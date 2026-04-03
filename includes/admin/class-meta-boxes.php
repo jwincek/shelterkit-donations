@@ -197,6 +197,12 @@ class Meta_Boxes {
             return;
         }
 
+        // sd_memorial meta boxes are replaced by PluginDocumentSettingPanel
+        // components in memorial-panel.js when the block editor is active.
+        if ( 'sd_memorial' === $post_type && use_block_editor_for_post( $post ) ) {
+            return;
+        }
+
         foreach ( self::$meta_boxes[ $post_type ]['boxes'] as $box_id => $box ) {
             add_meta_box(
                 'sd_' . $box_id,
@@ -367,6 +373,7 @@ class Meta_Boxes {
      */
     public static function save_meta_boxes( int $post_id, \WP_Post $post ): void {
         if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) return;
+        if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) return;
         if ( ! current_user_can( 'edit_post', $post_id ) ) return;
 
         $post_type = $post->post_type;

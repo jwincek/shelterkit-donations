@@ -78,34 +78,18 @@ function create( array $input ): array|WP_Error {
         update_post_meta( $memorial_id, '_sd_photo_id', (int) $input['photo_id'] );
     }
 
-    // Assign to memorial year taxonomy based on the memorial date.
-    $year = wp_date( 'Y', strtotime( $memorial_date ) );
-    wp_set_object_terms( $memorial_id, [ $year ], 'sd_memorial_year' );
-
-    // Update donor lifetime giving.
-    if ( ! empty( $input['amount'] ) ) {
-        Helpers\update_donor_lifetime_giving( $donor_id, (float) $input['amount'] );
-    }
-
-    // Determine if family notification should be sent.
-    $family_notified = false;
-    $notify_family   = $input['notify_family'] ?? [];
-    
-    if ( ! empty( $notify_family['enabled'] ) && ! empty( $notify_family['email'] ) ) {
-        do_action( 'starter_shelter_memorial_created', $memorial_id, $donor_id, $input );
-        $family_notified = true;
-    } else {
-        // Fire general hook without family notification.
-        do_action( 'starter_shelter_memorial_created', $memorial_id, $donor_id, $input );
-    }
+    // Run shared post-processing (year taxonomy, lifetime giving, emails).
+    Helpers\process_memorial_save( $memorial_id, [
+        'is_new'        => true,
+        'import_source' => 'ability_create',
+    ] );
 
     return [
-        'memorial_id'     => $memorial_id,
-        'donor_id'        => $donor_id,
-        'honoree_name'    => $input['honoree_name'],
-        'permalink'       => get_permalink( $memorial_id ),
-        'family_notified' => $family_notified,
-        'status'          => 'created',
+        'memorial_id'  => $memorial_id,
+        'donor_id'     => $donor_id,
+        'honoree_name' => $input['honoree_name'],
+        'permalink'    => get_permalink( $memorial_id ),
+        'status'       => 'created',
     ];
 }
 

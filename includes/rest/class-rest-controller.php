@@ -149,6 +149,27 @@ function register_routes(): void {
         ],
     ] );
 
+    // Donor find-or-create (admin, for memorial panel quick-create).
+    register_rest_route( $namespace, '/donors/find-or-create', [
+        [
+            'methods'             => WP_REST_Server::CREATABLE,
+            'callback'            => __NAMESPACE__ . '\\find_or_create_donor',
+            'permission_callback' => function() {
+                return current_user_can( 'edit_posts' );
+            },
+            'args'                => [
+                'display_name' => [
+                    'required'          => true,
+                    'sanitize_callback' => 'sanitize_text_field',
+                ],
+                'email' => [
+                    'default'           => '',
+                    'sanitize_callback' => 'sanitize_email',
+                ],
+            ],
+        ],
+    ] );
+
     // Public memorials endpoint (for memorial wall).
     register_rest_route( $namespace, '/memorials', [
         [
@@ -659,6 +680,36 @@ function get_public_memorials( WP_REST_Request $request ): WP_REST_Response {
 }
 
 /**
+ * Find or create a donor by name or email.
+ *
+ * Used by the memorial editor panel for inline donor quick-create.
+ *
+ * @since 2.1.0
+ *
+ * @param WP_REST_Request $request Request object.
+ * @return WP_REST_Response|WP_Error Response or error.
+ */
+function find_or_create_donor( WP_REST_Request $request ) {
+    $result = \Starter_Shelter\Admin\Shared\Donor_Lookup::find_or_create( [
+        'display_name'  => $request->get_param( 'display_name' ),
+        'email'         => $request->get_param( 'email' ),
+        'import_source' => 'admin_quick_create',
+    ] );
+
+    if ( is_wp_error( $result ) ) {
+        return $result;
+    }
+
+    $donor = get_post( $result['id'] );
+
+    return new WP_REST_Response( [
+        'id'           => $result['id'],
+        'created'      => $result['created'],
+        'display_name' => $donor ? $donor->post_title : '',
+    ], $result['created'] ? 201 : 200 );
+}
+
+/**
  * Get donor ID for current user.
  *
  * @since 1.0.0
@@ -689,3 +740,42 @@ function get_donor_id_for_current_user(): ?int {
 
 // Register routes.
 add_action( 'rest_api_init', __NAMESPACE__ . '\\register_routes' );
+
+/**
+ * Post-save processing for memorials.
+ *
+ * Delegates to the shared Helpers\process_memorial_save() so the same
+ * business logic (title sync, donor resolution, year taxonomy, lifetime
+ * giving, email hooks) runs regardless of whether the memorial was
+ * created via the block editor, ability, or import.
+ *
+ * Runs on save_post_sd_memorial (fires on both classic POST and REST saves)
+ * at a late priority so all meta is already written.
+ *
+ * @since 2.1.0
+ *
+ * @param int      $post_id Post ID.
+ * @param \WP_Post $post    Post object.
+ * @param bool     $update  Whether this is an update (false = new post).
+ */
+function process_memorial_save( int $post_id, \WP_Post $post, bool $update ): void {
+    // Skip autosaves and revisions.
+    if ( ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) || wp_is_post_revision( $post_id ) ) {
+        return;
+    }
+
+    // Prevent recursion from wp_update_post in the helper.
+    static $processing = [];
+    if ( isset( $processing[ $post_id ] ) ) {
+        return;
+    }
+    $processing[ $post_id ] = true;
+
+    \Starter_Shelter\Helpers\process_memorial_save( $post_id, [
+        'is_new'        => ! $update,
+        'import_source' => 'admin_editor',
+    ] );
+
+    unset( $processing[ $post_id ] );
+}
+add_action( 'save_post_sd_memorial', __NAMESPACE__ . '\\process_memorial_save', 20, 3 );

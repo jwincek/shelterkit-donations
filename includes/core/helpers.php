@@ -701,6 +701,87 @@ function get_species_label( string $species ): string {
 
 
 /**
+ * Process post-save side effects for a memorial.
+ *
+ * Centralizes the business logic that must run after a memorial is created
+ * or updated, regardless of the entry point (ability create, REST save,
+ * legacy import). This ensures consistent behavior for:
+ * - Title sync from honoree name
+ * - Donor resolution from display name
+ * - Year taxonomy assignment from donation date
+ * - Donor lifetime giving update
+ * - Email/notification hook
+ *
+ * @since 2.1.0
+ *
+ * @param int   $memorial_id The memorial post ID.
+ * @param array $context {
+ *     Optional context about how this save originated.
+ *
+ *     @type bool   $is_new        Whether this is a new memorial (default true).
+ *     @type string $import_source Source identifier for donor auto-creation.
+ * }
+ */
+function process_memorial_save( int $memorial_id, array $context = [] ): void {
+    $is_new        = $context['is_new'] ?? true;
+    $import_source = $context['import_source'] ?? 'admin';
+
+    $honoree_name  = get_post_meta( $memorial_id, '_sd_honoree_name', true );
+    $donor_id      = (int) get_post_meta( $memorial_id, '_sd_donor_id', true );
+    $display_name  = get_post_meta( $memorial_id, '_sd_donor_display_name', true );
+    $donation_date = get_post_meta( $memorial_id, '_sd_donation_date', true );
+    $amount        = (float) get_post_meta( $memorial_id, '_sd_amount', true );
+
+    // 1. Sync post_title from honoree_name.
+    $post = get_post( $memorial_id );
+    if ( ! empty( $honoree_name ) && $post && $post->post_title !== $honoree_name ) {
+        wp_update_post( [
+            'ID'         => $memorial_id,
+            'post_title' => $honoree_name,
+        ] );
+    }
+
+    // 2. Auto-resolve donor from display_name if donor_id is empty.
+    if ( ! $donor_id && ! empty( $display_name ) ) {
+        $result = \Starter_Shelter\Admin\Shared\Donor_Lookup::find_or_create( [
+            'display_name'  => $display_name,
+            'import_source' => $import_source,
+        ] );
+
+        if ( ! is_wp_error( $result ) ) {
+            $donor_id = $result['id'];
+            update_post_meta( $memorial_id, '_sd_donor_id', $donor_id );
+        }
+    }
+
+    // 3. Assign sd_memorial_year taxonomy from donation date.
+    if ( ! empty( $donation_date ) ) {
+        $year = date( 'Y', strtotime( $donation_date ) );
+        wp_set_object_terms( $memorial_id, [ $year ], 'sd_memorial_year' );
+    }
+
+    // 4. Update donor lifetime giving.
+    if ( $donor_id && $amount > 0 && $is_new ) {
+        update_donor_lifetime_giving( $donor_id, $amount );
+    }
+
+    // 5. Fire memorial created hook (triggers emails).
+    if ( $is_new ) {
+        $input = [
+            'honoree_name'  => $honoree_name,
+            'amount'        => $amount,
+            'notify_family' => [
+                'enabled' => (bool) get_post_meta( $memorial_id, '_sd_notify_family_enabled', true ),
+                'name'    => get_post_meta( $memorial_id, '_sd_notify_family_name', true ),
+                'email'   => get_post_meta( $memorial_id, '_sd_notify_family_email', true ),
+            ],
+        ];
+
+        do_action( 'starter_shelter_memorial_created', $memorial_id, $donor_id, $input );
+    }
+}
+
+/**
  * Get allocation label.
  *
  * @since 1.0.0

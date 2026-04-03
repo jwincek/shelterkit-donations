@@ -169,59 +169,92 @@
             "fields": {
                 "donor_id": {
                     "type": "integer",
+                    "show_in_rest": true,
                     "description": "ID of the donor who created the memorial"
                 },
                 "donor_display_name": {
                     "type": "string",
+                    "show_in_rest": true,
                     "description": "Denormalized donor name for search (empty if anonymous)"
                 },
                 "honoree_name": {
                     "type": "string",
                     "maxLength": 200,
+                    "show_in_rest": true,
                     "description": "Name of person or pet being honored"
                 },
                 "memorial_type": {
                     "type": "string",
                     "enum": [
-                        "person",
-                        "pet"
+                        "human",
+                        "pet",
+                        "honor"
                     ],
+                    "show_in_rest": true,
                     "description": "Type of memorial"
                 },
                 "pet_species": {
                     "type": "string",
+                    "show_in_rest": true,
                     "description": "Species if memorial is for a pet"
                 },
                 "tribute_message": {
                     "type": "string",
                     "maxLength": 2000,
+                    "show_in_rest": true,
                     "description": "Tribute message for the memorial"
                 },
                 "amount": {
                     "type": "number",
                     "minimum": 0,
+                    "show_in_rest": true,
                     "description": "Donation amount"
                 },
                 "is_anonymous": {
                     "type": "boolean",
                     "default": false,
+                    "show_in_rest": true,
                     "description": "Whether donation is anonymous"
                 },
                 "donation_date": {
                     "type": "string",
                     "format": "date-time",
+                    "show_in_rest": true,
                     "description": "Date of memorial donation"
                 },
                 "wc_order_id": {
                     "type": "integer",
+                    "show_in_rest": true,
                     "description": "Associated WooCommerce order ID"
                 },
                 "notify_family": {
                     "type": "object",
-                    "description": "Family notification settings"
+                    "description": "Family notification settings (legacy, use flat fields below)"
+                },
+                "notify_family_enabled": {
+                    "type": "boolean",
+                    "default": false,
+                    "show_in_rest": true,
+                    "description": "Whether to send notification to family"
+                },
+                "notify_family_name": {
+                    "type": "string",
+                    "show_in_rest": true,
+                    "description": "Name of family member to notify"
+                },
+                "notify_family_email": {
+                    "type": "string",
+                    "show_in_rest": true,
+                    "description": "Email address for family notification"
+                },
+                "family_notified_date": {
+                    "type": "string",
+                    "show_in_rest": true,
+                    "description": "Date when family notification was sent"
                 },
                 "photo_id": {
                     "type": "integer",
+                    "show_in_rest": true,
                     "description": "Attachment ID for memorial photo"
                 }
             },

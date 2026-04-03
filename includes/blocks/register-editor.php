@@ -68,6 +68,49 @@ function register_editor_assets(): void {
         ],
     ];
 
+    // Memorial document setting panels (replaces meta boxes in the block editor).
+    wp_enqueue_script(
+        'sd-memorial-panel',
+        STARTER_SHELTER_URL . 'assets/js/memorial-panel.js',
+        [
+            'wp-plugins',
+            'wp-edit-post',
+            'wp-element',
+            'wp-components',
+            'wp-data',
+            'wp-core-data',
+            'wp-i18n',
+            'wp-api-fetch',
+        ],
+        filemtime( STARTER_SHELTER_PATH . 'assets/js/memorial-panel.js' ),
+        true
+    );
+
+    // Sidebar-only editing: hide the empty canvas and guide editors to the sidebar.
+    $screen = get_current_screen();
+    if ( $screen && 'sd_memorial' === $screen->post_type ) {
+        wp_add_inline_style( 'wp-edit-post', '
+            /* Hide the empty content canvas for sd_memorial. */
+            .post-type-sd_memorial .editor-visual-editor,
+            .post-type-sd_memorial .edit-post-visual-editor__content-area {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .post-type-sd_memorial .editor-visual-editor__post-title-wrapper,
+            .post-type-sd_memorial .is-root-container {
+                display: none;
+            }
+            .post-type-sd_memorial .edit-post-visual-editor__content-area::after {
+                content: "' . esc_js( __( 'Use the sidebar panels to edit this memorial.', 'starter-shelter' ) ) . '";
+                color: #949494;
+                font-size: 14px;
+                font-style: italic;
+                pointer-events: none;
+            }
+        ' );
+    }
+
     // Add inline script to window before any block scripts load
     add_action( 'admin_print_scripts', function() use ( $data ) {
         echo '<script>window.starterShelterBlocks = ' . wp_json_encode( $data ) . ';</script>';
