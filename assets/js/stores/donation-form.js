@@ -14,6 +14,7 @@ import {
 	submitToCart,
 	registerAmountActions,
 	registerAmountCallbacks,
+	registerFieldErrorCallbacks,
 	validateAmount,
 	createBaseFormData,
 } from './form-base.js';
@@ -41,6 +42,8 @@ const { state, actions } = store( NAMESPACE, {
 					isProcessing: false,
 					error: null,
 					success: null,
+					fieldErrors: {},
+					showSuccess: false,
 				};
 			}
 		},
@@ -67,7 +70,11 @@ const { state, actions } = store( NAMESPACE, {
 				state,
 				( form, ctx ) => {
 					const amount = form.amount || parseAmount( form.customAmount );
-					return validateAmount( amount, ctx );
+					const amountErr = validateAmount( amount, ctx );
+					if ( amountErr ) {
+						return { error: amountErr, fieldErrors: { amount: amountErr } };
+					}
+					return null;
 				},
 				( form, ctx, config ) => {
 					const amount = form.amount || parseAmount( form.customAmount );
@@ -104,6 +111,8 @@ const { state, actions } = store( NAMESPACE, {
 					dedication: '',
 					error: null,
 					success: null,
+					fieldErrors: {},
+					showSuccess: false,
 					isProcessing: false,
 				} );
 			}
@@ -124,5 +133,6 @@ const { state, actions } = store( NAMESPACE, {
 // Merge shared amount actions/callbacks + toggleAnonymous.
 registerAmountActions( NAMESPACE, state );
 registerAmountCallbacks( NAMESPACE, state );
+registerFieldErrorCallbacks( NAMESPACE, state );
 
 export { state, actions };

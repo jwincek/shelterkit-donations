@@ -32,6 +32,7 @@ class Activator {
             'category'    => 'Support Us',
             'option_key'  => 'sd_donation_product_id',
             'virtual'     => true,
+            'image_file'  => 'product-donation.svg',
             'attribute'   => [
                 'name'    => 'Preferred Allocation',
                 'slug'    => 'preferred-allocation',
@@ -52,6 +53,7 @@ class Activator {
             'category'    => 'Support Us',
             'option_key'  => 'sd_membership_product_id',
             'virtual'     => true,
+            'image_file'  => 'product-membership.svg',
             'attribute'   => [
                 'name'    => 'Membership Level',
                 'slug'    => 'membership-level',
@@ -75,6 +77,7 @@ class Activator {
             'category'    => 'Support Us',
             'option_key'  => 'sd_business_membership_product_id',
             'virtual'     => true,
+            'image_file'  => 'product-membership-business.svg',
             'attribute'   => [
                 'name'    => 'Membership Level',
                 'slug'    => 'membership-level',
@@ -96,6 +99,7 @@ class Activator {
             'category'    => 'Support Us',
             'option_key'  => 'sd_memorial_product_id',
             'virtual'     => true,
+            'image_file'  => 'product-memorial.svg',
             'attribute'   => [
                 'name'    => 'In Memoriam Type',
                 'slug'    => 'in-memoriam-type',
@@ -226,6 +230,11 @@ class Activator {
             self::create_variation( $product_id, $data['attribute']['name'], $option_name, $price, $data['virtual'] ?? true );
         }
 
+        // Set default product image from plugin SVG.
+        if ( ! empty( $data['image_file'] ) ) {
+            self::set_product_image( $product_id, $data['image_file'], $data['name'] );
+        }
+
         // Sync the variable product.
         \WC_Product_Variable::sync( $product_id );
 
@@ -260,6 +269,54 @@ class Activator {
         ] );
         
         $variation->save();
+    }
+
+    /**
+     * Set a product's featured image from a plugin SVG file.
+     *
+     * Copies the SVG from the plugin's assets/images/ directory into
+     * the WordPress uploads folder and creates a media attachment.
+     *
+     * @since 2.1.0
+     *
+     * @param int    $product_id Product ID.
+     * @param string $filename   SVG filename (e.g. 'product-donation.svg').
+     * @param string $title      Attachment title.
+     */
+    private static function set_product_image( int $product_id, string $filename, string $title ): void {
+        $source = STARTER_SHELTER_PATH . 'assets/images/' . $filename;
+
+        if ( ! file_exists( $source ) ) {
+            return;
+        }
+
+        // Copy to uploads directory.
+        $upload_dir = wp_upload_dir();
+        $dest_dir   = $upload_dir['path'];
+        $dest_file  = $dest_dir . '/' . $filename;
+
+        if ( ! copy( $source, $dest_file ) ) {
+            return;
+        }
+
+        // Create attachment.
+        $attachment_id = wp_insert_attachment( [
+            'post_title'     => $title,
+            'post_mime_type' => 'image/svg+xml',
+            'post_status'    => 'inherit',
+        ], $dest_file, $product_id );
+
+        if ( ! $attachment_id || is_wp_error( $attachment_id ) ) {
+            return;
+        }
+
+        // Generate attachment metadata.
+        require_once ABSPATH . 'wp-admin/includes/image.php';
+        $metadata = wp_generate_attachment_metadata( $attachment_id, $dest_file );
+        wp_update_attachment_metadata( $attachment_id, $metadata );
+
+        // Set as product image.
+        set_post_thumbnail( $product_id, $attachment_id );
     }
 
     /**

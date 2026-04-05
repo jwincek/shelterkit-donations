@@ -236,6 +236,9 @@ function starter_shelter_admin_init(): void {
 
     // Initialize activity log.
     Starter_Shelter\Admin\Activity_Log::init();
+
+    // Initialize product sync checker.
+    Starter_Shelter\Admin\Product_Sync_Checker::init();
 }
 add_action( 'plugins_loaded', 'starter_shelter_admin_init', 25 );
 
@@ -270,14 +273,33 @@ function starter_shelter_register_blocks(): void {
         );
     } );
 
+    // Register shared form feedback styles (success/error messages, field
+    // validation, anonymous explainer, submit button, form header).
+    wp_register_style(
+        'sd-form-feedback',
+        STARTER_SHELTER_URL . 'blocks/shared/form-feedback.css',
+        [],
+        filemtime( STARTER_SHELTER_PATH . 'blocks/shared/form-feedback.css' )
+    );
+
     // Register blocks from blocks directory.
     $blocks_dir = STARTER_SHELTER_PATH . 'blocks/';
-    
+
     if ( is_dir( $blocks_dir ) ) {
         $blocks = glob( $blocks_dir . '*/block.json' );
-        
+
         foreach ( $blocks as $block_json ) {
             register_block_type( dirname( $block_json ) );
+        }
+    }
+
+    // Add shared feedback styles as dependency for form blocks.
+    $form_blocks = [ 'donation-form', 'memorial-form', 'membership-form' ];
+    foreach ( $form_blocks as $block ) {
+        $handle = 'starter-shelter-' . $block . '-style';
+        $style = wp_styles()->query( $handle );
+        if ( $style ) {
+            $style->deps[] = 'sd-form-feedback';
         }
     }
 }

@@ -14,6 +14,7 @@ import {
 	submitToCart,
 	registerAmountActions,
 	registerAmountCallbacks,
+	registerFieldErrorCallbacks,
 	validateAmount,
 	createBaseFormData,
 } from './form-base.js';
@@ -48,6 +49,8 @@ const { state, actions } = store( NAMESPACE, {
 					isProcessing: false,
 					error: null,
 					success: null,
+					fieldErrors: {},
+					showSuccess: false,
 				};
 			}
 		},
@@ -123,18 +126,24 @@ const { state, actions } = store( NAMESPACE, {
 			yield* submitToCart(
 				state,
 				( form, ctx ) => {
+					const fieldErrors = {};
 					const amount = form.amount || parseAmount( form.customAmount );
-					const amountError = validateAmount( amount, ctx );
-					if ( amountError ) return amountError;
+					const amountErr = validateAmount( amount, ctx );
+					if ( amountErr ) fieldErrors.amount = amountErr;
 
 					if ( ! form.honoreeName.trim() ) {
-						return __( 'errorHonoreeName', 'Please enter the name of who this gift honors.' );
+						fieldErrors.honoree = __( 'errorHonoreeName', 'Please enter the name of who this gift honors.' );
 					}
 					if ( form.notifyFamily && ! form.familyName.trim() ) {
-						return __( 'errorFamilyName', 'Please enter the family contact name.' );
+						fieldErrors.familyName = __( 'errorFamilyName', 'Please enter the family contact name.' );
 					}
 					if ( form.notifyFamily && form.familyEmail && ! isValidEmail( form.familyEmail ) ) {
-						return __( 'errorInvalidEmail', 'Please enter a valid email address.' );
+						fieldErrors.familyEmail = __( 'errorInvalidEmail', 'Please enter a valid email address.' );
+					}
+
+					if ( Object.keys( fieldErrors ).length ) {
+						const firstError = Object.values( fieldErrors )[ 0 ];
+						return { error: firstError, fieldErrors };
 					}
 					return null;
 				},
@@ -201,6 +210,8 @@ const { state, actions } = store( NAMESPACE, {
 					donorName: '',
 					error: null,
 					success: null,
+					fieldErrors: {},
+					showSuccess: false,
 					isProcessing: false,
 				} );
 			}
@@ -267,5 +278,6 @@ const { state, actions } = store( NAMESPACE, {
 // Merge shared amount actions/callbacks + toggleAnonymous.
 registerAmountActions( NAMESPACE, state );
 registerAmountCallbacks( NAMESPACE, state );
+registerFieldErrorCallbacks( NAMESPACE, state );
 
 export { state, actions };

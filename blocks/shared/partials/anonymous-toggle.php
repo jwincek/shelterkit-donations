@@ -24,4 +24,9 @@ $label = $label ?? __( 'Make my donation anonymous', 'starter-shelter' );
 		</span>
 		<span class="sd-checkbox-text"><?php echo esc_html( $label ); ?></span>
 	</label>
+	<p class="sd-anonymous-explainer sd-collapsed"
+		data-wp-class--sd-collapsed="!callbacks.isAnonymousExplainer"
+		aria-live="polite">
+		<?php esc_html_e( 'Your name will not be displayed publicly.', 'starter-shelter' ); ?>
+	</p>
 </div>

@@ -40,5 +40,6 @@ $legend = $legend ?? __( 'Select Amount', 'starter-shelter' );
 				data-wp-on--input="actions.setCustomAmount" data-wp-on--focus="actions.clearPresetAmount"
 				data-wp-bind--value="state.forms['<?php echo esc_attr( $form_id ); ?>'].customAmount">
 		</div>
+		<p class="sd-field-help"><?php printf( esc_html__( '$%s minimum', 'starter-shelter' ), number_format( (int) $min_amount ) ); ?></p>
 	</div>
 </fieldset>

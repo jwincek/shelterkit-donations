@@ -13,6 +13,7 @@ import { formatCurrency, __, sanitizeText } from './utils.js';
 import {
 	submitToCart,
 	registerToggleAnonymous,
+	registerFieldErrorCallbacks,
 	createBaseFormData,
 } from './form-base.js';
 
@@ -43,6 +44,8 @@ const { state, actions } = store( NAMESPACE, {
 					isProcessing: false,
 					error: null,
 					success: null,
+					fieldErrors: {},
+					showSuccess: false,
 				};
 			}
 		},
@@ -128,15 +131,21 @@ const { state, actions } = store( NAMESPACE, {
 			yield* submitToCart(
 				state,
 				( form, ctx ) => {
+					const fieldErrors = {};
 					if ( ! form.selectedTier ) {
-						return __( 'errorSelectTier', 'Please select a membership level.' );
+						fieldErrors.tier = __( 'errorSelectTier', 'Please select a membership level.' );
 					}
 					if ( form.membershipType === 'business' && ! form.businessName.trim() ) {
-						return __( 'errorBusinessName', 'Please enter your business name.' );
+						fieldErrors.businessName = __( 'errorBusinessName', 'Please enter your business name.' );
 					}
 					const tiers = ctx.tiers?.[ form.membershipType ] || {};
-					if ( ! tiers[ form.selectedTier ] ) {
-						return __( 'errorInvalidTier', 'Selected tier is not available.' );
+					if ( form.selectedTier && ! tiers[ form.selectedTier ] ) {
+						fieldErrors.tier = __( 'errorInvalidTier', 'Selected tier is not available.' );
+					}
+
+					if ( Object.keys( fieldErrors ).length ) {
+						const firstError = Object.values( fieldErrors )[ 0 ];
+						return { error: firstError, fieldErrors };
 					}
 					return null;
 				},
@@ -184,6 +193,8 @@ const { state, actions } = store( NAMESPACE, {
 					logoPreview: '',
 					error: null,
 					success: null,
+					fieldErrors: {},
+					showSuccess: false,
 					isProcessing: false,
 				} );
 			}
@@ -260,6 +271,12 @@ const { state, actions } = store( NAMESPACE, {
 			return !! form?.logoPreview;
 		},
 
+		getLogoSrc() {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			return form?.logoPreview || '';
+		},
+
 		isBusinessMembership() {
 			const ctx = getContext();
 			const form = state.forms[ ctx.formId ];
@@ -278,5 +295,6 @@ const { state, actions } = store( NAMESPACE, {
 
 // Merge shared toggleAnonymous action.
 registerToggleAnonymous( NAMESPACE, state );
+registerFieldErrorCallbacks( NAMESPACE, state );
 
 export { state, actions };

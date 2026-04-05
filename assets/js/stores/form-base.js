@@ -5,11 +5,6 @@
  * Uses the Interactivity API's store merging — calling store() with
  * the same namespace merges actions/callbacks into the existing store.
  *
- * Usage in each form store:
- *   const { state } = store( 'my-namespace', { state: { forms: {} }, ... } );
- *   registerAmountActions( 'my-namespace', state );
- *   registerAmountCallbacks( 'my-namespace', state );
- *
  * @package Starter_Shelter
  * @since 2.1.0
  */
@@ -22,21 +17,67 @@ import { getSharedConfig, formatCurrency, parseAmount, __ } from './utils.js';
  */
 const SUBMIT_TIMEOUT = 30000;
 
+// ── DOM helpers ──────────────────────────────────────────────────────
+
+/**
+ * Refresh WooCommerce cart fragments (header cart widget, etc.).
+ */
+function refreshCartFragments() {
+	if ( typeof jQuery !== 'undefined' && jQuery( document.body ).trigger ) {
+		jQuery( document.body ).trigger( 'wc_fragment_refresh' );
+	}
+}
+
+/**
+ * Scroll the first field with an error into view.
+ *
+ * @param {string} formId The form instance ID.
+ * @param {Object} fieldErrors Map of field names to error messages.
+ */
+function scrollToFirstError( formId, fieldErrors ) {
+	const formEl = document.getElementById( formId );
+	if ( ! formEl ) return;
+
+	const firstField = Object.keys( fieldErrors )[ 0 ];
+	if ( ! firstField ) return;
+
+	// Try to find the input by common ID/name patterns.
+	const selector = [
+		`#${ formId }-${ firstField }`,
+		`[data-wp-on--input="actions.set${ capitalize( firstField ) }"]`,
+		`.sd-${ firstField }-section`,
+	].join( ', ' );
+
+	const el = formEl.querySelector( selector );
+	if ( el ) {
+		el.scrollIntoView( { behavior: 'smooth', block: 'center' } );
+		// Focus the input if possible.
+		const input = el.matches( 'input, textarea, select' ) ? el : el.querySelector( 'input, textarea, select' );
+		if ( input ) input.focus( { preventScroll: true } );
+	}
+}
+
+function capitalize( str ) {
+	return str.charAt( 0 ).toUpperCase() + str.slice( 1 );
+}
+
+// ── Submit handler ───────────────────────────────────────────────────
+
 /**
  * Shared submit-to-cart generator.
  *
  * Each store's submitToCart delegates to this via yield*.
  *
- * @param {Object}   stateRef      The store's state object (from store() return).
- * @param {Function} validate      Return error string or null.
+ * @param {Object}   stateRef      The store's state object.
+ * @param {Function} validate      Return { error, fieldErrors } or null.
+ *                                 error: summary string, fieldErrors: { field: message }.
+ *                                 May also return a plain string for backward compat.
  * @param {Function} buildFormData Return FormData.
  * @param {Function} resetForm     Reset form-specific fields.
  */
 export function* submitToCart( stateRef, validate, buildFormData, resetForm ) {
 	const ctx = getContext();
 	const form = stateRef.forms[ ctx.formId ];
-	// Read AJAX config from context (set in render.php) rather than
-	// getConfig() which has cross-namespace issues.
 	const config = {
 		...getSharedConfig(),
 		ajaxUrl:   ctx.ajaxUrl,
@@ -45,15 +86,27 @@ export function* submitToCart( stateRef, validate, buildFormData, resetForm ) {
 
 	if ( ! form || form.isProcessing ) return;
 
-	const validationError = validate( form, ctx );
-	if ( validationError ) {
-		form.error = validationError;
+	// Clear previous field errors.
+	form.fieldErrors = {};
+
+	const validationResult = validate( form, ctx );
+	if ( validationResult ) {
+		// Support both string (legacy) and object (field-level) returns.
+		if ( typeof validationResult === 'string' ) {
+			form.error = validationResult;
+		} else {
+			form.error = validationResult.error || '';
+			form.fieldErrors = validationResult.fieldErrors || {};
+			scrollToFirstError( ctx.formId, form.fieldErrors );
+		}
 		return;
 	}
 
 	form.isProcessing = true;
 	form.error = null;
 	form.success = null;
+	form.fieldErrors = {};
+	form.showSuccess = false;
 
 	const controller = new AbortController();
 	const timeoutId = setTimeout( () => controller.abort(), SUBMIT_TIMEOUT );
@@ -72,6 +125,10 @@ export function* submitToCart( stateRef, validate, buildFormData, resetForm ) {
 
 		if ( result.success ) {
 			form.success = result.data?.message || __( 'addedToCart', 'Added to cart!' );
+			form.showSuccess = true;
+
+			// Refresh WooCommerce cart widgets.
+			refreshCartFragments();
 
 			if ( config.autoRedirectToCheckout && result.data?.checkout_url ) {
 				window.location.href = result.data.checkout_url;
@@ -96,11 +153,10 @@ export function* submitToCart( stateRef, validate, buildFormData, resetForm ) {
 	}
 }
 
+// ── Shared amount actions (donation + memorial) ──────────────────────
+
 /**
  * Register shared amount actions into a store namespace.
- *
- * Merges selectAmount, clearPresetAmount, and setCustomAmount into
- * the store via a second store() call.
  *
  * @param {string} namespace The store namespace.
  * @param {Object} stateRef  The store's state object.
@@ -115,6 +171,7 @@ export function registerAmountActions( namespace, stateRef ) {
 					form.amount = ctx.buttonAmount;
 					form.customAmount = '';
 					form.error = null;
+					form.fieldErrors = {};
 				}
 			},
 
@@ -133,6 +190,7 @@ export function registerAmountActions( namespace, stateRef ) {
 					form.customAmount = event.target.value;
 					form.amount = 0;
 					form.error = null;
+					form.fieldErrors = {};
 				}
 			},
 
@@ -147,10 +205,10 @@ export function registerAmountActions( namespace, stateRef ) {
 	} );
 }
 
+// ── Shared amount callbacks ──────────────────────────────────────────
+
 /**
  * Register shared amount callbacks into a store namespace.
- *
- * Merges getEffectiveAmount, getDisplayAmount, and isAmountSelected.
  *
  * @param {string} namespace The store namespace.
  * @param {Object} stateRef  The store's state object.
@@ -200,6 +258,38 @@ export function registerToggleAnonymous( namespace, stateRef ) {
 	} );
 }
 
+// ── Shared field-error callbacks ─────────────────────────────────────
+
+/**
+ * Register shared field error callbacks.
+ *
+ * @param {string} namespace The store namespace.
+ * @param {Object} stateRef  The store's state object.
+ */
+export function registerFieldErrorCallbacks( namespace, stateRef ) {
+	store( namespace, {
+		callbacks: {
+			hasFieldError() {
+				const ctx = getContext();
+				const form = stateRef.forms[ ctx.formId ];
+				return !! form?.fieldErrors?.[ ctx.fieldName ];
+			},
+
+			getFieldError() {
+				const ctx = getContext();
+				const form = stateRef.forms[ ctx.formId ];
+				return form?.fieldErrors?.[ ctx.fieldName ] || '';
+			},
+
+			isAnonymousExplainer() {
+				const ctx = getContext();
+				const form = stateRef.forms[ ctx.formId ];
+				return !! form?.isAnonymous;
+			},
+		},
+	} );
+}
+
 // ── Validation helpers ───────────────────────────────────────────────
 
 /**
@@ -210,11 +300,13 @@ export function registerToggleAnonymous( namespace, stateRef ) {
  * @returns {string|null} Error message or null if valid.
  */
 export function validateAmount( amount, ctx ) {
-	if ( amount < ( ctx.minAmount || 1 ) ) {
-		return __( 'errorMinAmount', 'Please enter a valid amount.' );
+	const min = ctx.minAmount || 1;
+	if ( amount < min ) {
+		return `The minimum gift amount is $${ min }.`;
 	}
-	if ( amount > ( ctx.maxAmount || 100000 ) ) {
-		return __( 'errorMaxAmount', 'Amount exceeds maximum allowed.' );
+	const max = ctx.maxAmount || 100000;
+	if ( amount > max ) {
+		return `The maximum gift amount is $${ max.toLocaleString() }.`;
 	}
 	return null;
 }

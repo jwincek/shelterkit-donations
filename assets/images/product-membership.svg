@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs>
+    <linearGradient id="bg-mb" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#eff6ff"/>
+      <stop offset="100%" stop-color="#dbeafe"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="400" rx="24" fill="url(#bg-mb)"/>
+  <!-- Card shape -->
+  <rect x="100" y="130" width="200" height="140" rx="12" fill="white" stroke="#2563eb" stroke-width="2.5"/>
+  <!-- Badge circle -->
+  <circle cx="200" cy="130" r="30" fill="#2563eb"/>
+  <circle cx="200" cy="130" r="26" fill="#3b82f6"/>
+  <!-- Star in badge -->
+  <path d="M200 110 L204 122 L217 122 L207 129 L210 141 L200 134 L190 141 L193 129 L183 122 L196 122Z" fill="white"/>
+  <!-- Lines on card (member info) -->
+  <rect x="130" y="175" width="100" height="6" rx="3" fill="#bfdbfe"/>
+  <rect x="130" y="195" width="140" height="6" rx="3" fill="#dbeafe"/>
+  <rect x="130" y="215" width="80" height="6" rx="3" fill="#dbeafe"/>
+  <rect x="130" y="235" width="120" height="6" rx="3" fill="#eff6ff"/>
+  <!-- People silhouettes -->
+  <circle cx="160" cy="310" r="15" fill="#2563eb" opacity="0.2"/>
+  <rect x="148" y="325" width="24" height="20" rx="8" fill="#2563eb" opacity="0.15"/>
+  <circle cx="200" cy="305" r="18" fill="#2563eb" opacity="0.25"/>
+  <rect x="185" y="323" width="30" height="24" rx="10" fill="#2563eb" opacity="0.2"/>
+  <circle cx="240" cy="310" r="15" fill="#2563eb" opacity="0.2"/>
+  <rect x="228" y="325" width="24" height="20" rx="8" fill="#2563eb" opacity="0.15"/>
+</svg>
