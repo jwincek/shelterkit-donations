@@ -9,323 +9,263 @@
  */
 
 import { store, getContext } from '@wordpress/interactivity';
-import { getSharedConfig, formatCurrency, parseAmount, __, sanitizeText, isValidEmail } from './utils.js';
+import { parseAmount, __, sanitizeText, isValidEmail } from './utils.js';
+import {
+	submitToCart,
+	registerAmountActions,
+	registerAmountCallbacks,
+	validateAmount,
+	createBaseFormData,
+} from './form-base.js';
 
-const { state, actions } = store( 'starter-shelter/memorial-form', {
-    state: {
-        forms: {},
-    },
+const NAMESPACE = 'starter-shelter/memorial-form';
 
-    actions: {
-        /**
-         * Initialize a memorial form instance.
-         */
-        initForm() {
-            const ctx = getContext();
-            const { formId, defaultAmount = 50 } = ctx;
+const { state, actions } = store( NAMESPACE, {
+	state: {
+		forms: {},
+	},
 
-            if ( ! state.forms[ formId ] ) {
-                state.forms[ formId ] = {
-                    amount: defaultAmount,
-                    customAmount: '',
-                    isAnonymous: false,
-                    // Memorial-specific fields (required)
-                    dedicationType: 'memory', // memory | honor
-                    honoreeType: 'person', // person | pet
-                    honoreeName: '',
-                    tributeMessage: '',
-                    // Family notification
-                    notifyFamily: false,
-                    familyName: '',
-                    familyEmail: '',
-                    familyAddress: '',
-                    sendCard: false,
-                    // State
-                    isProcessing: false,
-                    error: null,
-                    success: null,
-                };
-            }
-        },
+	actions: {
+		initForm() {
+			const ctx = getContext();
+			const { formId, defaultAmount = 50 } = ctx;
 
-        // Amount actions
-        selectAmount() {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            if ( form && ctx.buttonAmount > 0 ) {
-                form.amount = ctx.buttonAmount;
-                form.customAmount = '';
-                form.error = null;
-            }
-        },
+			if ( ! state.forms[ formId ] ) {
+				state.forms[ formId ] = {
+					amount: defaultAmount,
+					customAmount: '',
+					isAnonymous: false,
+					dedicationType: 'memory',
+					honoreeType: 'person',
+					honoreeName: '',
+					tributeMessage: '',
+					notifyFamily: false,
+					familyName: '',
+					familyEmail: '',
+					familyAddress: '',
+					sendCard: false,
+					donorName: '',
+					isProcessing: false,
+					error: null,
+					success: null,
+				};
+			}
+		},
 
-        clearPresetAmount() {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            if ( form ) form.amount = 0;
-        },
+		// Memorial-specific actions.
+		setDedicationType( event ) {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			if ( form ) form.dedicationType = event.target.value;
+		},
 
-        setCustomAmount( event ) {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            if ( form ) {
-                form.customAmount = event.target.value;
-                form.amount = 0;
-                form.error = null;
-            }
-        },
+		setHonoreeType( event ) {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			if ( form ) form.honoreeType = event.target.value;
+		},
 
-        toggleAnonymous() {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            if ( form ) form.isAnonymous = ! form.isAnonymous;
-        },
+		setHonoreeName( event ) {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			if ( form ) {
+				form.honoreeName = sanitizeText( event.target.value ).substring( 0, 100 );
+				form.error = null;
+			}
+		},
 
-        // Memorial-specific actions
-        setDedicationType( event ) {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            if ( form ) form.dedicationType = event.target.value;
-        },
+		setTributeMessage( event ) {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			if ( form ) {
+				form.tributeMessage = sanitizeText( event.target.value ).substring( 0, 500 );
+			}
+		},
 
-        setHonoreeType( event ) {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            if ( form ) form.honoreeType = event.target.value;
-        },
+		// Family notification actions.
+		toggleNotifyFamily() {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			if ( form ) form.notifyFamily = ! form.notifyFamily;
+		},
 
-        setHonoreeName( event ) {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            if ( form ) {
-                form.honoreeName = sanitizeText( event.target.value ).substring( 0, 100 );
-                form.error = null;
-            }
-        },
+		setFamilyName( event ) {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			if ( form ) form.familyName = sanitizeText( event.target.value ).substring( 0, 100 );
+		},
 
-        setTributeMessage( event ) {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            if ( form ) {
-                form.tributeMessage = sanitizeText( event.target.value ).substring( 0, 500 );
-            }
-        },
+		setFamilyEmail( event ) {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			if ( form ) form.familyEmail = event.target.value.trim();
+		},
 
-        // Family notification actions
-        toggleNotifyFamily() {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            if ( form ) form.notifyFamily = ! form.notifyFamily;
-        },
+		setFamilyAddress( event ) {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			if ( form ) form.familyAddress = sanitizeText( event.target.value ).substring( 0, 500 );
+		},
 
-        setFamilyName( event ) {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            if ( form ) form.familyName = sanitizeText( event.target.value ).substring( 0, 100 );
-        },
+		toggleSendCard() {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			if ( form ) form.sendCard = ! form.sendCard;
+		},
 
-        setFamilyEmail( event ) {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            if ( form ) form.familyEmail = event.target.value.trim();
-        },
+		setDonorName( event ) {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			if ( form ) form.donorName = sanitizeText( event.target.value ).substring( 0, 200 );
+		},
 
-        setFamilyAddress( event ) {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            if ( form ) form.familyAddress = sanitizeText( event.target.value ).substring( 0, 500 );
-        },
+		*submitToCart() {
+			yield* submitToCart(
+				state,
+				( form, ctx ) => {
+					const amount = form.amount || parseAmount( form.customAmount );
+					const amountError = validateAmount( amount, ctx );
+					if ( amountError ) return amountError;
 
-        toggleSendCard() {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            if ( form ) form.sendCard = ! form.sendCard;
-        },
+					if ( ! form.honoreeName.trim() ) {
+						return __( 'errorHonoreeName', 'Please enter the name of who this gift honors.' );
+					}
+					if ( form.notifyFamily && ! form.familyName.trim() ) {
+						return __( 'errorFamilyName', 'Please enter the family contact name.' );
+					}
+					if ( form.notifyFamily && form.familyEmail && ! isValidEmail( form.familyEmail ) ) {
+						return __( 'errorInvalidEmail', 'Please enter a valid email address.' );
+					}
+					return null;
+				},
+				( form, ctx, config ) => {
+					const amount = form.amount || parseAmount( form.customAmount );
+					const formData = createBaseFormData( 'memorial', config );
+					formData.append( 'amount', amount );
 
-        /**
-         * Submit memorial donation to cart.
-         */
-        *submitToCart() {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            const config = getSharedConfig();
+					if ( form.isAnonymous ) formData.append( 'is_anonymous', '1' );
+					if ( form.donorName ) formData.append( 'donor_name', form.donorName );
 
-            if ( ! form || form.isProcessing ) return;
+					formData.append( 'dedication_enabled', '1' );
+					formData.append( 'dedication_type', form.dedicationType );
+					formData.append( 'honoree_name', form.honoreeName );
+					formData.append( 'honoree_type', form.honoreeType );
 
-            const amount = form.amount || parseAmount( form.customAmount );
-            
-            // Validation
-            if ( amount < ( ctx.minAmount || 1 ) ) {
-                form.error = __( 'errorMinAmount', 'Please enter a valid amount.' );
-                return;
-            }
+					if ( form.tributeMessage ) formData.append( 'tribute_message', form.tributeMessage );
 
-            if ( ! form.honoreeName.trim() ) {
-                form.error = __( 'errorHonoreeName', 'Please enter the name of who this gift honors.' );
-                return;
-            }
+					if ( form.notifyFamily ) {
+						formData.append( 'notify_family', '1' );
+						formData.append( 'family_name', form.familyName );
+						if ( form.familyEmail ) formData.append( 'family_email', form.familyEmail );
+						if ( form.familyAddress ) formData.append( 'family_address', form.familyAddress );
+						if ( form.sendCard ) formData.append( 'send_card', '1' );
+					}
+					return formData;
+				},
+				( form, ctx ) => {
+					Object.assign( form, {
+						amount: ctx.defaultAmount || 50,
+						customAmount: '',
+						isAnonymous: false,
+						dedicationType: 'memory',
+						honoreeType: 'person',
+						honoreeName: '',
+						tributeMessage: '',
+						notifyFamily: false,
+						familyName: '',
+						familyEmail: '',
+						familyAddress: '',
+						sendCard: false,
+					} );
+				}
+			);
+		},
 
-            if ( form.notifyFamily && ! form.familyName.trim() ) {
-                form.error = __( 'errorFamilyName', 'Please enter the family contact name.' );
-                return;
-            }
+		reset() {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			if ( form ) {
+				Object.assign( form, {
+					amount: ctx.defaultAmount || 50,
+					customAmount: '',
+					isAnonymous: false,
+					dedicationType: 'memory',
+					honoreeType: 'person',
+					honoreeName: '',
+					tributeMessage: '',
+					notifyFamily: false,
+					familyName: '',
+					familyEmail: '',
+					familyAddress: '',
+					sendCard: false,
+					donorName: '',
+					error: null,
+					success: null,
+					isProcessing: false,
+				} );
+			}
+		},
+	},
 
-            if ( form.notifyFamily && form.familyEmail && ! isValidEmail( form.familyEmail ) ) {
-                form.error = __( 'errorInvalidEmail', 'Please enter a valid email address.' );
-                return;
-            }
+	callbacks: {
+		canProceed() {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			if ( ! form || form.isProcessing ) return false;
 
-            form.isProcessing = true;
-            form.error = null;
-            form.success = null;
+			const amount = form.amount || parseAmount( form.customAmount );
+			const hasHonoree = form.honoreeName.trim().length > 0;
+			const familyValid = ! form.notifyFamily || form.familyName.trim().length > 0;
 
-            try {
-                const formData = new FormData();
-                formData.append( 'action', 'sd_add_to_cart' );
-                formData.append( 'nonce', config.cartNonce );
-                formData.append( 'product_type', 'memorial' );
-                formData.append( 'amount', amount );
-                
-                if ( form.isAnonymous ) {
-                    formData.append( 'is_anonymous', '1' );
-                }
+			return amount >= ( ctx.minAmount || 1 ) && hasHonoree && familyValid && ctx.productConfigured;
+		},
 
-                // Memorial fields (always enabled for this form)
-                formData.append( 'dedication_enabled', '1' );
-                formData.append( 'dedication_type', form.dedicationType );
-                formData.append( 'honoree_name', form.honoreeName );
-                formData.append( 'honoree_type', form.honoreeType );
-                
-                if ( form.tributeMessage ) {
-                    formData.append( 'tribute_message', form.tributeMessage );
-                }
+		isFamilyHidden() {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			return ! form?.notifyFamily;
+		},
 
-                // Family notification
-                if ( form.notifyFamily ) {
-                    formData.append( 'notify_family', '1' );
-                    formData.append( 'family_name', form.familyName );
-                    if ( form.familyEmail ) formData.append( 'family_email', form.familyEmail );
-                    if ( form.familyAddress ) formData.append( 'family_address', form.familyAddress );
-                    if ( form.sendCard ) formData.append( 'send_card', '1' );
-                }
+		getHonoreeLabel() {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			if ( ! form ) return 'Name';
+			return form.honoreeType === 'pet'
+				? __( 'petName', "Pet's Name" )
+				: __( 'personName', "Person's Name" );
+		},
 
-                const response = yield fetch( config.ajaxUrl, {
-                    method: 'POST',
-                    body: formData,
-                    credentials: 'same-origin',
-                } );
+		getTributeCharCount() {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			return form?.tributeMessage?.length || 0;
+		},
 
-                const result = yield response.json();
+		getDedicationSummary() {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			if ( ! form || ! form.honoreeName ) return '';
 
-                if ( result.success ) {
-                    form.success = result.data?.message || __( 'addedToCart', 'Memorial gift added to cart!' );
-                    
-                    if ( config.autoRedirectToCheckout && result.data?.checkout_url ) {
-                        window.location.href = result.data.checkout_url;
-                    }
-                } else {
-                    form.error = result.data?.message || __( 'errorGeneric', 'Could not add to cart.' );
-                }
-            } catch ( error ) {
-                form.error = __( 'errorNetwork', 'Network error. Please try again.' );
-            } finally {
-                form.isProcessing = false;
-            }
-        },
+			const typeLabel = form.dedicationType === 'memory'
+				? __( 'inMemoryOf', 'In Memory Of' )
+				: __( 'inHonorOf', 'In Honor Of' );
+			const honoreeLabel = form.honoreeType === 'pet' ? ` (${ __( 'pet', 'Pet' ) })` : '';
 
-        reset() {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            if ( form ) {
-                Object.assign( form, {
-                    amount: ctx.defaultAmount || 50,
-                    customAmount: '',
-                    isAnonymous: false,
-                    dedicationType: 'memory',
-                    honoreeType: 'person',
-                    honoreeName: '',
-                    tributeMessage: '',
-                    notifyFamily: false,
-                    familyName: '',
-                    familyEmail: '',
-                    familyAddress: '',
-                    sendCard: false,
-                    error: null,
-                    success: null,
-                    isProcessing: false,
-                } );
-            }
-        },
-    },
+			return `${ typeLabel }: ${ form.honoreeName }${ honoreeLabel }`;
+		},
 
-    callbacks: {
-        getEffectiveAmount() {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            return form ? ( form.amount || parseAmount( form.customAmount ) ) : 0;
-        },
-
-        getDisplayAmount() {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            const amount = form ? ( form.amount || parseAmount( form.customAmount ) ) : 0;
-            return formatCurrency( amount );
-        },
-
-        canProceed() {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            if ( ! form || form.isProcessing ) return false;
-            
-            const amount = form.amount || parseAmount( form.customAmount );
-            const hasHonoree = form.honoreeName.trim().length > 0;
-            const familyValid = ! form.notifyFamily || form.familyName.trim().length > 0;
-            
-            return amount >= ( ctx.minAmount || 1 ) && hasHonoree && familyValid && ctx.productConfigured;
-        },
-
-        isAmountSelected() {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            return form?.amount === ctx.buttonAmount && ! form?.customAmount;
-        },
-
-        getHonoreeLabel() {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            if ( ! form ) return 'Name';
-            return form.honoreeType === 'pet' 
-                ? __( 'petName', "Pet's Name" ) 
-                : __( 'personName', "Person's Name" );
-        },
-
-        getTributeCharCount() {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            return form?.tributeMessage?.length || 0;
-        },
-
-        getDedicationSummary() {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            if ( ! form || ! form.honoreeName ) return '';
-
-            const typeLabel = form.dedicationType === 'memory' 
-                ? __( 'inMemoryOf', 'In Memory Of' )
-                : __( 'inHonorOf', 'In Honor Of' );
-            const honoreeLabel = form.honoreeType === 'pet' ? ` (${ __( 'pet', 'Pet' ) })` : '';
-            
-            return `${ typeLabel }: ${ form.honoreeName }${ honoreeLabel }`;
-        },
-
-        getDedicationTypeLabel() {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            return form?.dedicationType === 'memory' 
-                ? __( 'inMemoryOf', 'In Memory Of' )
-                : __( 'inHonorOf', 'In Honor Of' );
-        },
-    },
+		getDedicationTypeLabel() {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			return form?.dedicationType === 'memory'
+				? __( 'inMemoryOf', 'In Memory Of' )
+				: __( 'inHonorOf', 'In Honor Of' );
+		},
+	},
 } );
+
+// Merge shared amount actions/callbacks + toggleAnonymous.
+registerAmountActions( NAMESPACE, state );
+registerAmountCallbacks( NAMESPACE, state );
 
 export { state, actions };

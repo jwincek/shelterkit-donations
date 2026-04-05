@@ -9,257 +9,274 @@
  */
 
 import { store, getContext } from '@wordpress/interactivity';
-import { getSharedConfig, formatCurrency, __, sanitizeText } from './utils.js';
+import { formatCurrency, __, sanitizeText } from './utils.js';
+import {
+	submitToCart,
+	registerToggleAnonymous,
+	createBaseFormData,
+} from './form-base.js';
 
-const { state, actions } = store( 'starter-shelter/membership-form', {
-    state: {
-        forms: {},
-    },
+const NAMESPACE = 'starter-shelter/membership-form';
 
-    actions: {
-        /**
-         * Initialize a membership form instance.
-         */
-        initForm() {
-            const ctx = getContext();
-            const { formId, membershipType = 'individual', defaultTier = null } = ctx;
+// File objects can't be stored in reactive state (Proxy breaks them).
+// Keep them in a plain Map keyed by form ID.
+const logoFiles = new Map();
 
-            if ( ! state.forms[ formId ] ) {
-                state.forms[ formId ] = {
-                    membershipType, // individual | business
-                    selectedTier: defaultTier,
-                    isAnonymous: false,
-                    // Business-specific
-                    businessName: '',
-                    // State
-                    isProcessing: false,
-                    error: null,
-                    success: null,
-                };
-            }
-        },
+const { state, actions } = store( NAMESPACE, {
+	state: {
+		forms: {},
+	},
 
-        /**
-         * Select a membership tier.
-         */
-        selectTier() {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            if ( form && ctx.tierSlug ) {
-                form.selectedTier = ctx.tierSlug;
-                form.error = null;
-            }
-        },
+	actions: {
+		initForm() {
+			const ctx = getContext();
+			const { formId, membershipType = 'individual', defaultTier = null } = ctx;
 
-        /**
-         * Set membership type.
-         */
-        setMembershipType( event ) {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            if ( form ) {
-                form.membershipType = event.target.value;
-                form.selectedTier = null; // Reset tier when type changes
-            }
-        },
+			if ( ! state.forms[ formId ] ) {
+				state.forms[ formId ] = {
+					membershipType,
+					selectedTier: defaultTier,
+					isAnonymous: false,
+					businessName: '',
+					donorName: '',
+					logoPreview: '',
+					isProcessing: false,
+					error: null,
+					success: null,
+				};
+			}
+		},
 
-        toggleAnonymous() {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            if ( form ) form.isAnonymous = ! form.isAnonymous;
-        },
+		selectTier() {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			if ( form && ctx.tierSlug ) {
+				form.selectedTier = ctx.tierSlug;
+				form.error = null;
+			}
+		},
 
-        setBusinessName( event ) {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            if ( form ) {
-                form.businessName = sanitizeText( event.target.value ).substring( 0, 200 );
-                form.error = null;
-            }
-        },
+		setMembershipType( event ) {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			if ( form ) {
+				form.membershipType = event.target.value;
+				form.selectedTier = null;
+			}
+		},
 
-        /**
-         * Submit membership to cart.
-         */
-        *submitToCart() {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            const config = getSharedConfig();
+		setDonorName( event ) {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			if ( form ) form.donorName = sanitizeText( event.target.value ).substring( 0, 200 );
+		},
 
-            if ( ! form || form.isProcessing ) return;
+		setBusinessName( event ) {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			if ( form ) {
+				form.businessName = sanitizeText( event.target.value ).substring( 0, 200 );
+				form.error = null;
+			}
+		},
 
-            // Validation
-            if ( ! form.selectedTier ) {
-                form.error = __( 'errorSelectTier', 'Please select a membership level.' );
-                return;
-            }
+		triggerLogoInput( event ) {
+			// Prevent the click from bubbling if it's on the remove button.
+			if ( event.target.closest( '.sd-logo-remove' ) ) return;
+			const ctx = getContext();
+			const input = document.getElementById( ctx.formId + '-logo' );
+			if ( input ) input.click();
+		},
 
-            if ( form.membershipType === 'business' && ! form.businessName.trim() ) {
-                form.error = __( 'errorBusinessName', 'Please enter your business name.' );
-                return;
-            }
+		setLogo( event ) {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			const file = event.target.files?.[ 0 ];
+			if ( ! form || ! file ) return;
 
-            // Get tier price
-            const tiers = ctx.tiers?.[ form.membershipType ] || {};
-            const tier = tiers[ form.selectedTier ];
-            if ( ! tier ) {
-                form.error = __( 'errorInvalidTier', 'Selected tier is not available.' );
-                return;
-            }
+			// Validate file type and size (2MB max).
+			const allowed = [ 'image/png', 'image/jpeg', 'image/svg+xml' ];
+			if ( ! allowed.includes( file.type ) ) {
+				form.error = __( 'errorLogoType', 'Please upload a PNG, JPG, or SVG file.' );
+				return;
+			}
+			if ( file.size > 2 * 1024 * 1024 ) {
+				form.error = __( 'errorLogoSize', 'Logo must be under 2MB.' );
+				return;
+			}
 
-            form.isProcessing = true;
-            form.error = null;
-            form.success = null;
+			// Store the File outside reactive state — Proxy breaks File objects.
+			logoFiles.set( ctx.formId, file );
+			form.logoPreview = URL.createObjectURL( file );
+			form.error = null;
+		},
 
-            try {
-                const productType = form.membershipType === 'business' ? 'business_membership' : 'membership';
-                
-                const formData = new FormData();
-                formData.append( 'action', 'sd_add_to_cart' );
-                formData.append( 'nonce', config.cartNonce );
-                formData.append( 'product_type', productType );
-                formData.append( 'amount', tier.price || tier.amount || 0 );
-                formData.append( 'tier', form.selectedTier );
+		removeLogo( event ) {
+			event.stopPropagation();
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			if ( form ) {
+				if ( form.logoPreview ) URL.revokeObjectURL( form.logoPreview );
+				logoFiles.delete( ctx.formId );
+				form.logoPreview = '';
+				const input = document.getElementById( ctx.formId + '-logo' );
+				if ( input ) input.value = '';
+			}
+		},
 
-                if ( form.isAnonymous ) {
-                    formData.append( 'is_anonymous', '1' );
-                }
+		*submitToCart() {
+			yield* submitToCart(
+				state,
+				( form, ctx ) => {
+					if ( ! form.selectedTier ) {
+						return __( 'errorSelectTier', 'Please select a membership level.' );
+					}
+					if ( form.membershipType === 'business' && ! form.businessName.trim() ) {
+						return __( 'errorBusinessName', 'Please enter your business name.' );
+					}
+					const tiers = ctx.tiers?.[ form.membershipType ] || {};
+					if ( ! tiers[ form.selectedTier ] ) {
+						return __( 'errorInvalidTier', 'Selected tier is not available.' );
+					}
+					return null;
+				},
+				( form, ctx, config ) => {
+					const productType = form.membershipType === 'business' ? 'business_membership' : 'membership';
+					const tiers = ctx.tiers?.[ form.membershipType ] || {};
+					const tier = tiers[ form.selectedTier ];
 
-                if ( form.membershipType === 'business' && form.businessName ) {
-                    formData.append( 'business_name', form.businessName );
-                }
+					const formData = createBaseFormData( productType, config );
+					formData.append( 'amount', tier.price || tier.amount || 0 );
+					formData.append( 'tier', form.selectedTier );
 
-                const response = yield fetch( config.ajaxUrl, {
-                    method: 'POST',
-                    body: formData,
-                    credentials: 'same-origin',
-                } );
+					if ( form.isAnonymous ) formData.append( 'is_anonymous', '1' );
+					if ( form.donorName ) formData.append( 'donor_name', form.donorName );
+					if ( form.membershipType === 'business' && form.businessName ) {
+						formData.append( 'business_name', form.businessName );
+					}
+					const logoFile = logoFiles.get( ctx.formId );
+					if ( form.membershipType === 'business' && logoFile ) {
+						formData.append( 'business_logo', logoFile );
+					}
+					return formData;
+				},
+				( form, ctx ) => {
+					Object.assign( form, {
+						selectedTier: ctx.defaultTier || null,
+						isAnonymous: false,
+						businessName: '',
+					} );
+				}
+			);
+		},
 
-                const result = yield response.json();
+		reset() {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			if ( form ) {
+				if ( form.logoPreview ) URL.revokeObjectURL( form.logoPreview );
+				logoFiles.delete( ctx.formId );
+				Object.assign( form, {
+					selectedTier: ctx.defaultTier || null,
+					isAnonymous: false,
+					businessName: '',
+					donorName: '',
+					logoPreview: '',
+					error: null,
+					success: null,
+					isProcessing: false,
+				} );
+			}
+		},
+	},
 
-                if ( result.success ) {
-                    form.success = result.data?.message || __( 'addedToCart', 'Membership added to cart!' );
-                    
-                    if ( config.autoRedirectToCheckout && result.data?.checkout_url ) {
-                        window.location.href = result.data.checkout_url;
-                    }
-                } else {
-                    form.error = result.data?.message || __( 'errorGeneric', 'Could not add to cart.' );
-                }
-            } catch ( error ) {
-                form.error = __( 'errorNetwork', 'Network error. Please try again.' );
-            } finally {
-                form.isProcessing = false;
-            }
-        },
+	callbacks: {
+		getSelectedTier() {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			if ( ! form?.selectedTier ) return null;
+			const tiers = ctx.tiers?.[ form.membershipType ] || {};
+			return tiers[ form.selectedTier ] || null;
+		},
 
-        reset() {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            if ( form ) {
-                Object.assign( form, {
-                    selectedTier: ctx.defaultTier || null,
-                    isAnonymous: false,
-                    businessName: '',
-                    error: null,
-                    success: null,
-                    isProcessing: false,
-                } );
-            }
-        },
-    },
+		getDisplayPrice() {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			if ( ! form?.selectedTier ) return '$0';
+			const tiers = ctx.tiers?.[ form.membershipType ] || {};
+			const tier = tiers[ form.selectedTier ];
+			return formatCurrency( tier?.price || tier?.amount || 0 );
+		},
 
-    callbacks: {
-        /**
-         * Get currently selected tier object.
-         */
-        getSelectedTier() {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            if ( ! form?.selectedTier ) return null;
-            
-            const tiers = ctx.tiers?.[ form.membershipType ] || {};
-            return tiers[ form.selectedTier ] || null;
-        },
+		getSelectedTierName() {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			if ( ! form?.selectedTier ) return '';
+			const tiers = ctx.tiers?.[ form.membershipType ] || {};
+			const tier = tiers[ form.selectedTier ];
+			return tier?.name || tier?.label || '';
+		},
 
-        /**
-         * Get display price for selected tier.
-         */
-        getDisplayPrice() {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            if ( ! form?.selectedTier ) return '$0';
-            
-            const tiers = ctx.tiers?.[ form.membershipType ] || {};
-            const tier = tiers[ form.selectedTier ];
-            return formatCurrency( tier?.price || tier?.amount || 0 );
-        },
+		hasTierSelected() {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			return !! form?.selectedTier;
+		},
 
-        /**
-         * Check if form can proceed.
-         */
-        canProceed() {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            if ( ! form || form.isProcessing ) return false;
-            
-            const hasTier = !! form.selectedTier;
-            const businessValid = form.membershipType !== 'business' || form.businessName.trim().length > 0;
-            
-            return hasTier && businessValid && ctx.productConfigured;
-        },
+		canProceed() {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			if ( ! form || form.isProcessing ) return false;
+			const hasTier = !! form.selectedTier;
+			const businessValid = form.membershipType !== 'business' || form.businessName.trim().length > 0;
+			return hasTier && businessValid && ctx.productConfigured;
+		},
 
-        /**
-         * Check if a tier is selected.
-         */
-        isTierSelected() {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            return form?.selectedTier === ctx.tierSlug;
-        },
+		isTierSelected() {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			return form?.selectedTier === ctx.tierSlug;
+		},
 
-        /**
-         * Get tier price for display in tier card.
-         */
-        getTierPrice() {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            const tiers = ctx.tiers?.[ form?.membershipType || 'individual' ] || {};
-            const tier = tiers[ ctx.tierSlug ];
-            return formatCurrency( tier?.price || tier?.amount || 0 );
-        },
+		getTierPrice() {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			const tiers = ctx.tiers?.[ form?.membershipType || 'individual' ] || {};
+			const tier = tiers[ ctx.tierSlug ];
+			return formatCurrency( tier?.price || tier?.amount || 0 );
+		},
 
-        /**
-         * Get tier benefits list.
-         */
-        getTierBenefits() {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            const tiers = ctx.tiers?.[ form?.membershipType || 'individual' ] || {};
-            const tier = tiers[ ctx.tierSlug ];
-            return tier?.benefits || [];
-        },
+		getTierBenefits() {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			const tiers = ctx.tiers?.[ form?.membershipType || 'individual' ] || {};
+			const tier = tiers[ ctx.tierSlug ];
+			return tier?.benefits || [];
+		},
 
-        /**
-         * Check if business membership.
-         */
-        isBusinessMembership() {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            return form?.membershipType === 'business';
-        },
+		hasLogo() {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			return !! form?.logoPreview;
+		},
 
-        /**
-         * Get membership type label.
-         */
-        getMembershipTypeLabel() {
-            const ctx = getContext();
-            const form = state.forms[ ctx.formId ];
-            return form?.membershipType === 'business'
-                ? __( 'businessMembership', 'Business Membership' )
-                : __( 'individualMembership', 'Individual Membership' );
-        },
-    },
+		isBusinessMembership() {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			return form?.membershipType === 'business';
+		},
+
+		getMembershipTypeLabel() {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			return form?.membershipType === 'business'
+				? __( 'businessMembership', 'Business Membership' )
+				: __( 'individualMembership', 'Individual Membership' );
+		},
+	},
 } );
+
+// Merge shared toggleAnonymous action.
+registerToggleAnonymous( NAMESPACE, state );
 
 export { state, actions };

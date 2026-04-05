@@ -6,10 +6,6 @@
  */
 
 .sd-donation-form {
-    background: var(--wp--preset--color--base, #fff);
-    border: 1px solid var(--wp--preset--color--contrast-3, #e0e0e0);
-    border-radius: 8px;
-    padding: 2rem;
     max-width: 500px;
     margin: 0 auto;
 }

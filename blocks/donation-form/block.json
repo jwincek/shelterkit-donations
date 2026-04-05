@@ -35,7 +35,8 @@
             "width": true,
             "color": true,
             "style": true
-        }
+        },
+        "shadow": true
     },
     "usesContext": ["postId", "postType"],
     "providesContext": {
@@ -76,7 +77,7 @@
         },
         "submitButtonText": {
             "type": "string",
-            "default": "Continue to Checkout"
+            "default": "Add Gift to Cart"
         },
         "showSecureBadge": {
             "type": "boolean",
@@ -89,6 +90,24 @@
         "maxAmount": {
             "type": "number",
             "default": 100000
+        },
+        "style": {
+            "type": "object",
+            "default": {
+                "border": {
+                    "width": "1px",
+                    "style": "solid",
+                    "radius": "8px"
+                },
+                "spacing": {
+                    "padding": {
+                        "top": "2rem",
+                        "right": "2rem",
+                        "bottom": "2rem",
+                        "left": "2rem"
+                    }
+                }
+            }
         }
     },
     "example": {

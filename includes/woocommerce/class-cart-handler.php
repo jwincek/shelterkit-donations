@@ -82,6 +82,19 @@ class Cart_Handler {
             ] );
         }
 
+        // Handle business logo upload before building cart data.
+        // The file is uploaded now (during add-to-cart) so the attachment ID
+        // survives any payment gateway redirect (PayPal, etc.).
+        if ( 'business_membership' === $product_type && ! empty( $_FILES['business_logo']['name'] ) ) {
+            $logo_id = self::handle_logo_upload();
+            if ( is_wp_error( $logo_id ) ) {
+                wp_send_json_error( [
+                    'message' => $logo_id->get_error_message(),
+                ] );
+            }
+            $_POST['sd_logo_attachment_id'] = $logo_id;
+        }
+
         // Build cart item data.
         $cart_item_data = self::build_cart_item_data( $_POST, $product_type );
 
@@ -180,6 +193,10 @@ class Cart_Handler {
             $data['sd_is_anonymous'] = true;
         }
 
+        if ( ! empty( $post_data['donor_name'] ) ) {
+            $data['sd_donor_name'] = sanitize_text_field( $post_data['donor_name'] );
+        }
+
         // Dedication fields.
         if ( ! empty( $post_data['dedication_enabled'] ) ) {
             $data['sd_dedication_enabled'] = true;
@@ -226,6 +243,9 @@ class Cart_Handler {
             }
             if ( ! empty( $post_data['business_name'] ) ) {
                 $data['sd_business_name'] = sanitize_text_field( $post_data['business_name'] );
+            }
+            if ( ! empty( $post_data['sd_logo_attachment_id'] ) ) {
+                $data['sd_logo_attachment_id'] = absint( $post_data['sd_logo_attachment_id'] );
             }
         }
 
@@ -465,6 +485,14 @@ class Cart_Handler {
             }
         }
 
+        // Donor name.
+        if ( ! empty( $cart_item['sd_donor_name'] ) ) {
+            $item_data[] = [
+                'key'   => __( 'Donor Name', 'starter-shelter' ),
+                'value' => $cart_item['sd_donor_name'],
+            ];
+        }
+
         // Anonymous.
         if ( ! empty( $cart_item['sd_is_anonymous'] ) ) {
             $item_data[] = [
@@ -489,6 +517,19 @@ class Cart_Handler {
             ];
         }
 
+        // Business logo.
+        if ( ! empty( $cart_item['sd_logo_attachment_id'] ) ) {
+            $logo_url = wp_get_attachment_image_url( $cart_item['sd_logo_attachment_id'], 'thumbnail' );
+            if ( $logo_url ) {
+                $item_data[] = [
+                    'key'     => __( 'Business Logo', 'starter-shelter' ),
+                    'value'   => __( 'Uploaded (pending review)', 'starter-shelter' ),
+                    'display' => '<img src="' . esc_url( $logo_url ) . '" alt="" style="max-width:60px;max-height:40px;vertical-align:middle;"> '
+                        . esc_html__( 'Pending review', 'starter-shelter' ),
+                ];
+            }
+        }
+
         return $item_data;
     }
 
@@ -505,6 +546,7 @@ class Cart_Handler {
     public static function save_cart_item_to_order( $item, $cart_item_key, $values, $order ): void {
         $meta_keys = [
             'sd_product_type',
+            'sd_donor_name',
             'sd_allocation',
             'sd_campaign_id',
             'sd_is_anonymous',
@@ -520,6 +562,7 @@ class Cart_Handler {
             'sd_send_card',
             'sd_membership_tier',
             'sd_business_name',
+            'sd_logo_attachment_id',
             'sd_custom_price',
         ];
 
@@ -563,6 +606,61 @@ class Cart_Handler {
                 $cart_item['data']->set_price( $cart_item['sd_custom_price'] );
             }
         }
+    }
+
+    /**
+     * Handle business logo file upload.
+     *
+     * Creates a WordPress media attachment from the uploaded file.
+     * Called during add-to-cart so the attachment ID (not the file)
+     * travels through the cart → order pipeline. This survives
+     * payment gateway redirects (PayPal Smart Buttons, etc.) that
+     * would otherwise lose file data from the original request.
+     *
+     * The logo starts with status 'pending' and goes through the
+     * admin moderation flow (Logo_Moderation class).
+     *
+     * @since 2.1.0
+     *
+     * @return int|\WP_Error Attachment ID or error.
+     */
+    private static function handle_logo_upload() {
+        require_once ABSPATH . 'wp-admin/includes/image.php';
+        require_once ABSPATH . 'wp-admin/includes/file.php';
+        require_once ABSPATH . 'wp-admin/includes/media.php';
+
+        // Validate file type.
+        $allowed = [ 'image/png', 'image/jpeg', 'image/svg+xml' ];
+        if ( ! in_array( $_FILES['business_logo']['type'] ?? '', $allowed, true ) ) {
+            return new \WP_Error(
+                'invalid_file_type',
+                __( 'Logo must be a PNG, JPG, or SVG file.', 'starter-shelter' )
+            );
+        }
+
+        // Validate file size (2MB).
+        if ( ( $_FILES['business_logo']['size'] ?? 0 ) > 2 * 1024 * 1024 ) {
+            return new \WP_Error(
+                'file_too_large',
+                __( 'Logo must be under 2MB.', 'starter-shelter' )
+            );
+        }
+
+        // Use WordPress media handling to upload and create attachment.
+        $attachment_id = media_handle_upload( 'business_logo', 0 );
+
+        if ( is_wp_error( $attachment_id ) ) {
+            return new \WP_Error(
+                'upload_failed',
+                __( 'Logo upload failed. Please try again.', 'starter-shelter' )
+            );
+        }
+
+        // Mark as pending review.
+        update_post_meta( $attachment_id, '_sd_logo_status', 'pending' );
+        update_post_meta( $attachment_id, '_sd_logo_source', 'membership_form' );
+
+        return $attachment_id;
     }
 
     /**

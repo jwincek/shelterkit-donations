@@ -42,6 +42,33 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
+.sd-type-option input:focus-visible + .sd-type-label {
+    outline: 2px solid var(--sd-membership-color);
+    outline-offset: 2px;
+}
+
+/* Collapsed state */
+.sd-membership-form .sd-collapsed {
+    display: none;
+}
+
+/* Text Inputs */
+.sd-membership-form .sd-text-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--wp--preset--color--contrast-3, #e0e0e0);
+    border-radius: 4px;
+    font-size: 1rem;
+    background: var(--wp--preset--color--base, #fff);
+    transition: border-color 0.2s ease;
+}
+
+.sd-membership-form .sd-text-input:focus {
+    outline: none;
+    border-color: var(--sd-membership-color);
+}
+
 /* Tiers Grid */
 .sd-tiers-grid {
     display: grid;
@@ -103,6 +130,12 @@
     text-align: left;
 }
 
+.sd-tier-select-btn:focus-visible {
+    outline: 2px solid var(--sd-membership-color);
+    outline-offset: -2px;
+    border-radius: 10px;
+}
+
 .sd-tier-featured .sd-tier-select-btn {
     padding-top: 2.5rem;
 }
@@ -157,13 +190,108 @@
 
 .sd-tier-benefits svg {
     flex-shrink: 0;
-    color: var(--wp--preset--color--vivid-green-cyan, #00a32a);
     margin-top: 0.125rem;
 }
 
-/* Business Section */
-.sd-business-section[hidden] {
-    display: none;
+/* New benefits at this tier — emphasized */
+.sd-benefit-new {
+    font-weight: 600;
+    color: var(--wp--preset--color--contrast, #1e1e1e);
+}
+
+.sd-benefit-new svg {
+    color: var(--sd-membership-color);
+}
+
+/* Inherited from lower tiers — muted */
+.sd-benefit-inherited {
+    color: var(--wp--preset--color--contrast-3, #9ca3af);
+}
+
+.sd-benefit-inherited svg {
+    color: var(--wp--preset--color--contrast-3, #9ca3af);
+}
+
+/* Logo Upload */
+.sd-logo-upload {
+    margin-top: 1rem;
+}
+
+.sd-logo-dropzone {
+    position: relative;
+    border: 2px dashed var(--wp--preset--color--contrast-3, #d0d0d0);
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+}
+
+.sd-logo-dropzone:hover {
+    border-color: var(--sd-membership-color);
+}
+
+.sd-logo-dropzone.sd-has-logo {
+    border-style: solid;
+    border-color: var(--sd-membership-color);
+    padding: 0.75rem;
+}
+
+.sd-logo-input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
+    height: 0;
+}
+
+.sd-logo-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.375rem;
+    color: var(--wp--preset--color--contrast-3, #999);
+}
+
+.sd-logo-placeholder svg {
+    color: var(--wp--preset--color--contrast-3, #ccc);
+}
+
+.sd-logo-formats {
+    font-size: 0.75rem;
+}
+
+.sd-logo-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.sd-logo-img {
+    max-width: 120px;
+    max-height: 80px;
+    object-fit: contain;
+    border-radius: 4px;
+}
+
+.sd-logo-remove {
+    background: var(--wp--preset--color--contrast-4, #f0f0f0);
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--wp--preset--color--contrast-2, #666);
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.sd-logo-remove:hover {
+    background: #f8d7da;
+    color: #721c24;
 }
 
 /* Membership Summary */
@@ -172,12 +300,16 @@
     align-items: baseline;
     gap: 0.5rem;
     justify-content: center;
+    flex-wrap: wrap;
     margin-bottom: 1rem;
     font-size: 1.125rem;
 }
 
-.sd-membership-summary[hidden] {
-    display: none;
+.sd-summary-tier {
+    width: 100%;
+    text-align: center;
+    font-weight: 600;
+    color: var(--wp--preset--color--contrast, #111);
 }
 
 .sd-summary-value {

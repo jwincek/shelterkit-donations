@@ -48,7 +48,6 @@ function get_plugin_templates(): array {
  * @return string
  */
 function get_templates_dir(): string {
-    error_log(dirname( __DIR__ ) . '/templates/');
     return dirname( __DIR__, 1 ) . '/templates/';
 }
 

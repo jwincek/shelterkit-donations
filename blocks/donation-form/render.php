@@ -45,8 +45,10 @@ $checkout_url = function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url()
 $product_id = (int) get_option( 'sd_donation_product_id', 0 );
 $product_ok = $product_id && function_exists( 'wc_get_product' ) && wc_get_product( $product_id );
 
+$namespace = 'starter-shelter/donation-form';
+
 // Initialize state.
-wp_interactivity_state( 'starter-shelter/donation-form', [
+wp_interactivity_state( $namespace, [
     'forms' => [
         $form_id => [
             'amount'       => $default_amount,
@@ -72,15 +74,19 @@ $context = wp_json_encode( [
     'productType'       => 'donation',
     'checkoutUrl'       => $checkout_url,
     'productConfigured' => $product_ok,
+    'ajaxUrl'           => admin_url( 'admin-ajax.php' ),
+    'cartNonce'         => wp_create_nonce( 'sd_add_to_cart' ),
 ] );
 
 $wrapper = get_block_wrapper_attributes( [
     'class'               => 'sd-donation-form',
     'id'                  => $form_id,
-    'data-wp-interactive' => '{"namespace":"starter-shelter/donation-form"}',
+    'data-wp-interactive' => '{"namespace":"' . $namespace . '"}',
     'data-wp-context'     => $context,
     'data-wp-init'        => 'actions.initForm',
 ] );
+
+$partials = dirname( __DIR__ ) . '/shared/partials';
 ?>
 <div <?php echo $wrapper; ?>>
     <div class="sd-form-header">
@@ -95,38 +101,11 @@ $wrapper = get_block_wrapper_attributes( [
     </div>
 
     <div class="sd-donation-form-inner">
-        <!-- Amount Selection -->
-        <fieldset class="sd-form-section sd-amount-section">
-            <legend class="sd-section-label"><?php esc_html_e( 'Select Amount', 'starter-shelter' ); ?></legend>
-            <div class="sd-preset-amounts" role="radiogroup">
-                <?php foreach ( $preset_amounts as $amt ) : ?>
-                    <button type="button" role="radio" class="sd-amount-button"
-                        data-wp-on--click="actions.selectAmount" 
-                        data-wp-class--selected="callbacks.isAmountSelected"
-                        data-wp-context='{"buttonAmount":<?php echo (int) $amt; ?>}'>
-                        $<?php echo number_format( $amt ); ?>
-                    </button>
-                <?php endforeach; ?>
-            </div>
-            <div class="sd-custom-amount">
-                <label for="<?php echo esc_attr( $form_id ); ?>-custom" class="sd-custom-label">
-                    <?php esc_html_e( 'Or enter custom amount:', 'starter-shelter' ); ?>
-                </label>
-                <div class="sd-input-wrapper">
-                    <span class="sd-currency-symbol">$</span>
-                    <input type="number" 
-                        id="<?php echo esc_attr( $form_id ); ?>-custom" 
-                        class="sd-custom-input"
-                        min="<?php echo esc_attr( $min_amount ); ?>" 
-                        max="<?php echo esc_attr( $max_amount ); ?>" 
-                        step="1" 
-                        placeholder="0"
-                        data-wp-on--input="actions.setCustomAmount" 
-                        data-wp-on--focus="actions.clearPresetAmount"
-                        data-wp-bind--value="state.forms['<?php echo esc_attr( $form_id ); ?>'].customAmount">
-                </div>
-            </div>
-        </fieldset>
+        <?php
+        // Amount selector (shared partial).
+        $legend = __( 'Select Amount', 'starter-shelter' );
+        require $partials . '/amount-selector.php';
+        ?>
 
         <?php if ( $show_allocation ) : ?>
         <div class="sd-form-section sd-allocation-section">
@@ -143,34 +122,26 @@ $wrapper = get_block_wrapper_attributes( [
         </div>
         <?php endif; ?>
 
-        <?php if ( $show_anonymous ) : ?>
-        <div class="sd-form-section sd-anonymous-section">
-            <label class="sd-checkbox-label">
-                <input type="checkbox" class="sd-checkbox" 
-                    data-wp-on--change="actions.toggleAnonymous" 
-                    data-wp-bind--checked="state.forms['<?php echo esc_attr( $form_id ); ?>'].isAnonymous">
-                <span class="sd-checkbox-custom">
-                    <svg class="sd-checkbox-icon" viewBox="0 0 20 20">
-                        <path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" fill="currentColor"/>
-                    </svg>
-                </span>
-                <span class="sd-checkbox-text"><?php esc_html_e( 'Make my donation anonymous', 'starter-shelter' ); ?></span>
-            </label>
-        </div>
-        <?php endif; ?>
+        <?php
+        // Anonymous toggle (shared partial).
+        if ( $show_anonymous ) :
+            $label = __( 'Make my donation anonymous', 'starter-shelter' );
+            require $partials . '/anonymous-toggle.php';
+        endif;
+        ?>
 
         <!-- Summary & Submit -->
         <div class="sd-form-section sd-summary-section">
             <div class="sd-donation-summary">
                 <span class="sd-summary-label"><?php esc_html_e( 'Your Gift:', 'starter-shelter' ); ?></span>
                 <span class="sd-summary-amount" data-wp-text="callbacks.getDisplayAmount">
-                    $<?php echo number_format( $default_amount ); ?>
+                    $<?php echo number_format( (int) $default_amount ); ?>
                 </span>
             </div>
 
-            <button type="button" class="sd-submit-button wp-element-button" 
+            <button type="button" class="sd-submit-button wp-element-button"
                 data-wp-on--click="actions.submitToCart"
-                data-wp-bind--disabled="!callbacks.canProceed" 
+                data-wp-bind--disabled="!callbacks.canProceed"
                 data-wp-class--is-processing="state.forms['<?php echo esc_attr( $form_id ); ?>'].isProcessing">
                 <span data-wp-bind--hidden="state.forms['<?php echo esc_attr( $form_id ); ?>'].isProcessing">
                     <?php echo esc_html( $submit_text ); ?>
@@ -180,26 +151,14 @@ $wrapper = get_block_wrapper_attributes( [
                 </span>
             </button>
 
-            <div class="sd-form-success" role="status" data-wp-bind--hidden="!state.forms['<?php echo esc_attr( $form_id ); ?>'].success">
-                <p data-wp-text="state.forms['<?php echo esc_attr( $form_id ); ?>'].success"></p>
-                <a href="<?php echo esc_url( $checkout_url ); ?>" class="sd-checkout-link wp-element-button">
-                    <?php esc_html_e( 'Proceed to Checkout', 'starter-shelter' ); ?>
-                </a>
-            </div>
-            <div class="sd-form-error" role="alert" data-wp-bind--hidden="!state.forms['<?php echo esc_attr( $form_id ); ?>'].error">
-                <p data-wp-text="state.forms['<?php echo esc_attr( $form_id ); ?>'].error"></p>
-            </div>
+            <?php require $partials . '/form-messages.php'; ?>
         </div>
     </div>
 
-    <?php if ( $show_secure ) : ?>
-    <div class="sd-form-footer">
-        <p class="sd-secure-notice">
-            <svg viewBox="0 0 24 24" width="16" height="16">
-                <path d="M12 1C8.676 1 6 3.676 6 7v2H4v14h16V9h-2V7c0-3.324-2.676-6-6-6zm0 2c2.276 0 4 1.724 4 4v2H8V7c0-2.276 1.724-4 4-4z" fill="currentColor"/>
-            </svg>
-            <?php esc_html_e( 'Secure donation powered by WooCommerce', 'starter-shelter' ); ?>
-        </p>
-    </div>
-    <?php endif; ?>
+    <?php
+    if ( $show_secure ) :
+        $label = __( 'Secure donation powered by WooCommerce', 'starter-shelter' );
+        require $partials . '/trust-badge.php';
+    endif;
+    ?>
 </div>

@@ -32,10 +32,9 @@ use Starter_Shelter\Core\Config;
  * @since 2.0.0
  */
 function register_interactivity_config(): void {
-    if ( ! should_enqueue_interactivity() ) {
-        return;
-    }
-
+    // Always register config — the guard is too fragile ($post may not be
+    // set yet, or blocks may be rendered outside the main query). The config
+    // is lightweight and only outputs when a block actually renders.
     $currency_symbol   = function_exists( 'get_woocommerce_currency_symbol' )
         ? get_woocommerce_currency_symbol()
         : '$';
@@ -213,6 +212,15 @@ function register_script_modules(): void {
     wp_register_script_module(
         'starter-shelter/utils',
         STARTER_SHELTER_URL . 'assets/js/stores/utils.js',
+        [ '@wordpress/interactivity' ],
+        STARTER_SHELTER_VERSION
+    );
+
+    // Shared form base — provides composable submit handler, amount actions,
+    // and callbacks used by donation, memorial, and membership form stores.
+    wp_register_script_module(
+        'starter-shelter/form-base',
+        STARTER_SHELTER_URL . 'assets/js/stores/form-base.js',
         [ '@wordpress/interactivity' ],
         STARTER_SHELTER_VERSION
     );
