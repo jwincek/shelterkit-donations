@@ -1,0 +1,155 @@
+/**
+ * Contribution Tabs Block Styles
+ *
+ * @package Starter_Shelter
+ * @since 2.1.0
+ */
+
+.sd-contribution-tabs {
+    max-width: 600px;
+    margin: 0 auto;
+    overflow: hidden;
+}
+
+/* ── Tab Navigation ────────────────────────────────────────────────── */
+
+.sd-tabs-nav {
+    display: flex;
+    border-bottom: 2px solid var(--wp--preset--color--contrast-3, #e0e0e0);
+    margin: 0;
+    padding: 0;
+    gap: 0;
+}
+
+.sd-tab-button {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem 0.75rem;
+    border: none;
+    background: none;
+    color: var(--wp--preset--color--contrast-2, #666);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    white-space: nowrap;
+}
+
+.sd-tab-button::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: transparent;
+    border-radius: 3px 3px 0 0;
+    transition: background 0.2s ease;
+}
+
+.sd-tab-button:hover {
+    color: var(--wp--preset--color--contrast, #1e1e1e);
+    background: var(--wp--preset--color--contrast-4, #f8f9fa);
+}
+
+.sd-tab-button.sd-tab-active {
+    color: var(--wp--preset--color--primary, #28a745);
+    font-weight: 600;
+}
+
+.sd-tab-button.sd-tab-active::after {
+    background: var(--wp--preset--color--primary, #28a745);
+}
+
+.sd-tab-button:focus-visible {
+    outline: 2px solid var(--wp--preset--color--primary, #28a745);
+    outline-offset: -2px;
+    border-radius: 4px;
+}
+
+.sd-tab-icon {
+    flex-shrink: 0;
+    opacity: 0.7;
+}
+
+.sd-tab-active .sd-tab-icon {
+    opacity: 1;
+}
+
+/* ── Tab Panels ────────────────────────────────────────────────────── */
+
+.sd-tab-panel {
+    display: none;
+    animation: sd-tab-fade-in 0.25s ease;
+}
+
+.sd-tab-panel-active {
+    display: block;
+}
+
+.sd-tab-panel[hidden] {
+    display: none;
+}
+
+@keyframes sd-tab-fade-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Remove inner form borders/padding when inside tabs — the tabs container provides them. */
+.sd-tab-panel > .sd-donation-form,
+.sd-tab-panel > .sd-memorial-form,
+.sd-tab-panel > .sd-membership-form {
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    max-width: none;
+}
+
+/* ── Responsive ────────────────────────────────────────────────────── */
+
+@media (max-width: 480px) {
+    .sd-tab-button {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.8rem;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .sd-tab-icon {
+        width: 16px;
+        height: 16px;
+    }
+}
+
+/* ── Editor Styles ─────────────────────────────────────────────────── */
+
+.sd-tabs-editor-header {
+    display: flex;
+    border-bottom: 2px solid #e0e0e0;
+    margin-bottom: 1rem;
+}
+
+.sd-tabs-editor-tab {
+    flex: 1;
+    text-align: center;
+    padding: 0.75rem;
+    font-size: 0.85rem;
+    color: #666;
+    font-weight: 500;
+}
+
+.sd-tabs-editor-tab.sd-tab-active {
+    color: #28a745;
+    font-weight: 600;
+    border-bottom: 3px solid #28a745;
+    margin-bottom: -2px;
+}
+
+.sd-tabs-editor-panels {
+    padding: 0 1rem 1rem;
+}

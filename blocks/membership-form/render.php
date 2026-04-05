@@ -42,7 +42,6 @@ wp_interactivity_state( 'starter-shelter/membership-form', [
             'membershipType' => $membership_type,
             'selectedTier'   => $default_tier,
             'isAnonymous'    => false,
-            'businessName'   => '',
             'donorName'      => '',
             'logoPreview'    => '',
             'isProcessing'   => false,
@@ -112,7 +111,6 @@ $current_tiers = ( $membership_type === 'business' ) ? $business_tiers : $indivi
             <span class="sd-section-label"><?php esc_html_e( 'Select Your Level', 'starter-shelter' ); ?></span>
 
             <?php
-            // Render a tier grid for each membership type. Only the active type is visible.
             $tier_sets = [
                 'individual' => $individual_tiers,
                 'business'   => $business_tiers,
@@ -121,68 +119,101 @@ $current_tiers = ( $membership_type === 'business' ) ? $business_tiers : $indivi
             foreach ( $tier_sets as $type => $tiers ) :
                 if ( empty( $tiers ) ) continue;
                 $is_default = ( $type === $membership_type );
-            ?>
-            <div class="sd-tiers-grid sd-columns-<?php echo esc_attr( $columns ); ?> <?php echo $is_default ? '' : 'sd-collapsed'; ?>"
-                data-wp-class--sd-collapsed="<?php echo $type === 'individual' ? 'callbacks.isBusinessMembership' : '!callbacks.isBusinessMembership'; ?>">
-                <?php
-                $prev_benefits = [];
-                foreach ( $tiers as $slug => $tier ) :
-                    $price = $tier['price'] ?? $tier['amount'] ?? 0;
-                    $name = $tier['name'] ?? $tier['label'] ?? ucfirst( $slug );
-                    $benefits = $tier['benefits'] ?? [];
-                    $new_benefits = array_diff( $benefits, $prev_benefits );
-                    $featured = $tier['featured'] ?? false;
-                    $prev_benefits = $benefits;
+                $container_class = $is_default ? '' : 'sd-collapsed';
+
+                if ( 'list' === $layout || ! $show_benefits ) :
+                    // ── Compact list layout (no benefits) ──
                 ?>
-                    <div class="sd-tier-card <?php echo $featured ? 'sd-tier-featured' : ''; ?>"
-                         data-wp-class--selected="callbacks.isTierSelected"
-                         data-wp-context='{"tierSlug":"<?php echo esc_attr( $slug ); ?>"}'>
-                        <?php if ( $featured ) : ?>
-                            <div class="sd-tier-badge"><?php esc_html_e( 'Most Popular', 'starter-shelter' ); ?></div>
-                        <?php endif; ?>
-
-                        <button type="button" class="sd-tier-select-btn" data-wp-on--click="actions.selectTier">
-                            <div class="sd-tier-header">
-                                <h3 class="sd-tier-name"><?php echo esc_html( $name ); ?></h3>
-                                <div class="sd-tier-price">
-                                    <span class="sd-price-amount">$<?php echo esc_html( number_format( $price ) ); ?></span>
-                                    <span class="sd-price-period">/<?php esc_html_e( 'year', 'starter-shelter' ); ?></span>
-                                </div>
-                            </div>
-
-                            <?php if ( $show_benefits && ! empty( $benefits ) ) : ?>
-                            <ul class="sd-tier-benefits">
-                                <?php foreach ( $benefits as $benefit ) :
-                                    $is_new = in_array( $benefit, $new_benefits, true );
-                                ?>
-                                    <li class="<?php echo $is_new ? 'sd-benefit-new' : 'sd-benefit-inherited'; ?>">
-                                        <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" fill="currentColor"/></svg>
-                                        <?php echo esc_html( $benefit ); ?>
-                                    </li>
-                                <?php endforeach; ?>
-                            </ul>
+                <div class="sd-tiers-list <?php echo esc_attr( $container_class ); ?>"
+                    data-wp-class--sd-collapsed="<?php echo $type === 'individual' ? 'callbacks.isBusinessMembership' : '!callbacks.isBusinessMembership'; ?>">
+                    <?php foreach ( $tiers as $slug => $tier ) :
+                        $price = $tier['price'] ?? $tier['amount'] ?? 0;
+                        $name = $tier['name'] ?? $tier['label'] ?? ucfirst( $slug );
+                    ?>
+                    <label class="sd-tier-option"
+                        data-wp-class--selected="callbacks.isTierSelected"
+                        data-wp-context='{"tierSlug":"<?php echo esc_attr( $slug ); ?>"}'>
+                        <input type="radio" name="<?php echo esc_attr( $form_id ); ?>_tier_<?php echo esc_attr( $type ); ?>"
+                            value="<?php echo esc_attr( $slug ); ?>" class="sd-radio"
+                            data-wp-on--change="actions.selectTier"
+                            data-wp-bind--checked="callbacks.isTierSelected">
+                        <span class="sd-tier-option-content">
+                            <span class="sd-tier-option-name"><?php echo esc_html( $name ); ?></span>
+                            <span class="sd-tier-option-price">$<?php echo esc_html( number_format( $price ) ); ?><span class="sd-tier-option-period">/<?php esc_html_e( 'yr', 'starter-shelter' ); ?></span></span>
+                        </span>
+                    </label>
+                    <?php endforeach; ?>
+                </div>
+                <?php else :
+                    // ── Cards layout (with benefits) ──
+                ?>
+                <div class="sd-tiers-grid sd-columns-<?php echo esc_attr( $columns ); ?> <?php echo esc_attr( $container_class ); ?>"
+                    data-wp-class--sd-collapsed="<?php echo $type === 'individual' ? 'callbacks.isBusinessMembership' : '!callbacks.isBusinessMembership'; ?>">
+                    <?php
+                    $prev_benefits = [];
+                    foreach ( $tiers as $slug => $tier ) :
+                        $price = $tier['price'] ?? $tier['amount'] ?? 0;
+                        $name = $tier['name'] ?? $tier['label'] ?? ucfirst( $slug );
+                        $benefits = $tier['benefits'] ?? [];
+                        $new_benefits = array_diff( $benefits, $prev_benefits );
+                        $featured = $tier['featured'] ?? false;
+                        $prev_benefits = $benefits;
+                    ?>
+                        <div class="sd-tier-card <?php echo $featured ? 'sd-tier-featured' : ''; ?>"
+                             data-wp-class--selected="callbacks.isTierSelected"
+                             data-wp-context='{"tierSlug":"<?php echo esc_attr( $slug ); ?>"}'>
+                            <?php if ( $featured ) : ?>
+                                <div class="sd-tier-badge"><?php esc_html_e( 'Most Popular', 'starter-shelter' ); ?></div>
                             <?php endif; ?>
-                        </button>
-                    </div>
-                <?php endforeach; ?>
-            </div>
+
+                            <button type="button" class="sd-tier-select-btn" data-wp-on--click="actions.selectTier">
+                                <div class="sd-tier-header">
+                                    <h3 class="sd-tier-name"><?php echo esc_html( $name ); ?></h3>
+                                    <div class="sd-tier-price">
+                                        <span class="sd-price-amount">$<?php echo esc_html( number_format( $price ) ); ?></span>
+                                        <span class="sd-price-period">/<?php esc_html_e( 'year', 'starter-shelter' ); ?></span>
+                                    </div>
+                                </div>
+
+                                <ul class="sd-tier-benefits">
+                                    <?php foreach ( $benefits as $benefit ) :
+                                        $is_new = in_array( $benefit, $new_benefits, true );
+                                    ?>
+                                        <li class="<?php echo $is_new ? 'sd-benefit-new' : 'sd-benefit-inherited'; ?>">
+                                            <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" fill="currentColor"/></svg>
+                                            <?php echo esc_html( $benefit ); ?>
+                                        </li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            </button>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+                <?php endif; ?>
             <?php endforeach; ?>
         </div>
 
-        <!-- Business Details (for business memberships) -->
+        <!-- Donor / Business Name (unified field) -->
+        <div class="sd-form-section sd-donor-name-section">
+            <label for="<?php echo esc_attr( $form_id ); ?>-donor-name" class="sd-section-label">
+                <span data-wp-text="callbacks.getDonorNameLabel"><?php esc_html_e( 'Your Name', 'starter-shelter' ); ?></span>
+                <span class="sd-required" data-wp-class--sd-collapsed="!callbacks.isBusinessMembership">*</span>
+            </label>
+            <input type="text" id="<?php echo esc_attr( $form_id ); ?>-donor-name" class="sd-text-input" maxlength="200"
+                data-wp-bind--placeholder="callbacks.getDonorNamePlaceholder"
+                placeholder="<?php esc_attr_e( 'Enter your name...', 'starter-shelter' ); ?>"
+                data-wp-on--input="actions.setDonorName"
+                data-wp-bind--value="state.forms['<?php echo esc_attr( $form_id ); ?>'].donorName">
+            <p class="description sd-field-help" data-wp-text="callbacks.getDonorNameHelp"><?php esc_html_e( 'How your name will appear on our membership records.', 'starter-shelter' ); ?></p>
+            <p class="sd-family-tier-note sd-collapsed" data-wp-class--sd-collapsed="!callbacks.isFamilyTier" aria-live="polite">
+                <?php esc_html_e( 'Please list all family members to be included in your membership (e.g. "John & Mary Smith").', 'starter-shelter' ); ?>
+            </p>
+        </div>
+
+        <!-- Business Logo (business memberships only) -->
         <div class="sd-form-section sd-business-section sd-collapsed"
             data-wp-class--sd-collapsed="!callbacks.isBusinessMembership"
             data-wp-bind--aria-hidden="!callbacks.isBusinessMembership">
-            <div class="sd-field-wrapper">
-                <label for="<?php echo esc_attr( $form_id ); ?>-business" class="sd-section-label">
-                    <?php esc_html_e( 'Business Name', 'starter-shelter' ); ?> <span class="sd-required">*</span>
-                </label>
-                <input type="text" id="<?php echo esc_attr( $form_id ); ?>-business" class="sd-text-input" maxlength="200"
-                    placeholder="<?php esc_attr_e( 'Enter your business name...', 'starter-shelter' ); ?>"
-                    data-wp-on--input="actions.setBusinessName"
-                    data-wp-bind--value="state.forms['<?php echo esc_attr( $form_id ); ?>'].businessName">
-            </div>
-
             <div class="sd-field-wrapper sd-logo-upload">
                 <label class="sd-section-label"><?php esc_html_e( 'Business Logo', 'starter-shelter' ); ?> <span class="sd-optional">(<?php esc_html_e( 'Optional', 'starter-shelter' ); ?>)</span></label>
                 <div class="sd-logo-dropzone" data-wp-on--click="actions.triggerLogoInput"
@@ -208,13 +239,8 @@ $current_tiers = ( $membership_type === 'business' ) ? $business_tiers : $indivi
         </div>
 
         <?php
-        // Donor display name (shared partial).
-        $namespace = 'starter-shelter/membership-form';
-        $label = __( 'Your Name', 'starter-shelter' );
-        $help  = __( 'How your name will appear on our membership records.', 'starter-shelter' );
-        require dirname( __DIR__ ) . '/shared/partials/donor-name.php';
-
         // Anonymous toggle (shared partial).
+        $namespace = 'starter-shelter/membership-form';
         if ( $show_anonymous ) :
             $label = __( 'Keep my membership anonymous', 'starter-shelter' );
             require dirname( __DIR__ ) . '/shared/partials/anonymous-toggle.php';

@@ -157,6 +157,14 @@ class Order_Handler {
             );
         }
 
+        // Validate that required custom meta is present.
+        // Items added directly (not through form blocks) will be missing
+        // fields like honoree_name, donor_name, etc.
+        $validation = self::validate_item_meta( $item, $config );
+        if ( is_wp_error( $validation ) ) {
+            return $validation;
+        }
+
         // Build input from order/item.
         $input = Product_Mapper::build_input( $order, $item, $config );
 
@@ -183,6 +191,80 @@ class Order_Handler {
         }
 
         return $result;
+    }
+
+    /**
+     * Validate that an order item has the required custom meta.
+     *
+     * Items added through the form blocks have custom meta set by the
+     * cart handler (sd_product_type, sd_honoree_name, etc.). Items added
+     * directly through WooCommerce (shop page, direct URL) will be
+     * missing this meta, which would create incomplete CPT records.
+     *
+     * @since 2.1.0
+     *
+     * @param \WC_Order_Item $item   The order item.
+     * @param array          $config The product config from Product_Mapper.
+     * @return true|WP_Error True if valid, WP_Error if missing required fields.
+     */
+    private static function validate_item_meta( \WC_Order_Item $item, array $config ): true|WP_Error {
+        $product_type = $config['product_type'] ?? '';
+
+        // Check if the item was added through our form (has sd_product_type meta).
+        $has_form_meta = $item->get_meta( '_sd_product_type' );
+
+        if ( ! $has_form_meta ) {
+            // Item was added directly, not through a form block.
+            // For donations, this is acceptable — amount comes from variation price.
+            // For memberships, tier comes from variation attribute — also acceptable.
+            // For memorials, honoree_name is required and has no fallback.
+
+            if ( 'memorial' === $product_type ) {
+                $honoree = $item->get_meta( '_sd_honoree_name' );
+                if ( empty( $honoree ) ) {
+                    return new WP_Error(
+                        'missing_required_meta',
+                        __( 'Memorial missing required fields (honoree name). Item may have been added directly without using the memorial form. Please use the memorial tribute form to add this item.', 'starter-shelter' )
+                    );
+                }
+            }
+
+            // Log a note but allow processing for donations and memberships.
+            if ( in_array( $product_type, [ 'donation', 'membership' ], true ) ) {
+                // These can proceed with defaults — amount from variation,
+                // tier/allocation from attribute. Donor info comes from
+                // the billing details at checkout.
+                return true;
+            }
+        }
+
+        // Specific field validation for form-submitted items.
+        if ( 'memorial' === $product_type ) {
+            $honoree = $item->get_meta( '_sd_honoree_name' );
+            if ( empty( $honoree ) ) {
+                return new WP_Error(
+                    'missing_honoree',
+                    __( 'Memorial tribute is missing the honoree name.', 'starter-shelter' )
+                );
+            }
+        }
+
+        if ( 'membership' === $product_type ) {
+            $tier = $item->get_meta( '_sd_membership_tier' );
+            if ( empty( $tier ) ) {
+                // Tier might come from the variation attribute instead.
+                // Only error if we can't determine it at all.
+                $variation_id = $item->get_variation_id();
+                if ( ! $variation_id ) {
+                    return new WP_Error(
+                        'missing_tier',
+                        __( 'Membership is missing the tier selection.', 'starter-shelter' )
+                    );
+                }
+            }
+        }
+
+        return true;
     }
 
     /**

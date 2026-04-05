@@ -1,0 +1,86 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "starter-shelter/contribution-tabs",
+    "version": "2.1.0",
+    "title": "Contribution Tabs",
+    "category": "starter-shelter",
+    "icon": "layout",
+    "description": "Tabbed container for donation, membership, and memorial form blocks. Presents multiple giving options in a single, compact interface.",
+    "keywords": ["tabs", "contribute", "support", "giving", "donate", "membership", "memorial"],
+    "textdomain": "starter-shelter",
+    "supports": {
+        "html": false,
+        "align": ["wide", "full"],
+        "color": {
+            "background": true,
+            "text": true,
+            "gradients": true
+        },
+        "spacing": {
+            "margin": true,
+            "padding": true
+        },
+        "__experimentalBorder": {
+            "color": true,
+            "radius": true,
+            "style": true,
+            "width": true
+        },
+        "shadow": true,
+        "interactivity": {
+            "clientNavigation": true
+        }
+    },
+    "attributes": {
+        "tabLabels": {
+            "type": "array",
+            "default": ["Give a Gift", "Become a Member", "Honor a Loved One"]
+        },
+        "tabIcons": {
+            "type": "array",
+            "default": ["heart", "groups", "format-quote"]
+        },
+        "defaultTab": {
+            "type": "number",
+            "default": 0
+        },
+        "style": {
+            "type": "object",
+            "default": {
+                "border": {
+                    "width": "1px",
+                    "style": "solid",
+                    "radius": "8px"
+                },
+                "spacing": {
+                    "padding": {
+                        "top": "0",
+                        "right": "0",
+                        "bottom": "0",
+                        "left": "0"
+                    }
+                }
+            }
+        }
+    },
+    "allowedBlocks": [
+        "starter-shelter/donation-form",
+        "starter-shelter/membership-form",
+        "starter-shelter/memorial-form"
+    ],
+    "example": {
+        "attributes": {
+            "tabLabels": ["Give a Gift", "Become a Member", "Honor a Loved One"]
+        },
+        "innerBlocks": [
+            { "name": "starter-shelter/donation-form" },
+            { "name": "starter-shelter/membership-form" },
+            { "name": "starter-shelter/memorial-form" }
+        ]
+    },
+    "viewScriptModule": "file:./view.js",
+    "editorScript": "file:./edit.js",
+    "style": "file:./style.css",
+    "render": "file:./render.php"
+}

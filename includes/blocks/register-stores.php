@@ -225,6 +225,14 @@ function register_script_modules(): void {
         STARTER_SHELTER_VERSION
     );
 
+    // Contribution tabs — lightweight tab switcher for giving forms.
+    wp_register_script_module(
+        'starter-shelter/contribution-tabs',
+        STARTER_SHELTER_URL . 'blocks/contribution-tabs/view.js',
+        [ '@wordpress/interactivity' ],
+        STARTER_SHELTER_VERSION
+    );
+
     // Memorials store — registered for dependency tracking and import map generation.
     // WordPress 6.9 performance optimizations applied:
     // - fetchpriority: 'low' — deprioritizes loading vs LCP image

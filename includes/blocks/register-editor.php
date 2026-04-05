@@ -37,6 +37,7 @@ function register_editor_assets(): void {
         'starter-shelter-memorial-wall-editor-script',
         'starter-shelter-campaign-progress-editor-script',
         'starter-shelter-donor-dashboard-editor-script',
+        'starter-shelter-contribution-tabs-editor-script',
     ];
 
     // All edit.js files use wp.serverSideRender, wp.blockEditor,

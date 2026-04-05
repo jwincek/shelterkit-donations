@@ -199,7 +199,7 @@ class Activator {
         $product->set_description( $data['description'] );
         $product->set_short_description( $data['short_desc'] );
         $product->set_status( 'publish' );
-        $product->set_catalog_visibility( 'visible' );
+        $product->set_catalog_visibility( 'hidden' );
         $product->set_sold_individually( true );
         $product->set_virtual( $data['virtual'] ?? true );
         $product->set_tax_status( 'none' );

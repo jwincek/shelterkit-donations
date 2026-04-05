@@ -38,7 +38,6 @@ const { state, actions } = store( NAMESPACE, {
 					membershipType,
 					selectedTier: defaultTier,
 					isAnonymous: false,
-					businessName: '',
 					donorName: '',
 					logoPreview: '',
 					isProcessing: false,
@@ -72,15 +71,6 @@ const { state, actions } = store( NAMESPACE, {
 			const ctx = getContext();
 			const form = state.forms[ ctx.formId ];
 			if ( form ) form.donorName = sanitizeText( event.target.value ).substring( 0, 200 );
-		},
-
-		setBusinessName( event ) {
-			const ctx = getContext();
-			const form = state.forms[ ctx.formId ];
-			if ( form ) {
-				form.businessName = sanitizeText( event.target.value ).substring( 0, 200 );
-				form.error = null;
-			}
 		},
 
 		triggerLogoInput( event ) {
@@ -135,8 +125,8 @@ const { state, actions } = store( NAMESPACE, {
 					if ( ! form.selectedTier ) {
 						fieldErrors.tier = __( 'errorSelectTier', 'Please select a membership level.' );
 					}
-					if ( form.membershipType === 'business' && ! form.businessName.trim() ) {
-						fieldErrors.businessName = __( 'errorBusinessName', 'Please enter your business name.' );
+					if ( form.membershipType === 'business' && ! form.donorName.trim() ) {
+						fieldErrors.donorName = __( 'errorBusinessName', 'Please enter your business name.' );
 					}
 					const tiers = ctx.tiers?.[ form.membershipType ] || {};
 					if ( form.selectedTier && ! tiers[ form.selectedTier ] ) {
@@ -159,9 +149,12 @@ const { state, actions } = store( NAMESPACE, {
 					formData.append( 'tier', form.selectedTier );
 
 					if ( form.isAnonymous ) formData.append( 'is_anonymous', '1' );
-					if ( form.donorName ) formData.append( 'donor_name', form.donorName );
-					if ( form.membershipType === 'business' && form.businessName ) {
-						formData.append( 'business_name', form.businessName );
+					if ( form.donorName ) {
+						formData.append( 'donor_name', form.donorName );
+						// For business memberships, donorName IS the business name.
+						if ( form.membershipType === 'business' ) {
+							formData.append( 'business_name', form.donorName );
+						}
 					}
 					const logoFile = logoFiles.get( ctx.formId );
 					if ( form.membershipType === 'business' && logoFile ) {
@@ -188,7 +181,6 @@ const { state, actions } = store( NAMESPACE, {
 				Object.assign( form, {
 					selectedTier: ctx.defaultTier || null,
 					isAnonymous: false,
-					businessName: '',
 					donorName: '',
 					logoPreview: '',
 					error: null,
@@ -239,7 +231,7 @@ const { state, actions } = store( NAMESPACE, {
 			const form = state.forms[ ctx.formId ];
 			if ( ! form || form.isProcessing ) return false;
 			const hasTier = !! form.selectedTier;
-			const businessValid = form.membershipType !== 'business' || form.businessName.trim().length > 0;
+			const businessValid = form.membershipType !== 'business' || form.donorName.trim().length > 0;
 			return hasTier && businessValid && ctx.productConfigured;
 		},
 
@@ -263,6 +255,36 @@ const { state, actions } = store( NAMESPACE, {
 			const tiers = ctx.tiers?.[ form?.membershipType || 'individual' ] || {};
 			const tier = tiers[ ctx.tierSlug ];
 			return tier?.benefits || [];
+		},
+
+		getDonorNameLabel() {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			return form?.membershipType === 'business'
+				? __( 'businessName', 'Business Name' )
+				: __( 'yourName', 'Your Name' );
+		},
+
+		getDonorNamePlaceholder() {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			return form?.membershipType === 'business'
+				? __( 'businessNamePlaceholder', 'Enter your business name...' )
+				: __( 'yourNamePlaceholder', 'Enter your name...' );
+		},
+
+		isFamilyTier() {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			return form?.membershipType === 'individual' && form?.selectedTier === 'family';
+		},
+
+		getDonorNameHelp() {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			return form?.membershipType === 'business'
+				? __( 'businessNameHelp', 'Your business name as it will appear on our website.' )
+				: __( 'yourNameHelp', 'How your name will appear on our membership records.' );
 		},
 
 		hasLogo() {

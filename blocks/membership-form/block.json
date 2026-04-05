@@ -58,8 +58,8 @@
         },
         "layout": {
             "type": "string",
-            "default": "cards",
-            "enum": ["cards", "table", "list"]
+            "default": "list",
+            "enum": ["cards", "list"]
         },
         "columns": {
             "type": "number",
@@ -67,7 +67,7 @@
         },
         "showBenefits": {
             "type": "boolean",
-            "default": true
+            "default": false
         },
         "showAnonymous": {
             "type": "boolean",

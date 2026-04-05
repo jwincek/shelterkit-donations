@@ -180,7 +180,17 @@ class Product_Sync_Checker {
 			$result['issues'][] = self::issue( 'warning', $sku, 'Product tax status is not "none".' );
 		}
 
-		// 4. Check attribute.
+		// 4. Check catalog visibility — products should be hidden to prevent
+		// direct add-to-cart without the form block's required fields.
+		if ( $product->get_catalog_visibility() !== 'hidden' ) {
+			$result['issues'][] = self::issue(
+				'warning',
+				$sku,
+				sprintf( 'Catalog visibility is "%s", should be "hidden".', $product->get_catalog_visibility() )
+			);
+		}
+
+		// 5. Check attribute.
 		$attributes = $product->get_attributes();
 		$expected_slug = $definition['attribute_slug'];
 		$found_attribute = null;
@@ -472,6 +482,184 @@ class Product_Sync_Checker {
 	}
 
 	/**
+	 * Repair detected sync issues.
+	 *
+	 * Creates missing variations, sets virtual flag, updates attribute
+	 * options, and assigns default images. Only touches products that
+	 * have issues — leaves correctly configured products alone.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @return array{ repaired: int, skipped: int, details: string[] }
+	 */
+	public static function repair(): array {
+		$result = [
+			'repaired' => 0,
+			'skipped'  => 0,
+			'details'  => [],
+		];
+
+		foreach ( self::$product_map as $sku => $definition ) {
+			$product_id = (int) get_option( $definition['option_key'], 0 );
+			if ( ! $product_id ) {
+				$result['details'][] = sprintf( '%s: skipped — product not created yet.', $sku );
+				$result['skipped']++;
+				continue;
+			}
+
+			$product = wc_get_product( $product_id );
+			if ( ! $product || ! $product->is_type( 'variable' ) ) {
+				$result['details'][] = sprintf( '%s: skipped — not a valid variable product.', $sku );
+				$result['skipped']++;
+				continue;
+			}
+
+			$changed = false;
+
+			// Fix 0: Hide from catalog.
+			if ( $product->get_catalog_visibility() !== 'hidden' ) {
+				$product->set_catalog_visibility( 'hidden' );
+				$result['details'][] = sprintf( '%s: set catalog visibility to hidden.', $sku );
+				$changed = true;
+			}
+
+			// Fix 1: Set virtual if not already.
+			if ( ! $product->is_virtual() ) {
+				$product->set_virtual( true );
+				$result['details'][] = sprintf( '%s: set to virtual.', $sku );
+				$changed = true;
+			}
+
+			// Fix 2: Set tax status to none.
+			if ( $product->get_tax_status() !== 'none' ) {
+				$product->set_tax_status( 'none' );
+				$result['details'][] = sprintf( '%s: set tax status to none.', $sku );
+				$changed = true;
+			}
+
+			// Fix 3: Create missing variations.
+			$expected_terms = self::get_expected_terms( $definition['config_source'] );
+			$existing_variations = $product->get_available_variations();
+
+			$variation_list = [];
+			foreach ( $existing_variations as $v ) {
+				foreach ( $v['attributes'] as $attr_val ) {
+					$variation_list[] = [
+						'id'    => $v['variation_id'],
+						'value' => trim( $attr_val ),
+						'slug'  => sanitize_title( $attr_val ),
+						'price' => (float) ( $v['display_price'] ?? 0 ),
+					];
+				}
+			}
+
+			$attribute_slug = $definition['attribute_slug'];
+			$all_option_names = [];
+
+			// Collect existing attribute option names.
+			foreach ( $existing_variations as $v ) {
+				foreach ( $v['attributes'] as $attr_val ) {
+					$all_option_names[] = trim( $attr_val );
+				}
+			}
+
+			foreach ( $expected_terms as $term ) {
+				$match = self::find_matching_variation( $term, $variation_list );
+
+				if ( ! $match ) {
+					// Create the missing variation.
+					$variation = new \WC_Product_Variation();
+					$variation->set_parent_id( $product_id );
+					$variation->set_status( 'publish' );
+					$variation->set_regular_price( (string) ( $term['price'] ?? 10 ) );
+					$variation->set_virtual( true );
+					$variation->set_manage_stock( false );
+					$variation->set_stock_status( 'instock' );
+					$variation->set_attributes( [
+						sanitize_title( $attribute_slug ) => $term['label'],
+					] );
+					$variation->save();
+
+					$all_option_names[] = $term['label'];
+					$result['details'][] = sprintf( '%s: created variation "%s" ($%s).', $sku, $term['label'], number_format( $term['price'] ?? 10, 2 ) );
+					$changed = true;
+				}
+			}
+
+			// Fix 4: Update attribute options to include all terms.
+			$attributes = $product->get_attributes();
+			foreach ( $attributes as $attr_key => $attribute ) {
+				if ( sanitize_title( $attr_key ) === sanitize_title( $attribute_slug ) ) {
+					$current_options = $attribute->get_options();
+					$merged = array_unique( array_merge( $current_options, $all_option_names ) );
+
+					if ( count( $merged ) > count( $current_options ) ) {
+						$attribute->set_options( $merged );
+						$product->set_attributes( [ $attribute ] );
+						$result['details'][] = sprintf( '%s: updated attribute options (%d → %d).', $sku, count( $current_options ), count( $merged ) );
+						$changed = true;
+					}
+					break;
+				}
+			}
+
+			// Fix 5: Set default image if missing.
+			if ( ! $product->get_image_id() ) {
+				$image_file = self::$product_map[ $sku ]['image_file'] ?? null;
+				// Look up image_file from the activator's product data.
+				if ( ! $image_file ) {
+					$image_map = [
+						'shelter-donations'             => 'product-donation.svg',
+						'shelter-memberships'           => 'product-membership.svg',
+						'shelter-memberships-business'   => 'product-membership-business.svg',
+						'shelter-donations-in-memoriam' => 'product-memorial.svg',
+					];
+					$image_file = $image_map[ $sku ] ?? null;
+				}
+
+				if ( $image_file ) {
+					$source = STARTER_SHELTER_PATH . 'assets/images/' . $image_file;
+					if ( file_exists( $source ) ) {
+						require_once ABSPATH . 'wp-admin/includes/image.php';
+
+						$upload_dir = wp_upload_dir();
+						$dest_file  = $upload_dir['path'] . '/' . $image_file;
+
+						if ( copy( $source, $dest_file ) ) {
+							$attachment_id = wp_insert_attachment( [
+								'post_title'     => $product->get_name(),
+								'post_mime_type' => 'image/svg+xml',
+								'post_status'    => 'inherit',
+							], $dest_file, $product_id );
+
+							if ( $attachment_id && ! is_wp_error( $attachment_id ) ) {
+								$metadata = wp_generate_attachment_metadata( $attachment_id, $dest_file );
+								wp_update_attachment_metadata( $attachment_id, $metadata );
+								set_post_thumbnail( $product_id, $attachment_id );
+								$result['details'][] = sprintf( '%s: set default product image.', $sku );
+								$changed = true;
+							}
+						}
+					}
+				}
+			}
+
+			if ( $changed ) {
+				$product->save();
+				\WC_Product_Variable::sync( $product_id );
+				$result['repaired']++;
+			} else {
+				$result['skipped']++;
+			}
+		}
+
+		// Clear the sync check cache so the notice updates.
+		self::invalidate_cache();
+
+		return $result;
+	}
+
+	/**
 	 * Display sync check results as an admin notice.
 	 *
 	 * @since 2.1.0
@@ -525,27 +713,84 @@ class Product_Sync_Checker {
 				<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=starter-shelter-settings&action=recheck-sync' ), 'sd_recheck_sync' ) ); ?>" class="button button-small">
 					<?php esc_html_e( 'Re-check Now', 'starter-shelter' ); ?>
 				</a>
+				<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=starter-shelter-settings&action=repair-sync' ), 'sd_repair_sync' ) ); ?>" class="button button-small button-primary" onclick="return confirm('<?php echo esc_js( __( 'This will create missing variations, set products to virtual, fix tax status, and assign default images. Continue?', 'starter-shelter' ) ); ?>');">
+					<?php esc_html_e( 'Repair Issues', 'starter-shelter' ); ?>
+				</a>
 			</p>
 		</div>
 		<?php
 	}
 
 	/**
-	 * Handle the re-check action.
+	 * Handle admin actions (re-check and repair).
 	 *
 	 * @since 2.1.0
 	 */
-	public static function handle_recheck(): void {
-		if ( ! isset( $_GET['action'] ) || 'recheck-sync' !== $_GET['action'] ) {
-			return;
+	public static function handle_admin_actions(): void {
+		$action = $_GET['action'] ?? '';
+
+		if ( 'recheck-sync' === $action ) {
+			if ( ! wp_verify_nonce( $_GET['_wpnonce'] ?? '', 'sd_recheck_sync' ) ) {
+				return;
+			}
+			delete_transient( 'sd_product_sync_check' );
+			wp_safe_redirect( remove_query_arg( [ 'action', '_wpnonce' ] ) );
+			exit;
 		}
-		if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( $_GET['_wpnonce'], 'sd_recheck_sync' ) ) {
+
+		if ( 'repair-sync' === $action ) {
+			if ( ! wp_verify_nonce( $_GET['_wpnonce'] ?? '', 'sd_repair_sync' ) ) {
+				return;
+			}
+			if ( ! current_user_can( 'manage_woocommerce' ) ) {
+				return;
+			}
+
+			$repair_result = self::repair();
+			set_transient( 'sd_repair_result', $repair_result, 60 );
+			wp_safe_redirect( add_query_arg( 'sd-repaired', '1', remove_query_arg( [ 'action', '_wpnonce' ] ) ) );
+			exit;
+		}
+	}
+
+	/**
+	 * Show repair results notice.
+	 *
+	 * @since 2.1.0
+	 */
+	public static function show_repair_result(): void {
+		if ( ! isset( $_GET['sd-repaired'] ) ) {
 			return;
 		}
 
-		delete_transient( 'sd_product_sync_check' );
-		wp_safe_redirect( remove_query_arg( [ 'action', '_wpnonce' ] ) );
-		exit;
+		$result = get_transient( 'sd_repair_result' );
+		delete_transient( 'sd_repair_result' );
+
+		if ( ! $result ) {
+			return;
+		}
+		?>
+		<div class="notice notice-success is-dismissible">
+			<p>
+				<strong><?php esc_html_e( 'Starter Shelter — Repair Complete:', 'starter-shelter' ); ?></strong>
+				<?php printf(
+					esc_html__( '%d product(s) repaired, %d skipped.', 'starter-shelter' ),
+					$result['repaired'],
+					$result['skipped']
+				); ?>
+			</p>
+			<?php if ( ! empty( $result['details'] ) ) : ?>
+			<details>
+				<summary><?php esc_html_e( 'View details', 'starter-shelter' ); ?></summary>
+				<ul style="margin-left: 1.5em;">
+					<?php foreach ( $result['details'] as $detail ) : ?>
+						<li><?php echo esc_html( $detail ); ?></li>
+					<?php endforeach; ?>
+				</ul>
+			</details>
+			<?php endif; ?>
+		</div>
+		<?php
 	}
 
 	/**
@@ -564,7 +809,8 @@ class Product_Sync_Checker {
 	 */
 	public static function init(): void {
 		add_action( 'admin_notices', [ self::class, 'maybe_show_admin_notice' ] );
-		add_action( 'admin_init', [ self::class, 'handle_recheck' ] );
+		add_action( 'admin_notices', [ self::class, 'show_repair_result' ] );
+		add_action( 'admin_init', [ self::class, 'handle_admin_actions' ] );
 
 		// Invalidate cache when products or config might change.
 		add_action( 'woocommerce_update_product', [ self::class, 'invalidate_cache' ] );
