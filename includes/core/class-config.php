@@ -50,6 +50,20 @@ class Config {
      * @param string $name Config file name (without .json extension).
      * @return array The parsed config data.
      */
+    /**
+     * Config keys that support admin overrides from the options table.
+     *
+     * Each entry maps a config file name to an array of top-level keys
+     * that can be overridden. The admin override is stored as a WordPress
+     * option named 'sd_config_{name}_{key}'.
+     *
+     * @var array<string, string[]>
+     */
+    private static array $overridable = [
+        'settings' => [ 'allocations', 'memorial_types', 'pet_species', 'donor_levels' ],
+        'tiers'    => [ 'tiers' ],
+    ];
+
     public static function get( string $name ): array {
         if ( isset( self::$cache[ $name ] ) ) {
             return self::$cache[ $name ];
@@ -73,8 +87,86 @@ class Config {
         // Resolve $ref references recursively.
         $data = self::resolve_refs( $data );
 
+        // Apply admin overrides from the options table.
+        $data = self::apply_overrides( $name, $data );
+
         self::$cache[ $name ] = $data;
         return $data;
+    }
+
+    /**
+     * Apply admin overrides from the options table.
+     *
+     * JSON config provides defaults. Admin-edited values (stored as
+     * 'sd_config_{name}_{key}' options) take precedence when present.
+     *
+     * @since 2.1.0
+     *
+     * @param string $name Config file name.
+     * @param array  $data Config data from JSON.
+     * @return array Config with overrides applied.
+     */
+    private static function apply_overrides( string $name, array $data ): array {
+        $keys = self::$overridable[ $name ] ?? [];
+
+        foreach ( $keys as $key ) {
+            $option = get_option( 'sd_config_' . $name . '_' . $key );
+
+            if ( false !== $option && is_array( $option ) ) {
+                $data[ $key ] = $option;
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * Save an admin override for a config key.
+     *
+     * @since 2.1.0
+     *
+     * @param string $name  Config file name.
+     * @param string $key   Top-level key to override.
+     * @param array  $value The override value.
+     * @return bool True if saved, false if not an overridable key.
+     */
+    public static function save_override( string $name, string $key, array $value ): bool {
+        $keys = self::$overridable[ $name ] ?? [];
+
+        if ( ! in_array( $key, $keys, true ) ) {
+            return false;
+        }
+
+        update_option( 'sd_config_' . $name . '_' . $key, $value );
+        self::clear_cache( $name );
+
+        return true;
+    }
+
+    /**
+     * Delete an admin override, reverting to JSON defaults.
+     *
+     * @since 2.1.0
+     *
+     * @param string $name Config file name.
+     * @param string $key  Top-level key to revert.
+     */
+    public static function delete_override( string $name, string $key ): void {
+        delete_option( 'sd_config_' . $name . '_' . $key );
+        self::clear_cache( $name );
+    }
+
+    /**
+     * Check if a config key has an admin override.
+     *
+     * @since 2.1.0
+     *
+     * @param string $name Config file name.
+     * @param string $key  Top-level key.
+     * @return bool True if override exists.
+     */
+    public static function has_override( string $name, string $key ): bool {
+        return false !== get_option( 'sd_config_' . $name . '_' . $key );
     }
 
     /**

@@ -27,6 +27,7 @@ class Settings {
 
     private static array $tabs = [
         'general'  => 'General',
+        'data'     => 'Data',
         'products' => 'Products',
         'emails'   => 'Emails',
         'pages'    => 'Pages',
@@ -68,6 +69,19 @@ class Settings {
                 'page'    => self::PAGE_SLUG,
                 'tab'     => 'products',
                 'message' => 'products_created',
+            ], admin_url( 'admin.php' ) ) );
+            exit;
+        }
+
+        // Handle data tab saves.
+        if ( isset( $_POST['sd_save_data_config'] ) ) {
+            check_admin_referer( 'sd_data_config' );
+            self::save_data_tab();
+
+            wp_redirect( add_query_arg( [
+                'page'    => self::PAGE_SLUG,
+                'tab'     => 'data',
+                'message' => 'data_saved',
             ], admin_url( 'admin.php' ) ) );
             exit;
         }
@@ -309,7 +323,9 @@ class Settings {
         <div class="wrap">
             <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 
-            <?php if ( 'products_created' === $message ) : ?>
+            <?php if ( 'data_saved' === $message ) : ?>
+                <div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Configuration saved. Sync check cache cleared.', 'starter-shelter' ); ?></p></div>
+            <?php elseif ( 'products_created' === $message ) : ?>
                 <div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Products have been created successfully.', 'starter-shelter' ); ?></p></div>
             <?php elseif ( 'products_saved' === $message ) : ?>
                 <div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Product settings have been saved.', 'starter-shelter' ); ?></p></div>
@@ -328,6 +344,8 @@ class Settings {
                 <?php
                 if ( 'products' === $current_tab ) {
                     self::render_products_tab();
+                } elseif ( 'data' === $current_tab ) {
+                    self::render_data_tab();
                 } else {
                     ?>
                     <form action="options.php" method="post">
@@ -343,6 +361,293 @@ class Settings {
             </div>
         </div>
         <?php
+    }
+
+    /**
+     * Render the Data configuration tab.
+     *
+     * Editable config values that override JSON defaults.
+     *
+     * @since 2.1.0
+     */
+    private static function render_data_tab(): void {
+        $allocations  = Config::get_item( 'settings', 'allocations', [] );
+        $all_tiers    = Config::get_item( 'tiers', 'tiers', [] );
+        $ind_tiers    = $all_tiers['individual'] ?? [];
+        $biz_tiers    = $all_tiers['business'] ?? [];
+        $pet_species  = Config::get_item( 'settings', 'pet_species', [] );
+        $donor_levels = Config::get_item( 'settings', 'donor_levels', [] );
+        $thresholds   = $donor_levels['thresholds'] ?? [];
+        ?>
+        <form method="post">
+            <?php wp_nonce_field( 'sd_data_config' ); ?>
+
+            <!-- Allocations -->
+            <h2><?php esc_html_e( 'Donation Allocations', 'starter-shelter' ); ?></h2>
+            <p class="description"><?php esc_html_e( 'Fund designations that donors can direct their gifts to.', 'starter-shelter' ); ?></p>
+            <table class="widefat striped sd-data-table" style="max-width: 600px; margin: 15px 0;">
+                <thead>
+                    <tr>
+                        <th style="width: 40%;"><?php esc_html_e( 'Slug', 'starter-shelter' ); ?></th>
+                        <th style="width: 50%;"><?php esc_html_e( 'Display Name', 'starter-shelter' ); ?></th>
+                        <th style="width: 10%;"></th>
+                    </tr>
+                </thead>
+                <tbody id="sd-allocations-list">
+                    <?php foreach ( $allocations as $slug => $label ) : ?>
+                    <tr>
+                        <td><input type="text" name="sd_allocations[slugs][]" value="<?php echo esc_attr( $slug ); ?>" class="regular-text" /></td>
+                        <td><input type="text" name="sd_allocations[labels][]" value="<?php echo esc_attr( $label ); ?>" class="regular-text" /></td>
+                        <td><button type="button" class="button sd-remove-row" title="<?php esc_attr_e( 'Remove', 'starter-shelter' ); ?>">&times;</button></td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+            <button type="button" class="button sd-add-row" data-target="sd-allocations-list" data-fields="sd_allocations"><?php esc_html_e( '+ Add Allocation', 'starter-shelter' ); ?></button>
+            <?php if ( Config::has_override( 'settings', 'allocations' ) ) : ?>
+                <span class="sd-override-badge"><?php esc_html_e( 'Custom', 'starter-shelter' ); ?></span>
+            <?php endif; ?>
+
+            <hr style="margin: 30px 0;" />
+
+            <!-- Individual Tiers -->
+            <h2><?php esc_html_e( 'Individual Membership Tiers', 'starter-shelter' ); ?></h2>
+            <p class="description"><?php esc_html_e( 'Membership levels for individual supporters.', 'starter-shelter' ); ?></p>
+            <table class="widefat striped sd-data-table" style="max-width: 700px; margin: 15px 0;">
+                <thead>
+                    <tr>
+                        <th style="width: 25%;"><?php esc_html_e( 'Slug', 'starter-shelter' ); ?></th>
+                        <th style="width: 40%;"><?php esc_html_e( 'Label', 'starter-shelter' ); ?></th>
+                        <th style="width: 20%;"><?php esc_html_e( 'Price', 'starter-shelter' ); ?></th>
+                        <th style="width: 15%;"></th>
+                    </tr>
+                </thead>
+                <tbody id="sd-ind-tiers-list">
+                    <?php foreach ( $ind_tiers as $slug => $tier ) : ?>
+                    <tr>
+                        <td><input type="text" name="sd_ind_tiers[slugs][]" value="<?php echo esc_attr( $slug ); ?>" class="regular-text" /></td>
+                        <td><input type="text" name="sd_ind_tiers[labels][]" value="<?php echo esc_attr( $tier['label'] ?? '' ); ?>" class="regular-text" /></td>
+                        <td><input type="number" name="sd_ind_tiers[amounts][]" value="<?php echo esc_attr( $tier['amount'] ?? 0 ); ?>" min="0" step="1" class="small-text" /></td>
+                        <td><button type="button" class="button sd-remove-row">&times;</button></td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+            <button type="button" class="button sd-add-row" data-target="sd-ind-tiers-list" data-fields="sd_ind_tiers"><?php esc_html_e( '+ Add Tier', 'starter-shelter' ); ?></button>
+
+            <hr style="margin: 30px 0;" />
+
+            <!-- Business Tiers -->
+            <h2><?php esc_html_e( 'Business Membership Tiers', 'starter-shelter' ); ?></h2>
+            <p class="description"><?php esc_html_e( 'Membership levels for business/corporate supporters.', 'starter-shelter' ); ?></p>
+            <table class="widefat striped sd-data-table" style="max-width: 700px; margin: 15px 0;">
+                <thead>
+                    <tr>
+                        <th style="width: 25%;"><?php esc_html_e( 'Slug', 'starter-shelter' ); ?></th>
+                        <th style="width: 40%;"><?php esc_html_e( 'Label', 'starter-shelter' ); ?></th>
+                        <th style="width: 20%;"><?php esc_html_e( 'Price', 'starter-shelter' ); ?></th>
+                        <th style="width: 15%;"></th>
+                    </tr>
+                </thead>
+                <tbody id="sd-biz-tiers-list">
+                    <?php foreach ( $biz_tiers as $slug => $tier ) : ?>
+                    <tr>
+                        <td><input type="text" name="sd_biz_tiers[slugs][]" value="<?php echo esc_attr( $slug ); ?>" class="regular-text" /></td>
+                        <td><input type="text" name="sd_biz_tiers[labels][]" value="<?php echo esc_attr( $tier['label'] ?? '' ); ?>" class="regular-text" /></td>
+                        <td><input type="number" name="sd_biz_tiers[amounts][]" value="<?php echo esc_attr( $tier['amount'] ?? 0 ); ?>" min="0" step="1" class="small-text" /></td>
+                        <td><button type="button" class="button sd-remove-row">&times;</button></td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+            <button type="button" class="button sd-add-row" data-target="sd-biz-tiers-list" data-fields="sd_biz_tiers"><?php esc_html_e( '+ Add Tier', 'starter-shelter' ); ?></button>
+
+            <hr style="margin: 30px 0;" />
+
+            <!-- Pet Species -->
+            <h2><?php esc_html_e( 'Pet Species', 'starter-shelter' ); ?></h2>
+            <p class="description"><?php esc_html_e( 'Species options for pet memorials.', 'starter-shelter' ); ?></p>
+            <table class="widefat striped sd-data-table" style="max-width: 500px; margin: 15px 0;">
+                <thead>
+                    <tr>
+                        <th style="width: 40%;"><?php esc_html_e( 'Slug', 'starter-shelter' ); ?></th>
+                        <th style="width: 50%;"><?php esc_html_e( 'Display Name', 'starter-shelter' ); ?></th>
+                        <th style="width: 10%;"></th>
+                    </tr>
+                </thead>
+                <tbody id="sd-species-list">
+                    <?php foreach ( $pet_species as $slug => $label ) : ?>
+                    <tr>
+                        <td><input type="text" name="sd_species[slugs][]" value="<?php echo esc_attr( $slug ); ?>" class="regular-text" /></td>
+                        <td><input type="text" name="sd_species[labels][]" value="<?php echo esc_attr( $label ); ?>" class="regular-text" /></td>
+                        <td><button type="button" class="button sd-remove-row">&times;</button></td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+            <button type="button" class="button sd-add-row" data-target="sd-species-list" data-fields="sd_species"><?php esc_html_e( '+ Add Species', 'starter-shelter' ); ?></button>
+
+            <hr style="margin: 30px 0;" />
+
+            <!-- Donor Levels -->
+            <h2><?php esc_html_e( 'Donor Recognition Levels', 'starter-shelter' ); ?></h2>
+            <p class="description"><?php esc_html_e( 'Lifetime giving thresholds for donor recognition tiers.', 'starter-shelter' ); ?></p>
+            <table class="widefat striped sd-data-table" style="max-width: 500px; margin: 15px 0;">
+                <thead>
+                    <tr>
+                        <th style="width: 50%;"><?php esc_html_e( 'Level Name', 'starter-shelter' ); ?></th>
+                        <th style="width: 40%;"><?php esc_html_e( 'Minimum ($)', 'starter-shelter' ); ?></th>
+                        <th style="width: 10%;"></th>
+                    </tr>
+                </thead>
+                <tbody id="sd-donor-levels-list">
+                    <?php foreach ( $thresholds as $level => $amount ) : ?>
+                    <tr>
+                        <td><input type="text" name="sd_donor_levels[names][]" value="<?php echo esc_attr( $level ); ?>" class="regular-text" /></td>
+                        <td><input type="number" name="sd_donor_levels[amounts][]" value="<?php echo esc_attr( $amount ); ?>" min="0" step="1" class="small-text" /></td>
+                        <td><button type="button" class="button sd-remove-row">&times;</button></td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+            <button type="button" class="button sd-add-row" data-target="sd-donor-levels-list" data-fields="sd_donor_levels"><?php esc_html_e( '+ Add Level', 'starter-shelter' ); ?></button>
+
+            <p class="submit">
+                <button type="submit" name="sd_save_data_config" class="button button-primary"><?php esc_html_e( 'Save Data Configuration', 'starter-shelter' ); ?></button>
+            </p>
+        </form>
+
+        <script>
+        jQuery( function( $ ) {
+            // Add row.
+            $( '.sd-add-row' ).on( 'click', function() {
+                var target = $( '#' + $( this ).data( 'target' ) );
+                var fields = $( this ).data( 'fields' );
+                var row = target.find( 'tr:last' ).clone();
+                row.find( 'input' ).val( '' );
+                target.append( row );
+            } );
+
+            // Remove row.
+            $( document ).on( 'click', '.sd-remove-row', function() {
+                var tbody = $( this ).closest( 'tbody' );
+                if ( tbody.find( 'tr' ).length > 1 ) {
+                    $( this ).closest( 'tr' ).remove();
+                }
+            } );
+        } );
+        </script>
+
+        <style>
+            .sd-data-table input.regular-text { width: 100%; }
+            .sd-data-table input.small-text { width: 100px; }
+            .sd-override-badge {
+                display: inline-block;
+                margin-left: 8px;
+                padding: 2px 8px;
+                background: #2271b1;
+                color: #fff;
+                border-radius: 3px;
+                font-size: 11px;
+                font-weight: 600;
+                vertical-align: middle;
+            }
+        </style>
+        <?php
+    }
+
+    /**
+     * Save the Data tab configuration.
+     *
+     * @since 2.1.0
+     */
+    private static function save_data_tab(): void {
+        // Allocations: slug → label map.
+        if ( isset( $_POST['sd_allocations']['slugs'] ) ) {
+            $slugs  = array_map( 'sanitize_key', $_POST['sd_allocations']['slugs'] );
+            $labels = array_map( 'sanitize_text_field', $_POST['sd_allocations']['labels'] );
+            $allocations = [];
+            foreach ( $slugs as $i => $slug ) {
+                if ( ! empty( $slug ) && ! empty( $labels[ $i ] ) ) {
+                    $allocations[ $slug ] = $labels[ $i ];
+                }
+            }
+            if ( ! empty( $allocations ) ) {
+                Config::save_override( 'settings', 'allocations', $allocations );
+            }
+        }
+
+        // Individual tiers.
+        if ( isset( $_POST['sd_ind_tiers']['slugs'] ) ) {
+            $ind_tiers = self::parse_tier_input( $_POST['sd_ind_tiers'] );
+            $biz_tiers = self::parse_tier_input( $_POST['sd_biz_tiers'] ?? [] );
+
+            $tiers = [
+                'individual' => $ind_tiers,
+                'business'   => $biz_tiers,
+            ];
+            Config::save_override( 'tiers', 'tiers', $tiers );
+        }
+
+        // Pet species.
+        if ( isset( $_POST['sd_species']['slugs'] ) ) {
+            $slugs  = array_map( 'sanitize_key', $_POST['sd_species']['slugs'] );
+            $labels = array_map( 'sanitize_text_field', $_POST['sd_species']['labels'] );
+            $species = [];
+            foreach ( $slugs as $i => $slug ) {
+                if ( ! empty( $slug ) && ! empty( $labels[ $i ] ) ) {
+                    $species[ $slug ] = $labels[ $i ];
+                }
+            }
+            if ( ! empty( $species ) ) {
+                Config::save_override( 'settings', 'pet_species', $species );
+            }
+        }
+
+        // Donor levels.
+        if ( isset( $_POST['sd_donor_levels']['names'] ) ) {
+            $names   = array_map( 'sanitize_key', $_POST['sd_donor_levels']['names'] );
+            $amounts = array_map( 'absint', $_POST['sd_donor_levels']['amounts'] );
+            $levels = [];
+            foreach ( $names as $i => $name ) {
+                if ( ! empty( $name ) ) {
+                    $levels[ $name ] = $amounts[ $i ] ?? 0;
+                }
+            }
+            if ( ! empty( $levels ) ) {
+                Config::save_override( 'settings', 'donor_levels', [ 'thresholds' => $levels ] );
+            }
+        }
+
+        // Clear sync checker cache since config changed.
+        Product_Sync_Checker::invalidate_cache();
+    }
+
+    /**
+     * Parse tier input from POST data.
+     *
+     * @since 2.1.0
+     *
+     * @param array $input POST data with slugs, labels, amounts arrays.
+     * @return array Parsed tier data keyed by slug.
+     */
+    private static function parse_tier_input( array $input ): array {
+        $slugs   = array_map( 'sanitize_key', $input['slugs'] ?? [] );
+        $labels  = array_map( 'sanitize_text_field', $input['labels'] ?? [] );
+        $amounts = array_map( 'absint', $input['amounts'] ?? [] );
+
+        $tiers = [];
+        foreach ( $slugs as $i => $slug ) {
+            if ( empty( $slug ) || empty( $labels[ $i ] ) ) {
+                continue;
+            }
+            $tiers[ $slug ] = [
+                'slug'   => $slug,
+                'label'  => $labels[ $i ],
+                'amount' => $amounts[ $i ] ?? 0,
+            ];
+        }
+        return $tiers;
     }
 
     private static function render_products_tab(): void {
