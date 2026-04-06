@@ -356,10 +356,117 @@ class Settings {
                         ?>
                     </form>
                     <?php
+                    if ( 'emails' === $current_tab ) {
+                        self::render_email_templates_table();
+                    }
                 }
                 ?>
             </div>
         </div>
+        <?php
+    }
+
+    /**
+     * Render the email templates overview table.
+     *
+     * Shows all configured emails with status, subject, trigger info,
+     * and links to the WooCommerce email settings for customization.
+     *
+     * @since 2.1.0
+     */
+    private static function render_email_templates_table(): void {
+        $emails_config = Config::get_item( 'emails', 'emails', [] );
+
+        if ( empty( $emails_config ) ) {
+            return;
+        }
+
+        // Check if WooCommerce emails are available.
+        $wc_emails = [];
+        if ( function_exists( 'WC' ) && WC()->mailer() ) {
+            foreach ( WC()->mailer()->get_emails() as $email ) {
+                $wc_emails[ $email->id ] = $email;
+            }
+        }
+
+        $recipient_labels = [
+            'donor'  => __( 'Donor', 'starter-shelter' ),
+            'admin'  => __( 'Admin', 'starter-shelter' ),
+            'custom' => __( 'Custom', 'starter-shelter' ),
+        ];
+        ?>
+        <hr style="margin: 30px 0;" />
+
+        <h2><?php esc_html_e( 'Email Templates', 'starter-shelter' ); ?></h2>
+        <p class="description"><?php esc_html_e( 'These emails are triggered automatically by plugin events. Click "Configure" to customize subjects, headings, and enable/disable individual emails in WooCommerce.', 'starter-shelter' ); ?></p>
+
+        <table class="widefat striped" style="margin-top: 15px;">
+            <thead>
+                <tr>
+                    <th style="width: 5%;"></th>
+                    <th style="width: 20%;"><?php esc_html_e( 'Email', 'starter-shelter' ); ?></th>
+                    <th style="width: 30%;"><?php esc_html_e( 'Subject', 'starter-shelter' ); ?></th>
+                    <th style="width: 10%;"><?php esc_html_e( 'Recipient', 'starter-shelter' ); ?></th>
+                    <th style="width: 20%;"><?php esc_html_e( 'Trigger', 'starter-shelter' ); ?></th>
+                    <th style="width: 15%;"><?php esc_html_e( 'Actions', 'starter-shelter' ); ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ( $emails_config as $email_id => $email_config ) :
+                    $wc_id    = 'sd_' . str_replace( '-', '_', $email_id );
+                    $wc_email = $wc_emails[ $wc_id ] ?? null;
+                    $enabled  = $wc_email ? $wc_email->is_enabled() : true;
+                    $subject  = $wc_email ? $wc_email->get_option( 'subject', $email_config['subject'] ?? '' ) : ( $email_config['subject'] ?? '' );
+                    $recipient_type = $email_config['recipient_type'] ?? 'donor';
+                    $settings_url   = admin_url( 'admin.php?page=wc-settings&tab=email&section=' . $wc_id );
+                ?>
+                <tr<?php echo $enabled ? '' : ' style="opacity: 0.6;"'; ?>>
+                    <td>
+                        <?php if ( $enabled ) : ?>
+                            <span class="dashicons dashicons-yes-alt" style="color: #00a32a;" title="<?php esc_attr_e( 'Enabled', 'starter-shelter' ); ?>"></span>
+                        <?php else : ?>
+                            <span class="dashicons dashicons-dismiss" style="color: #999;" title="<?php esc_attr_e( 'Disabled', 'starter-shelter' ); ?>"></span>
+                        <?php endif; ?>
+                    </td>
+                    <td>
+                        <strong><?php echo esc_html( $email_config['title'] ?? $email_id ); ?></strong>
+                        <p class="description" style="margin: 2px 0 0;"><?php echo esc_html( $email_config['description'] ?? '' ); ?></p>
+                    </td>
+                    <td>
+                        <code style="font-size: 12px; background: #f0f0f1; padding: 2px 6px; border-radius: 3px;"><?php echo esc_html( $subject ); ?></code>
+                    </td>
+                    <td>
+                        <?php
+                        echo esc_html( $recipient_labels[ $recipient_type ] ?? $recipient_type );
+                        if ( ! empty( $email_config['condition'] ) ) {
+                            echo ' <span class="dashicons dashicons-filter" style="font-size: 14px; color: #999;" title="' . esc_attr__( 'Conditional', 'starter-shelter' ) . '"></span>';
+                        }
+                        ?>
+                    </td>
+                    <td>
+                        <code style="font-size: 11px;"><?php echo esc_html( $email_config['trigger_hook'] ?? '' ); ?></code>
+                    </td>
+                    <td>
+                        <?php if ( $wc_email ) : ?>
+                            <a href="<?php echo esc_url( $settings_url ); ?>" class="button button-small">
+                                <?php esc_html_e( 'Configure', 'starter-shelter' ); ?>
+                            </a>
+                        <?php else : ?>
+                            <span class="description"><?php esc_html_e( 'Not registered', 'starter-shelter' ); ?></span>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+
+        <?php if ( ! empty( $wc_emails ) ) : ?>
+        <p style="margin-top: 15px;">
+            <a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=email' ) ); ?>" class="button">
+                <?php esc_html_e( 'WooCommerce Email Settings', 'starter-shelter' ); ?> →
+            </a>
+        </p>
+        <?php endif; ?>
         <?php
     }
 
