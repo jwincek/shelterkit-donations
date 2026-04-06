@@ -416,6 +416,17 @@ class My_Account {
 
         switch ( $template ) {
             case 'donor-dashboard':
+                $membership_url = wc_get_account_endpoint_url( 'my-memberships' );
+                $giving_url     = wc_get_account_endpoint_url( 'giving-history' );
+                $memorials_url  = wc_get_account_endpoint_url( 'my-memorials' );
+
+                // Membership expiry warning.
+                $days_remaining = null;
+                $is_expiring    = false;
+                if ( $membership && ! empty( $membership['end_date'] ) ) {
+                    $days_remaining = (int) ( ( strtotime( $membership['end_date'] ) - time() ) / DAY_IN_SECONDS );
+                    $is_expiring = $days_remaining >= 0 && $days_remaining <= 30;
+                }
                 ?>
                 <div class="sd-donor-dashboard">
                     <div class="sd-dashboard-header">
@@ -424,27 +435,41 @@ class My_Account {
                     </div>
 
                     <div class="sd-dashboard-stats">
-                        <div class="sd-stat">
+                        <a href="<?php echo esc_url( $giving_url ); ?>" class="sd-stat sd-stat-link">
                             <span class="sd-stat-value"><?php echo esc_html( Helpers\format_currency( $stats['lifetime_giving'] ) ); ?></span>
                             <span class="sd-stat-label"><?php esc_html_e( 'Lifetime Giving', 'starter-shelter' ); ?></span>
-                        </div>
-                        <div class="sd-stat">
+                        </a>
+                        <a href="<?php echo esc_url( $giving_url ); ?>" class="sd-stat sd-stat-link">
                             <span class="sd-stat-value"><?php echo esc_html( $stats['donation_count'] ); ?></span>
                             <span class="sd-stat-label"><?php esc_html_e( 'Donations', 'starter-shelter' ); ?></span>
-                        </div>
-                        <div class="sd-stat">
+                        </a>
+                        <a href="<?php echo esc_url( $memorials_url ); ?>" class="sd-stat sd-stat-link">
                             <span class="sd-stat-value"><?php echo esc_html( $stats['memorial_count'] ); ?></span>
                             <span class="sd-stat-label"><?php esc_html_e( 'Memorials', 'starter-shelter' ); ?></span>
-                        </div>
+                        </a>
                     </div>
 
                     <?php if ( $membership ) : ?>
-                    <div class="sd-membership-status">
+                    <div class="sd-membership-status <?php echo $is_expiring ? 'sd-expiring' : ''; ?>">
                         <h3><?php esc_html_e( 'Membership Status', 'starter-shelter' ); ?></h3>
                         <p>
                             <strong><?php echo esc_html( $membership['tier_label'] ?? $membership['tier'] ); ?></strong><br>
-                            <?php echo esc_html( sprintf( __( 'Expires: %s', 'starter-shelter' ), Helpers\format_date( $membership['end_date'] ) ) ); ?>
+                            <?php if ( $is_expiring ) : ?>
+                                <span class="sd-expiry-warning">
+                                    <?php echo esc_html( sprintf(
+                                        _n( 'Expires in %d day!', 'Expires in %d days!', $days_remaining, 'starter-shelter' ),
+                                        $days_remaining
+                                    ) ); ?>
+                                </span>
+                            <?php else : ?>
+                                <?php echo esc_html( sprintf( __( 'Expires: %s', 'starter-shelter' ), Helpers\format_date( $membership['end_date'] ) ) ); ?>
+                            <?php endif; ?>
                         </p>
+                        <?php if ( $is_expiring ) : ?>
+                            <a href="<?php echo esc_url( $membership_url ); ?>" class="button sd-renew-btn">
+                                <?php esc_html_e( 'Renew Membership', 'starter-shelter' ); ?>
+                            </a>
+                        <?php endif; ?>
                     </div>
                     <?php endif; ?>
 
@@ -456,7 +481,7 @@ class My_Account {
                             <li><?php echo esc_html( Helpers\format_date( $donation['donation_date'] ) . ' — ' . $donation['amount_formatted'] ); ?></li>
                             <?php endforeach; ?>
                         </ul>
-                        <a href="<?php echo esc_url( wc_get_account_endpoint_url( 'giving-history' ) ); ?>"><?php esc_html_e( 'View All', 'starter-shelter' ); ?></a>
+                        <a href="<?php echo esc_url( $giving_url ); ?>"><?php esc_html_e( 'View All →', 'starter-shelter' ); ?></a>
                     </div>
                     <?php endif; ?>
                 </div>
@@ -464,6 +489,14 @@ class My_Account {
                 break;
 
             case 'giving-history':
+                $page_total = 0;
+                if ( ! empty( $donations['items'] ) ) {
+                    foreach ( $donations['items'] as $d ) {
+                        $page_total += (float) ( $d['amount'] ?? 0 );
+                    }
+                }
+                $total_pages = (int) ceil( ( $donations['total'] ?? 0 ) / 10 );
+                $current_page = isset( $_GET['history-page'] ) ? absint( $_GET['history-page'] ) : 1;
                 ?>
                 <div class="sd-giving-history">
                     <?php if ( ! empty( $years ) ) : ?>
@@ -492,7 +525,40 @@ class My_Account {
                             </tr>
                             <?php endforeach; ?>
                         </tbody>
+                        <tfoot>
+                            <tr class="sd-page-total">
+                                <td><strong><?php esc_html_e( 'Page Total', 'starter-shelter' ); ?></strong></td>
+                                <td><strong><?php echo esc_html( Helpers\format_currency( $page_total ) ); ?></strong></td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
                     </table>
+
+                    <?php if ( $total_pages > 1 ) : ?>
+                    <nav class="sd-pagination">
+                        <?php if ( $current_page > 1 ) : ?>
+                            <a href="<?php echo esc_url( add_query_arg( 'history-page', $current_page - 1 ) ); ?>" class="sd-page-link">
+                                ← <?php esc_html_e( 'Previous', 'starter-shelter' ); ?>
+                            </a>
+                        <?php endif; ?>
+
+                        <span class="sd-page-info">
+                            <?php printf(
+                                esc_html__( 'Page %1$d of %2$d (%3$d total)', 'starter-shelter' ),
+                                $current_page,
+                                $total_pages,
+                                $donations['total'] ?? 0
+                            ); ?>
+                        </span>
+
+                        <?php if ( $current_page < $total_pages ) : ?>
+                            <a href="<?php echo esc_url( add_query_arg( 'history-page', $current_page + 1 ) ); ?>" class="sd-page-link">
+                                <?php esc_html_e( 'Next', 'starter-shelter' ); ?> →
+                            </a>
+                        <?php endif; ?>
+                    </nav>
+                    <?php endif; ?>
+
                     <?php endif; ?>
                 </div>
                 <?php
@@ -503,14 +569,60 @@ class My_Account {
                 <div class="sd-my-memberships">
                     <?php if ( ! empty( $active_memberships ) ) : ?>
                     <h3><?php esc_html_e( 'Active Memberships', 'starter-shelter' ); ?></h3>
-                    <?php foreach ( $active_memberships as $m ) : ?>
-                    <div class="sd-membership-card sd-active">
-                        <h4><?php echo esc_html( $m['tier_label'] ?? $m['tier'] ); ?></h4>
-                        <p><?php echo esc_html( sprintf( __( 'Valid until: %s', 'starter-shelter' ), Helpers\format_date( $m['end_date'] ) ) ); ?></p>
+                    <?php foreach ( $active_memberships as $m ) :
+                        $m_days = (int) ( ( strtotime( $m['end_date'] ) - time() ) / DAY_IN_SECONDS );
+                        $m_expiring = $m_days >= 0 && $m_days <= 30;
+                    ?>
+                    <div class="sd-membership-card sd-active <?php echo $m_expiring ? 'sd-expiring' : ''; ?>">
+                        <div class="sd-membership-info">
+                            <h4><?php echo esc_html( $m['tier_label'] ?? $m['tier'] ); ?></h4>
+                            <p>
+                                <?php if ( $m_expiring ) : ?>
+                                    <span class="sd-expiry-warning">
+                                        <?php echo esc_html( sprintf(
+                                            _n( 'Expires in %d day', 'Expires in %d days', $m_days, 'starter-shelter' ),
+                                            $m_days
+                                        ) ); ?>
+                                    </span>
+                                <?php else : ?>
+                                    <?php echo esc_html( sprintf( __( 'Valid until: %s', 'starter-shelter' ), Helpers\format_date( $m['end_date'] ) ) ); ?>
+                                <?php endif; ?>
+                            </p>
+                            <?php if ( ! empty( $m['amount'] ) ) : ?>
+                            <p class="sd-membership-amount"><?php echo esc_html( Helpers\format_currency( (float) $m['amount'] ) ); ?>/<?php esc_html_e( 'year', 'starter-shelter' ); ?></p>
+                            <?php endif; ?>
+                        </div>
+                        <?php if ( $m_expiring ) : ?>
+                        <div class="sd-membership-actions">
+                            <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="button"><?php esc_html_e( 'Renew', 'starter-shelter' ); ?></a>
+                        </div>
+                        <?php endif; ?>
                     </div>
                     <?php endforeach; ?>
-                    <?php else : ?>
-                    <p><?php esc_html_e( 'You don\'t have any active memberships.', 'starter-shelter' ); ?></p>
+                    <?php endif; ?>
+
+                    <?php if ( ! empty( $expired_memberships ) ) : ?>
+                    <h3><?php esc_html_e( 'Past Memberships', 'starter-shelter' ); ?></h3>
+                    <?php foreach ( $expired_memberships as $m ) : ?>
+                    <div class="sd-membership-card sd-expired">
+                        <div class="sd-membership-info">
+                            <h4><?php echo esc_html( $m['tier_label'] ?? $m['tier'] ); ?></h4>
+                            <p><?php echo esc_html( sprintf(
+                                __( '%s — %s', 'starter-shelter' ),
+                                Helpers\format_date( $m['start_date'] ?? '' ),
+                                Helpers\format_date( $m['end_date'] ?? '' )
+                            ) ); ?></p>
+                        </div>
+                        <div class="sd-membership-actions">
+                            <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="button button-small"><?php esc_html_e( 'Rejoin', 'starter-shelter' ); ?></a>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                    <?php endif; ?>
+
+                    <?php if ( empty( $active_memberships ) && empty( $expired_memberships ) ) : ?>
+                    <p><?php esc_html_e( 'You don\'t have any memberships yet.', 'starter-shelter' ); ?></p>
+                    <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="button"><?php esc_html_e( 'Become a Member', 'starter-shelter' ); ?></a>
                     <?php endif; ?>
                 </div>
                 <?php
@@ -523,14 +635,49 @@ class My_Account {
                     <p><?php esc_html_e( 'You haven\'t created any memorial tributes yet.', 'starter-shelter' ); ?></p>
                     <?php else : ?>
                     <div class="sd-memorials-grid">
-                        <?php foreach ( $memorials['items'] as $memorial ) : ?>
+                        <?php foreach ( $memorials['items'] as $memorial ) :
+                            $type_label = Helpers\get_memorial_type_label( $memorial['memorial_type'] ?? '' );
+                            $tribute    = $memorial['tribute_message'] ?? '';
+                            $excerpt    = $tribute ? wp_trim_words( $tribute, 15 ) : '';
+                            $photo_url  = ! empty( $memorial['photo_url'] ) ? $memorial['photo_url'] : '';
+                        ?>
                         <div class="sd-memorial-card">
-                            <h4><?php echo esc_html( $memorial['honoree_name'] ); ?></h4>
-                            <p><?php echo esc_html( Helpers\format_date( $memorial['donation_date'] ) ); ?></p>
-                            <a href="<?php echo esc_url( get_permalink( $memorial['id'] ) ); ?>"><?php esc_html_e( 'View', 'starter-shelter' ); ?></a>
+                            <?php if ( $photo_url ) : ?>
+                            <div class="sd-memorial-photo">
+                                <img src="<?php echo esc_url( $photo_url ); ?>" alt="<?php echo esc_attr( $memorial['honoree_name'] ); ?>" />
+                            </div>
+                            <?php endif; ?>
+                            <div class="sd-memorial-content">
+                                <span class="sd-memorial-type-badge"><?php echo esc_html( $type_label ); ?></span>
+                                <h4><?php echo esc_html( $memorial['honoree_name'] ); ?></h4>
+                                <?php if ( $excerpt ) : ?>
+                                <p class="sd-memorial-excerpt">"<?php echo esc_html( $excerpt ); ?>"</p>
+                                <?php endif; ?>
+                                <div class="sd-memorial-meta">
+                                    <span><?php echo esc_html( Helpers\format_date( $memorial['donation_date'] ) ); ?></span>
+                                    <span><?php echo esc_html( $memorial['amount_formatted'] ?? '' ); ?></span>
+                                </div>
+                                <a href="<?php echo esc_url( get_permalink( $memorial['id'] ) ); ?>" class="sd-memorial-link"><?php esc_html_e( 'View Memorial →', 'starter-shelter' ); ?></a>
+                            </div>
                         </div>
                         <?php endforeach; ?>
                     </div>
+
+                    <?php
+                    $mem_total_pages = (int) ceil( ( $memorials['total'] ?? 0 ) / 12 );
+                    $mem_current_page = isset( $_GET['memorial-page'] ) ? absint( $_GET['memorial-page'] ) : 1;
+                    if ( $mem_total_pages > 1 ) : ?>
+                    <nav class="sd-pagination">
+                        <?php if ( $mem_current_page > 1 ) : ?>
+                            <a href="<?php echo esc_url( add_query_arg( 'memorial-page', $mem_current_page - 1 ) ); ?>" class="sd-page-link">← <?php esc_html_e( 'Previous', 'starter-shelter' ); ?></a>
+                        <?php endif; ?>
+                        <span class="sd-page-info"><?php printf( esc_html__( 'Page %1$d of %2$d', 'starter-shelter' ), $mem_current_page, $mem_total_pages ); ?></span>
+                        <?php if ( $mem_current_page < $mem_total_pages ) : ?>
+                            <a href="<?php echo esc_url( add_query_arg( 'memorial-page', $mem_current_page + 1 ) ); ?>" class="sd-page-link"><?php esc_html_e( 'Next', 'starter-shelter' ); ?> →</a>
+                        <?php endif; ?>
+                    </nav>
+                    <?php endif; ?>
+
                     <?php endif; ?>
                 </div>
                 <?php
@@ -606,19 +753,58 @@ class My_Account {
      */
     private static function get_styles(): string {
         return '
-.sd-dashboard-stats { display: flex; gap: 20px; margin: 20px 0; }
-.sd-stat { flex: 1; background: #f8f8f8; padding: 20px; text-align: center; border-radius: 4px; }
-.sd-stat-value { display: block; font-size: 1.8em; font-weight: bold; }
+/* Dashboard stats — clickable cards */
+.sd-dashboard-stats { display: flex; gap: 20px; margin: 20px 0; flex-wrap: wrap; }
+.sd-stat { flex: 1; min-width: 120px; background: #f8f8f8; padding: 20px; text-align: center; border-radius: 4px; }
+.sd-stat-link { text-decoration: none; color: inherit; transition: all 0.2s ease; display: block; }
+.sd-stat-link:hover { background: #eef; transform: translateY(-2px); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.sd-stat-value { display: block; font-size: 1.8em; font-weight: bold; color: #1e1e1e; }
 .sd-stat-label { display: block; color: #666; margin-top: 5px; }
+
+/* Membership status */
 .sd-membership-status, .sd-recent-donations { background: #f8f8f8; padding: 20px; margin: 20px 0; border-radius: 4px; }
-.sd-membership-card { background: #f8f8f8; padding: 20px; margin: 15px 0; border-radius: 4px; border-left: 4px solid #2271b1; }
+.sd-membership-status.sd-expiring { background: #fff8e5; border: 1px solid #f0c33c; }
+.sd-expiry-warning { color: #996800; font-weight: 600; }
+.sd-renew-btn { margin-top: 10px; }
+
+/* Membership cards */
+.sd-membership-card { display: flex; justify-content: space-between; align-items: center; background: #f8f8f8; padding: 20px; margin: 15px 0; border-radius: 4px; border-left: 4px solid #2271b1; }
 .sd-membership-card.sd-active { border-left-color: #00a32a; }
-.sd-memorials-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
-.sd-memorial-card { background: #f8f8f8; padding: 20px; border-radius: 4px; }
+.sd-membership-card.sd-expired { border-left-color: #c3c4c7; opacity: 0.8; }
+.sd-membership-card.sd-expiring { border-left-color: #dba617; background: #fff8e5; }
+.sd-membership-info h4 { margin: 0 0 4px; }
+.sd-membership-info p { margin: 0; }
+.sd-membership-amount { color: #666; font-size: 0.9em; margin-top: 4px !important; }
+
+/* Memorial cards */
+.sd-memorials-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+.sd-memorial-card { background: #f8f8f8; border-radius: 8px; overflow: hidden; transition: box-shadow 0.2s ease; }
+.sd-memorial-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+.sd-memorial-photo img { width: 100%; height: 160px; object-fit: cover; }
+.sd-memorial-content { padding: 16px; }
+.sd-memorial-type-badge { display: inline-block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #8b5a5a; background: #f5ebe9; padding: 2px 8px; border-radius: 3px; margin-bottom: 8px; }
+.sd-memorial-content h4 { margin: 0 0 8px; font-size: 1.1em; }
+.sd-memorial-excerpt { color: #555; font-style: italic; font-size: 0.9em; margin: 0 0 8px; }
+.sd-memorial-meta { display: flex; justify-content: space-between; font-size: 0.85em; color: #888; margin-bottom: 8px; }
+.sd-memorial-link { font-size: 0.9em; }
+
+/* Giving history */
+.sd-page-total td { border-top: 2px solid #333 !important; }
+.sd-year-filter { margin-bottom: 20px; }
+
+/* Pagination */
+.sd-pagination { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 20px; padding-top: 16px; border-top: 1px solid #ddd; }
+.sd-page-link { text-decoration: none; }
+.sd-page-info { color: #666; font-size: 0.9em; }
+
+/* Statement */
 .sd-statement-content { background: #fff; border: 1px solid #ddd; padding: 40px; margin-top: 20px; }
 .sd-statement-summary { width: 100%; margin: 20px 0; border-collapse: collapse; }
 .sd-statement-summary td { padding: 10px; border-bottom: 1px solid #ddd; }
 .sd-statement-summary .sd-total td { border-top: 2px solid #333; font-size: 1.1em; }
+.sd-statement-header { display: flex; justify-content: space-between; align-items: center; }
+
+/* No donor */
 .sd-no-donor { text-align: center; padding: 40px; background: #f8f8f8; border-radius: 4px; }
 ';
     }
