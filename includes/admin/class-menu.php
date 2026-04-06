@@ -33,6 +33,14 @@ class Menu {
      */
     public static function init(): void {
         add_action( 'admin_menu', [ self::class, 'register_menu' ], 5 );
+        add_action( 'admin_menu', [ self::class, 'add_pending_badge' ], 99 );
+
+        // Invalidate badge cache when relevant records change.
+        add_action( 'save_post_sd_membership', [ self::class, 'invalidate_pending_cache' ] );
+        add_action( 'save_post_sd_memorial', [ self::class, 'invalidate_pending_cache' ] );
+        add_action( 'starter_shelter_logo_approved', [ self::class, 'invalidate_pending_cache' ] );
+        add_action( 'starter_shelter_logo_rejected', [ self::class, 'invalidate_pending_cache' ] );
+        add_action( 'starter_shelter_memorial_family_notification', [ self::class, 'invalidate_pending_cache' ] );
     }
 
     /**
@@ -178,6 +186,103 @@ class Menu {
             </div>
         </div>
         <?php
+    }
+
+    /**
+     * Add a pending action count badge to the menu item.
+     *
+     * Shows the total number of items needing attention (pending logos,
+     * expiring memberships, pending family notifications) as a red
+     * bubble on the Shelter Donations menu — same pattern as
+     * WooCommerce's order count badge.
+     *
+     * @since 2.1.0
+     */
+    public static function add_pending_badge(): void {
+        global $menu;
+
+        $count = self::get_pending_count();
+        if ( $count < 1 ) {
+            return;
+        }
+
+        $badge = sprintf(
+            ' <span class="awaiting-mod sd-pending-badge">%d</span>',
+            $count
+        );
+
+        foreach ( $menu as &$item ) {
+            if ( isset( $item[2] ) && self::MENU_SLUG === $item[2] ) {
+                $item[0] .= $badge;
+                break;
+            }
+        }
+    }
+
+    /**
+     * Get the total number of pending action items.
+     *
+     * Uses a short transient to avoid running 3 queries on every
+     * admin page load.
+     *
+     * @since 2.1.0
+     *
+     * @return int Total pending count.
+     */
+    private static function get_pending_count(): int {
+        $cached = get_transient( 'sd_menu_pending_count' );
+        if ( false !== $cached ) {
+            return (int) $cached;
+        }
+
+        global $wpdb;
+        $count = 0;
+
+        // Pending logo reviews.
+        if ( class_exists( __NAMESPACE__ . '\\Logo_Moderation' ) ) {
+            $count += Logo_Moderation::get_pending_count();
+        }
+
+        // Expiring memberships (next 7 days).
+        $count += (int) $wpdb->get_var( $wpdb->prepare( "
+            SELECT COUNT(*)
+            FROM {$wpdb->posts} p
+            JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_end_date'
+            WHERE p.post_type = 'sd_membership'
+            AND p.post_status = 'publish'
+            AND pm.meta_value BETWEEN %s AND %s
+        ", wp_date( 'Y-m-d' ), wp_date( 'Y-m-d', strtotime( '+7 days' ) ) ) );
+
+        // Pending family notifications.
+        $count += (int) $wpdb->get_var( "
+            SELECT COUNT(*)
+            FROM {$wpdb->posts} p
+            JOIN {$wpdb->postmeta} pm_notify ON p.ID = pm_notify.post_id
+                AND pm_notify.meta_key = '_sd_notify_family_enabled'
+                AND pm_notify.meta_value = '1'
+            LEFT JOIN {$wpdb->postmeta} pm_sent ON p.ID = pm_sent.post_id
+                AND pm_sent.meta_key = '_sd_family_notified_date'
+            WHERE p.post_type = 'sd_memorial'
+            AND p.post_status = 'publish'
+            AND (pm_sent.meta_value IS NULL OR pm_sent.meta_value = '')
+        " );
+
+        // Cache for 10 minutes.
+        set_transient( 'sd_menu_pending_count', $count, 600 );
+
+        return $count;
+    }
+
+    /**
+     * Clear the pending count cache.
+     *
+     * Called when actions are taken that change the pending count
+     * (logo moderation, family notification sent, membership renewed).
+     *
+     * @since 2.1.0
+     */
+    public static function invalidate_pending_cache(): void {
+        delete_transient( 'sd_menu_pending_count' );
     }
 
     /**

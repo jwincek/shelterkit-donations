@@ -420,18 +420,38 @@ function get_date_range_for_period( string $period, ?int $year = null, ?int $fis
     $year = $year ?? (int) wp_date( 'Y' );
 
     return match ( $period ) {
+        'today' => [
+            'start' => wp_date( 'Y-m-d' ),
+            'end'   => wp_date( 'Y-m-d' ),
+        ],
+        'week' => [
+            'start' => wp_date( 'Y-m-d', strtotime( 'monday this week' ) ),
+            'end'   => wp_date( 'Y-m-d' ),
+        ],
+        'month' => [
+            'start' => wp_date( 'Y-m-01' ),
+            'end'   => wp_date( 'Y-m-t' ),
+        ],
+        'quarter' => get_current_quarter_range( $year ),
+        'year' => [
+            'start' => "$year-01-01",
+            'end'   => "$year-12-31",
+        ],
         'fiscal_year' => get_fiscal_year_range( $fiscal_year ?? $year ),
         'calendar_year' => [
             'start' => "$year-01-01",
             'end'   => "$year-12-31",
         ],
-        'quarter' => get_current_quarter_range( $year ),
-        'month' => [
-            'start' => wp_date( 'Y-m-01' ),
-            'end'   => wp_date( 'Y-m-t' ),
-        ],
         'ytd' => [
             'start' => "$year-01-01",
+            'end'   => wp_date( 'Y-m-d' ),
+        ],
+        'custom' => [
+            'start' => sanitize_text_field( $_GET['date_from'] ?? $_POST['date_from'] ?? "$year-01-01" ),
+            'end'   => sanitize_text_field( $_GET['date_to'] ?? $_POST['date_to'] ?? wp_date( 'Y-m-d' ) ),
+        ],
+        'all_time' => [
+            'start' => '2000-01-01',
             'end'   => wp_date( 'Y-m-d' ),
         ],
         default => [

@@ -127,12 +127,11 @@ class Reports {
             </nav>
 
             <div class="sd-reports-filters">
-                <form method="get">
-                    <input type="hidden" name="post_type" value="sd_donation" />
+                <form method="get" action="<?php echo esc_url( admin_url( 'admin.php' ) ); ?>">
                     <input type="hidden" name="page" value="<?php echo esc_attr( self::PAGE_SLUG ); ?>" />
                     <input type="hidden" name="tab" value="<?php echo esc_attr( $active_tab ); ?>" />
                     
-                    <select name="period" id="sd-period-filter">
+                    <select name="period" id="sd-period-filter" onchange="document.getElementById('sd-custom-range').style.display = this.value === 'custom' ? 'inline-flex' : 'none';">
                         <option value="today" <?php selected( $period, 'today' ); ?>>
                             <?php esc_html_e( 'Today', 'starter-shelter' ); ?>
                         </option>
@@ -154,7 +153,16 @@ class Reports {
                         <option value="all_time" <?php selected( $period, 'all_time' ); ?>>
                             <?php esc_html_e( 'All Time', 'starter-shelter' ); ?>
                         </option>
+                        <option value="custom" <?php selected( $period, 'custom' ); ?>>
+                            <?php esc_html_e( 'Custom Range', 'starter-shelter' ); ?>
+                        </option>
                     </select>
+
+                    <span id="sd-custom-range" style="display: <?php echo 'custom' === $period ? 'inline-flex' : 'none'; ?>; gap: 5px; align-items: center;">
+                        <input type="date" name="date_from" value="<?php echo esc_attr( sanitize_text_field( $_GET['date_from'] ?? '' ) ); ?>" />
+                        <span>—</span>
+                        <input type="date" name="date_to" value="<?php echo esc_attr( sanitize_text_field( $_GET['date_to'] ?? '' ) ); ?>" />
+                    </span>
                     
                     <button type="submit" class="button">
                         <?php esc_html_e( 'Filter', 'starter-shelter' ); ?>
@@ -231,6 +239,11 @@ class Reports {
             </div>
         </div>
 
+        <?php
+        // Donation trend chart.
+        self::render_donation_trend_chart( $period );
+        ?>
+
         <?php if ( ! empty( $stats['by_allocation'] ) ) : ?>
         <h3><?php esc_html_e( 'By Allocation', 'starter-shelter' ); ?></h3>
         <table class="wp-list-table widefat fixed striped">
@@ -299,6 +312,11 @@ class Reports {
                 <span class="sd-stat-label"><?php esc_html_e( 'Membership Revenue', 'starter-shelter' ); ?></span>
             </div>
         </div>
+
+        <?php
+        // Retention metric.
+        self::render_retention_metric();
+        ?>
 
         <?php if ( ! empty( $membership_stats['by_tier'] ) ) : ?>
         <h3><?php esc_html_e( 'By Tier', 'starter-shelter' ); ?></h3>
@@ -398,9 +416,11 @@ class Reports {
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ( $campaigns as $campaign ) : 
-                    $goal   = (float) get_term_meta( $campaign->term_id, '_sd_goal', true );
-                    $raised = (float) get_term_meta( $campaign->term_id, '_sd_raised', true );
+                <?php foreach ( $campaigns as $campaign ) :
+                    $goal = (float) get_term_meta( $campaign->term_id, '_sd_goal', true );
+
+                    // Calculate raised amount filtered by period.
+                    $raised = self::get_campaign_raised( $campaign->term_id, $period );
                     $percent = $goal > 0 ? min( 100, ( $raised / $goal ) * 100 ) : 0;
                 ?>
                 <tr>
@@ -429,6 +449,217 @@ class Reports {
             </tbody>
         </table>
         <?php
+    }
+
+    /**
+     * Render an inline SVG bar chart of donation totals over time.
+     *
+     * Groups donations by day (short periods), week, or month and
+     * renders a simple bar chart. No external JS library needed.
+     *
+     * @since 2.1.0
+     *
+     * @param string $period The reporting period.
+     */
+    private static function render_donation_trend_chart( string $period ): void {
+        global $wpdb;
+
+        $date_range = \Starter_Shelter\Helpers\get_date_range_for_period( $period );
+        $start = $date_range['start'] ?? wp_date( 'Y-m-01' );
+        $end   = $date_range['end'] ?? wp_date( 'Y-m-d' );
+
+        // Determine grouping based on date span.
+        $days_span = max( 1, (int) ( ( strtotime( $end ) - strtotime( $start ) ) / DAY_IN_SECONDS ) );
+
+        if ( $days_span <= 14 ) {
+            $group_format = '%Y-%m-%d';
+            $label_format = 'M j';
+        } elseif ( $days_span <= 90 ) {
+            $group_format = '%x-%v'; // ISO year-week
+            $label_format = 'M j';
+        } else {
+            $group_format = '%Y-%m';
+            $label_format = 'M Y';
+        }
+
+        $rows = $wpdb->get_results( $wpdb->prepare( "
+            SELECT
+                DATE_FORMAT( pm_date.meta_value, %s ) as period_key,
+                MIN( pm_date.meta_value ) as period_start,
+                SUM( pm_amount.meta_value ) as total,
+                COUNT( * ) as count
+            FROM {$wpdb->posts} p
+            JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = '_sd_donation_date'
+            JOIN {$wpdb->postmeta} pm_amount ON p.ID = pm_amount.post_id AND pm_amount.meta_key = '_sd_amount'
+            WHERE p.post_type = 'sd_donation'
+              AND p.post_status = 'publish'
+              AND pm_date.meta_value >= %s
+              AND pm_date.meta_value <= %s
+            GROUP BY period_key
+            ORDER BY period_start ASC
+        ", $group_format, $start, $end . ' 23:59:59' ) );
+
+        if ( empty( $rows ) ) {
+            return;
+        }
+
+        // Build chart data.
+        $max_total = max( array_map( fn( $r ) => (float) $r->total, $rows ) );
+        $bar_count = count( $rows );
+        $chart_w   = 600;
+        $chart_h   = 200;
+        $bar_gap   = 4;
+        $bar_w     = max( 8, min( 40, (int) ( ( $chart_w - ( $bar_count * $bar_gap ) ) / $bar_count ) ) );
+        $total_w   = $bar_count * ( $bar_w + $bar_gap );
+
+        ?>
+        <div class="sd-trend-chart" style="margin: 20px 0;">
+            <h3><?php esc_html_e( 'Donation Trend', 'starter-shelter' ); ?></h3>
+            <div style="overflow-x: auto;">
+                <svg viewBox="0 0 <?php echo $total_w; ?> <?php echo $chart_h + 30; ?>" width="<?php echo min( $total_w, $chart_w ); ?>" style="font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+                    <!-- Grid lines -->
+                    <?php for ( $i = 0; $i <= 4; $i++ ) :
+                        $y = $chart_h - ( $chart_h * $i / 4 );
+                        $val = $max_total * $i / 4;
+                    ?>
+                    <line x1="0" y1="<?php echo $y; ?>" x2="<?php echo $total_w; ?>" y2="<?php echo $y; ?>" stroke="#e0e0e0" stroke-width="0.5" />
+                    <?php endfor; ?>
+
+                    <!-- Bars -->
+                    <?php foreach ( $rows as $i => $row ) :
+                        $bar_h = $max_total > 0 ? ( (float) $row->total / $max_total ) * $chart_h : 0;
+                        $x = $i * ( $bar_w + $bar_gap );
+                        $y = $chart_h - $bar_h;
+                        $label = wp_date( $label_format, strtotime( $row->period_start ) );
+                    ?>
+                    <g>
+                        <rect x="<?php echo $x; ?>" y="<?php echo $y; ?>" width="<?php echo $bar_w; ?>" height="<?php echo $bar_h; ?>"
+                            fill="#059669" rx="2" opacity="0.85">
+                            <title><?php echo esc_attr( $label . ': $' . number_format( (float) $row->total, 2 ) . ' (' . $row->count . ' donations)' ); ?></title>
+                        </rect>
+                        <?php if ( $bar_count <= 15 ) : ?>
+                        <text x="<?php echo $x + $bar_w / 2; ?>" y="<?php echo $chart_h + 14; ?>" text-anchor="middle" fill="#666" font-size="9">
+                            <?php echo esc_html( $label ); ?>
+                        </text>
+                        <?php elseif ( $i % 3 === 0 ) : ?>
+                        <text x="<?php echo $x + $bar_w / 2; ?>" y="<?php echo $chart_h + 14; ?>" text-anchor="middle" fill="#666" font-size="8">
+                            <?php echo esc_html( $label ); ?>
+                        </text>
+                        <?php endif; ?>
+                    </g>
+                    <?php endforeach; ?>
+                </svg>
+            </div>
+        </div>
+        <?php
+    }
+
+    /**
+     * Render membership retention metric.
+     *
+     * Shows the percentage of memberships that have been renewed
+     * (have more than one order associated, or have a renewal date).
+     *
+     * @since 2.1.0
+     */
+    private static function render_retention_metric(): void {
+        global $wpdb;
+
+        // Count total memberships that have expired in the last 12 months.
+        $year_ago = wp_date( 'Y-m-d', strtotime( '-12 months' ) );
+        $today    = wp_date( 'Y-m-d' );
+
+        $expired_count = (int) $wpdb->get_var( $wpdb->prepare( "
+            SELECT COUNT( DISTINCT p.ID )
+            FROM {$wpdb->posts} p
+            JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_end_date'
+            WHERE p.post_type = 'sd_membership'
+              AND p.post_status = 'publish'
+              AND pm.meta_value >= %s
+              AND pm.meta_value <= %s
+        ", $year_ago, $today ) );
+
+        // Count memberships that were renewed (donor has another active membership after expiry).
+        $renewed_count = (int) $wpdb->get_var( $wpdb->prepare( "
+            SELECT COUNT( DISTINCT expired.ID )
+            FROM {$wpdb->posts} expired
+            JOIN {$wpdb->postmeta} pm_end ON expired.ID = pm_end.post_id AND pm_end.meta_key = '_sd_end_date'
+            JOIN {$wpdb->postmeta} pm_donor ON expired.ID = pm_donor.post_id AND pm_donor.meta_key = '_sd_donor_id'
+            JOIN {$wpdb->posts} renewed ON renewed.post_type = 'sd_membership'
+                AND renewed.post_status = 'publish'
+                AND renewed.ID != expired.ID
+            JOIN {$wpdb->postmeta} pm_donor2 ON renewed.ID = pm_donor2.post_id
+                AND pm_donor2.meta_key = '_sd_donor_id'
+                AND pm_donor2.meta_value = pm_donor.meta_value
+            JOIN {$wpdb->postmeta} pm_start ON renewed.ID = pm_start.post_id
+                AND pm_start.meta_key = '_sd_start_date'
+                AND pm_start.meta_value >= pm_end.meta_value
+            WHERE expired.post_type = 'sd_membership'
+              AND expired.post_status = 'publish'
+              AND pm_end.meta_value >= %s
+              AND pm_end.meta_value <= %s
+        ", $year_ago, $today ) );
+
+        $retention_rate = $expired_count > 0 ? round( ( $renewed_count / $expired_count ) * 100, 1 ) : 0;
+        $rate_color = $retention_rate >= 70 ? '#059669' : ( $retention_rate >= 40 ? '#d97706' : '#dc2626' );
+
+        ?>
+        <div class="sd-retention-metric" style="margin: 20px 0; padding: 15px 20px; background: #f6f7f7; border-radius: 4px; display: flex; align-items: center; gap: 20px;">
+            <div style="text-align: center;">
+                <span style="font-size: 32px; font-weight: 700; color: <?php echo esc_attr( $rate_color ); ?>;"><?php echo esc_html( $retention_rate ); ?>%</span>
+                <br>
+                <span style="font-size: 11px; text-transform: uppercase; color: #646970;"><?php esc_html_e( 'Renewal Rate', 'starter-shelter' ); ?></span>
+            </div>
+            <div style="font-size: 13px; color: #50575e;">
+                <?php printf(
+                    esc_html__( '%1$d of %2$d expired memberships renewed in the last 12 months.', 'starter-shelter' ),
+                    $renewed_count,
+                    $expired_count
+                ); ?>
+            </div>
+        </div>
+        <?php
+    }
+
+    /**
+     * Get the total raised for a campaign, filtered by period.
+     *
+     * @since 2.1.0
+     *
+     * @param int    $campaign_id Campaign term ID.
+     * @param string $period      Reporting period.
+     * @return float Total raised.
+     */
+    private static function get_campaign_raised( int $campaign_id, string $period ): float {
+        global $wpdb;
+
+        $date_clause = '';
+        if ( 'all_time' !== $period ) {
+            $date_range = \Starter_Shelter\Helpers\get_date_range_for_period( $period );
+            if ( $date_range['start'] && $date_range['end'] ) {
+                $date_clause = $wpdb->prepare(
+                    "AND pm_date.meta_value >= %s AND pm_date.meta_value <= %s",
+                    $date_range['start'],
+                    $date_range['end'] . ' 23:59:59'
+                );
+            }
+        }
+
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $date_clause is already prepared.
+        $raised = (float) $wpdb->get_var( $wpdb->prepare( "
+            SELECT COALESCE( SUM( pm_amount.meta_value ), 0 )
+            FROM {$wpdb->posts} p
+            JOIN {$wpdb->postmeta} pm_amount ON p.ID = pm_amount.post_id AND pm_amount.meta_key = '_sd_amount'
+            JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
+            JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+            LEFT JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = '_sd_donation_date'
+            WHERE p.post_type = 'sd_donation'
+              AND p.post_status = 'publish'
+              AND tt.term_id = %d
+              $date_clause
+        ", $campaign_id ) );
+
+        return $raised;
     }
 
     /**

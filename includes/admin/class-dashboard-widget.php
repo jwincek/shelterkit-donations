@@ -34,6 +34,23 @@ class Dashboard_Widget {
     public static function init(): void {
         add_action( 'wp_dashboard_setup', [ self::class, 'register_widget' ] );
         add_action( 'wp_ajax_sd_dashboard_refresh', [ self::class, 'ajax_refresh' ] );
+
+        // Invalidate stats cache when shelter records change.
+        foreach ( [ 'sd_donation', 'sd_membership', 'sd_memorial', 'sd_donor' ] as $cpt ) {
+            add_action( "save_post_{$cpt}", [ self::class, 'invalidate_cache' ] );
+        }
+    }
+
+    /**
+     * Clear all cached dashboard stats.
+     *
+     * @since 2.1.0
+     */
+    public static function invalidate_cache(): void {
+        foreach ( [ 'today', 'week', 'month', 'year' ] as $period ) {
+            delete_transient( 'sd_dashboard_stats_' . $period );
+        }
+        delete_transient( 'sd_dashboard_action_items' );
     }
 
     /**
@@ -58,28 +75,41 @@ class Dashboard_Widget {
     /**
      * Render the dashboard widget.
      */
+    /**
+     * Cache TTL for dashboard stats (15 minutes).
+     */
+    private const CACHE_TTL = 900;
+
     public static function render_widget(): void {
         $period = get_user_option( 'sd_dashboard_period' ) ?: 'month';
-        
-        // Get stats using the dashboard-stats ability.
-        $ability = wp_get_ability( 'shelter-reports/dashboard-stats' );
-        
-        if ( ! $ability ) {
-            echo '<p>' . esc_html__( 'Unable to load statistics.', 'starter-shelter' ) . '</p>';
-            return;
-        }
 
-        $stats = $ability->execute( [ 'period' => $period ] );
+        // Try cached stats first.
+        $cache_key = 'sd_dashboard_stats_' . $period;
+        $stats = get_transient( $cache_key );
 
-        if ( is_wp_error( $stats ) ) {
-            echo '<p class="error">' . esc_html( $stats->get_error_message() ) . '</p>';
-            return;
+        if ( false === $stats ) {
+            $ability = wp_get_ability( 'shelter-reports/dashboard-stats' );
+
+            if ( ! $ability ) {
+                echo '<p>' . esc_html__( 'Unable to load statistics.', 'starter-shelter' ) . '</p>';
+                return;
+            }
+
+            $stats = $ability->execute( [ 'period' => $period ] );
+
+            if ( is_wp_error( $stats ) ) {
+                echo '<p class="error">' . esc_html( $stats->get_error_message() ) . '</p>';
+                return;
+            }
+
+            set_transient( $cache_key, $stats, self::CACHE_TTL );
         }
 
         $donation_stats   = $stats['donations'] ?? [];
         $membership_stats = $stats['memberships'] ?? [];
-        
-        // Get action items.
+        $memorial_stats   = $stats['memorials'] ?? [];
+
+        // Get action items (cached separately).
         $action_items = self::get_action_items();
 
         self::render_styles();
@@ -143,6 +173,16 @@ class Dashboard_Widget {
                         <?php echo esc_html( number_format( $membership_stats['active'] ?? 0 ) ); ?>
                     </span>
                     <span class="sd-widget-stat-label"><?php esc_html_e( 'Members', 'starter-shelter' ); ?></span>
+                </div>
+            </div>
+
+            <div class="sd-widget-stat">
+                <span class="sd-stat-icon">❤️</span>
+                <div class="sd-stat-content">
+                    <span class="sd-widget-stat-value">
+                        <?php echo esc_html( number_format( $memorial_stats['count'] ?? 0 ) ); ?>
+                    </span>
+                    <span class="sd-widget-stat-label"><?php esc_html_e( 'Memorials', 'starter-shelter' ); ?></span>
                 </div>
             </div>
         </div>
@@ -260,22 +300,31 @@ class Dashboard_Widget {
         }
 
         $period = sanitize_key( $_POST['period'] ?? 'month' );
-        
+
         // Save preference.
         update_user_option( get_current_user_id(), 'sd_dashboard_period', $period );
 
-        $ability = wp_get_ability( 'shelter-reports/dashboard-stats' );
-        if ( ! $ability ) {
-            wp_send_json_error();
-        }
+        // Use cached stats.
+        $cache_key = 'sd_dashboard_stats_' . $period;
+        $stats = get_transient( $cache_key );
 
-        $stats = $ability->execute( [ 'period' => $period ] );
-        if ( is_wp_error( $stats ) ) {
-            wp_send_json_error();
+        if ( false === $stats ) {
+            $ability = wp_get_ability( 'shelter-reports/dashboard-stats' );
+            if ( ! $ability ) {
+                wp_send_json_error();
+            }
+
+            $stats = $ability->execute( [ 'period' => $period ] );
+            if ( is_wp_error( $stats ) ) {
+                wp_send_json_error();
+            }
+
+            set_transient( $cache_key, $stats, self::CACHE_TTL );
         }
 
         $donation_stats   = $stats['donations'] ?? [];
         $membership_stats = $stats['memberships'] ?? [];
+        $memorial_stats   = $stats['memorials'] ?? [];
 
         ob_start();
         ?>
@@ -307,6 +356,13 @@ class Dashboard_Widget {
                 <span class="sd-widget-stat-label"><?php esc_html_e( 'Members', 'starter-shelter' ); ?></span>
             </div>
         </div>
+        <div class="sd-widget-stat">
+            <span class="sd-stat-icon">❤️</span>
+            <div class="sd-stat-content">
+                <span class="sd-widget-stat-value"><?php echo esc_html( number_format( $memorial_stats['count'] ?? 0 ) ); ?></span>
+                <span class="sd-widget-stat-label"><?php esc_html_e( 'Memorials', 'starter-shelter' ); ?></span>
+            </div>
+        </div>
         <?php
         $html = ob_get_clean();
 
@@ -319,6 +375,11 @@ class Dashboard_Widget {
      * @return array Action items.
      */
     private static function get_action_items(): array {
+        $cached = get_transient( 'sd_dashboard_action_items' );
+        if ( false !== $cached ) {
+            return $cached;
+        }
+
         $items = [];
 
         // Pending logo reviews.
@@ -372,6 +433,7 @@ class Dashboard_Widget {
             ];
         }
 
+        set_transient( 'sd_dashboard_action_items', $items, self::CACHE_TTL );
         return $items;
     }
 
@@ -447,14 +509,31 @@ class Dashboard_Widget {
             LIMIT %d
         ", $count, $count, $count, $count ) );
 
+        // Batch-load all donor names to avoid N+1 queries.
+        $donor_ids = array_filter( array_unique( array_map( fn( $r ) => (int) $r->donor_id, $results ) ) );
+        $donor_names = [];
+
+        if ( ! empty( $donor_ids ) ) {
+            // Single query to get all donor display names.
+            $placeholders = implode( ',', array_fill( 0, count( $donor_ids ), '%d' ) );
+            $donor_rows = $wpdb->get_results( $wpdb->prepare(
+                "SELECT p.ID, COALESCE( pm.meta_value, p.post_title ) as display_name
+                 FROM {$wpdb->posts} p
+                 LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_display_name'
+                 WHERE p.ID IN ( $placeholders )",
+                ...$donor_ids
+            ) );
+
+            foreach ( $donor_rows as $dr ) {
+                $donor_names[ (int) $dr->ID ] = $dr->display_name;
+            }
+        }
+
         $activity = [];
         foreach ( $results as $row ) {
             $donor_name = __( 'Someone', 'starter-shelter' );
             if ( $row->donor_id && ! $row->is_anonymous ) {
-                $donor = Entity_Hydrator::get( 'sd_donor', (int) $row->donor_id );
-                if ( $donor ) {
-                    $donor_name = $donor['display_name'] ?? $donor['first_name'] ?? $donor_name;
-                }
+                $donor_name = $donor_names[ (int) $row->donor_id ] ?? $donor_name;
             } elseif ( $row->is_anonymous ) {
                 $donor_name = __( 'Anonymous', 'starter-shelter' );
             }
@@ -525,6 +604,9 @@ class Dashboard_Widget {
                 gap: 12px;
                 margin-bottom: 15px;
                 transition: opacity 0.2s;
+            }
+            .sd-widget-stats .sd-widget-stat:nth-child(5) {
+                grid-column: 1 / -1;
             }
             .sd-widget-stat {
                 display: flex;
