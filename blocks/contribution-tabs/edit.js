@@ -77,5 +77,8 @@
 
 	wp.blocks.registerBlockType( 'starter-shelter/contribution-tabs', {
 		edit: Edit,
+		save: function() {
+			return el( wp.blockEditor.InnerBlocks.Content );
+		},
 	} );
 } )( window.wp );

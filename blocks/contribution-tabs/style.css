@@ -84,15 +84,11 @@
 
 .sd-tab-panel {
     display: none;
-    animation: sd-tab-fade-in 0.25s ease;
 }
 
-.sd-tab-panel-active {
+.sd-tab-panel.sd-tab-panel-active {
     display: block;
-}
-
-.sd-tab-panel[hidden] {
-    display: none;
+    animation: sd-tab-fade-in 0.25s ease;
 }
 
 @keyframes sd-tab-fade-in {

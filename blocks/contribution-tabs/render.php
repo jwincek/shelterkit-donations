@@ -40,8 +40,6 @@ $wrapper = get_block_wrapper_attributes( [
 	'data-wp-context'     => $context,
 ] );
 
-// Parse inner blocks to render each in its own tab panel.
-$inner_blocks = $block->parsed_block['innerBlocks'] ?? [];
 ?>
 <div <?php echo $wrapper; ?>>
 	<div class="sd-tabs-nav" role="tablist" aria-label="<?php esc_attr_e( 'Contribution type', 'starter-shelter' ); ?>">
@@ -65,16 +63,15 @@ $inner_blocks = $block->parsed_block['innerBlocks'] ?? [];
 		<?php endforeach; ?>
 	</div>
 
-	<?php foreach ( $inner_blocks as $i => $inner_block ) :
+	<?php foreach ( $block->inner_blocks as $i => $inner_block ) :
 		$is_active = ( $i === $default_tab );
-		$panel_content = ( new \WP_Block( $inner_block ) )->render();
+		$panel_content = $inner_block->render();
 	?>
 	<div role="tabpanel" class="sd-tab-panel <?php echo $is_active ? 'sd-tab-panel-active' : ''; ?>"
 		id="<?php echo esc_attr( $block_id ); ?>-panel-<?php echo $i; ?>"
 		aria-labelledby="<?php echo esc_attr( $block_id ); ?>-tab-<?php echo $i; ?>"
 		data-wp-class--sd-tab-panel-active="callbacks.isActiveTab"
-		data-wp-context='{"tabIndex":<?php echo $i; ?>}'
-		<?php echo $is_active ? '' : 'hidden'; ?>>
+		data-wp-context='{"tabIndex":<?php echo $i; ?>}'>
 		<?php echo $panel_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 	</div>
 	<?php endforeach; ?>

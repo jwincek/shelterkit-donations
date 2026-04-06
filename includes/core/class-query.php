@@ -386,6 +386,34 @@ class Query {
     }
 
     /**
+     * Filter to posts where a meta key does NOT exist (or is empty).
+     *
+     * Inverse of whereExists(). Finds posts that have never had this
+     * meta set, or where it was deleted.
+     *
+     * @since 2.1.0
+     *
+     * @param string $field The meta field name (without prefix).
+     * @return self
+     */
+    public function whereNotExists( string $field ): self {
+        $this->meta_query[] = [
+            'relation' => 'OR',
+            [
+                'key'     => $this->meta_prefix . $field,
+                'compare' => 'NOT EXISTS',
+            ],
+            [
+                'key'     => $this->meta_prefix . $field,
+                'value'   => '',
+                'compare' => '=',
+            ],
+        ];
+
+        return $this;
+    }
+
+    /**
      * Set the post status filter.
      *
      * @since 1.0.0

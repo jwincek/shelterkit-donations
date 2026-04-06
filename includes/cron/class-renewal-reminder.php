@@ -129,10 +129,12 @@ class Renewal_Reminder {
      * @return array Array of membership data.
      */
     private static function get_expiring_memberships( string $target_date ): array {
+        // Query methods auto-prefix fields with _sd_, so pass the
+        // bare field name (not the full meta key).
         return Query::for( 'sd_membership' )
             ->where( 'end_date', $target_date )
             ->whereCompare( 'status', 'cancelled', '!=' )
-            ->whereNotExists( self::REMINDER_SENT_META )
+            ->whereNotExists( 'renewal_reminder_sent' )
             ->get();
     }
 
