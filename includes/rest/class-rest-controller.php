@@ -109,6 +109,11 @@ function register_routes(): void {
     ] );
 
     // Public stats endpoint.
+    // INTENTIONALLY PUBLIC: Returns aggregate donation totals and donor
+    // counts for use in public-facing blocks (campaign progress, donor
+    // stats widget). No individual donor/donation data is exposed —
+    // only aggregate sums and counts. This supports nonprofit
+    // transparency and fundraising campaign displays.
     register_rest_route( $namespace, '/stats', [
         [
             'methods'             => WP_REST_Server::READABLE,
@@ -149,13 +154,13 @@ function register_routes(): void {
         ],
     ] );
 
-    // Donor find-or-create (admin, for memorial panel quick-create).
+    // Donor find-or-create (admin only, for memorial panel quick-create).
     register_rest_route( $namespace, '/donors/find-or-create', [
         [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => __NAMESPACE__ . '\\find_or_create_donor',
             'permission_callback' => function() {
-                return current_user_can( 'edit_posts' );
+                return current_user_can( 'manage_options' );
             },
             'args'                => [
                 'display_name' => [

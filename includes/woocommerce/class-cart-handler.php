@@ -56,6 +56,15 @@ class Cart_Handler {
     public static function ajax_add_to_cart(): void {
         check_ajax_referer( 'sd_add_to_cart', 'nonce' );
 
+        // Rate limit: 1 add-to-cart per 3 seconds per user/IP.
+        $rate_key = 'sd_cart_rate_' . ( get_current_user_id() ?: wp_hash( $_SERVER['REMOTE_ADDR'] ?? '' ) );
+        if ( false !== get_transient( $rate_key ) ) {
+            wp_send_json_error( [
+                'message' => __( 'Please wait a moment before adding another item.', 'starter-shelter' ),
+            ] );
+        }
+        set_transient( $rate_key, 1, 3 );
+
         $product_type = sanitize_key( $_POST['product_type'] ?? 'donation' );
         $amount = floatval( $_POST['amount'] ?? 0 );
 
@@ -403,9 +412,13 @@ class Cart_Handler {
         if ( isset( $_REQUEST['sd_allocation'] ) ) {
             $cart_item_data['sd_allocation'] = sanitize_key( $_REQUEST['sd_allocation'] );
         }
-        
+
         if ( isset( $_REQUEST['sd_amount'] ) ) {
-            $cart_item_data['sd_custom_price'] = floatval( $_REQUEST['sd_amount'] );
+            $amount = floatval( $_REQUEST['sd_amount'] );
+            // Reject negative or zero amounts.
+            if ( $amount > 0 ) {
+                $cart_item_data['sd_custom_price'] = $amount;
+            }
         }
 
         if ( isset( $_REQUEST['sd_campaign'] ) ) {
@@ -630,7 +643,10 @@ class Cart_Handler {
         require_once ABSPATH . 'wp-admin/includes/media.php';
 
         // Validate file type.
-        $allowed = [ 'image/png', 'image/jpeg', 'image/svg+xml' ];
+        // SVG intentionally excluded — SVGs can contain embedded JavaScript
+        // and are a known XSS vector. Only raster formats are safe for
+        // user-uploaded content served inline.
+        $allowed = [ 'image/png', 'image/jpeg' ];
         if ( ! in_array( $_FILES['business_logo']['type'] ?? '', $allowed, true ) ) {
             return new \WP_Error(
                 'invalid_file_type',

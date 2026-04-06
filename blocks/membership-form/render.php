@@ -219,7 +219,7 @@ $current_tiers = ( $membership_type === 'business' ) ? $business_tiers : $indivi
                 <div class="sd-logo-dropzone" data-wp-on--click="actions.triggerLogoInput"
                     data-wp-class--sd-has-logo="callbacks.hasLogo">
                     <input type="file" id="<?php echo esc_attr( $form_id ); ?>-logo" class="sd-logo-input"
-                        accept="image/png,image/jpeg,image/svg+xml"
+                        accept="image/png,image/jpeg"
                         data-wp-on--change="actions.setLogo">
                     <div class="sd-logo-preview sd-collapsed" data-wp-class--sd-collapsed="!callbacks.hasLogo">
                         <img data-wp-bind--src="callbacks.getLogoSrc" alt="" class="sd-logo-img">
@@ -232,7 +232,7 @@ $current_tiers = ( $membership_type === 'business' ) ? $business_tiers : $indivi
                     <div class="sd-logo-placeholder" data-wp-class--sd-collapsed="callbacks.hasLogo">
                         <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" fill="currentColor"/></svg>
                         <span><?php esc_html_e( 'Click to upload logo', 'starter-shelter' ); ?></span>
-                        <span class="sd-logo-formats"><?php esc_html_e( 'PNG, JPG, or SVG', 'starter-shelter' ); ?></span>
+                        <span class="sd-logo-formats"><?php esc_html_e( 'PNG or JPG', 'starter-shelter' ); ?></span>
                     </div>
                 </div>
             </div>

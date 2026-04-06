@@ -88,9 +88,9 @@ const { state, actions } = store( NAMESPACE, {
 			if ( ! form || ! file ) return;
 
 			// Validate file type and size (2MB max).
-			const allowed = [ 'image/png', 'image/jpeg', 'image/svg+xml' ];
+			const allowed = [ 'image/png', 'image/jpeg' ];
 			if ( ! allowed.includes( file.type ) ) {
-				form.error = __( 'errorLogoType', 'Please upload a PNG, JPG, or SVG file.' );
+				form.error = __( 'errorLogoType', 'Please upload a PNG or JPG file.' );
 				return;
 			}
 			if ( file.size > 2 * 1024 * 1024 ) {
