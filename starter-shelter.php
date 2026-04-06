@@ -150,6 +150,9 @@ function starter_shelter_woocommerce_init(): void {
 
     // Initialize My Account (donor dashboard endpoints).
     Starter_Shelter\WooCommerce\My_Account::init();
+
+    // Replace single-product templates for mapped products with the matching form block.
+    Starter_Shelter\WooCommerce\Product_Page_Override::init();
 }
 add_action( 'plugins_loaded', 'starter_shelter_woocommerce_init', 20 );
 
