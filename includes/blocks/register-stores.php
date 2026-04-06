@@ -158,6 +158,12 @@ function register_interactivity_stores(): void {
     // We seed an empty namespace so wp_interactivity_state() is initialized.
     wp_interactivity_state( 'starter-shelter/memorials', [] );
 
+    // --- Candles (light a candle for a memorial) ----------------------------
+    // Seed the user's candle list so the UI knows which are already lit.
+    wp_interactivity_state( 'starter-shelter/candles', [
+        'candles' => \Starter_Shelter\REST\get_user_candles(),
+    ] );
+
     // --- Donation listings ---------------------------------------------------
     wp_interactivity_state( 'starter-shelter/donations', [
         'isLoading'  => false,
@@ -229,6 +235,14 @@ function register_script_modules(): void {
     wp_register_script_module(
         'starter-shelter/contribution-tabs',
         STARTER_SHELTER_URL . 'blocks/contribution-tabs/view.js',
+        [ '@wordpress/interactivity' ],
+        STARTER_SHELTER_VERSION
+    );
+
+    // Candles — light a candle for a memorial.
+    wp_register_script_module(
+        'starter-shelter/candles',
+        STARTER_SHELTER_URL . 'assets/js/stores/candles.js',
         [ '@wordpress/interactivity' ],
         STARTER_SHELTER_VERSION
     );

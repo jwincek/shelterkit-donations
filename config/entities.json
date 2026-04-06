@@ -256,6 +256,11 @@
                     "type": "integer",
                     "show_in_rest": true,
                     "description": "Attachment ID for memorial photo"
+                },
+                "candle_count": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Number of candles lit for this memorial"
                 }
             },
             "computed": {

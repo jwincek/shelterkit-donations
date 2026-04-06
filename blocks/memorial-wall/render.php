@@ -33,6 +33,9 @@ declare( strict_types = 1 );
 // The view.js also imports memorials.js via relative URL for editor
 // compatibility, but this enqueue ensures the import map is correct.
 wp_enqueue_script_module( 'starter-shelter/memorials' );
+wp_enqueue_script_module( 'starter-shelter/candles' );
+
+$candle_api_url = rest_url( 'starter-shelter/v1/candles/toggle' );
 
 // ─── Block attributes ────────────────────────────────────────────────
 $archive_id       = $attributes['archiveId'] ?: wp_unique_id( 'sd-wall-' );
@@ -163,6 +166,9 @@ $context = [
         'year'   => $year_filter,
         'search' => $search_term,
     ],
+
+    // Candle API URL for the toggle endpoint.
+    'candleApiUrl'    => $candle_api_url,
 
     // Render config — set once at render time, read-only after that.
     'config'          => [
@@ -373,6 +379,20 @@ $wrapper_attributes = get_block_wrapper_attributes( [
                     </div>
 
                 </a>
+
+                <div class="sd-candle-action" data-wp-interactive="starter-shelter/candles">
+                    <button type="button" class="sd-candle-button"
+                        data-wp-on--click="actions.toggleCandle"
+                        data-wp-class--sd-candle-lit="state.isLit"
+                        data-wp-bind--aria-label="state.candleAriaLabel"
+                        data-wp-bind--aria-pressed="state.isLit">
+                        <svg class="sd-candle-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                            <path d="M12 2C12 2 9 7 9 10C9 11.66 10.34 13 12 13C13.66 13 15 11.66 15 10C15 7 12 2 12 2Z" class="sd-candle-flame"/>
+                            <rect x="11" y="13" width="2" height="9" rx="1" fill="currentColor" opacity="0.6"/>
+                        </svg>
+                        <span class="sd-candle-count" data-wp-text="state.candleLabel"></span>
+                    </button>
+                </div>
             </article>
         </template>
 
@@ -444,6 +464,37 @@ $wrapper_attributes = get_block_wrapper_attributes( [
                 </div>
 
             </a>
+
+            <?php
+            $candle_count = (int) ( $item['candle_count'] ?? 0 );
+            $user_candles = \Starter_Shelter\REST\get_user_candles();
+            $is_lit       = in_array( (int) $item['id'], $user_candles, true );
+            ?>
+            <div class="sd-candle-action"
+                data-wp-interactive="starter-shelter/candles"
+                data-wp-context='{"memorialId":<?php echo (int) $item['id']; ?>,"candleCount":<?php echo $candle_count; ?>,"candleApiUrl":"<?php echo esc_attr( $candle_api_url ); ?>","honoreeName":"<?php echo esc_attr( $item['honoree_name'] ?? '' ); ?>"}'>
+                <button type="button" class="sd-candle-button <?php echo $is_lit ? 'sd-candle-lit' : ''; ?>"
+                    data-wp-on--click="actions.toggleCandle"
+                    data-wp-class--sd-candle-lit="state.isLit"
+                    data-wp-bind--aria-label="state.candleAriaLabel"
+                    data-wp-bind--aria-pressed="state.isLit"
+                    aria-label="<?php echo $is_lit ? esc_attr( 'Remove candle for ' . $item['honoree_name'] ) : esc_attr( 'Light a candle for ' . $item['honoree_name'] ); ?>"
+                    aria-pressed="<?php echo $is_lit ? 'true' : 'false'; ?>">
+                    <svg class="sd-candle-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                        <path d="M12 2C12 2 9 7 9 10C9 11.66 10.34 13 12 13C13.66 13 15 11.66 15 10C15 7 12 2 12 2Z" class="sd-candle-flame"/>
+                        <rect x="11" y="13" width="2" height="9" rx="1" fill="currentColor" opacity="0.6"/>
+                    </svg>
+                    <span class="sd-candle-count"><?php
+                        if ( $candle_count === 0 ) {
+                            esc_html_e( 'Light a candle', 'starter-shelter' );
+                        } elseif ( $candle_count === 1 ) {
+                            esc_html_e( '1 candle', 'starter-shelter' );
+                        } else {
+                            printf( esc_html__( '%d candles', 'starter-shelter' ), $candle_count );
+                        }
+                    ?></span>
+                </button>
+            </div>
         </article>
         <?php endforeach; ?>
 

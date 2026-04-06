@@ -857,3 +857,64 @@
         transition: opacity 0.1s;
     }
 }
+
+/* ── Candle Action ────────────────────────────────────────────────── */
+
+.sd-candle-action {
+    padding: 8px 16px 12px;
+    border-top: 1px solid var(--sd-wall-border, rgba(0, 0, 0, 0.06));
+}
+
+.sd-candle-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--sd-wall-text-muted, #888);
+    transition: all 0.2s ease;
+}
+
+.sd-candle-button:hover {
+    background: rgba(251, 191, 36, 0.1);
+    color: #b45309;
+}
+
+.sd-candle-button:focus-visible {
+    outline: 2px solid #f59e0b;
+    outline-offset: 2px;
+}
+
+/* Flame SVG */
+.sd-candle-flame {
+    fill: #ccc;
+    transition: all 0.3s ease;
+}
+
+.sd-candle-button:hover .sd-candle-flame {
+    fill: #fbbf24;
+}
+
+/* Lit state */
+.sd-candle-button.sd-candle-lit {
+    color: #b45309;
+}
+
+.sd-candle-button.sd-candle-lit .sd-candle-flame {
+    fill: #f59e0b;
+    filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.6));
+    animation: sd-candle-glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes sd-candle-glow {
+    from { filter: drop-shadow(0 0 3px rgba(245, 158, 11, 0.4)); }
+    to   { filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.8)); }
+}
+
+.sd-candle-count {
+    font-weight: 500;
+}

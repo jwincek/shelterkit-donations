@@ -312,6 +312,7 @@ add_action( 'init', 'starter_shelter_register_blocks' );
  */
 function starter_shelter_register_rest_api(): void {
     require_once STARTER_SHELTER_PATH . 'includes/rest/class-rest-controller.php';
+    require_once STARTER_SHELTER_PATH . 'includes/rest/class-candles-controller.php';
 }
 add_action( 'plugins_loaded', 'starter_shelter_register_rest_api', 15 );
 
