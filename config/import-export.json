@@ -535,7 +535,10 @@
           "tribute_message",
           "pet_species",
           "is_anonymous",
-          "notify_family_email"
+          "donor_display_name",
+          "notify_family_name",
+          "notify_family_email",
+          "notify_family_address"
         ],
         "field_map": {
           "email": {
@@ -567,9 +570,11 @@
             "validate": "enum",
             "enum_values": [
               "person",
-              "pet"
+              "pet",
+              "human",
+              "honor"
             ],
-            "description": "Must be \"person\" or \"pet\""
+            "description": "One of: pet, human, honor (or legacy: person)"
           },
           "tribute_message": {
             "target": "tribute_message",
@@ -583,9 +588,21 @@
             "target": "is_anonymous",
             "validate": "boolean_string"
           },
+          "donor_display_name": {
+            "target": "donor_display_name",
+            "validate": "text"
+          },
+          "notify_family_name": {
+            "target": "notify_family_name",
+            "validate": "text"
+          },
           "notify_family_email": {
             "target": "notify_family_email",
             "validate": "email_optional"
+          },
+          "notify_family_address": {
+            "target": "notify_family_address",
+            "validate": "text"
           }
         },
         "ability": "shelter-memorials/create",

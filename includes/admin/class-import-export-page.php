@@ -112,13 +112,14 @@ class Import_Export_Page {
 
 		// Localize config data for the React UI.
 		wp_localize_script( 'sd-import-export', 'sdImportExport', [
-			'ajaxUrl'      => admin_url( 'admin-ajax.php' ),
-			'adminPostUrl' => admin_url( 'admin-post.php' ),
-			'exportNonce'  => wp_create_nonce( self::EXPORT_NONCE ),
-			'previewNonce' => wp_create_nonce( 'sd_preview_import' ),
-			'importNonce'  => wp_create_nonce( 'sd_process_import' ),
-			'counts'       => $counts,
-			'templateUrls' => self::get_template_urls(),
+			'ajaxUrl'        => admin_url( 'admin-ajax.php' ),
+			'adminPostUrl'   => admin_url( 'admin-post.php' ),
+			'exportNonce'    => wp_create_nonce( self::EXPORT_NONCE ),
+			'previewNonce'   => wp_create_nonce( 'sd_preview_import' ),
+			'importNonce'    => wp_create_nonce( 'sd_process_import' ),
+			'errorCsvNonce'  => wp_create_nonce( 'sd_download_error_csv' ),
+			'counts'         => $counts,
+			'templateUrls'   => self::get_template_urls(),
 		] );
 
 		// Minimal styles for the React UI layout.
@@ -181,16 +182,17 @@ class Import_Export_Page {
 	 * @return array<string, string> Keyed by entity type.
 	 */
 	private static function get_template_urls(): array {
-		$base = wp_nonce_url(
-			admin_url( 'admin-ajax.php?action=sd_download_template' ),
-			'sd_download_template'
-		);
+		$nonce = wp_create_nonce( 'sd_download_template' );
 
 		$entity_types = Config::get_path( 'import-export', 'entity_types', [] );
 		$urls = [];
 
 		foreach ( array_keys( $entity_types ) as $type ) {
-			$urls[ $type ] = $base . '&type=' . $type;
+			$urls[ $type ] = admin_url( 'admin-ajax.php' ) . '?' . http_build_query( [
+				'action'   => 'sd_download_template',
+				'_wpnonce' => $nonce,
+				'type'     => $type,
+			] );
 		}
 
 		return $urls;

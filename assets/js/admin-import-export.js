@@ -255,6 +255,14 @@
         var results = resultsState[0];
         var setResults = resultsState[1];
 
+        var progressState = useState( null );
+        var progress = progressState[0];
+        var setProgress = progressState[1];
+
+        var importKeyState = useState( null );
+        var importKey = importKeyState[0];
+        var setImportKey = importKeyState[1];
+
         // Initialize options state
         var defaultOptions = {};
         if ( options ) {
@@ -270,10 +278,12 @@
             setFile( selectedFile );
             setPreview( null );
             setResults( null );
+            setProgress( null );
+            setImportKey( null );
 
             if ( selectedFile ) {
                 setIsLoading( true );
-                
+
                 var formData = new FormData();
                 formData.append( 'action', 'sd_preview_import' );
                 formData.append( 'import_type', importAction );
@@ -299,16 +309,58 @@
             }
         }
 
+        function processBatch( key ) {
+            var formData = new FormData();
+            formData.append( 'action', 'sd_process_import_batch' );
+            formData.append( 'import_key', key );
+            formData.append( 'nonce', sdImportExport.importNonce );
+
+            return fetch( sdImportExport.ajaxUrl, {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin'
+            })
+            .then( function( response ) { return response.json(); } )
+            .then( function( data ) {
+                if ( ! data.success ) {
+                    throw new Error( data.data || 'Batch failed' );
+                }
+
+                var batch = data.data;
+                setProgress( {
+                    processed: batch.processed,
+                    total: batch.total,
+                    percent: Math.round( ( batch.processed / batch.total ) * 100 )
+                } );
+
+                if ( batch.done ) {
+                    setResults( batch.results );
+                    setImportKey( batch.import_key );
+                    setFile( null );
+                    setPreview( null );
+                    setIsImporting( false );
+                    return;
+                }
+
+                // Process next batch.
+                return processBatch( key );
+            });
+        }
+
         function handleImport() {
             if ( ! file ) return;
 
             setIsImporting( true );
+            setProgress( { processed: 0, total: 0, percent: 0 } );
+            setResults( null );
 
+            // Step 1: Start the import (upload file, get session key).
             var formData = new FormData();
-            formData.append( 'action', 'sd_process_import_' + importAction );
+            formData.append( 'action', 'sd_start_import' );
+            formData.append( 'import_type', importAction );
             formData.append( 'file', file );
             formData.append( 'nonce', sdImportExport.importNonce );
-            
+
             Object.keys( importOptions ).forEach( function( key ) {
                 formData.append( key, importOptions[ key ] ? '1' : '0' );
             });
@@ -320,16 +372,25 @@
             })
             .then( function( response ) { return response.json(); } )
             .then( function( data ) {
-                if ( data.success && data.data ) {
-                    setResults( data.data );
-                    setFile( null );
-                    setPreview( null );
+                if ( ! data.success ) {
+                    throw new Error( data.data || 'Start failed' );
                 }
-                setIsImporting( false );
+
+                var key = data.data.import_key;
+                setImportKey( key );
+                setProgress( {
+                    processed: 0,
+                    total: data.data.total_rows,
+                    percent: 0
+                } );
+
+                // Step 2: Process batches.
+                return processBatch( key );
             })
             .catch( function( error ) {
                 console.error( 'Import error:', error );
                 setIsImporting( false );
+                setProgress( null );
             });
         }
 
@@ -352,17 +413,43 @@
                 )
             ),
             el( CardBody, {},
+                // Progress bar (during import)
+                progress && isImporting ? el( 'div', { style: { marginBottom: '16px' } },
+                    el( 'div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: '4px', fontSize: '13px' } },
+                        el( 'span', {}, sprintf( __( 'Processing row %d of %d...', 'starter-shelter' ), progress.processed, progress.total ) ),
+                        el( 'span', { style: { fontWeight: '600' } }, progress.percent + '%' )
+                    ),
+                    el( 'div', { style: { background: '#e0e0e0', borderRadius: '4px', height: '8px', overflow: 'hidden' } },
+                        el( 'div', { style: {
+                            background: '#007cba',
+                            height: '100%',
+                            width: progress.percent + '%',
+                            borderRadius: '4px',
+                            transition: 'width 0.3s ease'
+                        } })
+                    )
+                ) : null,
+
                 // Results notice
                 results ? el( Notice, {
                     status: results.errors > 0 ? 'warning' : 'success',
                     isDismissible: true,
-                    onRemove: function() { setResults( null ); }
+                    onRemove: function() { setResults( null ); setImportKey( null ); setProgress( null ); }
                 },
-                    el( 'strong', {}, __( 'Import Complete!', 'starter-shelter' ) + ' ' ),
-                    results.created > 0 ? el( 'span', { style: { color: '#00a32a' } }, results.created + ' created ' ) : null,
-                    results.updated > 0 ? el( 'span', { style: { color: '#0073aa' } }, results.updated + ' updated ' ) : null,
-                    results.skipped > 0 ? el( 'span', { style: { color: '#996800' } }, results.skipped + ' skipped ' ) : null,
-                    results.errors > 0 ? el( 'span', { style: { color: '#d63638' } }, results.errors + ' errors' ) : null
+                    el( 'div', {},
+                        el( 'strong', {}, __( 'Import Complete!', 'starter-shelter' ) + ' ' ),
+                        results.created > 0 ? el( 'span', { style: { color: '#00a32a' } }, results.created + ' created ' ) : null,
+                        results.updated > 0 ? el( 'span', { style: { color: '#0073aa' } }, results.updated + ' updated ' ) : null,
+                        results.skipped > 0 ? el( 'span', { style: { color: '#996800' } }, results.skipped + ' skipped ' ) : null,
+                        results.errors > 0 ? el( 'span', { style: { color: '#d63638' } }, results.errors + ' errors' ) : null,
+                        results.errors > 0 && importKey ? el( 'div', { style: { marginTop: '8px' } },
+                            el( 'a', {
+                                href: sdImportExport.ajaxUrl + '?action=sd_download_error_csv&import_key=' + importKey + '&_wpnonce=' + sdImportExport.errorCsvNonce,
+                                className: 'button button-small',
+                                style: { textDecoration: 'none' }
+                            }, __( 'Download Error Report (CSV)', 'starter-shelter' ) )
+                        ) : null
+                    )
                 ) : null,
 
                 // Template info

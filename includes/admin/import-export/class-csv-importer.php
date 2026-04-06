@@ -38,6 +38,11 @@ use Starter_Shelter\Helpers;
 class CSV_Importer {
 
 	/**
+	 * Batch size for chunked imports.
+	 */
+	private const BATCH_SIZE = 50;
+
+	/**
 	 * Meta key for the import deduplication hash.
 	 *
 	 * Stored as post meta on every imported record. When re-importing,
@@ -252,6 +257,259 @@ class CSV_Importer {
 			'totalRows' => $row_num,
 			'validRows' => $valid_count,
 		];
+	}
+
+	/**
+	 * Start a batched import.
+	 *
+	 * Moves the uploaded file to a persistent temp location, counts rows,
+	 * and returns an import session key. The JS polls process_batch()
+	 * with this key until all rows are processed.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @param string $entity_type Key from import-export.json entity_types.
+	 * @param string $filepath    Path to the uploaded CSV file.
+	 * @param array  $options     Import options.
+	 * @return array{ import_key: string, total_rows: int }|\WP_Error
+	 */
+	public static function start_import( string $entity_type, string $filepath, array $options = [] ): array|\WP_Error {
+		$config = Config::get_path( 'import-export', "entity_types.{$entity_type}.import" );
+		if ( ! $config ) {
+			return new \WP_Error( 'invalid_type', __( 'Invalid import type.', 'starter-shelter' ) );
+		}
+
+		// Move uploaded file to a persistent temp location.
+		$upload_dir = wp_upload_dir();
+		$import_key = 'sd_import_' . wp_generate_uuid4();
+		$dest       = $upload_dir['basedir'] . '/' . $import_key . '.csv';
+
+		if ( ! copy( $filepath, $dest ) ) {
+			return new \WP_Error( 'file_error', __( 'Could not save uploaded file.', 'starter-shelter' ) );
+		}
+
+		// Count total data rows.
+		$handle = fopen( $dest, 'r' );
+		fgetcsv( $handle ); // Skip header.
+		$total_rows = 0;
+		while ( fgetcsv( $handle ) !== false ) {
+			$total_rows++;
+		}
+		fclose( $handle );
+
+		// Store import session in a transient.
+		$session = [
+			'entity_type' => $entity_type,
+			'filepath'    => $dest,
+			'options'     => $options,
+			'total_rows'  => $total_rows,
+			'processed'   => 0,
+			'results'     => [
+				'created'       => 0,
+				'updated'       => 0,
+				'skipped'       => 0,
+				'errors'        => 0,
+				'duplicates'    => 0,
+				'error_details' => [],
+			],
+		];
+
+		set_transient( $import_key, $session, HOUR_IN_SECONDS );
+
+		return [
+			'import_key' => $import_key,
+			'total_rows' => $total_rows,
+			'batch_size' => self::BATCH_SIZE,
+		];
+	}
+
+	/**
+	 * Process one batch of rows from a started import.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @param string $import_key The import session key.
+	 * @return array{ done: bool, processed: int, total: int, results: array }|\WP_Error
+	 */
+	public static function process_batch( string $import_key ): array|\WP_Error {
+		$session = get_transient( $import_key );
+		if ( ! $session ) {
+			return new \WP_Error( 'session_expired', __( 'Import session expired. Please start again.', 'starter-shelter' ) );
+		}
+
+		$entity_type = $session['entity_type'];
+		$filepath    = $session['filepath'];
+		$options     = $session['options'];
+		$offset      = $session['processed'];
+		$results     = $session['results'];
+
+		$config = Config::get_path( 'import-export', "entity_types.{$entity_type}.import" );
+		if ( ! $config ) {
+			return new \WP_Error( 'invalid_type', __( 'Invalid import type.', 'starter-shelter' ) );
+		}
+
+		$ability_name = $config['ability'] ?? null;
+		$is_donor     = ( 'upsert_donor' === ( $config['handler'] ?? null ) );
+		$validator    = new CSV_Validator( $entity_type );
+
+		$skip_errors     = $options['skip_errors'] ?? true;
+		$create_donors   = $options['create_donors'] ?? true;
+		$update_existing = $options['update_existing'] ?? true;
+		$skip_duplicates = $options['skip_duplicates'] ?? true;
+		$hash_columns    = $config['hash_columns'] ?? [];
+
+		// Load existing hashes.
+		$existing_hashes = [];
+		if ( $skip_duplicates && ! empty( $hash_columns ) && ! $is_donor ) {
+			$post_type       = Config::get_path( 'import-export', "entity_types.{$entity_type}.post_type" ) ?? '';
+			$existing_hashes = self::load_existing_hashes( $post_type );
+		}
+
+		// Open CSV and skip to the right offset.
+		$csv = self::open_csv( $filepath, $validator, $entity_type );
+		if ( is_wp_error( $csv ) ) {
+			return $csv;
+		}
+
+		$handle  = $csv['handle'];
+		$headers = $csv['headers'];
+
+		// Skip already-processed rows.
+		for ( $i = 0; $i < $offset; $i++ ) {
+			if ( fgetcsv( $handle ) === false ) {
+				break;
+			}
+		}
+
+		// Process this batch.
+		Helpers\set_internal_processing( true );
+
+		try {
+			$batch_processed = 0;
+
+			while ( $batch_processed < self::BATCH_SIZE && ( $data = fgetcsv( $handle ) ) !== false ) {
+				$row_number = $offset + $batch_processed + 2; // +2 for header + 1-indexed.
+				$batch_processed++;
+
+				$row = @array_combine( $headers, array_pad( $data, count( $headers ), '' ) );
+				if ( false === $row ) {
+					$results['skipped']++;
+					continue;
+				}
+
+				$errors = $validator->validate_row( $row );
+				if ( ! empty( $errors ) ) {
+					self::record_error( $results, $row_number, implode( '; ', $errors ), $skip_errors );
+					// Store the original row data for the error CSV.
+					$results['error_details'][ count( $results['error_details'] ) - 1 ]['row_data'] = $data;
+					continue;
+				}
+
+				if ( $skip_duplicates && ! $is_donor && ! empty( $hash_columns ) ) {
+					$hash = self::compute_row_hash( $entity_type, $row, $hash_columns );
+					if ( isset( $existing_hashes[ $hash ] ) ) {
+						$results['duplicates']++;
+						$results['skipped']++;
+						continue;
+					}
+				}
+
+				$result = $is_donor
+					? self::upsert_donor( $row, $update_existing )
+					: self::import_entity_row( $row, $config, $create_donors, $entity_type, $hash_columns );
+
+				if ( is_wp_error( $result ) ) {
+					self::record_error( $results, $row_number, $result->get_error_message(), $skip_errors );
+					$results['error_details'][ count( $results['error_details'] ) - 1 ]['row_data'] = $data;
+				} else {
+					self::tally_result( $results, $result, $row_number, $skip_errors );
+
+					if ( ( $result['created'] ?? false ) && ! empty( $hash_columns ) ) {
+						$hash = $hash ?? self::compute_row_hash( $entity_type, $row, $hash_columns );
+						$existing_hashes[ $hash ] = true;
+					}
+				}
+			}
+		} finally {
+			Helpers\set_internal_processing( false );
+		}
+
+		fclose( $handle );
+
+		// Update session.
+		$session['processed'] = $offset + $batch_processed;
+		$session['results']   = $results;
+		$done = $session['processed'] >= $session['total_rows'];
+
+		if ( $done ) {
+			// Clean up the temp file.
+			@unlink( $filepath );
+
+			// Store error details for download if there are any.
+			if ( ! empty( $results['error_details'] ) ) {
+				set_transient( $import_key . '_errors', $results['error_details'], HOUR_IN_SECONDS );
+			}
+
+			delete_transient( $import_key );
+		} else {
+			set_transient( $import_key, $session, HOUR_IN_SECONDS );
+		}
+
+		return [
+			'done'      => $done,
+			'processed' => $session['processed'],
+			'total'     => $session['total_rows'],
+			'results'   => $results,
+			'import_key' => $import_key,
+		];
+	}
+
+	/**
+	 * Generate a CSV of error rows for download.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @param string $import_key The import session key.
+	 * @return string|null CSV content or null if no errors.
+	 */
+	public static function get_error_csv( string $import_key ): ?string {
+		$errors = get_transient( $import_key . '_errors' );
+		if ( ! $errors || ! is_array( $errors ) ) {
+			return null;
+		}
+
+		$output = fopen( 'php://temp', 'r+' );
+		fwrite( $output, "\xEF\xBB\xBF" ); // UTF-8 BOM.
+
+		// Header: original columns + error column.
+		$first_row = $errors[0]['row_data'] ?? [];
+		$header = array_keys( $first_row ?: [] );
+		$header[] = 'error_message';
+		$header[] = 'row_number';
+
+		if ( ! empty( $first_row ) ) {
+			fputcsv( $output, [ 'Row', 'Error', ...array_map( fn( $i ) => "Column " . ( $i + 1 ), range( 0, count( $first_row ) - 1 ) ) ] );
+		}
+
+		foreach ( $errors as $error ) {
+			$row_data = $error['row_data'] ?? [];
+			if ( ! empty( $row_data ) ) {
+				fputcsv( $output, array_merge(
+					[ $error['row'] ?? '', $error['message'] ?? '' ],
+					$row_data
+				) );
+			} else {
+				fputcsv( $output, [ $error['row'] ?? '', $error['message'] ?? '' ] );
+			}
+		}
+
+		rewind( $output );
+		$csv = stream_get_contents( $output );
+		fclose( $output );
+
+		delete_transient( $import_key . '_errors' );
+
+		return $csv;
 	}
 
 	/**
