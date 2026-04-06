@@ -30,7 +30,6 @@ class Settings {
         'data'     => 'Data',
         'products' => 'Products',
         'emails'   => 'Emails',
-        'pages'    => 'Pages',
     ];
 
     public static function init(): void {
@@ -144,9 +143,6 @@ class Settings {
             echo '<p>' . esc_html__( 'Configure email notifications.', 'starter-shelter' ) . '</p>';
         }, self::PAGE_SLUG . '_emails' );
 
-        add_settings_section( 'sd_pages', __( 'Page Settings', 'starter-shelter' ), function() {
-            echo '<p>' . esc_html__( 'Select pages for plugin functionality.', 'starter-shelter' ) . '</p>';
-        }, self::PAGE_SLUG . '_pages' );
     }
 
     private static function register_fields(): void {
@@ -202,15 +198,6 @@ class Settings {
             'description' => __( 'Email address for business logo moderation notifications.', 'starter-shelter' ),
         ], 'emails' );
 
-        // Pages tab fields
-        foreach ( [
-            'memorial_wall_page' => 'Memorial Wall Page',
-            'donor_wall_page'    => 'Donor Wall Page',
-            'donation_page'      => 'Donation Page',
-            'membership_page'    => 'Membership Page',
-        ] as $id => $label ) {
-            self::add_field( $id, __( $label, 'starter-shelter' ), 'sd_pages', 'page', [ 'default' => 0 ], 'pages' );
-        }
     }
 
     private static function add_field( string $id, string $title, string $section, string $type, array $args = [], string $tab = 'general' ): void {
@@ -282,10 +269,6 @@ class Settings {
         foreach ( [ 'feature_anonymous_donations', 'feature_dedications', 'feature_family_notifications', 'feature_renewal_reminders', 'feature_annual_statements' ] as $f ) {
             $sanitized[ $f ] = ! empty( $input[ $f ] );
         }
-        foreach ( [ 'memorial_wall_page', 'donor_wall_page', 'donation_page', 'membership_page' ] as $f ) {
-            $sanitized[ $f ] = absint( $input[ $f ] ?? 0 );
-        }
-
         return $sanitized;
     }
 
@@ -305,10 +288,6 @@ class Settings {
             'feature_family_notifications'  => true,
             'feature_renewal_reminders'     => true,
             'feature_annual_statements'     => true,
-            'memorial_wall_page'            => 0,
-            'donor_wall_page'               => 0,
-            'donation_page'                 => 0,
-            'membership_page'               => 0,
         ];
     }
 
