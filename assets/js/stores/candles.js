@@ -1,107 +1,30 @@
 /**
- * Candles Store — Light a candle for a memorial.
+ * Candles namespace placeholder.
  *
- * Manages per-user candle state and optimistic toggle UI.
- * Uses a separate namespace from the memorials store so it
- * doesn't interfere with the wall's navigation logic.
+ * The candle interactivity (getters and toggle action) lives inside the
+ * memorials store now (see memorials.js) so it can read `context.item`
+ * from the same namespace `data-wp-each` binds into. Splitting the
+ * candle code into its own namespace caused two problems:
+ *
+ *   1. `data-wp-interactive="starter-shelter/candles"` on the inner div
+ *      created a fresh context scope that did not inherit the per-item
+ *      proxy from the parent's `data-wp-each`, so `ctx.item` was always
+ *      undefined.
+ *   2. Registering candle code under the memorials namespace from a
+ *      separate file resulted in non-deterministic merge ordering with
+ *      memorials.js, intermittently overwriting state/getters.
+ *
+ * The `starter-shelter/candles` namespace is still used to hold the
+ * current user's lit-list. It is seeded server-side via
+ * wp_interactivity_state() in register-stores.php and the runtime
+ * hydrates it without needing a JS `store()` call here. The memorials
+ * store reads/writes that state via `store('starter-shelter/candles')`.
+ *
+ * This file is intentionally a no-op and is no longer enqueued by the
+ * memorial-wall block. It is kept so the registered script module
+ * `starter-shelter/candles` continues to resolve if anything else
+ * references it.
  *
  * @package Starter_Shelter
  * @since 2.1.0
  */
-
-import { store, getContext } from '@wordpress/interactivity';
-
-const NAMESPACE = 'starter-shelter/candles';
-
-const { state } = store( NAMESPACE, {
-	state: {
-		/** @type {number[]} Memorial IDs the current user has lit. */
-		candles: [],
-
-		/** Derived: is the current memorial lit? */
-		get isLit() {
-			const ctx = getContext();
-			const id = ctx.memorialId || ctx.item?.id;
-			return id ? state.candles.includes( id ) : false;
-		},
-
-		/** Derived: candle count for the current memorial. */
-		get candleCount() {
-			const ctx = getContext();
-			return ctx.candleCount ?? 0;
-		},
-
-		/** Derived: display label. */
-		get candleLabel() {
-			const count = state.candleCount;
-			if ( count === 0 ) return 'Light a candle';
-			if ( count === 1 ) return '1 candle';
-			return count + ' candles';
-		},
-
-		/** Derived: aria label for the toggle button. */
-		get candleAriaLabel() {
-			const ctx = getContext();
-			const name = ctx.item?.honoree_name || ctx.honoreeName || '';
-			return state.isLit
-				? 'Remove candle for ' + name
-				: 'Light a candle for ' + name;
-		},
-	},
-
-	actions: {
-		/**
-		 * Toggle candle on/off for a memorial.
-		 * Optimistic update: UI changes immediately, server confirms.
-		 */
-		*toggleCandle( event ) {
-			// Prevent the click from navigating the memorial link.
-			event.preventDefault();
-			event.stopPropagation();
-
-			const ctx = getContext();
-			const memorialId = ctx.memorialId || ctx.item?.id;
-			if ( ! memorialId ) return;
-
-			const wasLit = state.candles.includes( memorialId );
-
-			// Optimistic update.
-			if ( wasLit ) {
-				state.candles = state.candles.filter( function( id ) { return id !== memorialId; } );
-				ctx.candleCount = Math.max( 0, ( ctx.candleCount || 0 ) - 1 );
-			} else {
-				state.candles = [ ...state.candles, memorialId ];
-				ctx.candleCount = ( ctx.candleCount || 0 ) + 1;
-			}
-
-			// Server call.
-			try {
-				const response = yield fetch( ctx.candleApiUrl || '/wp-json/starter-shelter/v1/candles/toggle', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify( { memorial_id: memorialId } ),
-					credentials: 'same-origin',
-				} );
-
-				const result = yield response.json();
-
-				// Confirm from server.
-				if ( result.count !== undefined ) {
-					ctx.candleCount = result.count;
-				}
-				if ( result.candles ) {
-					state.candles = result.candles;
-				}
-			} catch ( error ) {
-				// Rollback on failure.
-				if ( wasLit ) {
-					state.candles = [ ...state.candles, memorialId ];
-					ctx.candleCount = ( ctx.candleCount || 0 ) + 1;
-				} else {
-					state.candles = state.candles.filter( function( id ) { return id !== memorialId; } );
-					ctx.candleCount = Math.max( 0, ( ctx.candleCount || 0 ) - 1 );
-				}
-			}
-		},
-	},
-} );

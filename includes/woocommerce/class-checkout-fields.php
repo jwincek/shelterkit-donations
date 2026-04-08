@@ -34,7 +34,10 @@ class Checkout_Fields {
      * @since 1.0.0
      */
     public static function init(): void {
-        self::load_field_definitions();
+        // Field definitions are built lazily on first access (see
+        // get_field_definitions()) because they contain __() calls and
+        // init() may run before the `init` hook, which would trigger
+        // WordPress's "translation loading too early" notice.
 
         // Add checkout fields.
         add_filter( 'woocommerce_checkout_fields', [ self::class, 'add_checkout_fields' ] );
@@ -56,6 +59,24 @@ class Checkout_Fields {
 
         // Enqueue scripts for conditional display.
         add_action( 'wp_enqueue_scripts', [ self::class, 'enqueue_scripts' ] );
+    }
+
+    /**
+     * Get field definitions, building them on first access.
+     *
+     * Lazy initialization avoids calling __() at plugin-load time,
+     * which would trigger WordPress's "translation loading too early"
+     * notice when init() runs on `plugins_loaded`.
+     *
+     * @since 1.1.0
+     *
+     * @return array Field definitions.
+     */
+    private static function get_field_definitions(): array {
+        if ( empty( self::$field_definitions ) ) {
+            self::load_field_definitions();
+        }
+        return self::$field_definitions;
     }
 
     /**
@@ -326,7 +347,7 @@ class Checkout_Fields {
     private static function get_fields_for_product_types( array $product_types ): array {
         $fields = [];
 
-        foreach ( self::$field_definitions as $key => $field ) {
+        foreach ( self::get_field_definitions() as $key => $field ) {
             // Fields without product_types apply to all.
             if ( empty( $field['product_types'] ) ) {
                 $fields[ $key ] = $field;
@@ -501,7 +522,7 @@ class Checkout_Fields {
             return;
         }
 
-        foreach ( self::$field_definitions as $key => $field ) {
+        foreach ( self::get_field_definitions() as $key => $field ) {
             $field_name = 'sd_' . $key;
             $meta_key = $field['meta_key'] ?? '_sd_' . $key;
 
@@ -590,7 +611,7 @@ class Checkout_Fields {
         $has_fields = false;
         $output = '<div class="sd-admin-order-fields"><h3>' . esc_html__( 'Shelter Donation Details', 'starter-shelter' ) . '</h3>';
 
-        foreach ( self::$field_definitions as $key => $field ) {
+        foreach ( self::get_field_definitions() as $key => $field ) {
             $meta_key = $field['meta_key'] ?? '_sd_' . $key;
             $value = $order->get_meta( $meta_key );
 
@@ -624,7 +645,7 @@ class Checkout_Fields {
     public static function display_email_order_fields( \WC_Order $order, bool $sent_to_admin ): void {
         $fields_output = [];
 
-        foreach ( self::$field_definitions as $key => $field ) {
+        foreach ( self::get_field_definitions() as $key => $field ) {
             $meta_key = $field['meta_key'] ?? '_sd_' . $key;
             $value = $order->get_meta( $meta_key );
 

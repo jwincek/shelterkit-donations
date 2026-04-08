@@ -86,17 +86,6 @@ function get_entity_value( array $source_args, $block_instance, string $attribut
     $field = $source_args['field'] ?? null;
     $post_id = $source_args['id'] ?? $block_instance->context['postId'] ?? null;
 
-    // Temporary debug — remove after confirming bindings work.
-    if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-        error_log( sprintf(
-            '[SD Binding] entity=%s field=%s postId=%s context_keys=%s',
-            $entity_type ?? 'null',
-            $field ?? 'null',
-            $post_id ?? 'null',
-            implode( ',', array_keys( $block_instance->context ?? [] ) )
-        ) );
-    }
-
     if ( ! $entity_type || ! $field || ! $post_id ) {
         return null;
     }

@@ -118,6 +118,7 @@
       "label": "List Donations",
       "description": "Retrieves a paginated list of donations with filters",
       "category": "shelter-donations",
+      "callback": "Starter_Shelter\\Abilities\\Donations\\list_donations",
       "permission": "owner_or_admin",
       "meta": {
         "annotations": {
@@ -357,6 +358,7 @@
       "label": "List Memberships",
       "description": "Retrieves a paginated list of memberships",
       "category": "shelter-memberships",
+      "callback": "Starter_Shelter\\Abilities\\Memberships\\list_memberships",
       "permission": "admin",
       "meta": {
         "annotations": {
@@ -486,6 +488,7 @@
       "label": "List Memorials",
       "description": "Retrieves a paginated list of memorials for the public wall",
       "category": "shelter-memorials",
+      "callback": "Starter_Shelter\\Abilities\\Memorials\\list_memorials",
       "permission": "public",
       "meta": {
         "annotations": {

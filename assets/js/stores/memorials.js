@@ -172,9 +172,113 @@ const { state, actions } = store( 'starter-shelter/memorials', {
             const ctx = getContext();
             return ctx.item?.memorial_type === 'pet';
         },
+
+        /**
+         * Derived: is the current data-wp-each item lit by this user?
+         * Reads the lit-list from the candles namespace (seeded by PHP).
+         */
+        get isLit() {
+            const ctx = getContext();
+            const id  = ctx.item?.id;
+            if ( ! id ) return false;
+            const candlesState = store( 'starter-shelter/candles' ).state;
+            return ( candlesState.candles || [] ).includes( id );
+        },
+
+        /**
+         * Derived: human-readable candle label for the current item.
+         */
+        get candleLabel() {
+            const ctx = getContext();
+            const count = ctx.item?.candle_count ?? 0;
+            if ( count === 0 ) return 'Light a candle';
+            if ( count === 1 ) return '1 candle';
+            return count + ' candles';
+        },
+
+        /**
+         * Derived: aria label for the candle toggle button.
+         */
+        get candleAriaLabel() {
+            const ctx  = getContext();
+            const name = ctx.item?.honoree_name || '';
+            const id   = ctx.item?.id;
+            const lit  = id
+                ? ( store( 'starter-shelter/candles' ).state.candles || [] ).includes( id )
+                : false;
+            return lit
+                ? 'Remove candle for ' + name
+                : 'Light a candle for ' + name;
+        },
     },
 
     actions: {
+        /**
+         * Toggle candle on/off for the current data-wp-each item.
+         * Optimistic update: UI changes immediately, server confirms.
+         */
+        *toggleCandle( event ) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const ctx        = getContext();
+            const item       = ctx.item;
+            const memorialId = item?.id;
+            if ( ! memorialId ) return;
+
+            const candlesState = store( 'starter-shelter/candles' ).state;
+            const wasLit       = ( candlesState.candles || [] ).includes( memorialId );
+
+            const writeCount = ( delta ) => {
+                if ( typeof item.candle_count === 'number' ) {
+                    item.candle_count = Math.max( 0, item.candle_count + delta );
+                }
+            };
+
+            // Optimistic update.
+            if ( wasLit ) {
+                candlesState.candles = ( candlesState.candles || [] ).filter(
+                    function( id ) { return id !== memorialId; }
+                );
+                writeCount( -1 );
+            } else {
+                candlesState.candles = [ ...( candlesState.candles || [] ), memorialId ];
+                writeCount( 1 );
+            }
+
+            // Server call.
+            const apiUrl = ctx.candleApiUrl || '/wp-json/starter-shelter/v1/candles/toggle';
+
+            try {
+                const response = yield fetch( apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify( { memorial_id: memorialId } ),
+                    credentials: 'same-origin',
+                } );
+
+                const result = yield response.json();
+
+                if ( result.count !== undefined && typeof item.candle_count === 'number' ) {
+                    item.candle_count = result.count;
+                }
+                if ( result.candles ) {
+                    candlesState.candles = result.candles;
+                }
+            } catch ( error ) {
+                // Rollback on failure.
+                if ( wasLit ) {
+                    candlesState.candles = [ ...( candlesState.candles || [] ), memorialId ];
+                    writeCount( 1 );
+                } else {
+                    candlesState.candles = ( candlesState.candles || [] ).filter(
+                        function( id ) { return id !== memorialId; }
+                    );
+                    writeCount( -1 );
+                }
+            }
+        },
+
         /**
          * Handle filter <select> changes.
          *
