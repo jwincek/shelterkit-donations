@@ -3,7 +3,7 @@
  * Plugin Name: Starter Shelter Donations
  * Plugin URI: https://github.com/starter-shelter
  * Description: Animal shelter donations, memberships, and memorials management using WordPress 6.9+ Abilities API.
- * Version: 1.1.0
+ * Version: 1.1.1
  * Requires at least: 6.9
  * Requires PHP: 8.1
  * Author: Jerome Wincek / Claude
@@ -18,7 +18,7 @@ declare( strict_types = 1 );
 defined( 'ABSPATH' ) || exit;
 
 // Plugin constants.
-define( 'STARTER_SHELTER_VERSION', '1.1.0' );
+define( 'STARTER_SHELTER_VERSION', '1.1.1' );
 define( 'STARTER_SHELTER_FILE', __FILE__ );
 define( 'STARTER_SHELTER_PATH', plugin_dir_path( __FILE__ ) );
 define( 'STARTER_SHELTER_URL', plugin_dir_url( __FILE__ ) );
