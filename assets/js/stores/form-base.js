@@ -20,11 +20,37 @@ const SUBMIT_TIMEOUT = 30000;
 // ── DOM helpers ──────────────────────────────────────────────────────
 
 /**
- * Refresh WooCommerce cart fragments (header cart widget, etc.).
+ * Refresh WooCommerce cart UIs after a successful AJAX add-to-cart.
+ *
+ * WC has two cart UI families that listen on different mechanisms:
+ *
+ * - The classic mini-cart widget refreshes via the jQuery
+ *   `wc_fragment_refresh` event on document.body.
+ * - The WC Blocks mini-cart (`woocommerce/mini-cart` block) listens for the
+ *   native DOM event `wc-blocks_added_to_cart` on document.body. On that
+ *   event it refetches via the WC Store REST API. (Confirmed against
+ *   WC 10.7.0 assets/client/blocks/mini-cart-component-frontend.js.)
+ *
+ * The wp.data dispatch is a no-op on pages that don't enqueue @wordpress/data
+ * globally (most front-end pages); the DOM event is the reliable path.
+ *
+ * Without the DOM event dispatch, items added through our AJAX flow don't
+ * appear in the Blocks mini-cart until a full page reload.
  */
 function refreshCartFragments() {
 	if ( typeof jQuery !== 'undefined' && jQuery( document.body ).trigger ) {
 		jQuery( document.body ).trigger( 'wc_fragment_refresh' );
+	}
+
+	if ( typeof document !== 'undefined' && document.body && typeof CustomEvent === 'function' ) {
+		document.body.dispatchEvent( new CustomEvent( 'wc-blocks_added_to_cart' ) );
+	}
+
+	if ( window.wp?.data?.dispatch ) {
+		const cartStore = window.wp.data.dispatch( 'wc/store/cart' );
+		if ( cartStore && typeof cartStore.invalidateResolutionForStore === 'function' ) {
+			cartStore.invalidateResolutionForStore();
+		}
 	}
 }
 

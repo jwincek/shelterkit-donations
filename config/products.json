@@ -11,19 +11,35 @@
           "transform": "normalize_allocation",
           "default": "general-fund"
         },
+        "donor_name": {
+          "source": "item_meta",
+          "key": "_sd_donor_name"
+        },
         "dedication": {
-          "source": "order_meta",
-          "key": "_sd_dedication"
+          "source": "item_meta",
+          "key": "_sd_dedication",
+          "fallback": {
+            "source": "order_meta",
+            "key": "_sd_dedication"
+          }
         },
         "is_anonymous": {
-          "source": "order_meta",
+          "source": "item_meta",
           "key": "_sd_is_anonymous",
+          "fallback": {
+            "source": "order_meta",
+            "key": "_sd_is_anonymous"
+          },
           "transform": "boolean",
           "default": false
         },
         "campaign_id": {
-          "source": "order_meta",
-          "key": "_sd_campaign_id"
+          "source": "item_meta",
+          "key": "_sd_campaign_id",
+          "fallback": {
+            "source": "order_meta",
+            "key": "_sd_campaign_id"
+          }
         }
       }
     },
@@ -42,9 +58,17 @@
           "source": "static",
           "value": "individual"
         },
+        "donor_name": {
+          "source": "item_meta",
+          "key": "_sd_donor_name"
+        },
         "is_anonymous": {
-          "source": "order_meta",
+          "source": "item_meta",
           "key": "_sd_is_anonymous",
+          "fallback": {
+            "source": "order_meta",
+            "key": "_sd_is_anonymous"
+          },
           "transform": "boolean",
           "default": false
         }
@@ -65,13 +89,36 @@
           "source": "static",
           "value": "business"
         },
+        "donor_name": {
+          "source": "item_meta",
+          "key": "_sd_donor_name"
+        },
         "business_name": {
-          "source": "order_meta",
+          "source": "item_meta",
           "key": "_sd_business_name",
           "fallback": {
-            "source": "order_field",
-            "key": "billing_company"
+            "source": "order_meta",
+            "key": "_sd_business_name",
+            "fallback": {
+              "source": "order_field",
+              "key": "billing_company"
+            }
           }
+        },
+        "logo_attachment_id": {
+          "source": "item_meta",
+          "key": "_sd_logo_attachment_id",
+          "transform": "integer"
+        },
+        "is_anonymous": {
+          "source": "item_meta",
+          "key": "_sd_is_anonymous",
+          "fallback": {
+            "source": "order_meta",
+            "key": "_sd_is_anonymous"
+          },
+          "transform": "boolean",
+          "default": false
         }
       }
     },
@@ -86,48 +133,96 @@
           "key": "in-memoriam-type",
           "transform": "lowercase"
         },
+        "donor_name": {
+          "source": "item_meta",
+          "key": "_sd_donor_name"
+        },
         "honoree_name": {
-          "source": "order_meta",
-          "key": "_sd_honoree_name"
+          "source": "item_meta",
+          "key": "_sd_honoree_name",
+          "fallback": {
+            "source": "order_meta",
+            "key": "_sd_honoree_name"
+          }
         },
         "tribute_message": {
-          "source": "order_meta",
-          "key": "_sd_tribute_message"
+          "source": "item_meta",
+          "key": "_sd_tribute_message",
+          "fallback": {
+            "source": "order_meta",
+            "key": "_sd_tribute_message"
+          }
         },
         "pet_species": {
-          "source": "order_meta",
-          "key": "_sd_pet_species"
+          "source": "item_meta",
+          "key": "_sd_pet_species",
+          "fallback": {
+            "source": "order_meta",
+            "key": "_sd_pet_species"
+          }
         },
         "is_anonymous": {
-          "source": "order_meta",
+          "source": "item_meta",
           "key": "_sd_is_anonymous",
+          "fallback": {
+            "source": "order_meta",
+            "key": "_sd_is_anonymous"
+          },
           "transform": "boolean",
           "default": false
+        },
+        "campaign_id": {
+          "source": "item_meta",
+          "key": "_sd_campaign_id",
+          "fallback": {
+            "source": "order_meta",
+            "key": "_sd_campaign_id"
+          }
         },
         "notify_family": {
           "source": "composite",
           "fields": {
             "enabled": {
-              "source": "order_meta",
+              "source": "item_meta",
               "key": "_sd_notify_family",
+              "fallback": {
+                "source": "order_meta",
+                "key": "_sd_notify_family"
+              },
               "transform": "boolean",
               "default": false
             },
             "name": {
-              "source": "order_meta",
-              "key": "_sd_family_name"
+              "source": "item_meta",
+              "key": "_sd_family_name",
+              "fallback": {
+                "source": "order_meta",
+                "key": "_sd_family_name"
+              }
             },
             "email": {
-              "source": "order_meta",
-              "key": "_sd_family_email"
+              "source": "item_meta",
+              "key": "_sd_family_email",
+              "fallback": {
+                "source": "order_meta",
+                "key": "_sd_family_email"
+              }
             },
             "address": {
-              "source": "order_meta",
-              "key": "_sd_family_address"
+              "source": "item_meta",
+              "key": "_sd_family_address",
+              "fallback": {
+                "source": "order_meta",
+                "key": "_sd_family_address"
+              }
             },
             "send_card": {
-              "source": "order_meta",
+              "source": "item_meta",
               "key": "_sd_send_card",
+              "fallback": {
+                "source": "order_meta",
+                "key": "_sd_send_card"
+              },
               "transform": "boolean",
               "default": false
             }

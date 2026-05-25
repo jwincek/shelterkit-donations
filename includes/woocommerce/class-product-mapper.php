@@ -98,7 +98,9 @@ class Product_Mapper {
      * @return array The ability input array.
      */
     public static function build_input( \WC_Order $order, \WC_Order_Item $item, array $config ): array {
-        // Base input from order - always included.
+        // Base input from order. donor_name is resolved by input_mapping when
+        // the product configures it (typically with item_meta + billing fallback);
+        // billing name is applied here only as the ultimate default.
         $input = [
             'order_id'    => $order->get_id(),
             'amount'      => (float) $item->get_total(),
@@ -109,9 +111,11 @@ class Product_Mapper {
         // Map additional fields from configuration.
         foreach ( $config['input_mapping'] ?? [] as $field => $mapping ) {
             $value = self::resolve_mapping( $order, $item, $mapping );
-            
-            // Only set if value is not null, or if there's no 'required' flag.
-            if ( null !== $value ) {
+
+            // Only override the base when the mapping produced a real value.
+            // This lets products.json donor_name override the billing default
+            // when the form supplied one (item_meta _sd_donor_name).
+            if ( null !== $value && '' !== $value ) {
                 $input[ $field ] = $value;
             }
         }

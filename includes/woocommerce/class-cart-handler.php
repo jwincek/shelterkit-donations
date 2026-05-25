@@ -584,18 +584,6 @@ class Cart_Handler {
                 $item->add_meta_data( '_' . $key, $values[ $key ], true );
             }
         }
-
-        // Also save to order meta for easy access.
-        if ( ! empty( $values['sd_campaign_id'] ) ) {
-            $order->update_meta_data( '_sd_campaign_id', $values['sd_campaign_id'] );
-        }
-        if ( ! empty( $values['sd_is_anonymous'] ) ) {
-            $order->update_meta_data( '_sd_is_anonymous', true );
-        }
-        if ( ! empty( $values['sd_dedication_enabled'] ) ) {
-            $order->update_meta_data( '_sd_dedication_type', $values['sd_dedication_type'] ?? 'honor' );
-            $order->update_meta_data( '_sd_honoree_name', $values['sd_honoree_name'] ?? '' );
-        }
     }
 
     /**

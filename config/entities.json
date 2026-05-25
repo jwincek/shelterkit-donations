@@ -123,6 +123,51 @@
                     "type": "boolean",
                     "default": false,
                     "description": "Whether membership auto-renews"
+                },
+                "business_name": {
+                    "type": "string",
+                    "description": "Business name (business memberships only)"
+                },
+                "business_website": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "Business website URL (business memberships only)"
+                },
+                "business_description": {
+                    "type": "string",
+                    "description": "Business description (business memberships only)"
+                },
+                "logo_attachment_id": {
+                    "type": "integer",
+                    "description": "WordPress attachment ID of the business logo"
+                },
+                "logo_status": {
+                    "type": "string",
+                    "enum": [
+                        "pending",
+                        "approved",
+                        "rejected"
+                    ],
+                    "description": "Moderation status of the business logo"
+                },
+                "logo_rejection_reason": {
+                    "type": "string",
+                    "description": "Reason given when a business logo is rejected"
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "active",
+                        "cancelled",
+                        "expired"
+                    ],
+                    "default": "active",
+                    "description": "Lifecycle status of the membership"
+                },
+                "cancelled_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "When the membership was cancelled (if applicable)"
                 }
             },
             "computed": {
