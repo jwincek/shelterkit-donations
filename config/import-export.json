@@ -572,9 +572,10 @@
               "person",
               "pet",
               "human",
-              "honor"
+              "honor",
+              "memory"
             ],
-            "description": "One of: pet, human, honor (or legacy: person)"
+            "description": "Canonical values: person, pet. Legacy values (human, honor, memory) accepted at import and normalized to 'person' by the memorial create ability."
           },
           "tribute_message": {
             "target": "tribute_message",

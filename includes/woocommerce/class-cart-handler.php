@@ -576,7 +576,6 @@ class Cart_Handler {
             'sd_membership_tier',
             'sd_business_name',
             'sd_logo_attachment_id',
-            'sd_custom_price',
         ];
 
         foreach ( $meta_keys as $key ) {
@@ -630,15 +629,23 @@ class Cart_Handler {
         require_once ABSPATH . 'wp-admin/includes/file.php';
         require_once ABSPATH . 'wp-admin/includes/media.php';
 
-        // Validate file type.
+        // Validate file type via WP's server-side check rather than the
+        // client-supplied $_FILES[..]['type'] (trivially spoofable).
         // SVG intentionally excluded — SVGs can contain embedded JavaScript
         // and are a known XSS vector. Only raster formats are safe for
         // user-uploaded content served inline.
-        $allowed = [ 'image/png', 'image/jpeg' ];
-        if ( ! in_array( $_FILES['business_logo']['type'] ?? '', $allowed, true ) ) {
+        $file_check = wp_check_filetype_and_ext(
+            $_FILES['business_logo']['tmp_name'] ?? '',
+            $_FILES['business_logo']['name']     ?? '',
+            [
+                'png'      => 'image/png',
+                'jpg|jpeg' => 'image/jpeg',
+            ]
+        );
+        if ( empty( $file_check['ext'] ) || empty( $file_check['type'] ) ) {
             return new \WP_Error(
                 'invalid_file_type',
-                __( 'Logo must be a PNG, JPG, or SVG file.', 'starter-shelter' )
+                __( 'Logo must be a PNG or JPG file.', 'starter-shelter' )
             );
         }
 
@@ -662,7 +669,6 @@ class Cart_Handler {
 
         // Mark as pending review.
         update_post_meta( $attachment_id, '_sd_logo_status', 'pending' );
-        update_post_meta( $attachment_id, '_sd_logo_source', 'membership_form' );
 
         return $attachment_id;
     }

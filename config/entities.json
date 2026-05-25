@@ -231,12 +231,12 @@
                 "memorial_type": {
                     "type": "string",
                     "enum": [
-                        "human",
-                        "pet",
-                        "honor"
+                        "person",
+                        "pet"
                     ],
+                    "default": "person",
                     "show_in_rest": true,
-                    "description": "Type of memorial"
+                    "description": "Subject of the memorial (canonical values; legacy rows may contain 'human', 'honor', or 'memory' — normalized to 'person' on read via Helpers\\normalize_memorial_type)"
                 },
                 "pet_species": {
                     "type": "string",

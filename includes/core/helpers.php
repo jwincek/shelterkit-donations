@@ -399,11 +399,31 @@ function get_attachment_url( int $attachment_id, string $size = 'full' ): string
  * @return string The human-readable label.
  */
 function get_memorial_type_label( string $type ): string {
-    return match ( $type ) {
-        'memory' => 'In Memory Of',
-        'honor'  => 'In Honor Of',
-        default  => ucfirst( $type ),
+    return match ( normalize_memorial_type( $type ) ) {
+        'pet'   => __( 'Pet', 'starter-shelter' ),
+        default => __( 'Person', 'starter-shelter' ),
     };
+}
+
+/**
+ * Normalize a memorial_type value to the canonical enum.
+ *
+ * The canonical memorial_type values are `person` and `pet`. Legacy data
+ * may contain `human` (treated as person), `honor` (the "in honor of"
+ * sentiment, stored separately as dedication_type but historically
+ * written to memorial_type), or `memory` (same conflation). All legacy
+ * values normalize to `person` except `pet`.
+ *
+ * Apply this on read so existing rows render correctly while writers
+ * are updated to emit canonical values only.
+ *
+ * @since 1.1.2
+ *
+ * @param string $raw The raw memorial_type value.
+ * @return string Canonical value: `person` or `pet`.
+ */
+function normalize_memorial_type( string $raw ): string {
+    return 'pet' === strtolower( trim( $raw ) ) ? 'pet' : 'person';
 }
 
 /**

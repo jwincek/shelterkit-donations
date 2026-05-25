@@ -559,7 +559,7 @@ class Import_Ajax_Handler {
 						'email' => 'sarah.johnson@example.com', 'honoree_name' => 'Margaret Johnson',
 						'amount' => '100.00', 'date' => '2025-03-10',
 						'first_name' => 'Sarah', 'last_name' => 'Johnson',
-						'memorial_type' => 'human',
+						'memorial_type' => 'person',
 						'tribute_message' => 'In loving memory of my mother who always loved animals.',
 						'pet_species' => '',
 						'is_anonymous' => 'no', 'donor_display_name' => 'Sarah Johnson',
@@ -576,12 +576,14 @@ class Import_Ajax_Handler {
 						'notify_family_name' => 'Chen Family', 'notify_family_email' => 'family.chen@example.com',
 						'notify_family_address' => '789 Pine Street, Portland, OR 97201',
 					] ),
-					// In Honor Of — living person, anonymous.
+					// In Honor Of — living person, anonymous. (memorial_type is the
+					// subject — person/pet; the "in honor of" sentiment is tracked
+					// separately via dedication_type at the order/cart layer.)
 					self::map_example( $headers, [
 						'email' => 'lisa.park@example.com', 'honoree_name' => 'Dr. James Wilson',
 						'amount' => '75.00', 'date' => '2025-04-01',
 						'first_name' => 'Lisa', 'last_name' => 'Park',
-						'memorial_type' => 'honor',
+						'memorial_type' => 'person',
 						'tribute_message' => 'Thank you for your years of dedicated veterinary care.',
 						'pet_species' => '',
 						'is_anonymous' => 'yes', 'donor_display_name' => '',

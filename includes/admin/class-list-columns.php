@@ -374,13 +374,12 @@ class List_Columns {
                 break;
 
             case 'type':
-                $type = $memorial['memorial_type'] ?? 'human';
+                $type  = Helpers\normalize_memorial_type( (string) ( $memorial['memorial_type'] ?? '' ) );
                 $types = [
-                    'human' => [ 'label' => __( 'Person', 'starter-shelter' ), 'icon' => '❤️' ],
-                    'pet'   => [ 'label' => __( 'Pet', 'starter-shelter' ), 'icon' => '🐾' ],
-                    'honor' => [ 'label' => __( 'Honor', 'starter-shelter' ), 'icon' => '⭐' ],
+                    'person' => [ 'label' => __( 'Person', 'starter-shelter' ), 'icon' => '❤️' ],
+                    'pet'    => [ 'label' => __( 'Pet', 'starter-shelter' ), 'icon' => '🐾' ],
                 ];
-                $type_info = $types[ $type ] ?? $types['human'];
+                $type_info = $types[ $type ];
                 echo '<span class="sd-type-badge">' . esc_html( $type_info['icon'] . ' ' . $type_info['label'] ) . '</span>';
                 break;
 

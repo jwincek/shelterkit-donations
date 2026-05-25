@@ -48,9 +48,6 @@ class Order_Handler {
         // Also process on processing status for immediate fulfillment.
         add_action( 'woocommerce_order_status_processing', [ self::class, 'process_order' ], 20 );
 
-        // Handle subscription renewals if WooCommerce Subscriptions is active.
-        add_action( 'woocommerce_subscription_renewal_payment_complete', [ self::class, 'process_renewal' ], 20 );
-
         // Admin notice for processing errors.
         add_action( 'add_meta_boxes', [ self::class, 'add_processing_meta_box' ] );
 
@@ -182,15 +179,7 @@ class Order_Handler {
 
         // Execute the ability.
         $ability = wp_get_ability( $ability_name );
-        $result = $ability->execute( $input );
-
-        // Store result metadata on the item.
-        if ( ! is_wp_error( $result ) ) {
-            $item->update_meta_data( '_sd_ability_result', $result );
-            $item->save();
-        }
-
-        return $result;
+        return $ability->execute( $input );
     }
 
     /**
@@ -265,102 +254,6 @@ class Order_Handler {
         }
 
         return true;
-    }
-
-    /**
-     * Process a subscription renewal.
-     *
-     * @since 1.0.0
-     *
-     * @param \WC_Subscription $subscription The subscription object.
-     */
-    public static function process_renewal( $subscription ): void {
-        // Get the renewal order.
-        $renewal_orders = $subscription->get_related_orders( 'all', 'renewal' );
-        
-        if ( empty( $renewal_orders ) ) {
-            return;
-        }
-
-        // Get the most recent renewal order.
-        $renewal_order = reset( $renewal_orders );
-        
-        if ( ! $renewal_order ) {
-            return;
-        }
-
-        // Check each item for membership renewals.
-        foreach ( $renewal_order->get_items() as $item ) {
-            $product = $item->get_product();
-            
-            if ( ! $product ) {
-                continue;
-            }
-
-            $config = Product_Mapper::find_by_sku( $product->get_sku() );
-            
-            if ( ! $config || 'membership' !== ( $config['product_type'] ?? '' ) ) {
-                continue;
-            }
-
-            // Find the original membership.
-            $original_order = $subscription->get_parent();
-            $membership_id = self::find_membership_for_order( $original_order->get_id() );
-
-            if ( $membership_id ) {
-                // Use the renew ability.
-                $ability = wp_get_ability( 'shelter-memberships/renew' );
-                
-                if ( $ability ) {
-                    $input = [
-                        'membership_id' => $membership_id,
-                        'order_id'      => $renewal_order->get_id(),
-                        'amount'        => (float) $item->get_total(),
-                    ];
-
-                    $result = $ability->execute( $input );
-
-                    if ( is_wp_error( $result ) ) {
-                        $renewal_order->add_order_note(
-                            sprintf(
-                                /* translators: %s: error message */
-                                __( 'Membership renewal failed: %s', 'starter-shelter' ),
-                                $result->get_error_message()
-                            )
-                        );
-                    } else {
-                        $renewal_order->add_order_note(
-                            __( 'Membership renewed successfully.', 'starter-shelter' )
-                        );
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Find membership ID associated with an order.
-     *
-     * @since 1.0.0
-     *
-     * @param int $order_id The order ID.
-     * @return int|null The membership ID or null.
-     */
-    private static function find_membership_for_order( int $order_id ): ?int {
-        $memberships = get_posts( [
-            'post_type'      => 'sd_membership',
-            'post_status'    => 'publish',
-            'posts_per_page' => 1,
-            'meta_query'     => [
-                [
-                    'key'   => '_sd_wc_order_id',
-                    'value' => $order_id,
-                ],
-            ],
-            'fields'         => 'ids',
-        ] );
-
-        return ! empty( $memberships ) ? $memberships[0] : null;
     }
 
     /**
