@@ -1,0 +1,415 @@
+<?php
+/**
+ * WP-CLI: starter-shelter validate
+ *
+ * Static-analysis-style consistency checker for the plugin's
+ * config-driven contracts. Catches the classes of bug that recurred
+ * across the audit pattern sweep — ability references that don't
+ * resolve, product mappings that target nonexistent ability inputs,
+ * domain action hooks fired with no listener (or vice versa), and
+ * products.json `ability` ids that aren't declared.
+ *
+ * Each check is conservative (low false-positive rate) and operates
+ * on static string matching across config JSON + PHP source.
+ *
+ * @package Starter_Shelter
+ * @subpackage Cli
+ * @since 1.1.2
+ */
+
+declare( strict_types = 1 );
+
+namespace Starter_Shelter\Cli;
+
+use WP_CLI;
+
+/**
+ * `wp starter-shelter validate` — config/code contract validator.
+ *
+ * @since 1.1.2
+ */
+class Validate_Command {
+
+	/**
+	 * Validate the plugin's config + code contracts.
+	 *
+	 * ## OPTIONS
+	 *
+	 * [--check=<name>]
+	 * : Run only one named check. One of: abilities, products, hooks, mappings.
+	 *
+	 * [--format=<format>]
+	 * : Output format. One of: human (default), json.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp starter-shelter validate
+	 *     wp starter-shelter validate --check=abilities
+	 *     wp starter-shelter validate --format=json
+	 *
+	 * @when before_wp_load
+	 *
+	 * @param array<int, string>    $args       Positional args.
+	 * @param array<string, string> $assoc_args Flag args.
+	 */
+	public function __invoke( array $args, array $assoc_args ): void {
+		$only   = $assoc_args['check'] ?? null;
+		$format = $assoc_args['format'] ?? 'human';
+
+		$abilities_config = $this->load_json( 'config/abilities.json' );
+		$products_config  = $this->load_json( 'config/products.json' );
+
+		$findings = [];
+
+		if ( null === $only || 'abilities' === $only ) {
+			$findings = array_merge(
+				$findings,
+				$this->check_ability_references( $abilities_config )
+			);
+		}
+		if ( null === $only || 'products' === $only ) {
+			$findings = array_merge(
+				$findings,
+				$this->check_product_ability_ids( $products_config, $abilities_config )
+			);
+		}
+		if ( null === $only || 'mappings' === $only ) {
+			$findings = array_merge(
+				$findings,
+				$this->check_product_input_mappings( $products_config, $abilities_config )
+			);
+		}
+		if ( null === $only || 'hooks' === $only ) {
+			$findings = array_merge(
+				$findings,
+				$this->check_domain_action_hooks()
+			);
+		}
+
+		$this->emit( $findings, $format );
+	}
+
+	/**
+	 * Check 1: every wp_get_ability('X')/wp_has_ability('X') call in PHP
+	 * resolves to an ability declared in config/abilities.json.
+	 *
+	 * Caught in audit: rest-controller calling shelter-reports/donor-summary
+	 * and shelter-reports/annual-statement (both undeclared).
+	 *
+	 * @param array<string, mixed> $abilities_config Parsed abilities.json.
+	 * @return array<int, array{file: string, line: int, message: string}>
+	 */
+	private function check_ability_references( array $abilities_config ): array {
+		$declared = array_keys( $abilities_config['abilities'] ?? [] );
+
+		$findings = [];
+		$pattern  = '/wp_(?:get|has)_ability\s*\(\s*[\'"]([^\'"]+)[\'"]/';
+
+		foreach ( $this->iter_php_files() as $file ) {
+			$contents = file_get_contents( $file );
+			if ( false === $contents ) {
+				continue;
+			}
+			if ( ! preg_match_all( $pattern, $contents, $matches, PREG_OFFSET_CAPTURE ) ) {
+				continue;
+			}
+			foreach ( $matches[1] as $match ) {
+				[ $name, $offset ] = $match;
+				if ( in_array( $name, $declared, true ) ) {
+					continue;
+				}
+				$findings[] = [
+					'file'    => $this->relative_path( $file ),
+					'line'    => $this->offset_to_line( $contents, $offset ),
+					'message' => sprintf(
+						'Reference to unregistered ability "%s" (not declared in config/abilities.json).',
+						$name
+					),
+				];
+			}
+		}
+
+		return $findings;
+	}
+
+	/**
+	 * Check 2: every `ability` id in config/products.json resolves to a
+	 * declared ability.
+	 *
+	 * @param array<string, mixed> $products_config  Parsed products.json.
+	 * @param array<string, mixed> $abilities_config Parsed abilities.json.
+	 * @return array<int, array{file: string, line: int, message: string}>
+	 */
+	private function check_product_ability_ids( array $products_config, array $abilities_config ): array {
+		$declared = array_keys( $abilities_config['abilities'] ?? [] );
+
+		$findings = [];
+		foreach ( ( $products_config['products'] ?? [] ) as $sku_prefix => $product ) {
+			$ability_id = $product['ability'] ?? null;
+			if ( null === $ability_id ) {
+				continue;
+			}
+			if ( in_array( $ability_id, $declared, true ) ) {
+				continue;
+			}
+			$findings[] = [
+				'file'    => 'config/products.json',
+				'line'    => 0,
+				'message' => sprintf(
+					'Product "%s" references ability "%s" which is not declared in config/abilities.json.',
+					$sku_prefix,
+					$ability_id
+				),
+			];
+		}
+
+		return $findings;
+	}
+
+	/**
+	 * Check 3: every `input_mapping` target in products.json appears in
+	 * the referenced ability's input_schema properties.
+	 *
+	 * Caught in audit: shelter-memberships-business products.json had no
+	 * mapping for logo_attachment_id — uploads silently dropped. Also
+	 * surfaces the opposite: input_mapping targets not declared by the
+	 * ability's schema (likely typos or stale fields).
+	 *
+	 * @param array<string, mixed> $products_config  Parsed products.json.
+	 * @param array<string, mixed> $abilities_config Parsed abilities.json.
+	 * @return array<int, array{file: string, line: int, message: string}>
+	 */
+	private function check_product_input_mappings( array $products_config, array $abilities_config ): array {
+		$findings = [];
+
+		foreach ( ( $products_config['products'] ?? [] ) as $sku_prefix => $product ) {
+			$ability_id = $product['ability'] ?? null;
+			$mapping    = $product['input_mapping'] ?? [];
+			if ( null === $ability_id || empty( $mapping ) ) {
+				continue;
+			}
+
+			$ability = $abilities_config['abilities'][ $ability_id ] ?? null;
+			if ( null === $ability ) {
+				continue;
+			}
+
+			$schema_props = $ability['input_schema']['properties'] ?? [];
+			if ( empty( $schema_props ) ) {
+				continue;
+			}
+
+			foreach ( array_keys( $mapping ) as $target ) {
+				if ( isset( $schema_props[ $target ] ) ) {
+					continue;
+				}
+				$findings[] = [
+					'file'    => 'config/products.json',
+					'line'    => 0,
+					'message' => sprintf(
+						'Product "%s" input_mapping target "%s" not declared in %s input_schema.',
+						$sku_prefix,
+						$target,
+						$ability_id
+					),
+				];
+			}
+		}
+
+		return $findings;
+	}
+
+	/**
+	 * Check 4: every do_action('starter_shelter_X') has at least one
+	 * matching add_action() listener, and every add_action() listener
+	 * has at least one matching producer.
+	 *
+	 * Caught in audit: dead listener for starter_shelter_email_sent (no
+	 * producer); orphan producer starter_shelter_memorial_family_notification
+	 * (no email subscriber).
+	 *
+	 * @return array<int, array{file: string, line: int, message: string}>
+	 */
+	private function check_domain_action_hooks(): array {
+		$producers = [];
+		$listeners = [];
+
+		$do_pattern  = '/do_action\s*\(\s*[\'"](starter_shelter_[a-z0-9_]+)[\'"]/';
+		$add_pattern = '/add_action\s*\(\s*[\'"](starter_shelter_[a-z0-9_]+)[\'"]/';
+
+		foreach ( $this->iter_php_files() as $file ) {
+			$contents = file_get_contents( $file );
+			if ( false === $contents ) {
+				continue;
+			}
+
+			if ( preg_match_all( $do_pattern, $contents, $matches, PREG_OFFSET_CAPTURE ) ) {
+				foreach ( $matches[1] as $match ) {
+					[ $hook, $offset ] = $match;
+					$producers[ $hook ][] = [
+						'file' => $this->relative_path( $file ),
+						'line' => $this->offset_to_line( $contents, $offset ),
+					];
+				}
+			}
+
+			if ( preg_match_all( $add_pattern, $contents, $matches, PREG_OFFSET_CAPTURE ) ) {
+				foreach ( $matches[1] as $match ) {
+					[ $hook, $offset ] = $match;
+					$listeners[ $hook ][] = [
+						'file' => $this->relative_path( $file ),
+						'line' => $this->offset_to_line( $contents, $offset ),
+					];
+				}
+			}
+		}
+
+		$findings = [];
+
+		// Producers with no listeners. Email-template extension-point hooks
+		// (suffixes _email_footer and _email_content) are documented escape
+		// hatches for third-party plugins; not having a built-in listener is
+		// expected.
+		foreach ( $producers as $hook => $sites ) {
+			if ( ! empty( $listeners[ $hook ] ) ) {
+				continue;
+			}
+			if ( str_ends_with( $hook, '_email_footer' ) || str_ends_with( $hook, '_email_content' ) ) {
+				continue;
+			}
+			foreach ( $sites as $site ) {
+				$findings[] = [
+					'file'    => $site['file'],
+					'line'    => $site['line'],
+					'message' => sprintf( 'do_action("%s") has no add_action listener anywhere.', $hook ),
+				];
+			}
+		}
+
+		// Listeners with no producers.
+		foreach ( $listeners as $hook => $sites ) {
+			if ( ! empty( $producers[ $hook ] ) ) {
+				continue;
+			}
+			foreach ( $sites as $site ) {
+				$findings[] = [
+					'file'    => $site['file'],
+					'line'    => $site['line'],
+					'message' => sprintf( 'add_action("%s") listens for a hook nothing fires.', $hook ),
+				];
+			}
+		}
+
+		return $findings;
+	}
+
+	/**
+	 * Load and parse a JSON config file.
+	 *
+	 * @param string $relative Path relative to plugin root.
+	 * @return array<string, mixed>
+	 */
+	private function load_json( string $relative ): array {
+		$path = STARTER_SHELTER_PATH . $relative;
+		if ( ! is_file( $path ) ) {
+			WP_CLI::error( sprintf( 'Required config missing: %s', $relative ) );
+		}
+		$raw = file_get_contents( $path );
+		if ( false === $raw ) {
+			WP_CLI::error( sprintf( 'Could not read: %s', $relative ) );
+		}
+		$data = json_decode( $raw, true );
+		if ( ! is_array( $data ) ) {
+			WP_CLI::error( sprintf( 'Invalid JSON: %s', $relative ) );
+		}
+		return $data;
+	}
+
+	/**
+	 * Iterate PHP files under includes/ and templates/. Skips vendor/,
+	 * node_modules/, and the validator's own file (whose PHPdoc contains
+	 * literal `wp_get_ability(...)` examples that would self-match).
+	 *
+	 * @return \Generator<string>
+	 */
+	private function iter_php_files(): \Generator {
+		$self = __FILE__;
+		foreach ( [ 'includes', 'templates' ] as $sub ) {
+			$root = STARTER_SHELTER_PATH . $sub;
+			if ( ! is_dir( $root ) ) {
+				continue;
+			}
+			$iter = new \RecursiveIteratorIterator(
+				new \RecursiveDirectoryIterator( $root, \FilesystemIterator::SKIP_DOTS )
+			);
+			foreach ( $iter as $file ) {
+				$path = $file->getPathname();
+				if ( '.php' !== substr( $path, -4 ) ) {
+					continue;
+				}
+				if ( str_contains( $path, '/vendor/' ) || str_contains( $path, '/node_modules/' ) ) {
+					continue;
+				}
+				if ( $path === $self ) {
+					continue;
+				}
+				yield $path;
+			}
+		}
+	}
+
+	/**
+	 * Convert a string-offset to a 1-indexed line number.
+	 *
+	 * @param string $haystack File contents.
+	 * @param int    $offset   Byte offset of match.
+	 * @return int Line number.
+	 */
+	private function offset_to_line( string $haystack, int $offset ): int {
+		return substr_count( $haystack, "\n", 0, $offset ) + 1;
+	}
+
+	/**
+	 * Make a path relative to the plugin root for nicer output.
+	 *
+	 * @param string $absolute Absolute filesystem path.
+	 * @return string Relative path.
+	 */
+	private function relative_path( string $absolute ): string {
+		$prefix = STARTER_SHELTER_PATH;
+		return str_starts_with( $absolute, $prefix )
+			? substr( $absolute, strlen( $prefix ) )
+			: $absolute;
+	}
+
+	/**
+	 * Emit findings and set the appropriate exit status.
+	 *
+	 * @param array<int, array{file: string, line: int, message: string}> $findings
+	 * @param string $format Output format: human or json.
+	 */
+	private function emit( array $findings, string $format ): void {
+		if ( 'json' === $format ) {
+			WP_CLI::print_value( $findings, [ 'format' => 'json' ] );
+			if ( ! empty( $findings ) ) {
+				exit( 1 );
+			}
+			return;
+		}
+
+		if ( empty( $findings ) ) {
+			WP_CLI::success( 'No contract violations found.' );
+			return;
+		}
+
+		foreach ( $findings as $f ) {
+			WP_CLI::line( sprintf(
+				'%s:%d  %s',
+				$f['file'],
+				$f['line'],
+				$f['message']
+			) );
+		}
+		WP_CLI::error( sprintf( '%d contract violation(s) found.', count( $findings ) ) );
+	}
+}

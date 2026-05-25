@@ -276,6 +276,10 @@
             "type": "string",
             "description": "Business name for business memberships"
           },
+          "logo_attachment_id": {
+            "type": "integer",
+            "description": "WordPress attachment ID of the business logo (business memberships)"
+          },
           "is_anonymous": {
             "type": "boolean",
             "default": false
@@ -475,6 +479,10 @@
           "is_anonymous": { "type": "boolean", "default": false },
           "notify_family": {
             "$ref": "schemas/notify-family.json"
+          },
+          "campaign_id": {
+            "type": "integer",
+            "description": "Optional campaign term ID to attach this memorial to (per-item)."
           },
           "donation_date": {
             "type": "string",

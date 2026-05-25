@@ -384,3 +384,12 @@ function starter_shelter_deactivate(): void {
     flush_rewrite_rules();
 }
 register_deactivation_hook( __FILE__, 'starter_shelter_deactivate' );
+
+// Register the WP-CLI `wp starter-shelter validate` contract-checker.
+// Loaded only when WP-CLI is active to keep production overhead at zero.
+if ( defined( 'WP_CLI' ) && WP_CLI ) {
+    \WP_CLI::add_command(
+        'starter-shelter validate',
+        \Starter_Shelter\Cli\Validate_Command::class
+    );
+}
