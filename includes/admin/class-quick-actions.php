@@ -111,6 +111,8 @@ class Quick_Actions {
 
         update_post_meta( $membership_id, '_sd_end_date', $new_end_date );
 
+        do_action( 'starter_shelter_membership_extended', $membership_id, $new_end_date );
+
         // Add note.
         $note = sprintf(
             /* translators: 1: new end date, 2: admin user */
@@ -163,6 +165,8 @@ class Quick_Actions {
         // Track that notification was sent.
         update_post_meta( $memorial_id, '_sd_family_notified_date', current_time( 'mysql' ) );
 
+        do_action( 'starter_shelter_family_notified', $memorial_id, (string) $notify_family['email'] );
+
         wp_safe_redirect( add_query_arg( [
             'post_type' => 'sd_memorial',
             'sd_action' => 'family_notified',
@@ -192,7 +196,7 @@ class Quick_Actions {
         $year = (int) wp_date( 'Y' );
 
         // Trigger the annual summary email.
-        do_action( 'starter_shelter_donor_annual_summary', $donor_id, [
+        do_action( 'starter_shelter_annual_summary', $donor_id, [
             'donor' => $donor,
             'year'  => $year,
         ] );
@@ -377,6 +381,7 @@ class Quick_Actions {
                     $base_date = $end_date ? max( strtotime( $end_date ), time() ) : time();
                     $new_end_date = wp_date( 'Y-m-d', strtotime( '+30 days', $base_date ) );
                     update_post_meta( $membership_id, '_sd_end_date', $new_end_date );
+                    do_action( 'starter_shelter_membership_extended', $membership_id, $new_end_date );
                     $count++;
                 }
                 return add_query_arg( [ 'sd_action' => 'memberships_extended', 'sd_count' => $count ], $redirect_url );
@@ -417,6 +422,7 @@ class Quick_Actions {
             if ( $notify_family['enabled'] && '' !== $notify_family['email'] && ! $already_sent ) {
                 do_action( 'starter_shelter_memorial_family_notification', $memorial_id, $memorial['donor_id'] ?? 0, $memorial );
                 update_post_meta( $memorial_id, '_sd_family_notified_date', current_time( 'mysql' ) );
+                do_action( 'starter_shelter_family_notified', $memorial_id, (string) $notify_family['email'] );
                 $count++;
             }
         }

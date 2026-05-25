@@ -367,43 +367,17 @@ function get_donor_summary( WP_REST_Request $request ) {
         return new WP_Error( 'no_donor', __( 'No donor profile found.', 'starter-shelter' ), [ 'status' => 404 ] );
     }
 
-    // Use ability for summary.
     $ability = wp_get_ability( 'shelter-reports/donor-summary' );
-
-    if ( $ability ) {
-        $result = $ability->execute( [ 'donor_id' => $donor_id ] );
-
-        if ( ! is_wp_error( $result ) ) {
-            return new WP_REST_Response( $result, 200 );
-        }
+    if ( ! $ability ) {
+        return new WP_Error( 'ability_unavailable', __( 'Donor summary unavailable.', 'starter-shelter' ), [ 'status' => 500 ] );
     }
 
-    // Fallback calculation.
-    global $wpdb;
+    $result = $ability->execute( [ 'donor_id' => $donor_id ] );
+    if ( is_wp_error( $result ) ) {
+        return $result;
+    }
 
-    $this_year = wp_date( 'Y-01-01' );
-
-    $summary = $wpdb->get_row( $wpdb->prepare( "
-        SELECT 
-            COUNT(*) as donation_count,
-            COALESCE(SUM(pm.meta_value), 0) as lifetime_giving,
-            COALESCE(SUM(CASE WHEN pmd.meta_value >= %s THEN pm.meta_value ELSE 0 END), 0) as ytd_giving
-        FROM {$wpdb->posts} p
-        JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_amount'
-        JOIN {$wpdb->postmeta} pmd ON p.ID = pmd.post_id AND pmd.meta_key = '_sd_donation_date'
-        JOIN {$wpdb->postmeta} pdi ON p.ID = pdi.post_id AND pdi.meta_key = '_sd_donor_id'
-        WHERE p.post_type = 'sd_donation'
-        AND p.post_status = 'publish'
-        AND pdi.meta_value = %d
-    ", $this_year, $donor_id ) );
-
-    return new WP_REST_Response( [
-        'donation_count'           => (int) $summary->donation_count,
-        'lifetime_giving'          => (float) $summary->lifetime_giving,
-        'lifetime_giving_formatted' => Helpers\format_currency( (float) $summary->lifetime_giving ),
-        'ytd_giving'               => (float) $summary->ytd_giving,
-        'ytd_giving_formatted'     => Helpers\format_currency( (float) $summary->ytd_giving ),
-    ], 200 );
+    return new WP_REST_Response( $result, 200 );
 }
 
 /**
@@ -519,7 +493,7 @@ function get_annual_statement( WP_REST_Request $request ) {
     $year = (int) $request->get_param( 'year' );
 
     // Use ability.
-    $ability = wp_get_ability( 'shelter-reports/annual-statement' );
+    $ability = wp_get_ability( 'shelter-reports/annual-summary' );
 
     if ( $ability ) {
         $result = $ability->execute( [

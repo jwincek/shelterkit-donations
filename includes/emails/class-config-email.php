@@ -153,6 +153,8 @@ class Config_Email extends WC_Email {
             $this->get_headers(),
             $this->get_attachments()
         );
+
+        $this->fire_sent_event();
     }
 
     /**
@@ -182,12 +184,46 @@ class Config_Email extends WC_Email {
             return false;
         }
 
-        return $this->send(
+        $sent = $this->send(
             $this->get_recipient(),
             $this->get_subject(),
             $this->get_content(),
             $this->get_headers(),
             $this->get_attachments()
+        );
+
+        $this->fire_sent_event();
+
+        return $sent;
+    }
+
+    /**
+     * Fire the `starter_shelter_email_sent` action for activity-log and
+     * third-party listeners. Primary object_id is derived from the email's
+     * first trigger_arg (always an entity id by convention); object_type is
+     * derived from the matching entity declaration.
+     *
+     * @since 1.1.2
+     */
+    protected function fire_sent_event(): void {
+        $arg_names   = $this->config['trigger_args'] ?? [];
+        $primary_arg = $arg_names[0] ?? null;
+        $object_id   = $primary_arg ? (int) ( $this->trigger_args[ $primary_arg ] ?? 0 ) : 0;
+
+        $object_type = null;
+        foreach ( $this->config['entities'] ?? [] as $entity_cfg ) {
+            if ( ( $entity_cfg['id_from'] ?? null ) === $primary_arg ) {
+                $object_type = $entity_cfg['entity'] ?? null;
+                break;
+            }
+        }
+
+        do_action(
+            'starter_shelter_email_sent',
+            $this->email_id,
+            (string) $this->recipient,
+            $object_id,
+            [ 'object_type' => $object_type ]
         );
     }
 

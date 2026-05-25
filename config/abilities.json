@@ -764,6 +764,38 @@
       }
     },
 
+    "shelter-reports/donor-summary": {
+      "label": "Get Donor Summary",
+      "description": "Quick-glance donor stats: lifetime giving, year-to-date giving, donation count",
+      "category": "shelter-reports",
+      "permission": "owner_or_admin",
+      "meta": {
+        "annotations": {
+          "readonly": true,
+          "destructive": false,
+          "idempotent": true
+        },
+        "show_in_rest": true
+      },
+      "input_schema": {
+        "type": "object",
+        "required": ["donor_id"],
+        "properties": {
+          "donor_id": { "type": "integer" }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "donation_count": { "type": "integer" },
+          "lifetime_giving": { "type": "number" },
+          "lifetime_giving_formatted": { "type": "string" },
+          "ytd_giving": { "type": "number" },
+          "ytd_giving_formatted": { "type": "string" }
+        }
+      }
+    },
+
     "shelter-reports/dashboard-stats": {
       "label": "Get Dashboard Statistics",
       "description": "Retrieves statistics for admin dashboard",

@@ -124,6 +124,49 @@ function annual_summary( array $input ): array|WP_Error {
 }
 
 /**
+ * Get quick-glance donor summary.
+ *
+ * @since 1.1.2
+ *
+ * @param array $input Input with donor_id.
+ * @return array|WP_Error Donor summary stats or error.
+ */
+function donor_summary( array $input ): array|WP_Error {
+    $donor_id = (int) ( $input['donor_id'] ?? 0 );
+
+    if ( ! $donor_id ) {
+        return new WP_Error(
+            'invalid_donor_id',
+            __( 'Valid donor ID is required.', 'starter-shelter' ),
+            [ 'status' => 400 ]
+        );
+    }
+
+    $year_start = wp_date( 'Y-01-01' );
+    $year_end   = wp_date( 'Y-12-31' );
+
+    $all_donations = Query::for( 'sd_donation' )
+        ->where( 'donor_id', $donor_id )
+        ->get();
+
+    $ytd_donations = Query::for( 'sd_donation' )
+        ->where( 'donor_id', $donor_id )
+        ->whereDateBetween( 'donation_date', $year_start, $year_end )
+        ->get();
+
+    $lifetime_giving = (float) array_sum( array_column( $all_donations, 'amount' ) );
+    $ytd_giving      = (float) array_sum( array_column( $ytd_donations, 'amount' ) );
+
+    return [
+        'donation_count'            => count( $all_donations ),
+        'lifetime_giving'           => $lifetime_giving,
+        'lifetime_giving_formatted' => Helpers\format_currency( $lifetime_giving ),
+        'ytd_giving'                => $ytd_giving,
+        'ytd_giving_formatted'      => Helpers\format_currency( $ytd_giving ),
+    ];
+}
+
+/**
  * Get dashboard statistics.
  *
  * @since 1.0.0
