@@ -12,6 +12,7 @@ declare( strict_types = 1 );
 namespace Starter_Shelter\Admin;
 
 use Starter_Shelter\Core\Entity_Hydrator;
+use Starter_Shelter\Emails\Email_Factory;
 use Starter_Shelter\Helpers;
 
 /**
@@ -73,8 +74,13 @@ class Quick_Actions {
 
         $donor_id = $membership['donor_id'] ?? 0;
 
-        // Trigger the renewal reminder email.
-        do_action( 'starter_shelter_membership_renewal_reminder', $membership_id, $donor_id, $membership );
+        // Send the renewal reminder email directly; this is a manual
+        // re-trigger, not the cron-driven `starter_shelter_membership_expiring`
+        // broadcast event.
+        Email_Factory::trigger_email( 'membership-renewal', [
+            'membership_id' => $membership_id,
+            'donor_id'      => $donor_id,
+        ] );
 
         // Track that reminder was sent.
         update_post_meta( $membership_id, '_sd_reminder_sent_date', current_time( 'mysql' ) );
@@ -228,8 +234,14 @@ class Quick_Actions {
 
         $donor_id = $donation['donor_id'] ?? 0;
 
-        // Trigger the donation receipt email.
-        do_action( 'starter_shelter_donation_receipt_resend', $donation_id, $donor_id, $donation );
+        // Re-send the receipt directly via the email factory rather than
+        // firing the normal `starter_shelter_donation_created` event (which
+        // would mislead other listeners about a new donation).
+        Email_Factory::trigger_email( 'donation-receipt', [
+            'donation_id' => $donation_id,
+            'donor_id'    => $donor_id,
+            'input'       => $donation,
+        ] );
 
         wp_safe_redirect( add_query_arg( [
             'post_type' => 'sd_donation',
@@ -368,7 +380,10 @@ class Quick_Actions {
                 foreach ( $post_ids as $membership_id ) {
                     $membership = Entity_Hydrator::get( 'sd_membership', $membership_id );
                     if ( $membership ) {
-                        do_action( 'starter_shelter_membership_renewal_reminder', $membership_id, $membership['donor_id'] ?? 0, $membership );
+                        Email_Factory::trigger_email( 'membership-renewal', [
+                            'membership_id' => $membership_id,
+                            'donor_id'      => $membership['donor_id'] ?? 0,
+                        ] );
                         update_post_meta( $membership_id, '_sd_reminder_sent_date', current_time( 'mysql' ) );
                         $count++;
                     }
@@ -452,7 +467,11 @@ class Quick_Actions {
         foreach ( $post_ids as $donation_id ) {
             $donation = Entity_Hydrator::get( 'sd_donation', $donation_id );
             if ( $donation ) {
-                do_action( 'starter_shelter_donation_receipt_resend', $donation_id, $donation['donor_id'] ?? 0, $donation );
+                Email_Factory::trigger_email( 'donation-receipt', [
+                    'donation_id' => $donation_id,
+                    'donor_id'    => $donation['donor_id'] ?? 0,
+                    'input'       => $donation,
+                ] );
                 $count++;
             }
         }

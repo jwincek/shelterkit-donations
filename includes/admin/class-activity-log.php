@@ -64,6 +64,7 @@ class Activity_Log {
         // Manual admin actions.
         add_action( 'starter_shelter_membership_extended', [ self::class, 'log_membership_extended' ], 10, 2 );
         add_action( 'starter_shelter_family_notified', [ self::class, 'log_family_notified' ], 10, 2 );
+        add_action( 'starter_shelter_membership_cancelled', [ self::class, 'log_membership_cancelled' ], 10, 3 );
 
         // Cleanup old logs.
         add_action( 'sd_cleanup_activity_log', [ self::class, 'cleanup_old_logs' ] );
@@ -378,6 +379,29 @@ class Activity_Log {
             [
                 'new_end_date' => $new_end_date,
                 'extended_by'  => get_current_user_id(),
+            ]
+        );
+    }
+
+    /**
+     * Log membership cancelled.
+     */
+    public static function log_membership_cancelled( int $membership_id, array $membership, string $reason ): void {
+        $donor_id   = (int) ( $membership['donor_id'] ?? 0 );
+        $donor_name = $donor_id ? self::get_donor_name( $donor_id ) : __( 'Unknown', 'starter-shelter' );
+
+        self::log(
+            'membership_cancelled',
+            'membership',
+            $reason
+                ? sprintf( __( '%1$s cancelled membership: %2$s', 'starter-shelter' ), $donor_name, $reason )
+                : sprintf( __( '%s cancelled membership', 'starter-shelter' ), $donor_name ),
+            'sd_membership',
+            $membership_id,
+            [
+                'donor_id' => $donor_id,
+                'reason'   => $reason,
+                'tier'     => $membership['tier'] ?? '',
             ]
         );
     }

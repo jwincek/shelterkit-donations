@@ -58,6 +58,7 @@ class Validate_Command {
 
 		$abilities_config = $this->load_json( 'config/abilities.json' );
 		$products_config  = $this->load_json( 'config/products.json' );
+		$emails_config    = $this->load_json( 'config/emails.json' );
 
 		$findings = [];
 
@@ -82,7 +83,7 @@ class Validate_Command {
 		if ( null === $only || 'hooks' === $only ) {
 			$findings = array_merge(
 				$findings,
-				$this->check_domain_action_hooks()
+				$this->check_domain_action_hooks( $emails_config )
 			);
 		}
 
@@ -220,19 +221,52 @@ class Validate_Command {
 	}
 
 	/**
+	 * Hooks documented as third-party extension points — fired but
+	 * intentionally not consumed by any built-in code. Exempt from the
+	 * "producer without listener" check.
+	 *
+	 * @var array<int, string>
+	 */
+	private const EXTENSION_POINT_HOOKS = [
+		'starter_shelter_legacy_record_updated',
+		'starter_shelter_legacy_order_synced',
+		'starter_shelter_donor_address_updated',
+		'starter_shelter_donor_profile_updated',
+		'starter_shelter_renewal_reminders_processed',
+		'starter_shelter_renewal_reminder_sent',
+	];
+
+	/**
 	 * Check 4: every do_action('starter_shelter_X') has at least one
-	 * matching add_action() listener, and every add_action() listener
-	 * has at least one matching producer.
+	 * matching add_action() listener (or dynamic listener via emails.json
+	 * trigger_hook), and every add_action() listener has at least one
+	 * matching producer.
 	 *
 	 * Caught in audit: dead listener for starter_shelter_email_sent (no
 	 * producer); orphan producer starter_shelter_memorial_family_notification
 	 * (no email subscriber).
 	 *
+	 * @param array<string, mixed> $emails_config Parsed emails.json — its
+	 *                                            `trigger_hook` entries are
+	 *                                            dynamic listeners that the
+	 *                                            regex below can't detect.
 	 * @return array<int, array{file: string, line: int, message: string}>
 	 */
-	private function check_domain_action_hooks(): array {
+	private function check_domain_action_hooks( array $emails_config ): array {
 		$producers = [];
 		$listeners = [];
+
+		// Dynamic listeners: emails.json trigger_hook entries are
+		// add_action()-ed at runtime by Config_Email::__construct.
+		foreach ( ( $emails_config['emails'] ?? [] ) as $email_id => $cfg ) {
+			$hook = $cfg['trigger_hook'] ?? null;
+			if ( $hook ) {
+				$listeners[ $hook ][] = [
+					'file' => 'config/emails.json',
+					'line' => 0,
+				];
+			}
+		}
 
 		$do_pattern  = '/do_action\s*\(\s*[\'"](starter_shelter_[a-z0-9_]+)[\'"]/';
 		$add_pattern = '/add_action\s*\(\s*[\'"](starter_shelter_[a-z0-9_]+)[\'"]/';
@@ -269,12 +303,16 @@ class Validate_Command {
 		// Producers with no listeners. Email-template extension-point hooks
 		// (suffixes _email_footer and _email_content) are documented escape
 		// hatches for third-party plugins; not having a built-in listener is
-		// expected.
+		// expected. The named hooks in EXTENSION_POINT_HOOKS are similarly
+		// documented per-event extension points.
 		foreach ( $producers as $hook => $sites ) {
 			if ( ! empty( $listeners[ $hook ] ) ) {
 				continue;
 			}
 			if ( str_ends_with( $hook, '_email_footer' ) || str_ends_with( $hook, '_email_content' ) ) {
+				continue;
+			}
+			if ( in_array( $hook, self::EXTENSION_POINT_HOOKS, true ) ) {
 				continue;
 			}
 			foreach ( $sites as $site ) {
