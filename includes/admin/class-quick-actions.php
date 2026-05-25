@@ -150,8 +150,8 @@ class Quick_Actions {
         }
 
         // Check if notification is enabled.
-        $notify_family = $memorial['notify_family'] ?? [];
-        if ( empty( $notify_family['enabled'] ) || empty( $notify_family['email'] ) ) {
+        $notify_family = Helpers\get_memorial_notify_family( $memorial_id );
+        if ( ! $notify_family['enabled'] || '' === $notify_family['email'] ) {
             wp_die( __( 'Family notification not configured for this memorial.', 'starter-shelter' ) );
         }
 
@@ -410,11 +410,11 @@ class Quick_Actions {
         $count = 0;
 
         foreach ( $post_ids as $memorial_id ) {
-            $memorial = Entity_Hydrator::get( 'sd_memorial', $memorial_id );
-            $notify_family = $memorial['notify_family'] ?? [];
-            $already_sent = get_post_meta( $memorial_id, '_sd_family_notified_date', true );
+            $memorial      = Entity_Hydrator::get( 'sd_memorial', $memorial_id );
+            $notify_family = Helpers\get_memorial_notify_family( $memorial_id );
+            $already_sent  = get_post_meta( $memorial_id, '_sd_family_notified_date', true );
 
-            if ( ! empty( $notify_family['enabled'] ) && ! empty( $notify_family['email'] ) && ! $already_sent ) {
+            if ( $notify_family['enabled'] && '' !== $notify_family['email'] && ! $already_sent ) {
                 do_action( 'starter_shelter_memorial_family_notification', $memorial_id, $memorial['donor_id'] ?? 0, $memorial );
                 update_post_meta( $memorial_id, '_sd_family_notified_date', current_time( 'mysql' ) );
                 $count++;

@@ -37,8 +37,10 @@ function create( array $input ): array|WP_Error {
         }
     }
 
-    // Use provided date or current time.
-    $donation_date = $input['date'] ?? wp_date( 'Y-m-d H:i:s' );
+    // Use provided date or current time. Canonical input key is
+    // `donation_date`; `date` accepted as legacy input for callers that
+    // haven't migrated yet (CC-2 read-both, write-canonical).
+    $donation_date = $input['donation_date'] ?? $input['date'] ?? wp_date( 'Y-m-d H:i:s' );
     $display_date = wp_date( 'Y-m-d', strtotime( $donation_date ) );
 
     // Create donation post.
@@ -59,7 +61,6 @@ function create( array $input ): array|WP_Error {
             '_sd_is_anonymous'  => $input['is_anonymous'] ?? false,
             '_sd_dedication'    => $input['dedication'] ?? '',
             '_sd_donation_date' => $donation_date,
-            '_sd_date'          => $donation_date,
         ],
     ], true );
 

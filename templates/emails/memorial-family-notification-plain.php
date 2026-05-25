@@ -13,9 +13,11 @@ use Starter_Shelter\Helpers;
 
 $memorial = $data['memorial'] ?? [];
 $donor = $data['donor'] ?? [];
-$notify_family = $memorial['notify_family'] ?? [];
+$notify_family = isset( $memorial['id'] )
+    ? Helpers\get_memorial_notify_family( (int) $memorial['id'] )
+    : [ 'enabled' => false, 'name' => '', 'email' => '', 'address' => '', 'send_card' => false ];
 
-$family_name = $notify_family['name'] ?? __( 'Dear Friend', 'starter-shelter' );
+$family_name = '' !== $notify_family['name'] ? $notify_family['name'] : __( 'Dear Friend', 'starter-shelter' );
 $is_anonymous = $memorial['is_anonymous'] ?? false;
 
 echo "= " . esc_html( $heading ) . " =\n\n";

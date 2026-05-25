@@ -427,6 +427,57 @@ function normalize_memorial_type( string $raw ): string {
 }
 
 /**
+ * Resolve a memorial's family-notification settings as a nested array.
+ *
+ * Canonical storage is five flat `_sd_notify_family_*` meta keys. Legacy
+ * rows may store the data in a single nested `_sd_notify_family` array
+ * instead. This helper reads flat first and falls back to nested for
+ * legacy data (CC-2 read-both, write-canonical).
+ *
+ * Always returns the same five-key shape so consumers can dot-access
+ * `enabled`, `name`, `email`, `address`, `send_card` uniformly.
+ *
+ * @since 1.1.2
+ *
+ * @param int $memorial_id The sd_memorial post ID.
+ * @return array{enabled: bool, name: string, email: string, address: string, send_card: bool}
+ */
+function get_memorial_notify_family( int $memorial_id ): array {
+    $enabled_raw   = get_post_meta( $memorial_id, '_sd_notify_family_enabled', true );
+    $name_raw      = get_post_meta( $memorial_id, '_sd_notify_family_name', true );
+    $email_raw     = get_post_meta( $memorial_id, '_sd_notify_family_email', true );
+    $address_raw   = get_post_meta( $memorial_id, '_sd_notify_family_address', true );
+    $send_card_raw = get_post_meta( $memorial_id, '_sd_notify_family_send_card', true );
+
+    $has_any_flat = '' !== $enabled_raw
+        || '' !== $name_raw
+        || '' !== $email_raw
+        || '' !== $address_raw
+        || '' !== $send_card_raw;
+
+    if ( ! $has_any_flat ) {
+        $legacy = get_post_meta( $memorial_id, '_sd_notify_family', true );
+        if ( is_array( $legacy ) && ! empty( $legacy ) ) {
+            return [
+                'enabled'   => (bool) ( $legacy['enabled'] ?? false ),
+                'name'      => (string) ( $legacy['name'] ?? '' ),
+                'email'     => (string) ( $legacy['email'] ?? '' ),
+                'address'   => (string) ( $legacy['address'] ?? '' ),
+                'send_card' => (bool) ( $legacy['send_card'] ?? false ),
+            ];
+        }
+    }
+
+    return [
+        'enabled'   => (bool) $enabled_raw,
+        'name'      => (string) $name_raw,
+        'email'     => (string) $email_raw,
+        'address'   => (string) $address_raw,
+        'send_card' => (bool) $send_card_raw,
+    ];
+}
+
+/**
  * Get date range for a reporting period.
  *
  * @since 1.0.0
@@ -810,11 +861,7 @@ function process_memorial_save( int $memorial_id, array $context = [] ): void {
         $input = [
             'honoree_name'  => $honoree_name,
             'amount'        => $amount,
-            'notify_family' => [
-                'enabled' => (bool) get_post_meta( $memorial_id, '_sd_notify_family_enabled', true ),
-                'name'    => get_post_meta( $memorial_id, '_sd_notify_family_name', true ),
-                'email'   => get_post_meta( $memorial_id, '_sd_notify_family_email', true ),
-            ],
+            'notify_family' => get_memorial_notify_family( $memorial_id ),
         ];
 
         do_action( 'starter_shelter_memorial_created', $memorial_id, $donor_id, $input );

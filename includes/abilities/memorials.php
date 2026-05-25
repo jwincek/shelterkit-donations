@@ -37,8 +37,10 @@ function create( array $input ): array|WP_Error {
         }
     }
 
-    // Use provided date or current time.
-    $memorial_date = $input['date'] ?? wp_date( 'Y-m-d H:i:s' );
+    // Use provided date or current time. Canonical input key is
+    // `donation_date`; `date` accepted as legacy input for callers that
+    // haven't migrated yet (CC-2 read-both, write-canonical).
+    $memorial_date = $input['donation_date'] ?? $input['date'] ?? wp_date( 'Y-m-d H:i:s' );
 
     // Get donor display name for denormalized search.
     $donor_display_name = '';
@@ -64,8 +66,13 @@ function create( array $input ): array|WP_Error {
             '_sd_wc_order_id'        => $input['order_id'] ?? 0,
             '_sd_is_anonymous'       => $input['is_anonymous'] ?? false,
             '_sd_donation_date'      => $memorial_date,
-            '_sd_date'               => $memorial_date,
-            '_sd_notify_family'      => $input['notify_family'] ?? [],
+            // notify_family persisted as 5 flat keys (canonical, CC-2).
+            // Input arrives nested from products.json composite mapping.
+            '_sd_notify_family_enabled'   => (bool) ( $input['notify_family']['enabled'] ?? false ),
+            '_sd_notify_family_name'      => (string) ( $input['notify_family']['name'] ?? '' ),
+            '_sd_notify_family_email'     => (string) ( $input['notify_family']['email'] ?? '' ),
+            '_sd_notify_family_address'   => (string) ( $input['notify_family']['address'] ?? '' ),
+            '_sd_notify_family_send_card' => (bool) ( $input['notify_family']['send_card'] ?? false ),
         ],
     ], true );
 

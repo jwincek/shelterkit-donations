@@ -421,14 +421,9 @@ class List_Columns {
                 break;
 
             case 'family_notified':
-                $notify_data = $memorial['notify_family'] ?? null;
-                // Handle both object and array formats.
-                if ( is_object( $notify_data ) ) {
-                    $notify_enabled = $notify_data->enabled ?? false;
-                } else {
-                    $notify_enabled = $notify_data['enabled'] ?? false;
-                }
-                $notified_date = get_post_meta( $post_id, '_sd_family_notified_date', true );
+                $notify_data    = Helpers\get_memorial_notify_family( (int) $post_id );
+                $notify_enabled = $notify_data['enabled'];
+                $notified_date  = get_post_meta( $post_id, '_sd_family_notified_date', true );
                 
                 if ( ! $notify_enabled ) {
                     echo '<span class="sd-meta">' . esc_html__( 'Not Requested', 'starter-shelter' ) . '</span>';
@@ -675,14 +670,9 @@ class List_Columns {
                     break;
 
                 case 'notify_family':
-                    $notify_data = $entity['notify_family'] ?? null;
-                    // Handle both object and array formats.
-                    if ( is_object( $notify_data ) ) {
-                        $notify_enabled = $notify_data->enabled ?? false;
-                    } else {
-                        $notify_enabled = $notify_data['enabled'] ?? false;
-                    }
-                    $notified = get_post_meta( $post->ID, '_sd_family_notified_date', true );
+                    $notify_data    = Helpers\get_memorial_notify_family( (int) $post->ID );
+                    $notify_enabled = $notify_data['enabled'];
+                    $notified       = get_post_meta( $post->ID, '_sd_family_notified_date', true );
                     
                     if ( $notify_enabled && ! $notified ) {
                         $new_actions['notify_family'] = sprintf(

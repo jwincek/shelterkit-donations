@@ -816,7 +816,6 @@ class Data_Integrity {
 							'post_date_gmt' => get_gmt_from_date( $order_date ),
 						] );
 						update_post_meta( $post->ID, '_sd_donation_date', $order_date );
-						update_post_meta( $post->ID, '_sd_date', $order_date );
 						$fixed++;
 					}
 				}

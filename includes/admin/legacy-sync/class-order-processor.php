@@ -380,7 +380,7 @@ class Order_Processor {
 		$field_map = match ( $product_type ) {
 			'donation' => [
 				'amount' => 'amount', 'allocation' => 'allocation',
-				'dedication' => 'dedication', 'order_id' => 'wc_order_id', 'date' => 'date',
+				'dedication' => 'dedication', 'order_id' => 'wc_order_id', 'date' => 'donation_date',
 			],
 			'membership' => [
 				'amount' => 'amount', 'tier' => 'tier',
@@ -390,7 +390,7 @@ class Order_Processor {
 			'memorial' => [
 				'amount' => 'amount', 'honoree_name' => 'honoree_name',
 				'memorial_type' => 'memorial_type', 'tribute_message' => 'tribute_message',
-				'pet_species' => 'pet_species', 'order_id' => 'wc_order_id', 'date' => 'date',
+				'pet_species' => 'pet_species', 'order_id' => 'wc_order_id', 'date' => 'donation_date',
 			],
 			default => [],
 		};

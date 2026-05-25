@@ -90,8 +90,10 @@ do_action( 'woocommerce_email_header', $heading, $email );
 <?php endif; ?>
 
 <?php
-$notify_family = $memorial['notify_family'] ?? [];
-if ( ! empty( $notify_family['enabled'] ) ) :
+$notify_family = isset( $memorial['id'] )
+    ? Helpers\get_memorial_notify_family( (int) $memorial['id'] )
+    : [ 'enabled' => false ];
+if ( $notify_family['enabled'] ) :
 ?>
 <p style="background-color: #d4edda; padding: 15px; border-left: 4px solid #28a745;">
     <?php esc_html_e( 'We will notify the family of your thoughtful tribute as you requested.', 'starter-shelter' ); ?>

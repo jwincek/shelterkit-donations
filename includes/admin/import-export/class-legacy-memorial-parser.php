@@ -366,7 +366,6 @@ class Legacy_Memorial_Parser {
 				'_sd_memorial_type'      => $row['memorial_type'],
 				'_sd_amount'             => $default_amount,
 				'_sd_donation_date'      => $memorial_date,
-				'_sd_date'               => $memorial_date,
 				'_sd_is_anonymous'       => $row['is_anonymous'] ? 1 : 0,
 				'_sd_import_source'      => self::IMPORT_SOURCE,
 				'_sd_import_line'        => $row['line_number'],

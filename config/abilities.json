@@ -62,6 +62,11 @@
           "campaign_id": {
             "type": "integer",
             "description": "Campaign term ID"
+          },
+          "donation_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Donation date. Defaults to current time. Legacy callers may pass `date` instead."
           }
         }
       },
@@ -470,6 +475,11 @@
           "is_anonymous": { "type": "boolean", "default": false },
           "notify_family": {
             "$ref": "schemas/notify-family.json"
+          },
+          "donation_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Memorial date. Defaults to current time. Legacy callers may pass `date` instead."
           }
         }
       },
@@ -682,8 +692,9 @@
             "type": "string",
             "maxLength": 20
           },
-          "email_preferences": {
+          "communication_preferences": {
             "type": "object",
+            "description": "Communication preferences. Persisted as meta key `_sd_communication_preferences`.",
             "properties": {
               "newsletter": { "type": "boolean" },
               "donation_receipts": { "type": "boolean" },

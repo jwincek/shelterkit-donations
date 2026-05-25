@@ -160,9 +160,14 @@ class Renewal_Reminder {
             return;
         }
 
-        // Check donor's email preferences (if implemented).
-        $donor_prefs = get_post_meta( $donor_id, '_sd_email_preferences', true );
-        
+        // Check donor's communication preferences. Canonical key is
+        // `_sd_communication_preferences`; `_sd_email_preferences` is read
+        // as a fallback for legacy rows (CC-2 read-both, write-canonical).
+        $donor_prefs = get_post_meta( $donor_id, '_sd_communication_preferences', true );
+        if ( ! is_array( $donor_prefs ) ) {
+            $donor_prefs = get_post_meta( $donor_id, '_sd_email_preferences', true );
+        }
+
         if ( is_array( $donor_prefs ) && isset( $donor_prefs['renewal_reminders'] ) && ! $donor_prefs['renewal_reminders'] ) {
             // Donor has opted out of renewal reminders.
             return;

@@ -50,8 +50,10 @@ if ( ! empty( $memorial['id'] ) ) {
     echo esc_url( get_permalink( $memorial['id'] ) ) . "\n\n";
 }
 
-$notify_family = $memorial['notify_family'] ?? [];
-if ( ! empty( $notify_family['enabled'] ) ) {
+$notify_family = isset( $memorial['id'] )
+    ? Helpers\get_memorial_notify_family( (int) $memorial['id'] )
+    : [ 'enabled' => false ];
+if ( $notify_family['enabled'] ) {
     echo esc_html__( 'We will notify the family of your thoughtful tribute as you requested.', 'starter-shelter' ) . "\n\n";
 }
 
