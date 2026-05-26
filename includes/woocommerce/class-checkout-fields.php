@@ -11,7 +11,7 @@ declare( strict_types = 1 );
 
 namespace Starter_Shelter\WooCommerce;
 
-use Starter_Shelter\Core\Config;
+use Starter_Shelter\Core\{ Config, Field_Manifest };
 
 /**
  * Manages dynamic checkout fields for shelter donation products.
@@ -82,10 +82,41 @@ class Checkout_Fields {
     /**
      * Load field definitions from configuration.
      *
+     * Manifest-owned fields (declared in `config/manifests/<entity>.php`
+     * `checkout_fields` blocks) are merged on top of the hard-coded
+     * legacy definitions below. The hard-coded array shrinks as entities
+     * migrate; common fields (e.g. `is_anonymous`) stay until a
+     * shared-field mechanism exists.
+     *
      * @since 1.0.0
      */
     private static function load_field_definitions(): void {
-        self::$field_definitions = [
+        $definitions = self::get_hard_coded_field_definitions();
+
+        foreach ( Field_Manifest::get_checkout_fields() as $name => $cfg ) {
+            $definitions[ $name ] = $cfg;
+        }
+
+        /**
+         * Filters the checkout field definitions.
+         *
+         * @since 1.0.0
+         *
+         * @param array $field_definitions The field definitions.
+         */
+        self::$field_definitions = apply_filters( 'starter_shelter_checkout_field_definitions', $definitions );
+    }
+
+    /**
+     * Legacy hard-coded checkout-field definitions. Each entry is
+     * migrated into its entity manifest (`config/manifests/<entity>.php`
+     * `checkout_fields` block) one at a time; this method shrinks as
+     * that happens.
+     *
+     * @return array Hard-coded definitions for unmigrated / shared fields.
+     */
+    private static function get_hard_coded_field_definitions(): array {
+        return [
             // Common fields.
             'is_anonymous' => [
                 'type'        => 'checkbox',
@@ -118,18 +149,6 @@ class Checkout_Fields {
                 'meta_key'    => '_sd_campaign_id',
                 'options'     => 'campaigns', // Dynamic options.
                 'product_types' => [ 'donation' ],
-            ],
-
-            // Business membership fields.
-            'business_name' => [
-                'type'        => 'text',
-                'label'       => __( 'Business Name', 'starter-shelter' ),
-                'placeholder' => __( 'Your business or organization name', 'starter-shelter' ),
-                'required'    => true,
-                'priority'    => 10,
-                'class'       => [ 'form-row-wide' ],
-                'meta_key'    => '_sd_business_name',
-                'product_types' => [ 'business_membership' ],
             ],
 
             // Memorial fields.
@@ -229,15 +248,6 @@ class Checkout_Fields {
                 'conditional' => 'notify_family',
             ],
         ];
-
-        /**
-         * Filters the checkout field definitions.
-         *
-         * @since 1.0.0
-         *
-         * @param array $field_definitions The field definitions.
-         */
-        self::$field_definitions = apply_filters( 'starter_shelter_checkout_field_definitions', self::$field_definitions );
     }
 
     /**

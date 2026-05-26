@@ -487,6 +487,29 @@ return [
 	],
 
 	/*
+	 * WooCommerce checkout fields. Each entry overlays per-checkout
+	 * UI attributes (placeholder, required, priority, class,
+	 * product_types, conditional) onto the field's intrinsic `form`
+	 * shape declared in `fields.<name>.form` above. The projector
+	 * derives `meta_key` from `meta_prefix + field_name` and produces
+	 * a config compatible with Checkout_Fields::render_field's
+	 * dispatch.
+	 *
+	 * Common fields (is_anonymous, etc.) are not entity-owned and
+	 * remain in the hard-coded array inside Checkout_Fields until a
+	 * shared-field mechanism exists.
+	 */
+	'checkout_fields' => [
+		'business_name' => [
+			'placeholder'   => 'Your business or organization name',
+			'required'      => true,
+			'priority'      => 10,
+			'class'         => [ 'form-row-wide' ],
+			'product_types' => [ 'business_membership' ],
+		],
+	],
+
+	/*
 	 * Admin meta boxes for the CPT edit screen. Each box lists fields
 	 * by name; the field's UI shape comes from `fields.<name>.form`
 	 * above. A `name => overrides` entry in the field list overrides

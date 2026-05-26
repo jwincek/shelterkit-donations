@@ -104,7 +104,8 @@ class Validate_Command {
 				$this->check_manifest_coverage(),
 				$this->check_manifest_abilities(),
 				$this->check_manifest_products(),
-				$this->check_manifest_meta_boxes()
+				$this->check_manifest_meta_boxes(),
+				$this->check_manifest_checkout_fields()
 			);
 		}
 
@@ -122,6 +123,49 @@ class Validate_Command {
 			require STARTER_SHELTER_PATH . 'includes/core/class-field-manifest.php';
 		}
 		Field_Manifest::init( STARTER_SHELTER_PATH . 'config' );
+	}
+
+	/**
+	 * Check 9: per-manifest sanity for the checkout_fields they declare.
+	 * Each field name referenced in the checkout_fields block must
+	 * exist in the manifest's `fields` section (otherwise the projector
+	 * silently emits an entry with no label/type).
+	 *
+	 * @return array<int, array{file: string, line: int, message: string}>
+	 */
+	private function check_manifest_checkout_fields(): array {
+		$findings = [];
+
+		foreach ( Field_Manifest::list_entities() as $entity ) {
+			$manifest = Field_Manifest::get( $entity );
+			if ( null === $manifest ) {
+				continue;
+			}
+
+			$checkout_fields = $manifest['checkout_fields'] ?? null;
+			if ( ! is_array( $checkout_fields ) ) {
+				continue;
+			}
+
+			$fields        = $manifest['fields'] ?? [];
+			$manifest_file = sprintf( 'config/manifests/%s.php', $entity );
+
+			foreach ( array_keys( $checkout_fields ) as $field_name ) {
+				if ( ! isset( $fields[ $field_name ] ) ) {
+					$findings[] = [
+						'file'    => $manifest_file,
+						'line'    => 0,
+						'message' => sprintf(
+							'checkout_fields lists "%s" that does not exist in %s.fields.',
+							$field_name,
+							$entity
+						),
+					];
+				}
+			}
+		}
+
+		return $findings;
 	}
 
 	/**

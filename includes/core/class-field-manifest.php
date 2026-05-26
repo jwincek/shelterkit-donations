@@ -262,6 +262,92 @@ class Field_Manifest {
 	}
 
 	/**
+	 * Collect checkout-field declarations across all manifests,
+	 * projected into the flat shape `Checkout_Fields::load_field_definitions()`
+	 * produces. Each entry's UI shape combines:
+	 *
+	 *  - `fields.<name>.form` (intrinsic: label, input_type → type)
+	 *  - `checkout_fields.<name>` overlay (placeholder, required,
+	 *    priority, class, product_types, conditional, options)
+	 *  - `meta_key` derived from `meta_prefix + field_name`
+	 *
+	 * Labels and placeholders are i18n'd at projection time when
+	 * WordPress is loaded; CLI-time validation works with plain strings.
+	 *
+	 * @since 1.1.2
+	 *
+	 * @return array<string, array<string, mixed>>
+	 */
+	public static function get_checkout_fields(): array {
+		$out = [];
+
+		foreach ( self::list_entities() as $entity ) {
+			$manifest = self::get( $entity );
+			if ( null === $manifest ) {
+				continue;
+			}
+
+			$checkout_fields = $manifest['checkout_fields'] ?? null;
+			if ( ! is_array( $checkout_fields ) ) {
+				continue;
+			}
+
+			$fields      = $manifest['fields'] ?? [];
+			$meta_prefix = $manifest['meta_prefix'] ?? '_';
+
+			foreach ( $checkout_fields as $field_name => $overlay ) {
+				$out[ $field_name ] = self::project_checkout_field(
+					$field_name,
+					$fields[ $field_name ]['form'] ?? [],
+					is_array( $overlay ) ? $overlay : [],
+					$meta_prefix
+				);
+			}
+		}
+
+		return $out;
+	}
+
+	/**
+	 * Project one checkout field into the legacy config shape.
+	 *
+	 * @since 1.1.2
+	 *
+	 * @param string               $field_name  Entity field name.
+	 * @param array<string, mixed> $form        The field's intrinsic form shape.
+	 * @param array<string, mixed> $overlay     The checkout_fields overlay.
+	 * @param string               $meta_prefix Entity meta prefix (for meta_key derivation).
+	 * @return array<string, mixed>
+	 */
+	private static function project_checkout_field( string $field_name, array $form, array $overlay, string $meta_prefix ): array {
+		$out = [];
+
+		if ( isset( $form['input_type'] ) ) {
+			$out['type'] = $form['input_type'];
+		}
+		if ( isset( $form['label'] ) ) {
+			$out['label'] = self::translate( $form['label'] );
+		}
+
+		// Checkout-overlay attrs (placeholder/description i18n'd).
+		foreach ( [ 'placeholder', 'description' ] as $key ) {
+			if ( isset( $overlay[ $key ] ) ) {
+				$out[ $key ] = self::translate( $overlay[ $key ] );
+			}
+		}
+		foreach ( [ 'required', 'priority', 'class', 'options', 'product_types', 'conditional' ] as $key ) {
+			if ( isset( $overlay[ $key ] ) ) {
+				$out[ $key ] = $overlay[ $key ];
+			}
+		}
+
+		// meta_key is derived; Cart_Handler and friends store under this key.
+		$out['meta_key'] = $meta_prefix . $field_name;
+
+		return $out;
+	}
+
+	/**
 	 * Collect meta-box declarations across all manifests, projected
 	 * into the shape `Meta_Boxes::get_meta_box_config()` expects
 	 * (keyed by post type).
