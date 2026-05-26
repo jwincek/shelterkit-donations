@@ -37,20 +37,34 @@
           "year": {
             "type": "integer"
           },
-          "total_donations": {
-            "type": "number"
-          },
-          "total_formatted": {
-            "type": "string"
-          },
-          "donation_count": {
-            "type": "integer"
-          },
           "donations": {
-            "type": "array"
+            "type": "object",
+            "description": "Donation rollup: items, total, formatted, count"
+          },
+          "memorials": {
+            "type": "object",
+            "description": "Memorial-donation rollup: items, total, formatted, count"
           },
           "memberships": {
-            "type": "array"
+            "type": "object",
+            "description": "Membership rollup: items, total, formatted, count"
+          },
+          "by_allocation": {
+            "type": "array",
+            "description": "Donations grouped by allocation"
+          },
+          "grand_total": {
+            "type": "number"
+          },
+          "grand_formatted": {
+            "type": "string"
+          },
+          "tax_deductible": {
+            "type": "number"
+          },
+          "generated_date": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       }
@@ -262,6 +276,10 @@
                 "type": "integer"
               }
             }
+          },
+          "stats": {
+            "type": "object",
+            "description": "Aggregate campaign statistics"
           },
           "donations": {
             "type": "array",

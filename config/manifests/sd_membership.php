@@ -253,8 +253,11 @@ return [
 				'properties' => [
 					'membership_id' => [ 'type' => 'integer' ],
 					'donor_id'      => [ '$entity' => 'donor_id' ],
+					'tier'          => [ '$entity' => 'tier' ],
+					'tier_label'    => [ 'type' => 'string' ],
 					'start_date'    => [ '$entity' => 'start_date' ],
 					'end_date'      => [ '$entity' => 'end_date' ],
+					'benefits'      => [ 'type' => 'array' ],
 					'status'        => [ '$entity' => 'status' ],
 				],
 			],
@@ -279,6 +282,9 @@ return [
 			'output' => [
 				'properties' => [
 					'membership_id' => [ 'type' => 'integer' ],
+					'donor_id'      => [ '$entity' => 'donor_id' ],
+					'tier'          => [ '$entity' => 'tier' ],
+					'tier_label'    => [ 'type' => 'string' ],
 					// new_end_date is the renewed end_date value reported by
 					// the ability response; not stored under that name on
 					// the entity, but shares the entity's date shape.
@@ -306,12 +312,15 @@ return [
 				'properties' => [
 					// is_active / tier_label / is_expiring_soon / days_remaining
 					// derive from `computed`; $entity refs target `fields` only.
+					'has_membership'   => [ 'type' => 'boolean' ],
+					'donor_id'         => [ '$entity' => 'donor_id' ],
 					'is_active'        => [ 'type' => 'boolean' ],
 					'tier'             => [ '$entity' => 'tier' ],
 					'tier_label'       => [ 'type' => 'string' ],
 					'end_date'         => [ '$entity' => 'end_date' ],
 					'is_expiring_soon' => [ 'type' => 'boolean' ],
 					'days_remaining'   => [ 'type' => 'integer' ],
+					'status'           => [ '$entity' => 'status' ],
 				],
 			],
 		],

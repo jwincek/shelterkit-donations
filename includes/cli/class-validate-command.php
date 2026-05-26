@@ -110,7 +110,8 @@ class Validate_Command {
 				$this->check_manifest_meta_boxes(),
 				$this->check_manifest_checkout_fields(),
 				$this->check_manifest_emails(),
-				$this->check_producer_arg_counts()
+				$this->check_producer_arg_counts(),
+				$this->check_ability_return_shapes( $abilities_config )
 			);
 		}
 
@@ -240,6 +241,326 @@ class Validate_Command {
 		}
 
 		return $findings;
+	}
+
+	/**
+	 * Check 12: ability handler return shape vs declared output_schema.
+	 *
+	 * For each ability with an `output_schema.properties` block, find the
+	 * handler function in `includes/abilities/*.php`, parse its
+	 * `return [...]` statements, and surface drift between the
+	 * literal-array keys it returns and the keys the schema declares:
+	 *
+	 *  - REQUIRED keys in schema absent from EVERY non-WP_Error return:
+	 *    the ability isn't fulfilling its declared contract.
+	 *  - Keys returned but not declared in schema properties: schema
+	 *    is undocumented for those fields (drift, or intentional but
+	 *    undocumented extras).
+	 *
+	 * Dynamic returns (`return $variable`, `return new WP_Error(...)`,
+	 * etc.) and abilities without declared output properties are
+	 * skipped. Aggregate covers all non-WP_Error returns in the
+	 * handler — a key appearing in any return counts as "potentially
+	 * returned."
+	 *
+	 * @param array<string, mixed> $abilities_config Parsed + merged abilities config.
+	 * @return array<int, array{file: string, line: int, message: string}>
+	 */
+	private function check_ability_return_shapes( array $abilities_config ): array {
+		$findings = [];
+		$abilities_dir = STARTER_SHELTER_PATH . 'includes/abilities/';
+		if ( ! is_dir( $abilities_dir ) ) {
+			return [];
+		}
+
+		// Cache parsed files to avoid re-tokenizing.
+		$parsed = [];
+
+		foreach ( $abilities_config['abilities'] ?? [] as $ability_id => $cfg ) {
+			$properties = $cfg['output_schema']['properties'] ?? null;
+			if ( ! is_array( $properties ) || empty( $properties ) ) {
+				continue;
+			}
+			$required = $cfg['output_schema']['required'] ?? [];
+			if ( ! is_array( $required ) ) {
+				$required = [];
+			}
+
+			[ $file_basename, $fn_name ] = $this->resolve_ability_handler( $ability_id, $cfg );
+			$file_path = $abilities_dir . $file_basename . '.php';
+			if ( ! is_file( $file_path ) ) {
+				continue; // Can't find handler file; skip silently.
+			}
+
+			if ( ! isset( $parsed[ $file_path ] ) ) {
+				$contents = @file_get_contents( $file_path );
+				if ( ! is_string( $contents ) ) {
+					$parsed[ $file_path ] = [];
+					continue;
+				}
+				$parsed[ $file_path ] = $this->parse_function_return_keys( $contents );
+			}
+
+			$handler = $parsed[ $file_path ][ $fn_name ] ?? null;
+			if ( null === $handler ) {
+				continue; // Function not found; could be ability-with-no-handler.
+			}
+
+			// Union of all return-array keys across all return statements.
+			$returned_keys = [];
+			foreach ( $handler['returns'] as $return ) {
+				foreach ( $return['keys'] as $key ) {
+					$returned_keys[ $key ] = true;
+				}
+			}
+			$returned_keys = array_keys( $returned_keys );
+
+			$schema_keys = array_keys( $properties );
+			$rel_file    = 'includes/abilities/' . $file_basename . '.php';
+
+			// Required-key-not-returned (always a bug).
+			foreach ( $required as $req ) {
+				if ( ! in_array( $req, $returned_keys, true ) ) {
+					$findings[] = [
+						'file'    => $rel_file,
+						'line'    => $handler['line'],
+						'message' => sprintf(
+							'Ability "%s" declares required output key "%s" but %s() never returns an array with that key.',
+							$ability_id,
+							$req,
+							$fn_name
+						),
+					];
+				}
+			}
+
+			// Returned-key-not-in-schema (drift).
+			foreach ( $returned_keys as $rk ) {
+				if ( ! in_array( $rk, $schema_keys, true ) ) {
+					$findings[] = [
+						'file'    => $rel_file,
+						'line'    => $handler['line'],
+						'message' => sprintf(
+							'Ability "%s" handler %s() returns key "%s" not declared in output_schema.properties.',
+							$ability_id,
+							$fn_name,
+							$rk
+						),
+					];
+				}
+			}
+		}
+
+		return $findings;
+	}
+
+	/**
+	 * Map an ability id to its handler file basename + function name.
+	 * Honors an explicit `callback` field on the ability config (e.g.,
+	 * `'callback' => 'Starter_Shelter\\Abilities\\Memorials\\list_memorials'`);
+	 * otherwise derives via Provider's convention (e.g.,
+	 * `shelter-donations/create` → file `donations`, function `create`).
+	 *
+	 * @return array{0: string, 1: string} [file_basename, function_name]
+	 */
+	private function resolve_ability_handler( string $ability_id, array $cfg ): array {
+		if ( isset( $cfg['callback'] ) && is_string( $cfg['callback'] ) ) {
+			// Format: Starter_Shelter\Abilities\Namespace\function_name
+			$parts = explode( '\\', $cfg['callback'] );
+			$fn    = array_pop( $parts );
+			$ns    = $parts[ count( $parts ) - 1 ] ?? '';
+			return [ strtolower( $ns ), $fn ];
+		}
+
+		[ $prefix, $action ] = array_pad( explode( '/', $ability_id, 2 ), 2, '' );
+		$file_basename = str_replace( 'shelter-', '', $prefix );
+		$fn_name       = str_replace( '-', '_', $action );
+		return [ $file_basename, $fn_name ];
+	}
+
+	/**
+	 * Token-based parser that walks a PHP file and returns, per top-level
+	 * function, the literal-array keys of every `return [...]` statement
+	 * it contains. Skips:
+	 *
+	 *  - Dynamic returns (`return $variable`, `return foo($x)`, etc.).
+	 *  - `return new WP_Error(...)` and similar non-array returns.
+	 *  - Anonymous functions (no T_STRING name after T_FUNCTION).
+	 *
+	 * @since 1.1.2
+	 *
+	 * @param string $contents PHP file contents.
+	 * @return array<string, array{line: int, returns: array<int, array{line: int, keys: string[]}>}>
+	 */
+	private function parse_function_return_keys( string $contents ): array {
+		$tokens = @token_get_all( $contents );
+		if ( ! is_array( $tokens ) ) {
+			return [];
+		}
+
+		$functions = [];
+		$n         = count( $tokens );
+
+		for ( $i = 0; $i < $n; $i++ ) {
+			$t = $tokens[ $i ];
+			if ( ! is_array( $t ) || T_FUNCTION !== $t[0] ) {
+				continue;
+			}
+
+			// Function name (skip whitespace).
+			$j = $i + 1;
+			while ( $j < $n && is_array( $tokens[ $j ] ) && T_WHITESPACE === $tokens[ $j ][0] ) {
+				$j++;
+			}
+			if ( $j >= $n || ! is_array( $tokens[ $j ] ) || T_STRING !== $tokens[ $j ][0] ) {
+				continue; // Anonymous function or method (after & for return-by-ref skipped).
+			}
+			$fn_name = $tokens[ $j ][1];
+			$fn_line = $tokens[ $j ][2];
+
+			// Find body's `{`.
+			$body_start = -1;
+			for ( $k = $j + 1; $k < $n; $k++ ) {
+				if ( is_string( $tokens[ $k ] ) && '{' === $tokens[ $k ] ) {
+					$body_start = $k;
+					break;
+				}
+				if ( is_string( $tokens[ $k ] ) && ';' === $tokens[ $k ] ) {
+					break; // Abstract method or declaration without body.
+				}
+			}
+			if ( -1 === $body_start ) {
+				continue;
+			}
+
+			// Walk body, tracking depth; find T_RETURN statements.
+			$depth   = 1;
+			$returns = [];
+			for ( $k = $body_start + 1; $k < $n; $k++ ) {
+				$tk = $tokens[ $k ];
+
+				if ( is_string( $tk ) ) {
+					if ( '{' === $tk ) {
+						$depth++;
+					} elseif ( '}' === $tk ) {
+						$depth--;
+						if ( 0 === $depth ) {
+							break;
+						}
+					}
+					continue;
+				}
+
+				if ( T_RETURN !== $tk[0] ) {
+					continue;
+				}
+				$return_line = $tk[2];
+
+				// Skip whitespace after `return`.
+				$r = $k + 1;
+				while ( $r < $n && is_array( $tokens[ $r ] ) && T_WHITESPACE === $tokens[ $r ][0] ) {
+					$r++;
+				}
+				if ( $r >= $n ) {
+					continue;
+				}
+
+				$next = $tokens[ $r ];
+				$open_idx = -1;
+				if ( is_string( $next ) && '[' === $next ) {
+					$open_idx = $r;
+				} elseif ( is_array( $next ) && T_ARRAY === $next[0] ) {
+					// `array(...)` — advance to `(`.
+					$p = $r + 1;
+					while ( $p < $n ) {
+						if ( is_string( $tokens[ $p ] ) && '(' === $tokens[ $p ] ) {
+							$open_idx = $p;
+							break;
+						}
+						$p++;
+					}
+				}
+				if ( -1 === $open_idx ) {
+					continue; // Dynamic return / WP_Error / etc.
+				}
+
+				$keys = $this->extract_array_literal_keys( $tokens, $open_idx, $n );
+				if ( ! empty( $keys ) ) {
+					$returns[] = [ 'line' => $return_line, 'keys' => $keys ];
+				}
+			}
+
+			$functions[ $fn_name ] = [ 'line' => $fn_line, 'returns' => $returns ];
+			$i                     = $k;
+		}
+
+		return $functions;
+	}
+
+	/**
+	 * Extract the top-level literal string keys from an array literal
+	 * starting at $open_idx (a `[` or `(` token). Recurses through
+	 * nested arrays/calls via depth tracking but only returns keys
+	 * at depth 1 of the outer array.
+	 *
+	 * @since 1.1.2
+	 *
+	 * @param array $tokens   Token stream.
+	 * @param int   $open_idx Index of the outer-array opening bracket.
+	 * @param int   $n        Total token count.
+	 * @return string[]
+	 */
+	private function extract_array_literal_keys( array $tokens, int $open_idx, int $n ): array {
+		$keys           = [];
+		$depth          = 1;
+		$expecting_key  = true;
+
+		// Tokens that don't affect key/value parsing — skip without
+		// touching `$expecting_key`. Comments are critical: a `// note`
+		// after a trailing comma was previously resetting expecting_key
+		// to false and silently dropping the next entry's key.
+		$skip_token_types = [ T_WHITESPACE, T_COMMENT, T_DOC_COMMENT ];
+
+		for ( $i = $open_idx + 1; $i < $n && $depth > 0; $i++ ) {
+			$t = $tokens[ $i ];
+
+			if ( is_string( $t ) ) {
+				if ( '[' === $t || '(' === $t || '{' === $t ) {
+					$depth++;
+				} elseif ( ']' === $t || ')' === $t || '}' === $t ) {
+					$depth--;
+					if ( 0 === $depth ) {
+						break;
+					}
+				} elseif ( ',' === $t && 1 === $depth ) {
+					$expecting_key = true;
+				}
+				continue;
+			}
+
+			if ( in_array( $t[0], $skip_token_types, true ) ) {
+				continue;
+			}
+
+			if ( 1 !== $depth || ! $expecting_key ) {
+				$expecting_key = false;
+				continue;
+			}
+
+			if ( T_CONSTANT_ENCAPSED_STRING === $t[0] ) {
+				// Confirm next non-skippable token is `=>`.
+				$j = $i + 1;
+				while ( $j < $n && is_array( $tokens[ $j ] ) && in_array( $tokens[ $j ][0], $skip_token_types, true ) ) {
+					$j++;
+				}
+				if ( $j < $n && is_array( $tokens[ $j ] ) && T_DOUBLE_ARROW === $tokens[ $j ][0] ) {
+					$keys[] = trim( $t[1], "'\"" );
+				}
+			}
+			$expecting_key = false;
+		}
+
+		return $keys;
 	}
 
 	/**

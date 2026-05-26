@@ -336,8 +336,10 @@ return [
 				'properties' => [
 					'memorial_id'     => [ 'type' => 'integer' ],
 					'donor_id'        => [ 'type' => 'integer' ],
+					'honoree_name'    => [ '$entity' => 'honoree_name' ],
 					'permalink'       => [ 'type' => 'string' ],
 					'family_notified' => [ 'type' => 'boolean' ],
+					'status'          => [ 'type' => 'string' ],
 				],
 			],
 		],

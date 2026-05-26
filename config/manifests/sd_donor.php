@@ -180,8 +180,10 @@ return [
 			],
 			'output' => [
 				'properties' => [
-					'success'  => [ 'type' => 'boolean' ],
-					'donor_id' => [ 'type' => 'integer' ],
+					'donor_id'          => [ 'type' => 'integer' ],
+					'address'           => [ '$ref' => 'schemas/address.json' ],
+					'formatted_address' => [ 'type' => 'string' ],
+					'status'            => [ 'type' => 'string' ],
 				],
 			],
 		],
@@ -205,9 +207,11 @@ return [
 			],
 			'output' => [
 				'properties' => [
+					'donor'              => [ 'type' => 'object' ],
 					'donations'          => [ 'type' => 'array' ],
 					'memberships'        => [ 'type' => 'array' ],
 					'memorials'          => [ 'type' => 'array' ],
+					'stats'              => [ 'type' => 'object' ],
 					'lifetime_giving'    => [ 'type' => 'number' ],
 					'current_membership' => [ 'type' => 'object' ],
 				],
