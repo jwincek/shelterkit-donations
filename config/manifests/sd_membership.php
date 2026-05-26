@@ -584,7 +584,10 @@ return [
 			'title'         => 'Membership Renewal Reminder',
 			'description'   => 'Sent when membership is expiring soon',
 			'trigger_hook'  => 'starter_shelter_membership_expiring',
-			'trigger_args'  => [ 'membership_id', 'donor_id' ],
+			'trigger_args'  => [
+				'membership_id' => [ 'type' => 'integer' ],
+				'donor_id'      => [ 'type' => 'integer' ],
+			],
 			'entities'      => [
 				'membership' => [ 'entity' => 'sd_membership', 'id_from' => 'membership_id' ],
 				'donor'      => [ 'entity' => 'sd_donor',      'id_from' => 'donor_id' ],
@@ -605,7 +608,10 @@ return [
 			'title'         => 'Business Logo Approved',
 			'description'   => 'Sent when a business membership logo is approved',
 			'trigger_hook'  => 'starter_shelter_logo_approved',
-			'trigger_args'  => [ 'membership_id', 'donor_id' ],
+			'trigger_args'  => [
+				'membership_id' => [ 'type' => 'integer' ],
+				'donor_id'      => [ 'type' => 'integer' ],
+			],
 			'entities'      => [
 				'membership' => [ 'entity' => 'sd_membership', 'id_from' => 'membership_id' ],
 				'donor'      => [ 'entity' => 'sd_donor',      'id_from' => 'donor_id' ],
@@ -624,7 +630,11 @@ return [
 			'title'         => 'Business Logo Rejected',
 			'description'   => 'Sent when a business membership logo is rejected',
 			'trigger_hook'  => 'starter_shelter_logo_rejected',
-			'trigger_args'  => [ 'membership_id', 'donor_id', 'reason' ],
+			'trigger_args'  => [
+				'membership_id' => [ 'type' => 'integer' ],
+				'donor_id'      => [ 'type' => 'integer' ],
+				'reason'        => [ 'type' => 'string' ],
+			],
 			'entities'      => [
 				'membership' => [ 'entity' => 'sd_membership', 'id_from' => 'membership_id' ],
 				'donor'      => [ 'entity' => 'sd_donor',      'id_from' => 'donor_id' ],

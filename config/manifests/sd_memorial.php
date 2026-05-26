@@ -604,7 +604,10 @@ return [
 			'title'         => 'Memorial Donation Confirmation',
 			'description'   => 'Sent to donors after creating a memorial',
 			'trigger_hook'  => 'starter_shelter_memorial_created',
-			'trigger_args'  => [ 'memorial_id', 'donor_id' ],
+			'trigger_args'  => [
+				'memorial_id' => [ 'type' => 'integer' ],
+				'donor_id'    => [ 'type' => 'integer' ],
+			],
 			'entities'      => [
 				'memorial' => [ 'entity' => 'sd_memorial', 'id_from' => 'memorial_id' ],
 				'donor'    => [ 'entity' => 'sd_donor',    'id_from' => 'donor_id' ],
@@ -624,7 +627,10 @@ return [
 			'title'           => 'Memorial Family Notification',
 			'description'     => 'Sent to family members when a memorial is created in honor of their loved one',
 			'trigger_hook'    => 'starter_shelter_memorial_created',
-			'trigger_args'    => [ 'memorial_id', 'donor_id' ],
+			'trigger_args'    => [
+				'memorial_id' => [ 'type' => 'integer' ],
+				'donor_id'    => [ 'type' => 'integer' ],
+			],
 			'entities'        => [
 				'memorial' => [ 'entity' => 'sd_memorial', 'id_from' => 'memorial_id' ],
 				'donor'    => [ 'entity' => 'sd_donor',    'id_from' => 'donor_id' ],
