@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- `List_Columns` column configuration is now built lazily on first access instead of during plugin bootstrap, so `__()` calls no longer run before the `init` hook.
+- `validate_item_meta()` return type relaxed from `true|WP_Error` to `bool|WP_Error`; the `true` literal type requires PHP 8.2+ and the plugin still declares an 8.1 floor.
+
+### Fixed
+- Resolved "Translation loading was triggered too early" notice from `List_Columns::init()` running on `plugins_loaded` (same root cause as the 1.1.1 `Checkout_Fields` fix).
+- CI: `php -l` matrix step ran `find ... | grep -v 'No syntax errors'`, which exits non-zero on success — the job was reporting a clean codebase as a failure. Switched to `xargs -n1 php -l` so the step actually validates 8.1–8.3 compatibility.
+- CI: added `phpcs.xml` (PHPCompatibilityWP ruleset, `testVersion=8.1-`); the `PHPCS Lint` job had been exiting 2 (usage error) every run because no config file was present.
+
 ## [1.1.1] - 2026-04-07
 
 ### Added
