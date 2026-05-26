@@ -322,8 +322,10 @@ class Validate_Command {
 	private function check_manifest_checkout_fields(): array {
 		$findings = [];
 
-		foreach ( Field_Manifest::list_entities() as $entity ) {
-			$manifest = Field_Manifest::get( $entity );
+		// Iterates all manifests (entities + shared) since the _shared
+		// manifest contributes checkout entries too.
+		foreach ( Field_Manifest::list_all_manifests() as $name ) {
+			$manifest = Field_Manifest::get( $name );
 			if ( null === $manifest ) {
 				continue;
 			}
@@ -334,7 +336,7 @@ class Validate_Command {
 			}
 
 			$fields        = $manifest['fields'] ?? [];
-			$manifest_file = sprintf( 'config/manifests/%s.php', $entity );
+			$manifest_file = sprintf( 'config/manifests/%s.php', $name );
 
 			foreach ( $checkout_fields as $field_name => $overlay ) {
 				$form          = $fields[ $field_name ]['form'] ?? [];
@@ -347,7 +349,7 @@ class Validate_Command {
 						'message' => sprintf(
 							'checkout_fields "%s" can\'t resolve an input_type — not a field in %s.fields and overlay doesn\'t supply one.',
 							$field_name,
-							$entity
+							$name
 						),
 					];
 				}

@@ -358,8 +358,11 @@ class Field_Manifest {
 	public static function get_checkout_fields(): array {
 		$out = [];
 
-		foreach ( self::list_entities() as $entity ) {
-			$manifest = self::get( $entity );
+		// Iterates all manifests (entities + shared) so the `_shared`
+		// manifest's checkout fields are projected alongside entity-owned
+		// ones.
+		foreach ( self::list_all_manifests() as $name ) {
+			$manifest = self::get( $name );
 			if ( null === $manifest ) {
 				continue;
 			}
@@ -561,22 +564,44 @@ class Field_Manifest {
 	/**
 	 * List entity names that have a manifest on disk.
 	 *
+	 * Filters out manifests whose names start with an underscore —
+	 * those are non-entity manifests (`_shared.php`) that contribute
+	 * fields/checkout entries shared across entities but shouldn't
+	 * be promoted to entities.json.
+	 *
 	 * @since 1.1.2
 	 *
 	 * @return string[]
 	 */
 	public static function list_entities(): array {
+		return array_values( array_filter(
+			self::list_all_manifests(),
+			fn( string $name ) => ! str_starts_with( $name, '_' )
+		) );
+	}
+
+	/**
+	 * List every manifest file on disk, including non-entity manifests
+	 * (underscore-prefixed names like `_shared`). Share-aware accessors
+	 * iterate this wider list so shared fields/checkout entries flow
+	 * into the merged config.
+	 *
+	 * @since 1.1.2
+	 *
+	 * @return string[]
+	 */
+	public static function list_all_manifests(): array {
 		if ( null === self::$manifests_path || ! is_dir( self::$manifests_path ) ) {
 			return [];
 		}
 
-		$entities = [];
+		$names = [];
 		foreach ( glob( self::$manifests_path . '*.php' ) ?: [] as $file ) {
-			$entities[] = basename( $file, '.php' );
+			$names[] = basename( $file, '.php' );
 		}
 
-		sort( $entities );
-		return $entities;
+		sort( $names );
+		return $names;
 	}
 
 	/**

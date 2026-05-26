@@ -108,27 +108,15 @@ class Checkout_Fields {
     }
 
     /**
-     * Legacy hard-coded checkout-field definitions. Each entry is
-     * migrated into its entity manifest (`config/manifests/<entity>.php`
-     * `checkout_fields` block) one at a time; this method shrinks as
-     * that happens.
+     * Legacy hard-coded checkout-field definitions. As of `is_anonymous`
+     * migrating to `config/manifests/_shared.php`, this array is empty
+     * and the method exists only as an extension point for any future
+     * non-manifest entries.
      *
-     * @return array Hard-coded definitions for unmigrated / shared fields.
+     * @return array Hard-coded definitions (empty after full migration).
      */
     private static function get_hard_coded_field_definitions(): array {
-        return [
-            // Common fields.
-            'is_anonymous' => [
-                'type'        => 'checkbox',
-                'label'       => __( 'Make my donation anonymous', 'starter-shelter' ),
-                'description' => __( 'Your name will not be publicly listed.', 'starter-shelter' ),
-                'required'    => false,
-                'priority'    => 10,
-                'class'       => [ 'form-row-wide' ],
-                'meta_key'    => '_sd_is_anonymous',
-            ],
-
-        ];
+        return [];
     }
 
     /**
