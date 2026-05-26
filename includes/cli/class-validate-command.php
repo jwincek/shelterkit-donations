@@ -21,6 +21,7 @@ declare( strict_types = 1 );
 
 namespace Starter_Shelter\Cli;
 
+use Starter_Shelter\Core\Field_Manifest;
 use WP_CLI;
 
 /**
@@ -60,6 +61,14 @@ class Validate_Command {
 		$products_config  = $this->load_json( 'config/products.json' );
 		$emails_config    = $this->load_json( 'config/emails.json' );
 
+		// Manifests own a growing subset of abilities; project them and
+		// merge so checks see the full declared surface (both sources).
+		$this->init_manifest_loader();
+		$manifest_abilities = Field_Manifest::get_abilities();
+		foreach ( $manifest_abilities as $ability_id => $cfg ) {
+			$abilities_config['abilities'][ $ability_id ] = $cfg;
+		}
+
 		$findings = [];
 
 		if ( null === $only || 'abilities' === $only ) {
@@ -89,11 +98,119 @@ class Validate_Command {
 		if ( null === $only || 'manifests' === $only ) {
 			$findings = array_merge(
 				$findings,
-				$this->check_manifest_coverage()
+				$this->check_manifest_coverage(),
+				$this->check_manifest_abilities()
 			);
 		}
 
 		$this->emit( $findings, $format );
+	}
+
+	/**
+	 * Bootstrap Field_Manifest for use during validation (CLI runs
+	 * before WP load, so we initialize the loader explicitly).
+	 *
+	 * @since 1.1.2
+	 */
+	private function init_manifest_loader(): void {
+		if ( ! class_exists( Field_Manifest::class ) ) {
+			require STARTER_SHELTER_PATH . 'includes/core/class-field-manifest.php';
+		}
+		Field_Manifest::init( STARTER_SHELTER_PATH . 'config' );
+	}
+
+	/**
+	 * Check 6: per-manifest sanity for the abilities they declare:
+	 *
+	 *  - `$entity` refs in input/output schemas must point to fields
+	 *    declared in the same entity manifest.
+	 *  - The ability id must not also appear in abilities.json
+	 *    (single source of truth).
+	 *  - Names in `input.required` must appear in `input.properties`.
+	 *
+	 * @return array<int, array{file: string, line: int, message: string}>
+	 */
+	private function check_manifest_abilities(): array {
+		$abilities_raw = file_get_contents( STARTER_SHELTER_PATH . 'config/abilities.json' );
+		$abilities_json = is_string( $abilities_raw ) ? json_decode( $abilities_raw, true ) : null;
+		$json_abilities = is_array( $abilities_json ) ? ( $abilities_json['abilities'] ?? [] ) : [];
+
+		$findings = [];
+
+		foreach ( Field_Manifest::list_entities() as $entity ) {
+			$manifest = Field_Manifest::get( $entity );
+			if ( null === $manifest ) {
+				continue;
+			}
+			$fields    = $manifest['fields'] ?? [];
+			$abilities = $manifest['abilities'] ?? [];
+
+			$manifest_file = sprintf( 'config/manifests/%s.php', $entity );
+
+			foreach ( $abilities as $ability_id => $cfg ) {
+				// Duplicate-source check.
+				if ( isset( $json_abilities[ $ability_id ] ) ) {
+					$findings[] = [
+						'file'    => 'config/abilities.json',
+						'line'    => 0,
+						'message' => sprintf(
+							'Ability "%s" is declared in both %s and config/abilities.json. The manifest is the source of truth; remove from abilities.json.',
+							$ability_id,
+							$manifest_file
+						),
+					];
+				}
+
+				// $entity ref + required-coverage checks on input + output.
+				foreach ( [ 'input', 'output' ] as $schema_key ) {
+					$schema = $cfg[ $schema_key ] ?? null;
+					if ( ! is_array( $schema ) ) {
+						continue;
+					}
+
+					$properties = $schema['properties'] ?? [];
+
+					foreach ( $properties as $prop_name => $prop ) {
+						if ( ! is_array( $prop ) || ! isset( $prop['$entity'] ) ) {
+							continue;
+						}
+						$ref = $prop['$entity'];
+						if ( ! isset( $fields[ $ref ] ) ) {
+							$findings[] = [
+								'file'    => $manifest_file,
+								'line'    => 0,
+								'message' => sprintf(
+									'Ability "%s" %s.properties.%s has $entity ref "%s" that does not exist in %s.fields.',
+									$ability_id,
+									$schema_key,
+									$prop_name,
+									$ref,
+									$entity
+								),
+							];
+						}
+					}
+
+					if ( 'input' === $schema_key ) {
+						foreach ( ( $schema['required'] ?? [] ) as $req ) {
+							if ( ! isset( $properties[ $req ] ) ) {
+								$findings[] = [
+									'file'    => $manifest_file,
+									'line'    => 0,
+									'message' => sprintf(
+										'Ability "%s" input.required lists "%s" but no such property in input.properties.',
+										$ability_id,
+										$req
+									),
+								];
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return $findings;
 	}
 
 	/**

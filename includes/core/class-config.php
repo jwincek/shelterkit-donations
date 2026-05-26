@@ -98,6 +98,12 @@ class Config {
             $data = self::merge_field_manifests( $data );
         }
 
+        // Merge in manifest-owned abilities. Same pattern: manifest owns
+        // the source; abilities.json gets thinner as entities migrate.
+        if ( 'abilities' === $name ) {
+            $data = self::merge_manifest_abilities( $data );
+        }
+
         // Apply admin overrides from the options table.
         $data = self::apply_overrides( $name, $data );
 
@@ -128,6 +134,29 @@ class Config {
         }
 
         $data['entities'] = $entities;
+        return $data;
+    }
+
+    /**
+     * Merge manifest-owned ability declarations into the abilities config.
+     *
+     * Each manifest ability replaces (not deep-merges) the corresponding
+     * abilities.json entry. The validator catches drift if both sources
+     * declare the same ability.
+     *
+     * @since 1.1.2
+     *
+     * @param array $data Parsed abilities.json data.
+     * @return array Data with manifest abilities merged in.
+     */
+    private static function merge_manifest_abilities( array $data ): array {
+        $abilities = $data['abilities'] ?? [];
+
+        foreach ( Field_Manifest::get_abilities() as $ability_id => $cfg ) {
+            $abilities[ $ability_id ] = $cfg;
+        }
+
+        $data['abilities'] = $abilities;
         return $data;
     }
 
