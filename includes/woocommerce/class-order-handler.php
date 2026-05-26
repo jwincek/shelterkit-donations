@@ -194,9 +194,9 @@ class Order_Handler {
      *
      * @param \WC_Order_Item $item   The order item.
      * @param array          $config The product config from Product_Mapper.
-     * @return true|WP_Error True if valid, WP_Error if missing required fields.
+     * @return bool|WP_Error True if valid, WP_Error if missing required fields.
      */
-    private static function validate_item_meta( \WC_Order_Item $item, array $config ): true|WP_Error {
+    private static function validate_item_meta( \WC_Order_Item $item, array $config ): bool|WP_Error {
         $product_type = $config['product_type'] ?? '';
 
         // Check if the item was added through our form (has sd_product_type meta).
