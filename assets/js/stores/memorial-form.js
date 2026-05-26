@@ -163,11 +163,14 @@ const { state, actions } = store( NAMESPACE, {
 					if ( form.tributeMessage ) formData.append( 'tribute_message', form.tributeMessage );
 
 					if ( form.notifyFamily ) {
-						formData.append( 'notify_family', '1' );
-						formData.append( 'family_name', form.familyName );
-						if ( form.familyEmail ) formData.append( 'family_email', form.familyEmail );
-						if ( form.familyAddress ) formData.append( 'family_address', form.familyAddress );
-						if ( form.sendCard ) formData.append( 'send_card', '1' );
+						// POST keys match the sd_memorial entity's flat
+						// notify_family_* fields (closes the audit-CC-2
+						// cart/entity meta-key divergence).
+						formData.append( 'notify_family_enabled', '1' );
+						formData.append( 'notify_family_name', form.familyName );
+						if ( form.familyEmail ) formData.append( 'notify_family_email', form.familyEmail );
+						if ( form.familyAddress ) formData.append( 'notify_family_address', form.familyAddress );
+						if ( form.sendCard ) formData.append( 'notify_family_send_card', '1' );
 					}
 					return formData;
 				},

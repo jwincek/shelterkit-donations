@@ -226,21 +226,25 @@ class Cart_Handler {
                 $data['sd_tribute_message'] = sanitize_textarea_field( $post_data['tribute_message'] );
             }
 
-            // Family notification fields.
-            if ( ! empty( $post_data['notify_family'] ) ) {
-                $data['sd_notify_family'] = true;
-                
-                if ( ! empty( $post_data['family_name'] ) ) {
-                    $data['sd_family_name'] = sanitize_text_field( $post_data['family_name'] );
+            // Family notification fields. POST/cart-data/item-meta keys
+            // now use the canonical `notify_family_*` shape that matches
+            // the sd_memorial entity declarations — closes the CC-2
+            // audit divergence where cart wrote `_sd_family_name` while
+            // the entity used `_sd_notify_family_name` for the same data.
+            if ( ! empty( $post_data['notify_family_enabled'] ) ) {
+                $data['sd_notify_family_enabled'] = true;
+
+                if ( ! empty( $post_data['notify_family_name'] ) ) {
+                    $data['sd_notify_family_name'] = sanitize_text_field( $post_data['notify_family_name'] );
                 }
-                if ( ! empty( $post_data['family_email'] ) ) {
-                    $data['sd_family_email'] = sanitize_email( $post_data['family_email'] );
+                if ( ! empty( $post_data['notify_family_email'] ) ) {
+                    $data['sd_notify_family_email'] = sanitize_email( $post_data['notify_family_email'] );
                 }
-                if ( ! empty( $post_data['family_address'] ) ) {
-                    $data['sd_family_address'] = sanitize_textarea_field( $post_data['family_address'] );
+                if ( ! empty( $post_data['notify_family_address'] ) ) {
+                    $data['sd_notify_family_address'] = sanitize_textarea_field( $post_data['notify_family_address'] );
                 }
-                if ( ! empty( $post_data['send_card'] ) ) {
-                    $data['sd_send_card'] = true;
+                if ( ! empty( $post_data['notify_family_send_card'] ) ) {
+                    $data['sd_notify_family_send_card'] = true;
                 }
             }
         }
@@ -568,11 +572,11 @@ class Cart_Handler {
             'sd_honoree_name',
             'sd_honoree_type',
             'sd_tribute_message',
-            'sd_notify_family',
-            'sd_family_name',
-            'sd_family_email',
-            'sd_family_address',
-            'sd_send_card',
+            'sd_notify_family_enabled',
+            'sd_notify_family_name',
+            'sd_notify_family_email',
+            'sd_notify_family_address',
+            'sd_notify_family_send_card',
             'sd_membership_tier',
             'sd_business_name',
             'sd_logo_attachment_id',

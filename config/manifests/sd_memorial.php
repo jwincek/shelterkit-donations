@@ -219,12 +219,23 @@ return [
 			'type'         => 'string',
 			'show_in_rest' => true,
 			'description'  => 'Mailing address for family notification card',
+			'form'         => [
+				'label'      => 'Family Address',
+				'input_type' => 'textarea',
+				'rows'       => 2,
+				'show_when'  => [ 'notify_family_enabled' => true ],
+			],
 		],
 		'notify_family_send_card' => [
 			'type'         => 'boolean',
 			'default'      => false,
 			'show_in_rest' => true,
 			'description'  => 'Whether to send a physical card in addition to email',
+			'form'         => [
+				'label'      => 'Send physical card',
+				'input_type' => 'checkbox',
+				'show_when'  => [ 'notify_family_enabled' => true ],
+			],
 		],
 		'family_notified_date' => [
 			'type'         => 'string',
@@ -429,36 +440,59 @@ return [
 				// Composite mapping — combines five flat meta keys into
 				// the notify_family object passed to the ability. The
 				// Cart_Handler/Product_Mapper handles `source: composite`
-				// natively; the manifest just owns the declaration.
+				// natively. Reads the canonical `_sd_notify_family_*` keys
+				// the cart-handler now writes; falls back to the legacy
+				// `_sd_family_*` keys for in-flight orders placed before
+				// the rename landed.
 				'notify_family' => [
 					'source' => 'composite',
 					'fields' => [
 						'enabled' => [
 							'source'    => 'item_meta',
-							'key'       => '_sd_notify_family',
-							'fallback'  => [ 'source' => 'order_meta', 'key' => '_sd_notify_family' ],
+							'key'       => '_sd_notify_family_enabled',
+							'fallback'  => [
+								'source'   => 'item_meta',
+								'key'      => '_sd_notify_family',
+								'fallback' => [ 'source' => 'order_meta', 'key' => '_sd_notify_family' ],
+							],
 							'transform' => 'boolean',
 							'default'   => false,
 						],
 						'name' => [
 							'source'   => 'item_meta',
-							'key'      => '_sd_family_name',
-							'fallback' => [ 'source' => 'order_meta', 'key' => '_sd_family_name' ],
+							'key'      => '_sd_notify_family_name',
+							'fallback' => [
+								'source'   => 'item_meta',
+								'key'      => '_sd_family_name',
+								'fallback' => [ 'source' => 'order_meta', 'key' => '_sd_family_name' ],
+							],
 						],
 						'email' => [
 							'source'   => 'item_meta',
-							'key'      => '_sd_family_email',
-							'fallback' => [ 'source' => 'order_meta', 'key' => '_sd_family_email' ],
+							'key'      => '_sd_notify_family_email',
+							'fallback' => [
+								'source'   => 'item_meta',
+								'key'      => '_sd_family_email',
+								'fallback' => [ 'source' => 'order_meta', 'key' => '_sd_family_email' ],
+							],
 						],
 						'address' => [
 							'source'   => 'item_meta',
-							'key'      => '_sd_family_address',
-							'fallback' => [ 'source' => 'order_meta', 'key' => '_sd_family_address' ],
+							'key'      => '_sd_notify_family_address',
+							'fallback' => [
+								'source'   => 'item_meta',
+								'key'      => '_sd_family_address',
+								'fallback' => [ 'source' => 'order_meta', 'key' => '_sd_family_address' ],
+							],
 						],
 						'send_card' => [
 							'source'    => 'item_meta',
-							'key'       => '_sd_send_card',
-							'fallback'  => [ 'source' => 'order_meta', 'key' => '_sd_send_card' ],
+							'key'       => '_sd_notify_family_send_card',
+							'fallback'  => [
+								'source'   => 'item_meta',
+								'key'      => '_sd_send_card',
+								'fallback' => [ 'source' => 'order_meta', 'key' => '_sd_send_card' ],
+							],
 							'transform' => 'boolean',
 							'default'   => false,
 						],
@@ -469,12 +503,13 @@ return [
 	],
 
 	/*
-	 * Checkout fields. Audit-flagged CC-2: the checkout-fields keys for
-	 * family-notification (`notify_family`, `family_name`, `family_email`,
-	 * `family_address`, `send_card`) differ from the canonical entity
-	 * fields (`notify_family_enabled`, `notify_family_name`, etc.). The
-	 * read-both view in Helpers\get_memorial_notify_family bridges them.
-	 * These entries are self-contained (no matching entity field).
+	 * Checkout fields. The family-notification entries now use the
+	 * canonical `notify_family_*` names matching the entity fields, so
+	 * they can $entity-ref instead of being self-contained (closes the
+	 * audit-flagged CC-2 cart/entity meta-key divergence). The cart-
+	 * handler and the products composite mapping were updated to use
+	 * the same canonical keys; the products mapping retains a fallback
+	 * to the legacy `_sd_family_*` keys for in-flight orders.
 	 */
 	'checkout_fields' => [
 		'honoree_name' => [
@@ -508,11 +543,7 @@ return [
 			'class'         => [ 'form-row-wide' ],
 			'product_types' => [ 'memorial' ],
 		],
-		// Self-contained: `notify_family` at checkout is a checkbox flag,
-		// not the same as the entity's `notify_family` (legacy object) or
-		// `notify_family_enabled`. CC-2 drift preserved verbatim.
-		'notify_family' => [
-			'input_type'    => 'checkbox',
+		'notify_family_enabled' => [
 			'label'         => 'Notify family of this tribute',
 			'description'   => 'We will send a card to the family letting them know of your gift.',
 			'required'      => false,
@@ -520,42 +551,38 @@ return [
 			'class'         => [ 'form-row-wide' ],
 			'product_types' => [ 'memorial' ],
 		],
-		'family_name' => [
-			'input_type'    => 'text',
+		'notify_family_name' => [
 			'label'         => 'Family Member Name',
 			'required'      => false,
 			'priority'      => 31,
 			'class'         => [ 'form-row-wide', 'sd-family-field' ],
 			'product_types' => [ 'memorial' ],
-			'conditional'   => 'notify_family',
+			'conditional'   => 'notify_family_enabled',
 		],
-		'family_email' => [
-			'input_type'    => 'email',
+		'notify_family_email' => [
 			'label'         => 'Family Email (for digital notification)',
 			'required'      => false,
 			'priority'      => 32,
 			'class'         => [ 'form-row-first', 'sd-family-field' ],
 			'product_types' => [ 'memorial' ],
-			'conditional'   => 'notify_family',
+			'conditional'   => 'notify_family_enabled',
 		],
-		'family_address' => [
-			'input_type'    => 'textarea',
+		'notify_family_address' => [
 			'label'         => 'Family Address (for mailed card)',
 			'placeholder'   => 'Street address, City, State, ZIP',
 			'required'      => false,
 			'priority'      => 33,
 			'class'         => [ 'form-row-wide', 'sd-family-field' ],
 			'product_types' => [ 'memorial' ],
-			'conditional'   => 'notify_family',
+			'conditional'   => 'notify_family_enabled',
 		],
-		'send_card' => [
-			'input_type'    => 'checkbox',
+		'notify_family_send_card' => [
 			'label'         => 'Send a physical card (in addition to email)',
 			'required'      => false,
 			'priority'      => 34,
 			'class'         => [ 'form-row-wide', 'sd-family-field' ],
 			'product_types' => [ 'memorial' ],
-			'conditional'   => 'notify_family',
+			'conditional'   => 'notify_family_enabled',
 		],
 	],
 
