@@ -30,20 +30,36 @@ class List_Columns {
     private static array $columns = [];
 
     /**
+     * Post types managed by this class.
+     *
+     * Kept as a static list so init() can register filters without
+     * triggering get_column_config() — that helper calls __() and must
+     * be deferred until after the `init` action.
+     *
+     * @since 1.1.0
+     * @var string[]
+     */
+    private const POST_TYPES = [ 'sd_donation', 'sd_membership', 'sd_memorial', 'sd_donor' ];
+
+    /**
      * Initialize list columns.
      *
      * @since 1.0.0
      */
     public static function init(): void {
-        self::$columns = self::get_column_config();
+        // Column configurations are built lazily on first access (see
+        // get_columns()) because they contain __() calls and init() runs
+        // on `plugins_loaded`, before the `init` action — calling __()
+        // here would trigger WordPress's "translation loading too early"
+        // notice.
 
-        foreach ( self::$columns as $post_type => $config ) {
+        foreach ( self::POST_TYPES as $post_type ) {
             // Register columns.
             add_filter( "manage_{$post_type}_posts_columns", [ self::class, 'register_columns' ] );
-            
+
             // Render column content.
             add_action( "manage_{$post_type}_posts_custom_column", [ self::class, 'render_column' ], 10, 2 );
-            
+
             // Make columns sortable.
             add_filter( "manage_edit-{$post_type}_sortable_columns", [ self::class, 'register_sortable' ] );
         }
@@ -56,6 +72,20 @@ class List_Columns {
 
         // Enqueue admin styles.
         add_action( 'admin_enqueue_scripts', [ self::class, 'enqueue_styles' ] );
+    }
+
+    /**
+     * Get column configurations, building them on first access.
+     *
+     * @since 1.1.0
+     *
+     * @return array Column configurations keyed by post type.
+     */
+    private static function get_columns(): array {
+        if ( empty( self::$columns ) ) {
+            self::$columns = self::get_column_config();
+        }
+        return self::$columns;
     }
 
     /**
@@ -132,12 +162,13 @@ class List_Columns {
      * @return array Modified columns.
      */
     public static function register_columns( array $columns ): array {
-        $screen = get_current_screen();
-        if ( ! $screen || ! isset( self::$columns[ $screen->post_type ] ) ) {
+        $screen     = get_current_screen();
+        $configured = self::get_columns();
+        if ( ! $screen || ! isset( $configured[ $screen->post_type ] ) ) {
             return $columns;
         }
 
-        return self::$columns[ $screen->post_type ]['columns'];
+        return $configured[ $screen->post_type ]['columns'];
     }
 
     /**
@@ -536,12 +567,13 @@ class List_Columns {
      * @return array Modified sortable columns.
      */
     public static function register_sortable( array $columns ): array {
-        $screen = get_current_screen();
-        if ( ! $screen || ! isset( self::$columns[ $screen->post_type ] ) ) {
+        $screen     = get_current_screen();
+        $configured = self::get_columns();
+        if ( ! $screen || ! isset( $configured[ $screen->post_type ] ) ) {
             return $columns;
         }
 
-        $config = self::$columns[ $screen->post_type ];
+        $config = $configured[ $screen->post_type ];
         foreach ( $config['sortable'] ?? [] as $col ) {
             $columns[ $col ] = $col;
         }
@@ -562,7 +594,7 @@ class List_Columns {
         }
 
         $post_type = $query->get( 'post_type' );
-        if ( ! isset( self::$columns[ $post_type ] ) ) {
+        if ( ! in_array( $post_type, self::POST_TYPES, true ) ) {
             return;
         }
 
@@ -602,12 +634,12 @@ class List_Columns {
      * @return array Modified actions.
      */
     public static function add_row_actions( array $actions, \WP_Post $post ): array {
-        if ( ! isset( self::$columns[ $post->post_type ] ) ) {
+        if ( ! in_array( $post->post_type, self::POST_TYPES, true ) ) {
             return $actions;
         }
 
         $entity = Entity_Hydrator::get( $post->post_type, $post->ID );
-        
+
         // Ensure entity is an array.
         if ( ! is_array( $entity ) ) {
             if ( is_object( $entity ) ) {
@@ -616,8 +648,9 @@ class List_Columns {
                 return $actions;
             }
         }
-        
-        $config = self::$columns[ $post->post_type ];
+
+        $configured = self::get_columns();
+        $config     = $configured[ $post->post_type ];
         $new_actions = [];
 
         foreach ( $config['row_actions'] ?? [] as $action ) {
@@ -731,7 +764,7 @@ class List_Columns {
         }
 
         $screen = get_current_screen();
-        if ( ! $screen || ! isset( self::$columns[ $screen->post_type ] ) ) {
+        if ( ! $screen || ! in_array( $screen->post_type, self::POST_TYPES, true ) ) {
             return;
         }
 
