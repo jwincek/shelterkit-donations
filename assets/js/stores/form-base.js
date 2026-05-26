@@ -20,6 +20,24 @@ const SUBMIT_TIMEOUT = 30000;
 // ── DOM helpers ──────────────────────────────────────────────────────
 
 /**
+ * Signal that an add-to-cart is starting.
+ *
+ * WC's mini-cart frontend script uses a two-phase lazy-load pattern: only
+ * `wc-blocks_adding_to_cart` is wired up initially. Firing that event causes
+ * the mini-cart to asynchronously load its full bundle, which then registers
+ * the listener for `wc-blocks_added_to_cart` (the success event). If we only
+ * fire the success event — as the plugin did before — the listener doesn't
+ * exist yet on first add and the cart UI never refreshes until a page reload.
+ *
+ * Fire this BEFORE the fetch, then fire refreshCartFragments() on success.
+ */
+function signalAddingToCart() {
+	if ( typeof document !== 'undefined' && document.body && typeof CustomEvent === 'function' ) {
+		document.body.dispatchEvent( new CustomEvent( 'wc-blocks_adding_to_cart', { bubbles: true, cancelable: true } ) );
+	}
+}
+
+/**
  * Refresh WooCommerce cart UIs after a successful AJAX add-to-cart.
  *
  * WC has two cart UI families that listen on different mechanisms:
@@ -27,15 +45,16 @@ const SUBMIT_TIMEOUT = 30000;
  * - The classic mini-cart widget refreshes via the jQuery
  *   `wc_fragment_refresh` event on document.body.
  * - The WC Blocks mini-cart (`woocommerce/mini-cart` block) listens for the
- *   native DOM event `wc-blocks_added_to_cart` on document.body. On that
- *   event it refetches via the WC Store REST API. (Confirmed against
- *   WC 10.7.0 assets/client/blocks/mini-cart-component-frontend.js.)
+ *   native DOM event `wc-blocks_added_to_cart` on document.body. The handler
+ *   reads `detail.preserveCartData`: if false (our case — we modify the cart
+ *   via admin-ajax, not the WC Store API, so the data store has no fresh
+ *   data), the mini-cart refetches via the WC Store REST API. WC's own button
+ *   passes true here because it already pushed fresh data via receiveCart().
  *
  * The wp.data dispatch is a no-op on pages that don't enqueue @wordpress/data
- * globally (most front-end pages); the DOM event is the reliable path.
+ * globally; the DOM event is the reliable path.
  *
- * Without the DOM event dispatch, items added through our AJAX flow don't
- * appear in the Blocks mini-cart until a full page reload.
+ * Pair this with signalAddingToCart() fired earlier — see that function.
  */
 function refreshCartFragments() {
 	if ( typeof jQuery !== 'undefined' && jQuery( document.body ).trigger ) {
@@ -43,7 +62,11 @@ function refreshCartFragments() {
 	}
 
 	if ( typeof document !== 'undefined' && document.body && typeof CustomEvent === 'function' ) {
-		document.body.dispatchEvent( new CustomEvent( 'wc-blocks_added_to_cart' ) );
+		document.body.dispatchEvent( new CustomEvent( 'wc-blocks_added_to_cart', {
+			bubbles: true,
+			cancelable: true,
+			detail: { preserveCartData: false },
+		} ) );
 	}
 
 	if ( window.wp?.data?.dispatch ) {
@@ -139,6 +162,10 @@ export function* submitToCart( stateRef, validate, buildFormData, resetForm ) {
 
 	try {
 		const formData = buildFormData( form, ctx, config );
+
+		// Notify WC's mini-cart so it can lazy-load its bundle before our
+		// success handler fires wc-blocks_added_to_cart.
+		signalAddingToCart();
 
 		const response = yield fetch( config.ajaxUrl, {
 			method: 'POST',
