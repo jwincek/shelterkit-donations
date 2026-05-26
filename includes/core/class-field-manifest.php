@@ -116,9 +116,9 @@ class Field_Manifest {
 	}
 
 	/**
-	 * Remove internal-only keys (e.g., `form`) from an entity-field
-	 * definition before exposing it to schema-shaped consumers like
-	 * entities.json and the ability $entity-ref resolver.
+	 * Strip UI-only keys from an entity-field definition before it
+	 * appears in the merged entities.json (Entity_Hydrator doesn't
+	 * care about UI metadata).
 	 *
 	 * @since 1.1.2
 	 *
@@ -127,6 +127,22 @@ class Field_Manifest {
 	 */
 	private static function strip_internal_keys( array $field ): array {
 		unset( $field['form'] );
+		return $field;
+	}
+
+	/**
+	 * Strip entity-storage keys (`form`, `show_in_rest`) when an
+	 * entity field is being projected into a JSON Schema (ability
+	 * input/output property). Those attrs only belong on the entity
+	 * declaration, not on the schema.
+	 *
+	 * @since 1.1.2
+	 *
+	 * @param array<string, mixed> $field Field definition.
+	 * @return array<string, mixed>
+	 */
+	private static function strip_storage_keys( array $field ): array {
+		unset( $field['form'], $field['show_in_rest'] );
 		return $field;
 	}
 
@@ -255,7 +271,7 @@ class Field_Manifest {
 		unset( $overrides['$entity'] );
 
 		$base = $entity_fields[ $ref_name ] ?? [];
-		$base = self::strip_internal_keys( $base );
+		$base = self::strip_storage_keys( $base );
 
 		return array_merge( $base, $overrides );
 	}

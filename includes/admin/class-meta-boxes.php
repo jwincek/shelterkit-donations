@@ -72,43 +72,6 @@ class Meta_Boxes {
      */
     private static function get_hard_coded_meta_box_config(): array {
         return [
-            'sd_memorial' => [
-                'boxes' => [
-                    'memorial_details' => [
-                        'title'    => __( 'Memorial Details', 'starter-shelter' ),
-                        'context'  => 'normal',
-                        'priority' => 'high',
-                        'fields'   => [
-                            'honoree_name'    => [ 'label' => __( 'Honoree Name', 'starter-shelter' ), 'type' => 'text', 'required' => true ],
-                            'memorial_type'   => [ 'label' => __( 'Type', 'starter-shelter' ), 'type' => 'select', 'options' => [ 'human' => 'Person', 'pet' => 'Pet', 'honor' => 'In Honor Of' ] ],
-                            'pet_species'     => [ 'label' => __( 'Pet Species', 'starter-shelter' ), 'type' => 'select', 'options' => [ 'dog' => 'Dog', 'cat' => 'Cat', 'bird' => 'Bird', 'horse' => 'Horse', 'other' => 'Other' ], 'show_when' => [ 'memorial_type' => 'pet' ] ],
-                            'tribute_message' => [ 'label' => __( 'Tribute Message', 'starter-shelter' ), 'type' => 'textarea', 'rows' => 6 ],
-                        ],
-                    ],
-                    'donation_info' => [
-                        'title'   => __( 'Donation Info', 'starter-shelter' ),
-                        'context' => 'side',
-                        'fields'  => [
-                            'donor_id'           => [ 'label' => __( 'Donated By', 'starter-shelter' ), 'type' => 'post_select', 'post_type' => 'sd_donor' ],
-                            'donor_display_name' => [ 'label' => __( 'Display Name', 'starter-shelter' ), 'type' => 'text', 'description' => __( 'Name shown on the memorial wall. Leave empty to pull from donor record.', 'starter-shelter' ) ],
-                            'amount'             => [ 'label' => __( 'Amount', 'starter-shelter' ), 'type' => 'currency' ],
-                            'donation_date'      => [ 'label' => __( 'Date', 'starter-shelter' ), 'type' => 'date' ],
-                            'is_anonymous'       => [ 'label' => __( 'Anonymous', 'starter-shelter' ), 'type' => 'checkbox' ],
-                        ],
-                    ],
-                    'family_notification' => [
-                        'title'   => __( 'Family Notification', 'starter-shelter' ),
-                        'context' => 'normal',
-                        'fields'  => [
-                            'notify_family_enabled' => [ 'label' => __( 'Notify Family', 'starter-shelter' ), 'type' => 'checkbox' ],
-                            'notify_family_name'    => [ 'label' => __( 'Family Name', 'starter-shelter' ), 'type' => 'text', 'show_when' => [ 'notify_family_enabled' => true ] ],
-                            'notify_family_email'   => [ 'label' => __( 'Family Email', 'starter-shelter' ), 'type' => 'email', 'show_when' => [ 'notify_family_enabled' => true ] ],
-                            'family_notified_date'  => [ 'label' => __( 'Notification Sent', 'starter-shelter' ), 'type' => 'datetime_display', 'readonly' => true ],
-                        ],
-                    ],
-                ],
-            ],
-
             'sd_donor' => [
                 'boxes' => [
                     'contact_info' => [

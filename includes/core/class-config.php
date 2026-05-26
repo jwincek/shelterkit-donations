@@ -88,9 +88,6 @@ class Config {
             return [];
         }
 
-        // Resolve $ref references recursively.
-        $data = self::resolve_refs( $data );
-
         // Merge in field manifests for the entities config so per-entity
         // PHP manifests at config/manifests/<entity>.php can replace or
         // augment entries that would otherwise live in entities.json.
@@ -109,6 +106,12 @@ class Config {
         if ( 'products' === $name ) {
             $data = self::merge_manifest_products( $data );
         }
+
+        // Resolve $ref references recursively. Runs AFTER manifest merges
+        // so refs contributed by manifests (e.g., sd_memorial's
+        // notify_family pointing to schemas/notify-family.json) are
+        // resolved alongside refs already in the JSON.
+        $data = self::resolve_refs( $data );
 
         // Apply admin overrides from the options table.
         $data = self::apply_overrides( $name, $data );
