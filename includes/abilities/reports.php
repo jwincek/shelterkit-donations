@@ -169,6 +169,19 @@ function donor_summary( array $input ): array|WP_Error {
 /**
  * Get dashboard statistics.
  *
+ * Return shape matches the declared output_schema and the keys read by
+ * admin consumers (`class-menu`, `class-dashboard-widget`, `class-reports`):
+ *
+ *   donations   => total, total_formatted, count, unique_donors, average
+ *   memberships => active, new, expiring_soon, revenue, revenue_formatted, by_tier
+ *   memorials   => total, new, revenue, revenue_formatted (`total` and `new` are
+ *                  both period counts; both keys kept because both consumers exist)
+ *   donors      => total (lifetime), new (in period)
+ *
+ * Pre-1.1.2 this returned `memberships.active_count`/`new_count`,
+ * `totals.new_donors`, etc., which no consumer read — silent zeros all
+ * over the admin UI. Renamed to match the schema and the renderers.
+ *
  * @since 1.0.0
  *
  * @param array $input Input with period and optional filters.
@@ -183,12 +196,14 @@ function dashboard_stats( array $input = [] ): array {
     );
 
     global $wpdb;
+    $today           = wp_date( 'Y-m-d' );
+    $expiring_window = wp_date( 'Y-m-d', strtotime( '+30 days' ) );
 
-    // Donations stats.
+    // Donations: count, sum, unique donors in period.
     $donation_stats = $wpdb->get_row( $wpdb->prepare(
-        "SELECT 
+        "SELECT
             COUNT(*) as count,
-            COALESCE(SUM(pm.meta_value), 0) as total,
+            COALESCE(SUM(pm.meta_value + 0), 0) as total,
             COUNT(DISTINCT pd.meta_value) as donors
         FROM {$wpdb->posts} p
         INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_amount'
@@ -201,29 +216,67 @@ function dashboard_stats( array $input = [] ): array {
         $range['end']
     ) );
 
-    // Membership stats.
+    // Memberships: active (currently valid), new (started in period), expiring_soon
+    // (next 30 days), revenue (sum amount of starts in period).
     $membership_stats = $wpdb->get_row( $wpdb->prepare(
-        "SELECT 
-            COUNT(*) as total_count,
-            COALESCE(SUM(pm.meta_value), 0) as total_amount,
-            SUM(CASE WHEN pe.meta_value >= %s THEN 1 ELSE 0 END) as active_count
+        "SELECT
+            SUM(CASE WHEN pe.meta_value >= %s THEN 1 ELSE 0 END) as active_count,
+            SUM(CASE WHEN ps.meta_value BETWEEN %s AND %s THEN 1 ELSE 0 END) as new_count,
+            SUM(CASE WHEN pe.meta_value BETWEEN %s AND %s THEN 1 ELSE 0 END) as expiring_count,
+            COALESCE(SUM(CASE WHEN ps.meta_value BETWEEN %s AND %s THEN pm.meta_value + 0 ELSE 0 END), 0) as revenue
         FROM {$wpdb->posts} p
         INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_amount'
         INNER JOIN {$wpdb->postmeta} pe ON p.ID = pe.post_id AND pe.meta_key = '_sd_end_date'
         INNER JOIN {$wpdb->postmeta} ps ON p.ID = ps.post_id AND ps.meta_key = '_sd_start_date'
         WHERE p.post_type = 'sd_membership'
-        AND p.post_status = 'publish'
-        AND ps.meta_value BETWEEN %s AND %s",
-        wp_date( 'Y-m-d' ),
+        AND p.post_status = 'publish'",
+        $today,
+        $range['start'],
+        $range['end'],
+        $today,
+        $expiring_window,
         $range['start'],
         $range['end']
     ) );
 
-    // Memorial stats.
-    $memorial_stats = $wpdb->get_row( $wpdb->prepare(
-        "SELECT 
+    // Memberships by tier (count + revenue per tier, scoped to period).
+    $by_tier_rows = $wpdb->get_results( $wpdb->prepare(
+        "SELECT
+            pt.meta_value as tier,
             COUNT(*) as count,
-            COALESCE(SUM(pm.meta_value), 0) as total
+            COALESCE(SUM(pm.meta_value + 0), 0) as revenue
+        FROM {$wpdb->posts} p
+        INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_amount'
+        INNER JOIN {$wpdb->postmeta} ps ON p.ID = ps.post_id AND ps.meta_key = '_sd_start_date'
+        INNER JOIN {$wpdb->postmeta} pt ON p.ID = pt.post_id AND pt.meta_key = '_sd_tier'
+        WHERE p.post_type = 'sd_membership'
+        AND p.post_status = 'publish'
+        AND ps.meta_value BETWEEN %s AND %s
+        GROUP BY pt.meta_value",
+        $range['start'],
+        $range['end']
+    ) );
+
+    $by_tier = [];
+    foreach ( $by_tier_rows as $row ) {
+        $tier = (string) $row->tier;
+        if ( '' === $tier ) {
+            continue;
+        }
+        $by_tier[ $tier ] = [
+            'count'   => (int) $row->count,
+            'revenue' => (float) $row->revenue,
+        ];
+    }
+
+    // Memorials: count + sum in period. Filters by `_sd_donation_date`
+    // (matching donations) so back-dated memorial entries land in the
+    // intended reporting period rather than the period in which the post
+    // happens to be saved.
+    $memorial_stats = $wpdb->get_row( $wpdb->prepare(
+        "SELECT
+            COUNT(*) as count,
+            COALESCE(SUM(pm.meta_value + 0), 0) as revenue
         FROM {$wpdb->posts} p
         INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_amount'
         INNER JOIN {$wpdb->postmeta} pdt ON p.ID = pdt.post_id AND pdt.meta_key = '_sd_donation_date'
@@ -234,8 +287,15 @@ function dashboard_stats( array $input = [] ): array {
         $range['end']
     ) );
 
-    // New donors this period.
-    $new_donors = $wpdb->get_var( $wpdb->prepare(
+    // Donors: lifetime total and new-in-period.
+    $donor_total = (int) $wpdb->get_var(
+        "SELECT COUNT(*)
+        FROM {$wpdb->posts}
+        WHERE post_type = 'sd_donor'
+        AND post_status = 'publish'"
+    );
+
+    $donor_new = (int) $wpdb->get_var( $wpdb->prepare(
         "SELECT COUNT(*)
         FROM {$wpdb->posts} p
         INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_created_date'
@@ -246,39 +306,41 @@ function dashboard_stats( array $input = [] ): array {
         $range['end']
     ) );
 
-    // Calculate totals.
     $donation_total   = (float) $donation_stats->total;
-    $membership_total = (float) $membership_stats->total_amount;
-    $memorial_total   = (float) $memorial_stats->total;
-    $grand_total      = $donation_total + $membership_total + $memorial_total;
+    $donation_count   = (int) $donation_stats->count;
+    $membership_total = (float) $membership_stats->revenue;
+    $memorial_total   = (float) $memorial_stats->revenue;
+    $memorial_count   = (int) $memorial_stats->count;
 
     return [
-        'period'      => $period,
-        'date_range'  => $range,
-        'donations'   => [
-            'count'          => (int) $donation_stats->count,
-            'total'          => $donation_total,
+        'period'       => $period,
+        'date_range'   => $range,
+        'donations'    => [
+            'total'           => $donation_total,
             'total_formatted' => Helpers\format_currency( $donation_total ),
-            'unique_donors'  => (int) $donation_stats->donors,
-            'average'        => $donation_stats->count > 0 
-                ? round( $donation_total / $donation_stats->count, 2 ) 
+            'count'           => $donation_count,
+            'unique_donors'   => (int) $donation_stats->donors,
+            'average'         => $donation_count > 0
+                ? round( $donation_total / $donation_count, 2 )
                 : 0,
         ],
-        'memberships' => [
-            'new_count'       => (int) $membership_stats->total_count,
-            'active_count'    => (int) $membership_stats->active_count,
-            'total'           => $membership_total,
-            'total_formatted' => Helpers\format_currency( $membership_total ),
+        'memberships'  => [
+            'active'            => (int) $membership_stats->active_count,
+            'new'               => (int) $membership_stats->new_count,
+            'expiring_soon'     => (int) $membership_stats->expiring_count,
+            'revenue'           => $membership_total,
+            'revenue_formatted' => Helpers\format_currency( $membership_total ),
+            'by_tier'           => $by_tier,
         ],
-        'memorials'   => [
-            'count'          => (int) $memorial_stats->count,
-            'total'          => $memorial_total,
-            'total_formatted' => Helpers\format_currency( $memorial_total ),
+        'memorials'    => [
+            'total'             => $memorial_count,
+            'new'               => $memorial_count,
+            'revenue'           => $memorial_total,
+            'revenue_formatted' => Helpers\format_currency( $memorial_total ),
         ],
-        'totals'      => [
-            'grand_total'     => $grand_total,
-            'total_formatted' => Helpers\format_currency( $grand_total ),
-            'new_donors'      => (int) $new_donors,
+        'donors'       => [
+            'total' => $donor_total,
+            'new'   => $donor_new,
         ],
         'generated_at' => wp_date( 'Y-m-d H:i:s' ),
     ];
@@ -326,25 +388,28 @@ function campaign_report( array $input ): array|WP_Error {
     $goal = get_term_meta( $campaign_id, 'goal', true );
     $goal = $goal ? (float) $goal : null;
 
+    $donation_count = count( $donations );
+    $average        = $donation_count > 0 ? round( $total / $donation_count, 2 ) : 0;
+    $percent_of_goal = $goal ? min( 100, round( ( $total / $goal ) * 100, 1 ) ) : null;
+    $remaining      = $goal ? max( 0, $goal - $total ) : null;
+
     return [
-        'campaign'    => [
-            'id'          => $campaign_id,
-            'name'        => $term->name,
-            'description' => $term->description,
-            'goal'        => $goal,
+        'campaign'  => [
+            'id'             => $campaign_id,
+            'name'           => $term->name,
+            'description'    => $term->description,
+            'goal'           => $goal,
             'goal_formatted' => $goal ? Helpers\format_currency( $goal ) : null,
         ],
-        'donations'   => $donations,
-        'stats'       => [
-            'total'           => $total,
+        'progress'  => [
+            'total_raised'    => $total,
             'total_formatted' => Helpers\format_currency( $total ),
-            'count'           => count( $donations ),
+            'percent_of_goal' => $percent_of_goal,
+            'donation_count'  => $donation_count,
             'donor_count'     => count( $donor_ids ),
-            'average'         => count( $donations ) > 0 
-                ? round( $total / count( $donations ), 2 ) 
-                : 0,
-            'progress'        => $goal ? min( 100, round( ( $total / $goal ) * 100, 1 ) ) : null,
-            'remaining'       => $goal ? max( 0, $goal - $total ) : null,
+            'average'         => $average,
+            'remaining'       => $remaining,
         ],
+        'donations' => $donations,
     ];
 }

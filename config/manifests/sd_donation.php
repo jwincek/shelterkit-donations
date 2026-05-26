@@ -301,6 +301,12 @@ return [
 					'donation_count'  => [ 'type' => 'integer' ],
 					'donor_count'     => [ 'type' => 'integer' ],
 					'average_amount'  => [ 'type' => 'number' ],
+					'by_allocation'   => [
+						'type'        => 'object',
+						'description' => 'Per-allocation breakdown keyed by allocation slug; each value is { count, total }.',
+					],
+					'period'          => [ 'type' => 'string' ],
+					'date_range'      => [ 'type' => 'object' ],
 				],
 			],
 		],

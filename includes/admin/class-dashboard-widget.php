@@ -48,7 +48,7 @@ class Dashboard_Widget {
      */
     public static function invalidate_cache(): void {
         foreach ( [ 'today', 'week', 'month', 'year' ] as $period ) {
-            delete_transient( 'sd_dashboard_stats_' . $period );
+            delete_transient( 'sd_dashboard_stats_v2_' . $period );
         }
         delete_transient( 'sd_dashboard_action_items' );
     }
@@ -83,8 +83,10 @@ class Dashboard_Widget {
     public static function render_widget(): void {
         $period = get_user_option( 'sd_dashboard_period' ) ?: 'month';
 
-        // Try cached stats first.
-        $cache_key = 'sd_dashboard_stats_' . $period;
+        // Try cached stats first. The v2 suffix is bumped whenever the
+        // ability's return shape changes so old transients don't serve
+        // pre-deploy data through the post-deploy renderer.
+        $cache_key = 'sd_dashboard_stats_v2_' . $period;
         $stats = get_transient( $cache_key );
 
         if ( false === $stats ) {
@@ -170,9 +172,9 @@ class Dashboard_Widget {
                 <span class="sd-stat-icon">🏅</span>
                 <div class="sd-stat-content">
                     <span class="sd-widget-stat-value">
-                        <?php echo esc_html( number_format( $membership_stats['active'] ?? 0 ) ); ?>
+                        <?php echo esc_html( number_format( $membership_stats['new'] ?? 0 ) ); ?>
                     </span>
-                    <span class="sd-widget-stat-label"><?php esc_html_e( 'Members', 'starter-shelter' ); ?></span>
+                    <span class="sd-widget-stat-label"><?php esc_html_e( 'New Members', 'starter-shelter' ); ?></span>
                 </div>
             </div>
 
@@ -180,7 +182,7 @@ class Dashboard_Widget {
                 <span class="sd-stat-icon">❤️</span>
                 <div class="sd-stat-content">
                     <span class="sd-widget-stat-value">
-                        <?php echo esc_html( number_format( $memorial_stats['count'] ?? 0 ) ); ?>
+                        <?php echo esc_html( number_format( $memorial_stats['total'] ?? 0 ) ); ?>
                     </span>
                     <span class="sd-widget-stat-label"><?php esc_html_e( 'Memorials', 'starter-shelter' ); ?></span>
                 </div>
@@ -304,8 +306,8 @@ class Dashboard_Widget {
         // Save preference.
         update_user_option( get_current_user_id(), 'sd_dashboard_period', $period );
 
-        // Use cached stats.
-        $cache_key = 'sd_dashboard_stats_' . $period;
+        // Use cached stats (cache key version must match render_widget).
+        $cache_key = 'sd_dashboard_stats_v2_' . $period;
         $stats = get_transient( $cache_key );
 
         if ( false === $stats ) {
@@ -352,14 +354,14 @@ class Dashboard_Widget {
         <div class="sd-widget-stat">
             <span class="sd-stat-icon">🏅</span>
             <div class="sd-stat-content">
-                <span class="sd-widget-stat-value"><?php echo esc_html( number_format( $membership_stats['active'] ?? 0 ) ); ?></span>
-                <span class="sd-widget-stat-label"><?php esc_html_e( 'Members', 'starter-shelter' ); ?></span>
+                <span class="sd-widget-stat-value"><?php echo esc_html( number_format( $membership_stats['new'] ?? 0 ) ); ?></span>
+                <span class="sd-widget-stat-label"><?php esc_html_e( 'New Members', 'starter-shelter' ); ?></span>
             </div>
         </div>
         <div class="sd-widget-stat">
             <span class="sd-stat-icon">❤️</span>
             <div class="sd-stat-content">
-                <span class="sd-widget-stat-value"><?php echo esc_html( number_format( $memorial_stats['count'] ?? 0 ) ); ?></span>
+                <span class="sd-widget-stat-value"><?php echo esc_html( number_format( $memorial_stats['total'] ?? 0 ) ); ?></span>
                 <span class="sd-widget-stat-label"><?php esc_html_e( 'Memorials', 'starter-shelter' ); ?></span>
             </div>
         </div>

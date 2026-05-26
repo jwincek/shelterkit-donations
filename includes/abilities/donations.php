@@ -146,10 +146,10 @@ function get_stats( array $input = [] ): array {
 
     global $wpdb;
 
-    $sql = $wpdb->prepare(
-        "SELECT 
+    $stats = $wpdb->get_row( $wpdb->prepare(
+        "SELECT
             COUNT(*) as donation_count,
-            COALESCE(SUM(pm_amount.meta_value), 0) as total_amount,
+            COALESCE(SUM(pm_amount.meta_value + 0), 0) as total_amount,
             COUNT(DISTINCT pm_donor.meta_value) as donor_count
         FROM {$wpdb->posts} p
         INNER JOIN {$wpdb->postmeta} pm_amount ON p.ID = pm_amount.post_id AND pm_amount.meta_key = '_sd_amount'
@@ -160,10 +160,33 @@ function get_stats( array $input = [] ): array {
         AND pm_date.meta_value BETWEEN %s AND %s",
         $range['start'],
         $range['end']
-    );
+    ) );
 
-    // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-    $stats = $wpdb->get_row( $sql );
+    // Per-allocation breakdown for the "By Allocation" report table.
+    $allocation_rows = $wpdb->get_results( $wpdb->prepare(
+        "SELECT
+            COALESCE(pm_alloc.meta_value, 'general-fund') as allocation,
+            COUNT(*) as count,
+            COALESCE(SUM(pm_amount.meta_value + 0), 0) as total
+        FROM {$wpdb->posts} p
+        INNER JOIN {$wpdb->postmeta} pm_amount ON p.ID = pm_amount.post_id AND pm_amount.meta_key = '_sd_amount'
+        INNER JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = '_sd_donation_date'
+        LEFT JOIN {$wpdb->postmeta} pm_alloc ON p.ID = pm_alloc.post_id AND pm_alloc.meta_key = '_sd_allocation'
+        WHERE p.post_type = 'sd_donation'
+        AND p.post_status = 'publish'
+        AND pm_date.meta_value BETWEEN %s AND %s
+        GROUP BY allocation",
+        $range['start'],
+        $range['end']
+    ) );
+
+    $by_allocation = [];
+    foreach ( $allocation_rows as $row ) {
+        $by_allocation[ (string) $row->allocation ] = [
+            'count' => (int) $row->count,
+            'total' => (float) $row->total,
+        ];
+    }
 
     $total  = (float) $stats->total_amount;
     $count  = (int) $stats->donation_count;
@@ -175,6 +198,7 @@ function get_stats( array $input = [] ): array {
         'donation_count'  => $count,
         'donor_count'     => $donors,
         'average_amount'  => $count > 0 ? round( $total / $count, 2 ) : 0,
+        'by_allocation'   => $by_allocation,
         'period'          => $input['period'] ?? 'fiscal_year',
         'date_range'      => $range,
     ];
