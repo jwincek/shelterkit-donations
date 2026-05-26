@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Resolved "Translation loading was triggered too early" notice from `List_Columns::init()` running on `plugins_loaded` (same root cause as the 1.1.1 `Checkout_Fields` fix).
+- WC Blocks mini-cart now refreshes after a form submit without requiring a page reload. The plugin was firing only `wc-blocks_added_to_cart` (the success event), but WC's mini-cart frontend uses a two-phase lazy-load — only `wc-blocks_adding_to_cart` is wired up initially, and the success listener isn't registered until the bundle finishes loading. Now firing both events (`adding_to_cart` before the fetch, `added_to_cart` on success with explicit `detail.preserveCartData: false` so the mini-cart refetches via the WC Store API).
 - CI: `php -l` matrix step ran `find ... | grep -v 'No syntax errors'`, which exits non-zero on success — the job was reporting a clean codebase as a failure. Switched to `xargs -n1 php -l` so the step actually validates 8.1–8.3 compatibility.
 - CI: added `phpcs.xml` (PHPCompatibilityWP ruleset, `testVersion=8.1-`); the `PHPCS Lint` job had been exiting 2 (usage error) every run because no config file was present.
 
