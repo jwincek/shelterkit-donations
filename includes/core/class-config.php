@@ -40,6 +40,10 @@ class Config {
      */
     public static function init( string $path ): void {
         self::$config_path = trailingslashit( $path );
+
+        // Initialize the field manifest loader in lockstep — Config::get('entities')
+        // merges manifest sections, so the two paths must stay paired.
+        Field_Manifest::init( $path );
     }
 
     /**
@@ -87,10 +91,43 @@ class Config {
         // Resolve $ref references recursively.
         $data = self::resolve_refs( $data );
 
+        // Merge in field manifests for the entities config so per-entity
+        // PHP manifests at config/manifests/<entity>.php can replace or
+        // augment entries that would otherwise live in entities.json.
+        if ( 'entities' === $name ) {
+            $data = self::merge_field_manifests( $data );
+        }
+
         // Apply admin overrides from the options table.
         $data = self::apply_overrides( $name, $data );
 
         self::$cache[ $name ] = $data;
+        return $data;
+    }
+
+    /**
+     * Merge Field_Manifest entity sections into the entities config.
+     *
+     * Each manifest replaces (not deep-merges) the corresponding entity
+     * section. Drift between an entities.json entry and a manifest is
+     * surfaced by `wp starter-shelter validate`, not silently resolved.
+     *
+     * @since 1.1.2
+     *
+     * @param array $data Parsed entities.json data.
+     * @return array Data with manifest sections merged in.
+     */
+    private static function merge_field_manifests( array $data ): array {
+        $entities = $data['entities'] ?? [];
+
+        foreach ( Field_Manifest::list_entities() as $entity ) {
+            $section = Field_Manifest::get_entity_section( $entity );
+            if ( null !== $section ) {
+                $entities[ $entity ] = $section;
+            }
+        }
+
+        $data['entities'] = $entities;
         return $data;
     }
 

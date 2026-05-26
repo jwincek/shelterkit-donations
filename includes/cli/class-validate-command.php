@@ -86,8 +86,63 @@ class Validate_Command {
 				$this->check_domain_action_hooks( $emails_config )
 			);
 		}
+		if ( null === $only || 'manifests' === $only ) {
+			$findings = array_merge(
+				$findings,
+				$this->check_manifest_coverage()
+			);
+		}
 
 		$this->emit( $findings, $format );
+	}
+
+	/**
+	 * Check 5: every entity that has a manifest under config/manifests/
+	 * has been removed from config/entities.json. Manifest is the source
+	 * of truth; an entry left in entities.json is a second definition
+	 * that will drift.
+	 *
+	 * @return array<int, array{file: string, line: int, message: string}>
+	 */
+	private function check_manifest_coverage(): array {
+		$manifests_dir = STARTER_SHELTER_PATH . 'config/manifests/';
+		if ( ! is_dir( $manifests_dir ) ) {
+			return [];
+		}
+
+		$entities_raw = file_get_contents( STARTER_SHELTER_PATH . 'config/entities.json' );
+		if ( false === $entities_raw ) {
+			return [];
+		}
+		$entities_data = json_decode( $entities_raw, true );
+		if ( ! is_array( $entities_data ) ) {
+			return [];
+		}
+
+		$findings = [];
+
+		foreach ( glob( $manifests_dir . '*.php' ) ?: [] as $file ) {
+			$entity = basename( $file, '.php' );
+
+			if ( isset( $entities_data['entities'][ $entity ] ) ) {
+				// Try to find the line in entities.json for a nicer reference.
+				$line = 0;
+				if ( preg_match( '/"' . preg_quote( $entity, '/' ) . '"\s*:/', $entities_raw, $m, PREG_OFFSET_CAPTURE ) ) {
+					$line = $this->offset_to_line( $entities_raw, $m[0][1] );
+				}
+				$findings[] = [
+					'file'    => 'config/entities.json',
+					'line'    => $line,
+					'message' => sprintf(
+						'Entity "%s" is defined in both config/entities.json and config/manifests/%s.php. The manifest is the source of truth; remove from entities.json.',
+						$entity,
+						$entity
+					),
+				];
+			}
+		}
+
+		return $findings;
 	}
 
 	/**

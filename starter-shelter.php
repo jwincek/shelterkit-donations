@@ -68,7 +68,8 @@ function starter_shelter_init(): void {
         return;
     }
 
-    // Initialize config loader.
+    // Initialize config loader. This also initializes Field_Manifest
+    // so Config::get('entities') can merge manifest sections in.
     Starter_Shelter\Core\Config::init( STARTER_SHELTER_CONFIG_PATH );
 
     // Initialize CPT and taxonomy registration.
