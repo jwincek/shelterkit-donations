@@ -138,14 +138,12 @@ return [
 	 * Refs target `fields` only, not `computed`. The validator catches
 	 * dangling $entity refs and required-not-in-properties typos.
 	 *
-	 * This block was translated verbatim from abilities.json: where the
-	 * ability declaration matched the entity declaration we use $entity
-	 * refs (the manifest's whole point); where they diverged we kept the
-	 * ability's local declaration so this migration is a pure refactor.
-	 * The drift between entity and ability shapes (e.g., `start_date`
-	 * lacking format:date in create output, `amount` lacking minimum:0
-	 * in renew input, `status` lacking enum across abilities) is real
-	 * audit content tracked separately — not silently resolved here.
+	 * Prefer $entity refs over local declarations whenever the property
+	 * refers to a real entity field — that's the manifest's whole point:
+	 * one source of truth for each field's shape. Use local declarations
+	 * only for ability-specific parameters (e.g., `reason` on cancel,
+	 * `page`/`per_page` on list) or for computed-field-derived output
+	 * (since refs don't target `computed`).
 	 */
 	'abilities' => [
 		'shelter-memberships/create' => [
@@ -198,11 +196,9 @@ return [
 				'properties' => [
 					'membership_id' => [ 'type' => 'integer' ],
 					'donor_id'      => [ '$entity' => 'donor_id' ],
-					// start_date / end_date here lack format:date that the entity declares.
-					'start_date'    => [ 'type' => 'string' ],
-					'end_date'      => [ 'type' => 'string' ],
-					// status here lacks the enum/default the entity declares.
-					'status'        => [ 'type' => 'string' ],
+					'start_date'    => [ '$entity' => 'start_date' ],
+					'end_date'      => [ '$entity' => 'end_date' ],
+					'status'        => [ '$entity' => 'status' ],
 				],
 			],
 		],
@@ -219,16 +215,18 @@ return [
 				'required'   => [ 'membership_id', 'amount', 'order_id' ],
 				'properties' => [
 					'membership_id' => [ 'type' => 'integer' ],
-					// amount here lacks the minimum:0 the entity declares.
-					'amount'        => [ 'type' => 'number' ],
+					'amount'        => [ '$entity' => 'amount' ],
 					'order_id'      => [ 'type' => 'integer' ],
 				],
 			],
 			'output' => [
 				'properties' => [
 					'membership_id' => [ 'type' => 'integer' ],
-					'new_end_date'  => [ 'type' => 'string' ],
-					'status'        => [ 'type' => 'string' ],
+					// new_end_date is the renewed end_date value reported by
+					// the ability response; not stored under that name on
+					// the entity, but shares the entity's date shape.
+					'new_end_date'  => [ '$entity' => 'end_date', 'description' => 'New end date after renewal' ],
+					'status'        => [ '$entity' => 'status' ],
 				],
 			],
 		],
@@ -249,12 +247,12 @@ return [
 			],
 			'output' => [
 				'properties' => [
-					// Most fields below are computed-field derived; $entity refs
-					// target `fields` only, so these are declared locally.
+					// is_active / tier_label / is_expiring_soon / days_remaining
+					// derive from `computed`; $entity refs target `fields` only.
 					'is_active'        => [ 'type' => 'boolean' ],
-					'tier'             => [ 'type' => 'string' ],
+					'tier'             => [ '$entity' => 'tier' ],
 					'tier_label'       => [ 'type' => 'string' ],
-					'end_date'         => [ 'type' => 'string' ],
+					'end_date'         => [ '$entity' => 'end_date' ],
 					'is_expiring_soon' => [ 'type' => 'boolean' ],
 					'days_remaining'   => [ 'type' => 'integer' ],
 				],
@@ -318,10 +316,8 @@ return [
 			'output' => [
 				'properties' => [
 					'membership_id' => [ 'type' => 'integer' ],
-					'status'        => [ 'type' => 'string' ],
-					'cancelled_at'  => [
-						'$entity' => 'cancelled_at',
-					],
+					'status'        => [ '$entity' => 'status' ],
+					'cancelled_at'  => [ '$entity' => 'cancelled_at' ],
 				],
 			],
 		],

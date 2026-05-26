@@ -99,9 +99,9 @@ function create( array $input ): array|WP_Error {
         'tier'            => $tier,
         'tier_label'      => Helpers\get_tier_label( $tier ),
         'start_date'      => $start_date,
-        'expiration_date' => $end_date,
+        'end_date'        => $end_date,
         'benefits'        => Helpers\get_tier_benefits( $tier, $type ),
-        'status'          => 'created',
+        'status'          => 'active',
     ];
 }
 
@@ -165,12 +165,12 @@ function renew( array $input ): array|WP_Error {
     do_action( 'starter_shelter_membership_renewed', $membership_id, $donor_id, $input );
 
     return [
-        'membership_id'       => $membership_id,
-        'donor_id'            => $donor_id,
-        'tier'                => $tier,
-        'tier_label'          => Helpers\get_tier_label( $tier ),
-        'new_expiration_date' => $new_end,
-        'status'              => 'renewed',
+        'membership_id' => $membership_id,
+        'donor_id'      => $donor_id,
+        'tier'          => $tier,
+        'tier_label'    => Helpers\get_tier_label( $tier ),
+        'new_end_date'  => $new_end,
+        'status'        => 'active',
     ];
 }
 
