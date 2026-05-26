@@ -84,7 +84,7 @@ do_action( 'woocommerce_email_header', $heading, $email );
     </table>
 </div>
 
-<?php if ( ! empty( $summary['donations']['by_allocation'] ) ) : ?>
+<?php if ( ! empty( $summary['by_allocation'] ) ) : ?>
 <h3><?php esc_html_e( 'Donations by Purpose', 'starter-shelter' ); ?></h3>
 
 <table class="td" cellspacing="0" cellpadding="6" border="1" style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
@@ -95,7 +95,7 @@ do_action( 'woocommerce_email_header', $heading, $email );
         </tr>
     </thead>
     <tbody>
-        <?php foreach ( $summary['donations']['by_allocation'] as $allocation => $amount ) : ?>
+        <?php foreach ( $summary['by_allocation'] as $allocation => $amount ) : ?>
         <tr>
             <td style="padding: 10px;"><?php echo esc_html( Helpers\get_allocation_label( $allocation ) ); ?></td>
             <td style="padding: 10px; text-align: right;"><?php echo esc_html( Helpers\format_currency( $amount ) ); ?></td>

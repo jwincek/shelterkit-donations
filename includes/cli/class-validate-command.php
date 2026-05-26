@@ -111,7 +111,8 @@ class Validate_Command {
 				$this->check_manifest_checkout_fields(),
 				$this->check_manifest_emails(),
 				$this->check_producer_arg_counts(),
-				$this->check_ability_return_shapes( $abilities_config )
+				$this->check_ability_return_shapes( $abilities_config ),
+				$this->check_template_field_accesses()
 			);
 		}
 
@@ -241,6 +242,239 @@ class Validate_Command {
 		}
 
 		return $findings;
+	}
+
+	/**
+	 * Check 13: email template field-reference checking.
+	 *
+	 * For each email with a template file, parse the template's PHP and
+	 * validate every `$var['literal_key']['literal_key']...` access chain
+	 * against the same entity / args paths the placeholder check uses.
+	 *
+	 * Recognized access roots:
+	 *  - `$data['alias']['...']` — direct entity_data access; resolves
+	 *    to the entity alias declared in the email's `entities` block.
+	 *  - `$args['key']['...']` — direct trigger_args access; resolves
+	 *    against typed trigger_args (when declared).
+	 *  - Locally-extracted aliases: a leading-block assignment of the
+	 *    form `$var = $data['alias']` or `$var = $args['key']` (with
+	 *    optional `?? default`) is tracked so that subsequent
+	 *    `$var['key']` accesses route to the right entity/args path.
+	 *
+	 * Skips:
+	 *  - Dynamic keys (`$var[$dyn]`, `$var[foo()]`).
+	 *  - Variables that aren't tracked (foreach iteration vars,
+	 *    arbitrary locals).
+	 *  - Accesses rooted in entities not yet migrated to a manifest.
+	 *  - `args.*` paths when trigger_args is the legacy flat-list form.
+	 *
+	 * @return array<int, array{file: string, line: int, message: string}>
+	 */
+	private function check_template_field_accesses(): array {
+		$findings = [];
+		$template_base = STARTER_SHELTER_PATH . 'templates/';
+		if ( ! is_dir( $template_base ) ) {
+			return [];
+		}
+
+		// Collect emails from manifests + emails.json.
+		$emails = [];
+		foreach ( Field_Manifest::list_all_manifests() as $name ) {
+			$manifest = Field_Manifest::get( $name );
+			if ( ! is_array( $manifest ) ) {
+				continue;
+			}
+			foreach ( $manifest['emails'] ?? [] as $email_id => $cfg ) {
+				$emails[ $email_id ] = $cfg;
+			}
+		}
+		$emails_raw  = @file_get_contents( STARTER_SHELTER_PATH . 'config/emails.json' );
+		$emails_json = is_string( $emails_raw ) ? json_decode( $emails_raw, true ) : null;
+		if ( is_array( $emails_json ) ) {
+			foreach ( $emails_json['emails'] ?? [] as $email_id => $cfg ) {
+				$emails[ $email_id ] = $cfg;
+			}
+		}
+
+		foreach ( $emails as $email_id => $cfg ) {
+			$template_rel = $cfg['template'] ?? '';
+			if ( ! is_string( $template_rel ) || '' === $template_rel ) {
+				continue;
+			}
+			$template_path = $template_base . $template_rel;
+			if ( ! is_file( $template_path ) ) {
+				continue;
+			}
+
+			$contents = @file_get_contents( $template_path );
+			if ( ! is_string( $contents ) ) {
+				continue;
+			}
+			$tokens = @token_get_all( $contents );
+			if ( ! is_array( $tokens ) ) {
+				continue;
+			}
+
+			$analysis = $this->analyze_template_tokens( $tokens );
+			$rel_file = 'templates/' . $template_rel;
+			$entities_in_email = $cfg['entities'] ?? [];
+			$trigger_args      = $cfg['trigger_args'] ?? [];
+
+			foreach ( $analysis['accesses'] as $access ) {
+				$var  = $access['var'];
+				$keys = $access['keys'];
+				$line = $access['line'];
+
+				// Resolve to a dot-path the existing walker understands.
+				if ( 'data' === $var ) {
+					// $data['alias']['key'] → entity alias path.
+					if ( empty( $keys ) ) {
+						continue;
+					}
+					$path = implode( '.', $keys );
+				} elseif ( 'args' === $var ) {
+					$path = 'args.' . implode( '.', $keys );
+				} elseif ( isset( $analysis['var_map'][ $var ] ) ) {
+					$root     = $analysis['var_map'][ $var ]['root'];
+					$root_kx  = $analysis['var_map'][ $var ]['keys'];
+					$combined = array_merge( $root_kx, $keys );
+					if ( 'data' === $root ) {
+						$path = implode( '.', $combined );
+					} elseif ( 'args' === $root ) {
+						$path = 'args.' . implode( '.', $combined );
+					} else {
+						continue; // Unknown root.
+					}
+				} else {
+					continue; // Untracked variable; skip.
+				}
+
+				$err = $this->validate_path( $path, $entities_in_email, $email_id, "template `\${$var}[...]`", $trigger_args );
+				if ( null !== $err ) {
+					$findings[] = [
+						'file'    => $rel_file,
+						'line'    => $line,
+						'message' => $err,
+					];
+				}
+			}
+		}
+
+		return $findings;
+	}
+
+	/**
+	 * Walk template tokens to extract:
+	 *  - `var_map`: locally-extracted aliases (e.g.,
+	 *    `$donor = $data['donor']`) keyed by variable name.
+	 *  - `accesses`: every `$var['literal_string']...` chain encountered.
+	 *
+	 * @since 1.1.2
+	 *
+	 * @param array $tokens
+	 * @return array{var_map: array<string, array{root: string, keys: string[]}>, accesses: array<int, array{var: string, keys: string[], line: int}>}
+	 */
+	private function analyze_template_tokens( array $tokens ): array {
+		$var_map  = [];
+		$accesses = [];
+		$n        = count( $tokens );
+		$skip     = [ T_WHITESPACE, T_COMMENT, T_DOC_COMMENT ];
+
+		for ( $i = 0; $i < $n; $i++ ) {
+			$t = $tokens[ $i ];
+			if ( ! is_array( $t ) || T_VARIABLE !== $t[0] ) {
+				continue;
+			}
+
+			$var_name = ltrim( $t[1], '$' );
+			$line     = $t[2];
+
+			// Look forward: is this an assignment? (T_VARIABLE = ...)
+			$j = $i + 1;
+			while ( $j < $n && is_array( $tokens[ $j ] ) && in_array( $tokens[ $j ][0], $skip, true ) ) {
+				$j++;
+			}
+			$is_assignment = ( $j < $n && is_string( $tokens[ $j ] ) && '=' === $tokens[ $j ]
+				// Reject `==`, `===`, `=>` (=> is T_DOUBLE_ARROW, not '=', so safe).
+				&& ! ( $j + 1 < $n && is_string( $tokens[ $j + 1 ] ) && '=' === $tokens[ $j + 1 ] ) );
+
+			if ( $is_assignment ) {
+				// Parse RHS: skip to first T_VARIABLE.
+				$k = $j + 1;
+				while ( $k < $n && is_array( $tokens[ $k ] ) && in_array( $tokens[ $k ][0], $skip, true ) ) {
+					$k++;
+				}
+				if ( $k < $n && is_array( $tokens[ $k ] ) && T_VARIABLE === $tokens[ $k ][0] ) {
+					$rhs_var = ltrim( $tokens[ $k ][1], '$' );
+					$rhs_keys = $this->parse_access_chain( $tokens, $k + 1, $n );
+					if ( ! empty( $rhs_keys ) ) {
+						$var_map[ $var_name ] = [ 'root' => $rhs_var, 'keys' => $rhs_keys ];
+					}
+					$i = $k; // Skip past RHS variable; outer for-loop continues from there.
+				}
+				continue;
+			}
+
+			// Not an assignment — check for access chain.
+			$keys = $this->parse_access_chain( $tokens, $i + 1, $n );
+			if ( ! empty( $keys ) ) {
+				$accesses[] = [
+					'var'  => $var_name,
+					'keys' => $keys,
+					'line' => $line,
+				];
+			}
+		}
+
+		return [ 'var_map' => $var_map, 'accesses' => $accesses ];
+	}
+
+	/**
+	 * From the token immediately after a T_VARIABLE, parse a chain of
+	 * `[literal_string]` accesses. Returns the list of literal keys.
+	 * Stops at the first non-`[STR]` token (including dynamic-key
+	 * accesses, method calls, etc.).
+	 *
+	 * @since 1.1.2
+	 *
+	 * @param array $tokens
+	 * @param int   $start  Index of the token immediately after the variable.
+	 * @param int   $n
+	 * @return string[]
+	 */
+	private function parse_access_chain( array $tokens, int $start, int $n ): array {
+		$keys = [];
+		$skip = [ T_WHITESPACE, T_COMMENT, T_DOC_COMMENT ];
+		$i    = $start;
+
+		while ( $i < $n ) {
+			// Skip whitespace/comments before `[`.
+			while ( $i < $n && is_array( $tokens[ $i ] ) && in_array( $tokens[ $i ][0], $skip, true ) ) {
+				$i++;
+			}
+			if ( $i >= $n || ! is_string( $tokens[ $i ] ) || '[' !== $tokens[ $i ] ) {
+				break;
+			}
+			$i++;
+			while ( $i < $n && is_array( $tokens[ $i ] ) && in_array( $tokens[ $i ][0], $skip, true ) ) {
+				$i++;
+			}
+			if ( $i >= $n || ! is_array( $tokens[ $i ] ) || T_CONSTANT_ENCAPSED_STRING !== $tokens[ $i ][0] ) {
+				break; // Dynamic key, integer key, etc. — stop chain.
+			}
+			$key = trim( $tokens[ $i ][1], "'\"" );
+			$i++;
+			while ( $i < $n && is_array( $tokens[ $i ] ) && in_array( $tokens[ $i ][0], $skip, true ) ) {
+				$i++;
+			}
+			if ( $i >= $n || ! is_string( $tokens[ $i ] ) || ']' !== $tokens[ $i ] ) {
+				break;
+			}
+			$i++;
+			$keys[] = $key;
+		}
+
+		return $keys;
 	}
 
 	/**
@@ -882,9 +1116,14 @@ class Validate_Command {
 		}
 
 		// Walk the rest of the path against fields → properties → properties...
+		// Implicit `id` and declared `relations` are always populated by
+		// Entity_Hydrator at hydration time, so they're valid first-level
+		// access keys even though they aren't in `fields`/`computed`.
 		$node = array_merge(
-			$entity_manifest['fields']   ?? [],
-			$entity_manifest['computed'] ?? []
+			$entity_manifest['fields']    ?? [],
+			$entity_manifest['computed']  ?? [],
+			$entity_manifest['relations'] ?? [],
+			[ 'id' => [ 'type' => 'integer', 'description' => 'WordPress post ID (always present)' ] ]
 		);
 
 		for ( $i = 1; $i < count( $parts ); $i++ ) {

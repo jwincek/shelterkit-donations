@@ -344,6 +344,12 @@ return [
 			'trigger_args'  => [
 				'donor_id' => [ 'type' => 'integer' ],
 				'year'     => [ 'type' => 'integer' ],
+				// Shape matches the shelter-reports/annual-summary ability
+				// output (the producer at handle_send_statement fires the
+				// ability result here). Only properties the placeholders
+				// and template reference are declared; the ability returns
+				// more (items arrays, totals, generated_date, etc.) but
+				// nothing in this email reads those.
 				'summary'  => [
 					'type'       => 'object',
 					'properties' => [
@@ -355,6 +361,20 @@ return [
 								'formatted' => [ 'type' => 'string' ],
 							],
 						],
+						'memorials' => [
+							'type'       => 'object',
+							'properties' => [
+								'count'     => [ 'type' => 'integer' ],
+								'formatted' => [ 'type' => 'string' ],
+							],
+						],
+						'memberships' => [
+							'type'       => 'object',
+							'properties' => [
+								'formatted' => [ 'type' => 'string' ],
+							],
+						],
+						'by_allocation' => [ 'type' => 'array' ],
 					],
 				],
 			],
