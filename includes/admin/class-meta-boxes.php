@@ -72,50 +72,6 @@ class Meta_Boxes {
      */
     private static function get_hard_coded_meta_box_config(): array {
         return [
-            'sd_donor' => [
-                'boxes' => [
-                    'contact_info' => [
-                        'title'    => __( 'Contact Information', 'starter-shelter' ),
-                        'context'  => 'normal',
-                        'priority' => 'high',
-                        'fields'   => [
-                            'first_name' => [ 'label' => __( 'First Name', 'starter-shelter' ), 'type' => 'text', 'required' => true ],
-                            'last_name'  => [ 'label' => __( 'Last Name', 'starter-shelter' ), 'type' => 'text', 'required' => true ],
-                            'email'      => [ 'label' => __( 'Email', 'starter-shelter' ), 'type' => 'email', 'required' => true ],
-                            'phone'      => [ 'label' => __( 'Phone', 'starter-shelter' ), 'type' => 'tel' ],
-                        ],
-                    ],
-                    'address' => [
-                        'title'   => __( 'Address', 'starter-shelter' ),
-                        'context' => 'normal',
-                        'fields'  => [
-                            'address_line_1' => [ 'label' => __( 'Address Line 1', 'starter-shelter' ), 'type' => 'text' ],
-                            'address_line_2' => [ 'label' => __( 'Address Line 2', 'starter-shelter' ), 'type' => 'text' ],
-                            'city'           => [ 'label' => __( 'City', 'starter-shelter' ), 'type' => 'text' ],
-                            'state'          => [ 'label' => __( 'State', 'starter-shelter' ), 'type' => 'text' ],
-                            'postal_code'    => [ 'label' => __( 'Postal Code', 'starter-shelter' ), 'type' => 'text' ],
-                        ],
-                    ],
-                    'donor_stats' => [
-                        'title'   => __( 'Donor Statistics', 'starter-shelter' ),
-                        'context' => 'side',
-                        'fields'  => [
-                            'lifetime_giving'     => [ 'label' => __( 'Lifetime Giving', 'starter-shelter' ), 'type' => 'currency_display', 'readonly' => true ],
-                            'donation_count'      => [ 'label' => __( 'Total Donations', 'starter-shelter' ), 'type' => 'number_display', 'readonly' => true ],
-                            'donor_level'         => [ 'label' => __( 'Donor Level', 'starter-shelter' ), 'type' => 'level_badge', 'readonly' => true ],
-                            'first_donation_date' => [ 'label' => __( 'First Donation', 'starter-shelter' ), 'type' => 'date_display', 'readonly' => true ],
-                        ],
-                    ],
-                    'user_account' => [
-                        'title'    => __( 'User Account', 'starter-shelter' ),
-                        'context'  => 'side',
-                        'priority' => 'low',
-                        'fields'   => [
-                            'user_id' => [ 'label' => __( 'Linked User', 'starter-shelter' ), 'type' => 'user_select' ],
-                        ],
-                    ],
-                ],
-            ],
         ];
     }
 
@@ -327,7 +283,46 @@ class Meta_Boxes {
                     update_post_meta( $post_id, $meta_key, 0 );
                 }
             }
+
+            // composite_save: after the flat per-field writes, assemble
+            // those values into a single object-meta key. Closes the
+            // admin-vs-abilities address-storage divergence — see
+            // sd_donor manifest's address box for the canonical use.
+            if ( ! empty( $box['composite_save'] ) ) {
+                self::apply_composite_save( $post_id, $box['composite_save'] );
+            }
         }
+    }
+
+    /**
+     * Apply a composite_save directive: read the just-saved flat meta
+     * keys, project them into the object-meta shape declared by
+     * `field_map`, merge into any existing object value at `meta_key`,
+     * and write. Preserves object keys not covered by field_map so
+     * data written by other paths (e.g., the update-address ability's
+     * `country` field) isn't clobbered by admin saves.
+     */
+    private static function apply_composite_save( int $post_id, array $cs ): void {
+        $target_meta = $cs['meta_key']  ?? '';
+        $field_map   = $cs['field_map'] ?? [];
+
+        if ( '' === $target_meta || empty( $field_map ) ) {
+            return;
+        }
+
+        $existing = get_post_meta( $post_id, $target_meta, true );
+        $object   = is_array( $existing ) ? $existing : [];
+
+        foreach ( $field_map as $field_id => $object_key ) {
+            $flat_value = get_post_meta( $post_id, '_sd_' . $field_id, true );
+            if ( '' === $flat_value || null === $flat_value ) {
+                unset( $object[ $object_key ] );
+            } else {
+                $object[ $object_key ] = $flat_value;
+            }
+        }
+
+        update_post_meta( $post_id, $target_meta, $object );
     }
 
     /**

@@ -359,10 +359,12 @@ class Validate_Command {
 
 	/**
 	 * Check 8: per-manifest sanity for the meta_boxes they declare.
-	 * Every field name referenced in a box's `fields` list (whether
-	 * bare string or map key with overrides) must exist in the
-	 * manifest's `fields` section. Catches typos that would otherwise
-	 * surface as a missing-key warning in the admin UI.
+	 *
+	 * Each entry in a box's `fields` list resolves either to a manifest
+	 * `fields` entry (bare string or `name => overrides` map) or is
+	 * self-contained — the overlay supplies its own `input_type` (e.g.,
+	 * display-only fields like `donor_level` that aren't editable
+	 * entity fields). Same relaxation as check_manifest_checkout_fields.
 	 *
 	 * @return array<int, array{file: string, line: int, message: string}>
 	 */
@@ -390,12 +392,15 @@ class Validate_Command {
 					if ( ! is_string( $field_name ) ) {
 						continue;
 					}
-					if ( ! isset( $fields[ $field_name ] ) ) {
+					$overlay   = is_int( $key ) || ! is_array( $value ) ? [] : $value;
+					$has_field = isset( $fields[ $field_name ] );
+					$overlay_supplies_input = isset( $overlay['input_type'] );
+					if ( ! $has_field && ! $overlay_supplies_input ) {
 						$findings[] = [
 							'file'    => $manifest_file,
 							'line'    => 0,
 							'message' => sprintf(
-								'Meta box "%s" lists field "%s" that does not exist in %s.fields.',
+								'Meta box "%s" entry "%s" can\'t resolve an input_type — not a field in %s.fields and overlay doesn\'t supply one.',
 								$box_id,
 								$field_name,
 								$entity

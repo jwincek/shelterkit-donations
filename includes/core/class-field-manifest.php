@@ -484,7 +484,7 @@ class Field_Manifest {
 	private static function project_meta_box( array $box_cfg, array $fields ): array {
 		$out = [];
 
-		foreach ( [ 'title', 'context', 'priority', 'show_when' ] as $key ) {
+		foreach ( [ 'title', 'context', 'priority', 'show_when', 'composite_save' ] as $key ) {
 			if ( ! isset( $box_cfg[ $key ] ) ) {
 				continue;
 			}
