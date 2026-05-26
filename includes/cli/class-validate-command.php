@@ -540,21 +540,21 @@ class Validate_Command {
 				continue; // Function not found; could be ability-with-no-handler.
 			}
 
-			// Union of all return-array keys across all return statements.
-			$returned_keys = [];
+			// Merge all return-statement trees into a single union tree so
+			// drift is reported per ability, not per return path.
+			$returned_tree = [];
 			foreach ( $handler['returns'] as $return ) {
-				foreach ( $return['keys'] as $key ) {
-					$returned_keys[ $key ] = true;
-				}
+				$returned_tree = $this->merge_return_trees( $returned_tree, $return['keys'] );
 			}
-			$returned_keys = array_keys( $returned_keys );
 
-			$schema_keys = array_keys( $properties );
+			$schema_tree = $this->schema_properties_tree( $properties );
 			$rel_file    = 'includes/abilities/' . $file_basename . '.php';
 
-			// Required-key-not-returned (always a bug).
+			// Required-key-not-returned (top-level only — nested required is
+			// declared at the parent schema level and is uncommon in this
+			// codebase; can be added later if needed).
 			foreach ( $required as $req ) {
-				if ( ! in_array( $req, $returned_keys, true ) ) {
+				if ( ! array_key_exists( $req, $returned_tree ) ) {
 					$findings[] = [
 						'file'    => $rel_file,
 						'line'    => $handler['line'],
@@ -568,24 +568,135 @@ class Validate_Command {
 				}
 			}
 
-			// Returned-key-not-in-schema (drift).
-			foreach ( $returned_keys as $rk ) {
-				if ( ! in_array( $rk, $schema_keys, true ) ) {
-					$findings[] = [
-						'file'    => $rel_file,
-						'line'    => $handler['line'],
-						'message' => sprintf(
-							'Ability "%s" handler %s() returns key "%s" not declared in output_schema.properties.',
-							$ability_id,
-							$fn_name,
-							$rk
-						),
-					];
-				}
-			}
+			// Returned-key-not-in-schema at any depth (drift).
+			$this->collect_tree_drift(
+				$returned_tree,
+				$schema_tree,
+				'',
+				$ability_id,
+				$fn_name,
+				$rel_file,
+				$handler['line'],
+				$findings
+			);
 		}
 
 		return $findings;
+	}
+
+	/**
+	 * Walk a returned-shape tree against a schema-properties tree,
+	 * appending a finding for each key in the returned side that the
+	 * schema side doesn't declare. Recurses through nested objects
+	 * wherever both sides expose nested structure; treats a schema
+	 * level without `properties` as opaque (any nested keys are
+	 * accepted).
+	 *
+	 * @since 1.1.3
+	 *
+	 * @param array         $returned   Returned-shape tree node.
+	 * @param array         $schema     Schema-properties tree node.
+	 * @param string        $path       Dot-path of the current node ('' at top).
+	 * @param string        $ability_id The ability being checked.
+	 * @param string        $fn_name    Handler function name (for the message).
+	 * @param string        $rel_file   Relative path (for the finding).
+	 * @param int           $line       Handler line (for the finding).
+	 * @param array<int,array<string,mixed>> $findings Findings accumulator, by reference.
+	 */
+	private function collect_tree_drift(
+		array $returned,
+		array $schema,
+		string $path,
+		string $ability_id,
+		string $fn_name,
+		string $rel_file,
+		int $line,
+		array &$findings
+	): void {
+		foreach ( $returned as $key => $child ) {
+			$qualified = '' === $path ? $key : ( $path . '.' . $key );
+
+			if ( ! array_key_exists( $key, $schema ) ) {
+				$findings[] = [
+					'file'    => $rel_file,
+					'line'    => $line,
+					'message' => sprintf(
+						'Ability "%s" handler %s() returns key "%s" not declared in output_schema.properties.',
+						$ability_id,
+						$fn_name,
+						$qualified
+					),
+				];
+				continue;
+			}
+
+			// Recurse only if both sides have a nested structure at this key.
+			// Schema-side null (no `properties` block) is treated as opaque —
+			// nested keys are fine, the schema just doesn't constrain them.
+			if ( is_array( $child ) && is_array( $schema[ $key ] ) ) {
+				$this->collect_tree_drift(
+					$child,
+					$schema[ $key ],
+					$qualified,
+					$ability_id,
+					$fn_name,
+					$rel_file,
+					$line,
+					$findings
+				);
+			}
+		}
+	}
+
+	/**
+	 * Convert a JSON Schema `properties` map into the same tree shape
+	 * the return-extractor produces: keys are property names, values
+	 * are either `null` (leaf / no nested constraint) or a nested map
+	 * built from `properties` of an object-typed property.
+	 *
+	 * @since 1.1.3
+	 *
+	 * @param array $properties Schema `properties` map.
+	 * @return array<string, array|null>
+	 */
+	private function schema_properties_tree( array $properties ): array {
+		$tree = [];
+		foreach ( $properties as $key => $def ) {
+			if ( is_array( $def ) && isset( $def['properties'] ) && is_array( $def['properties'] ) ) {
+				$tree[ $key ] = $this->schema_properties_tree( $def['properties'] );
+			} else {
+				$tree[ $key ] = null;
+			}
+		}
+		return $tree;
+	}
+
+	/**
+	 * Merge two returned-shape trees. Where both sides have a key with
+	 * nested-array values, recurse; otherwise the resulting value is
+	 * an array if either side had one (more specific wins over leaf).
+	 *
+	 * @since 1.1.3
+	 *
+	 * @param array $a First tree.
+	 * @param array $b Second tree.
+	 * @return array
+	 */
+	private function merge_return_trees( array $a, array $b ): array {
+		foreach ( $b as $key => $val ) {
+			if ( ! array_key_exists( $key, $a ) ) {
+				$a[ $key ] = $val;
+				continue;
+			}
+			$existing = $a[ $key ];
+			if ( is_array( $existing ) && is_array( $val ) ) {
+				$a[ $key ] = $this->merge_return_trees( $existing, $val );
+			} elseif ( is_array( $val ) ) {
+				$a[ $key ] = $val;
+			}
+			// Otherwise keep $existing (either both null, or existing already array).
+		}
+		return $a;
 	}
 
 	/**
@@ -668,6 +779,13 @@ class Validate_Command {
 			}
 
 			// Walk body, tracking depth; find T_RETURN statements.
+			//
+			// Note on string interpolation: `"{$var}"` tokenizes as
+			// T_CURLY_OPEN '{' (array) followed by a literal '}' (string).
+			// Without counting T_CURLY_OPEN as a depth increment, the
+			// literal '}' decrements past the function body and the walk
+			// exits early — missing the actual `return` statement. The
+			// same applies to `"${var}"` which emits T_DOLLAR_OPEN_CURLY_BRACES.
 			$depth   = 1;
 			$returns = [];
 			for ( $k = $body_start + 1; $k < $n; $k++ ) {
@@ -682,6 +800,11 @@ class Validate_Command {
 							break;
 						}
 					}
+					continue;
+				}
+
+				if ( T_CURLY_OPEN === $tk[0] || T_DOLLAR_OPEN_CURLY_BRACES === $tk[0] ) {
+					$depth++;
 					continue;
 				}
 
@@ -732,41 +855,70 @@ class Validate_Command {
 	}
 
 	/**
-	 * Extract the top-level literal string keys from an array literal
-	 * starting at $open_idx (a `[` or `(` token). Recurses through
-	 * nested arrays/calls via depth tracking but only returns keys
-	 * at depth 1 of the outer array.
+	 * Extract the literal string keys (and any nested string-keyed
+	 * sub-arrays) from an array literal starting at $open_idx (a `[`
+	 * or `(` token).
+	 *
+	 * Returns a tree shape: each key maps to either `null` (leaf —
+	 * value was a scalar / function call / variable / dynamic
+	 * expression) or another tree (value was a literal array, parsed
+	 * recursively). This lets callers compare nested object schemas
+	 * against the actual returned shape.
+	 *
+	 * Skip-tokens (whitespace, line and block comments) don't affect
+	 * key/value parsing. Comments are critical: a `// note` after a
+	 * trailing comma was previously resetting the parser's expecting-key
+	 * state and silently dropping the next entry's key.
 	 *
 	 * @since 1.1.2
 	 *
 	 * @param array $tokens   Token stream.
 	 * @param int   $open_idx Index of the outer-array opening bracket.
 	 * @param int   $n        Total token count.
-	 * @return string[]
+	 * @param int   &$end_idx Set to the index of the matching close bracket
+	 *                        (or the last index visited if the input runs
+	 *                        out). Used by the recursive call to advance past
+	 *                        a parsed nested array.
+	 * @return array<string, array|null>
 	 */
-	private function extract_array_literal_keys( array $tokens, int $open_idx, int $n ): array {
-		$keys           = [];
-		$depth          = 1;
-		$expecting_key  = true;
+	private function extract_array_literal_keys( array $tokens, int $open_idx, int $n, int &$end_idx = 0 ): array {
+		$tree              = [];
+		$depth             = 1;
+		$expecting_key     = true;
+		$pending_key       = null;  // Captured between key=>... and the next comma / close.
+		$skip_token_types  = [ T_WHITESPACE, T_COMMENT, T_DOC_COMMENT ];
 
-		// Tokens that don't affect key/value parsing — skip without
-		// touching `$expecting_key`. Comments are critical: a `// note`
-		// after a trailing comma was previously resetting expecting_key
-		// to false and silently dropping the next entry's key.
-		$skip_token_types = [ T_WHITESPACE, T_COMMENT, T_DOC_COMMENT ];
-
-		for ( $i = $open_idx + 1; $i < $n && $depth > 0; $i++ ) {
+		for ( $i = $open_idx + 1; $i < $n; $i++ ) {
 			$t = $tokens[ $i ];
 
 			if ( is_string( $t ) ) {
+				// A `[` or `(` immediately after `key =>` opens a nested
+				// value-array; recurse instead of just incrementing depth.
+				if ( $pending_key !== null && 1 === $depth && ( '[' === $t || '(' === $t ) ) {
+					$sub_end                = $i;
+					$tree[ $pending_key ]   = $this->extract_array_literal_keys( $tokens, $i, $n, $sub_end );
+					$pending_key            = null;
+					$expecting_key          = false;
+					$i                      = $sub_end;
+					continue;
+				}
+
 				if ( '[' === $t || '(' === $t || '{' === $t ) {
 					$depth++;
 				} elseif ( ']' === $t || ')' === $t || '}' === $t ) {
 					$depth--;
 					if ( 0 === $depth ) {
-						break;
+						if ( $pending_key !== null ) {
+							$tree[ $pending_key ] = null;
+						}
+						$end_idx = $i;
+						return $tree;
 					}
 				} elseif ( ',' === $t && 1 === $depth ) {
+					if ( $pending_key !== null ) {
+						$tree[ $pending_key ] = null;
+						$pending_key          = null;
+					}
 					$expecting_key = true;
 				}
 				continue;
@@ -774,6 +926,31 @@ class Validate_Command {
 
 			if ( in_array( $t[0], $skip_token_types, true ) ) {
 				continue;
+			}
+
+			// String interpolation: `"{$var}"` opens with T_CURLY_OPEN
+			// (or T_DOLLAR_OPEN_CURLY_BRACES) and closes with a literal `}`.
+			// Count the open as a depth increment so the close balances.
+			if ( T_CURLY_OPEN === $t[0] || T_DOLLAR_OPEN_CURLY_BRACES === $t[0] ) {
+				$depth++;
+				continue;
+			}
+
+			// `array(...)` syntax: T_ARRAY followed by `(` — handle the
+			// same way as `[` after `key =>`.
+			if ( $pending_key !== null && 1 === $depth && T_ARRAY === $t[0] ) {
+				$p = $i + 1;
+				while ( $p < $n && is_array( $tokens[ $p ] ) && in_array( $tokens[ $p ][0], $skip_token_types, true ) ) {
+					$p++;
+				}
+				if ( $p < $n && is_string( $tokens[ $p ] ) && '(' === $tokens[ $p ] ) {
+					$sub_end              = $p;
+					$tree[ $pending_key ] = $this->extract_array_literal_keys( $tokens, $p, $n, $sub_end );
+					$pending_key          = null;
+					$expecting_key        = false;
+					$i                    = $sub_end;
+					continue;
+				}
 			}
 
 			if ( 1 !== $depth || ! $expecting_key ) {
@@ -788,13 +965,21 @@ class Validate_Command {
 					$j++;
 				}
 				if ( $j < $n && is_array( $tokens[ $j ] ) && T_DOUBLE_ARROW === $tokens[ $j ][0] ) {
-					$keys[] = trim( $t[1], "'\"" );
+					$pending_key   = trim( $t[1], "'\"" );
+					$i             = $j;
+					$expecting_key = false;
+					continue;
 				}
 			}
 			$expecting_key = false;
 		}
 
-		return $keys;
+		// Input ran out — close any dangling pending key.
+		if ( $pending_key !== null ) {
+			$tree[ $pending_key ] = null;
+		}
+		$end_idx = $i - 1;
+		return $tree;
 	}
 
 	/**
