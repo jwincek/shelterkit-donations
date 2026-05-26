@@ -61,12 +61,15 @@ class Validate_Command {
 		$products_config  = $this->load_json( 'config/products.json' );
 		$emails_config    = $this->load_json( 'config/emails.json' );
 
-		// Manifests own a growing subset of abilities; project them and
-		// merge so checks see the full declared surface (both sources).
+		// Manifests own a growing subset of abilities and products; project
+		// them and merge so checks see the full declared surface (both
+		// sources).
 		$this->init_manifest_loader();
-		$manifest_abilities = Field_Manifest::get_abilities();
-		foreach ( $manifest_abilities as $ability_id => $cfg ) {
+		foreach ( Field_Manifest::get_abilities() as $ability_id => $cfg ) {
 			$abilities_config['abilities'][ $ability_id ] = $cfg;
+		}
+		foreach ( Field_Manifest::get_products() as $sku_prefix => $cfg ) {
+			$products_config['products'][ $sku_prefix ] = $cfg;
 		}
 
 		$findings = [];
@@ -99,7 +102,8 @@ class Validate_Command {
 			$findings = array_merge(
 				$findings,
 				$this->check_manifest_coverage(),
-				$this->check_manifest_abilities()
+				$this->check_manifest_abilities(),
+				$this->check_manifest_products()
 			);
 		}
 
@@ -117,6 +121,51 @@ class Validate_Command {
 			require STARTER_SHELTER_PATH . 'includes/core/class-field-manifest.php';
 		}
 		Field_Manifest::init( STARTER_SHELTER_PATH . 'config' );
+	}
+
+	/**
+	 * Check 7: per-manifest sanity for the products they declare. The
+	 * SKU prefix must not also appear in products.json (single source
+	 * of truth).
+	 *
+	 * Other product-level invariants (input_mapping target exists in
+	 * the referenced ability; ability id is declared) are already
+	 * covered by check_product_input_mappings + check_product_ability_ids
+	 * — both of which see manifest products via the merge step in
+	 * __invoke.
+	 *
+	 * @return array<int, array{file: string, line: int, message: string}>
+	 */
+	private function check_manifest_products(): array {
+		$products_raw  = file_get_contents( STARTER_SHELTER_PATH . 'config/products.json' );
+		$products_json = is_string( $products_raw ) ? json_decode( $products_raw, true ) : null;
+		$json_products = is_array( $products_json ) ? ( $products_json['products'] ?? [] ) : [];
+
+		$findings = [];
+
+		foreach ( Field_Manifest::list_entities() as $entity ) {
+			$manifest = Field_Manifest::get( $entity );
+			if ( null === $manifest ) {
+				continue;
+			}
+			$manifest_file = sprintf( 'config/manifests/%s.php', $entity );
+
+			foreach ( ( $manifest['products'] ?? [] ) as $sku_prefix => $cfg ) {
+				if ( isset( $json_products[ $sku_prefix ] ) ) {
+					$findings[] = [
+						'file'    => 'config/products.json',
+						'line'    => 0,
+						'message' => sprintf(
+							'Product "%s" is declared in both %s and config/products.json. The manifest is the source of truth; remove from products.json.',
+							$sku_prefix,
+							$manifest_file
+						),
+					];
+				}
+			}
+		}
+
+		return $findings;
 	}
 
 	/**

@@ -322,4 +322,117 @@ return [
 			],
 		],
 	],
+
+	/*
+	 * WooCommerce products owned by this entity. Each entry mirrors the
+	 * shape under `products.<sku_prefix>` in products.json: the cart-to-
+	 * order-to-ability mapping the Cart_Handler / Product_Mapper /
+	 * Order_Handler chain consumes.
+	 *
+	 * `input_mapping` keys are field names that flow into the ability's
+	 * input_schema; the validator's check_product_input_mappings ensures
+	 * each one exists in the referenced ability's declared input.
+	 *
+	 * Install-state data (legacy_products.product_ids[]) and cross-product
+	 * configuration (sku_attribute_mapping, checkout_field_sets) stay in
+	 * products.json since they're not single-entity definitions.
+	 */
+	'products' => [
+		'shelter-memberships' => [
+			'ability'       => 'shelter-memberships/create',
+			'product_type'  => 'membership',
+			'description'   => 'Individual shelter memberships',
+			'input_mapping' => [
+				'tier' => [
+					'source'    => 'attribute',
+					'key'       => 'membership-level',
+					'transform' => 'normalize_tier',
+				],
+				'membership_type' => [
+					'source' => 'static',
+					'value'  => 'individual',
+				],
+				'donor_name' => [
+					'source' => 'item_meta',
+					'key'    => '_sd_donor_name',
+				],
+				'is_anonymous' => [
+					'source'    => 'item_meta',
+					'key'       => '_sd_is_anonymous',
+					'fallback'  => [
+						'source' => 'order_meta',
+						'key'    => '_sd_is_anonymous',
+					],
+					'transform' => 'boolean',
+					'default'   => false,
+				],
+			],
+		],
+
+		'shelter-memberships-business' => [
+			'ability'       => 'shelter-memberships/create',
+			'product_type'  => 'membership',
+			'description'   => 'Business shelter memberships',
+			'input_mapping' => [
+				'tier' => [
+					'source'    => 'attribute',
+					'key'       => 'membership-level',
+					'transform' => 'normalize_tier',
+				],
+				'membership_type' => [
+					'source' => 'static',
+					'value'  => 'business',
+				],
+				'donor_name' => [
+					'source' => 'item_meta',
+					'key'    => '_sd_donor_name',
+				],
+				'business_name' => [
+					'source'   => 'item_meta',
+					'key'      => '_sd_business_name',
+					'fallback' => [
+						'source'   => 'order_meta',
+						'key'      => '_sd_business_name',
+						'fallback' => [
+							'source' => 'order_field',
+							'key'    => 'billing_company',
+						],
+					],
+				],
+				'logo_attachment_id' => [
+					'source'    => 'item_meta',
+					'key'       => '_sd_logo_attachment_id',
+					'transform' => 'integer',
+				],
+				'is_anonymous' => [
+					'source'    => 'item_meta',
+					'key'       => '_sd_is_anonymous',
+					'fallback'  => [
+						'source' => 'order_meta',
+						'key'    => '_sd_is_anonymous',
+					],
+					'transform' => 'boolean',
+					'default'   => false,
+				],
+			],
+		],
+
+		'memberships' => [
+			'ability'       => 'shelter-memberships/create',
+			'product_type'  => 'membership',
+			'description'   => 'Legacy membership product (pre-existing SKU)',
+			'legacy'        => true,
+			'input_mapping' => [
+				'tier' => [
+					'source'    => 'attribute',
+					'key'       => 'membership-level',
+					'transform' => 'normalize_tier',
+				],
+				'membership_type' => [
+					'source' => 'static',
+					'value'  => 'individual',
+				],
+			],
+		],
+	],
 ];

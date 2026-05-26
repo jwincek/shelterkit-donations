@@ -104,6 +104,12 @@ class Config {
             $data = self::merge_manifest_abilities( $data );
         }
 
+        // Merge in manifest-owned products (cart-to-ability input_mapping
+        // per product SKU prefix). Same pattern.
+        if ( 'products' === $name ) {
+            $data = self::merge_manifest_products( $data );
+        }
+
         // Apply admin overrides from the options table.
         $data = self::apply_overrides( $name, $data );
 
@@ -157,6 +163,29 @@ class Config {
         }
 
         $data['abilities'] = $abilities;
+        return $data;
+    }
+
+    /**
+     * Merge manifest-owned product declarations into the products config.
+     *
+     * Each manifest product replaces (not deep-merges) the corresponding
+     * products.json entry. The validator catches drift if both sources
+     * declare the same SKU prefix.
+     *
+     * @since 1.1.2
+     *
+     * @param array $data Parsed products.json data.
+     * @return array Data with manifest products merged in.
+     */
+    private static function merge_manifest_products( array $data ): array {
+        $products = $data['products'] ?? [];
+
+        foreach ( Field_Manifest::get_products() as $sku_prefix => $cfg ) {
+            $products[ $sku_prefix ] = $cfg;
+        }
+
+        $data['products'] = $products;
         return $data;
     }
 

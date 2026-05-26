@@ -233,6 +233,35 @@ class Field_Manifest {
 	}
 
 	/**
+	 * Collect product declarations across all manifests, projected into
+	 * the products.json shape (`{ "<sku-prefix>": {...config...} }`).
+	 *
+	 * Manifest product entries are passed through verbatim — unlike
+	 * abilities, the product mapping config has no `$entity` ref
+	 * convention (the values are mapping rules, not field shapes).
+	 *
+	 * @since 1.1.2
+	 *
+	 * @return array<string, array<string, mixed>>
+	 */
+	public static function get_products(): array {
+		$out = [];
+
+		foreach ( self::list_entities() as $entity ) {
+			$manifest = self::get( $entity );
+			if ( null === $manifest ) {
+				continue;
+			}
+
+			foreach ( $manifest['products'] ?? [] as $sku_prefix => $cfg ) {
+				$out[ $sku_prefix ] = $cfg;
+			}
+		}
+
+		return $out;
+	}
+
+	/**
 	 * List entity names that have a manifest on disk.
 	 *
 	 * @since 1.1.2
