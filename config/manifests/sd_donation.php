@@ -419,7 +419,15 @@ return [
 			'title'         => 'Donation Receipt',
 			'description'   => 'Sent to donors after a successful donation',
 			'trigger_hook'  => 'starter_shelter_donation_created',
-			'trigger_args'  => [ 'donation_id', 'donor_id', 'input' ],
+			// Typed trigger_args. `input` $ability_input-refs the
+			// shelter-donations/create input schema, so future
+			// args.input.X placeholders validate against the
+			// ability's declared input properties.
+			'trigger_args'  => [
+				'donation_id' => [ 'type' => 'integer' ],
+				'donor_id'    => [ 'type' => 'integer' ],
+				'input'       => [ '$ability_input' => 'shelter-donations/create' ],
+			],
 			'entities'      => [
 				'donation' => [ 'entity' => 'sd_donation', 'id_from' => 'donation_id' ],
 				'donor'    => [ 'entity' => 'sd_donor',    'id_from' => 'donor_id' ],

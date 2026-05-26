@@ -130,6 +130,100 @@ class Validate_Command {
 	}
 
 	/**
+	 * Walk an `args.*` placeholder path against an email's typed
+	 * `trigger_args` declaration. When trigger_args uses the legacy
+	 * flat-list form (numeric keys), shapes aren't statically knowable
+	 * and the walker silently skips. Recurses through `properties` on
+	 * object-typed args; resolves `$ability_input` refs to the named
+	 * ability's input_schema properties.
+	 *
+	 * @since 1.1.2
+	 *
+	 * @param string[] $parts        Path components, starting with 'args'.
+	 * @param array    $trigger_args Email's trigger_args declaration.
+	 * @param string   $email_id     Email id for diagnostics.
+	 * @param string   $context      Where the path came from (for diagnostics).
+	 * @param string   $path         Full original path (for diagnostics).
+	 * @return string|null  Error message string on failure, null on success/skip.
+	 */
+	private function validate_args_path( array $parts, array $trigger_args, string $email_id, string $context, string $path ): ?string {
+		// Legacy list-form trigger_args (numeric keys) → no static shape.
+		if ( empty( $trigger_args ) || ! is_string( array_key_first( $trigger_args ) ) ) {
+			return null;
+		}
+
+		$node = $trigger_args;
+
+		for ( $i = 1; $i < count( $parts ); $i++ ) {
+			$key = $parts[ $i ];
+
+			if ( ! isset( $node[ $key ] ) ) {
+				return sprintf(
+					'Email "%s" %s "%s" references "%s" which is not declared in trigger_args.',
+					$email_id,
+					$context,
+					$path,
+					implode( '.', array_slice( $parts, 0, $i + 1 ) )
+				);
+			}
+
+			$next = $node[ $key ];
+			if ( ! is_array( $next ) ) {
+				return null;
+			}
+
+			// More components to walk? Descend into sub-properties.
+			if ( $i + 1 < count( $parts ) ) {
+				$sub = $this->resolve_args_sub_properties( $next );
+				if ( null === $sub ) {
+					return sprintf(
+						'Email "%s" %s "%s" descends past "%s" but %s has no declared `properties` (or `$ability_input` ref) sub-tree.',
+						$email_id,
+						$context,
+						$path,
+						implode( '.', array_slice( $parts, 0, $i + 1 ) ),
+						implode( '.', array_slice( $parts, 0, $i + 1 ) )
+					);
+				}
+				$node = $sub;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Resolve a trigger_args entry's sub-property tree. Object-typed
+	 * entries use `properties`; entries can also $ability_input-ref
+	 * an ability's input_schema properties for DRY documentation.
+	 *
+	 * @since 1.1.2
+	 *
+	 * @param array $node A trigger_args entry value.
+	 * @return array<string, mixed>|null Sub-property map, or null if none.
+	 */
+	private function resolve_args_sub_properties( array $node ): ?array {
+		if ( isset( $node['$ability_input'] ) && is_string( $node['$ability_input'] ) ) {
+			$ability_id = $node['$ability_input'];
+			foreach ( Field_Manifest::list_all_manifests() as $name ) {
+				$manifest = Field_Manifest::get( $name );
+				if ( null === $manifest ) {
+					continue;
+				}
+				$ability = $manifest['abilities'][ $ability_id ] ?? null;
+				if ( is_array( $ability ) && isset( $ability['input']['properties'] ) ) {
+					return $ability['input']['properties'];
+				}
+			}
+			return null;
+		}
+
+		return isset( $node['properties'] ) && is_array( $node['properties'] )
+			? $node['properties']
+			: null;
+	}
+
+	/**
 	 * Check 10: per-manifest sanity for the emails they declare:
 	 *
 	 *  - email id must not also appear in emails.json (single source);
@@ -186,8 +280,10 @@ class Validate_Command {
 				// rooted prefix; skip `args.*`.
 				$entities_in_email = $email_cfg['entities'] ?? [];
 
+				$trigger_args = $email_cfg['trigger_args'] ?? [];
+
 				foreach ( ( $email_cfg['placeholders'] ?? [] ) as $name => $path ) {
-					$err = $this->validate_path( $path, $entities_in_email, $email_id, "placeholder $name" );
+					$err = $this->validate_path( $path, $entities_in_email, $email_id, "placeholder $name", $trigger_args );
 					if ( null !== $err ) {
 						$findings[] = [
 							'file'    => $manifest_file,
@@ -207,7 +303,8 @@ class Validate_Command {
 						$email_cfg[ $key ],
 						$entities_in_email,
 						$email_id,
-						$key
+						$key,
+						$trigger_args
 					);
 					if ( null !== $err ) {
 						$findings[] = [
@@ -236,13 +333,15 @@ class Validate_Command {
 	 * @param string $context           Where the path came from (for diagnostics).
 	 * @return string|null
 	 */
-	private function validate_path( string $path, array $entities_in_email, string $email_id, string $context ): ?string {
+	private function validate_path( string $path, array $entities_in_email, string $email_id, string $context, array $trigger_args = [] ): ?string {
 		$parts = explode( '.', $path );
 		$root  = $parts[0] ?? '';
 
-		// args.* — shape isn't statically validatable.
+		// args.* — walk against trigger_args when it carries types
+		// (typed associative form). Legacy flat-list trigger_args has
+		// no statically-knowable shape; skip in that case.
 		if ( 'args' === $root ) {
-			return null;
+			return $this->validate_args_path( $parts, $trigger_args, $email_id, $context, $path );
 		}
 
 		if ( ! isset( $entities_in_email[ $root ] ) ) {

@@ -557,7 +557,14 @@ return [
 			'title'         => 'Membership Welcome',
 			'description'   => 'Sent to new members after joining',
 			'trigger_hook'  => 'starter_shelter_membership_created',
-			'trigger_args'  => [ 'membership_id', 'donor_id', 'input' ],
+			// Typed trigger_args. `input` $ability_input-refs the
+			// shelter-memberships/create input schema for DRY
+			// documentation and future placeholder validation.
+			'trigger_args'  => [
+				'membership_id' => [ 'type' => 'integer' ],
+				'donor_id'      => [ 'type' => 'integer' ],
+				'input'         => [ '$ability_input' => 'shelter-memberships/create' ],
+			],
 			'entities'      => [
 				'membership' => [ 'entity' => 'sd_membership', 'id_from' => 'membership_id' ],
 				'donor'      => [ 'entity' => 'sd_donor',      'id_from' => 'donor_id' ],

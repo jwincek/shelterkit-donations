@@ -331,7 +331,25 @@ return [
 			'title'         => 'Annual Giving Summary',
 			'description'   => 'Annual summary of donations for tax purposes',
 			'trigger_hook'  => 'starter_shelter_annual_summary',
-			'trigger_args'  => [ 'donor_id', 'year', 'summary' ],
+			// Typed trigger_args: documents the expected producer call
+			// shape so placeholder args-paths can be statically walked.
+			// AUDIT NOTE: the actual producer at handle_send_statement
+			// fires `do_action('starter_shelter_annual_summary', $donor_id, [donor, year])`
+			// — two args, no summary object. The placeholders below
+			// reference args.summary.X but the producer doesn't pass
+			// one. Tracked separately; declaring the shape here makes
+			// the gap visible.
+			'trigger_args'  => [
+				'donor_id' => [ 'type' => 'integer' ],
+				'year'     => [ 'type' => 'integer' ],
+				'summary'  => [
+					'type'       => 'object',
+					'properties' => [
+						'total_formatted' => [ 'type' => 'string' ],
+						'count'           => [ 'type' => 'integer' ],
+					],
+				],
+			],
 			'entities'      => [
 				'donor' => [ 'entity' => 'sd_donor', 'id_from' => 'donor_id' ],
 			],

@@ -108,11 +108,14 @@ class Config_Email extends WC_Email {
      * @param mixed ...$args Trigger arguments matching trigger_args config.
      */
     public function trigger( ...$args ): void {
-        // Map arguments to named keys.
-        $arg_names = $this->config['trigger_args'] ?? [];
+        // Map positional args to named keys. trigger_args supports two
+        // shapes: a flat list `['donor_id', 'year', ...]` (legacy) or a
+        // typed associative map `['donor_id' => [type: int], ...]` (new).
+        // For both, names come from the *keys* (assoc) or *values* (list).
+        $names = self::trigger_arg_names( $this->config['trigger_args'] ?? [] );
         $this->trigger_args = [];
 
-        foreach ( $arg_names as $index => $name ) {
+        foreach ( $names as $index => $name ) {
             $this->trigger_args[ $name ] = $args[ $index ] ?? null;
         }
 
@@ -155,6 +158,27 @@ class Config_Email extends WC_Email {
         );
 
         $this->fire_sent_event();
+    }
+
+    /**
+     * Return the positional list of trigger-arg names from a config's
+     * `trigger_args` declaration, regardless of which form it uses.
+     *
+     *  - Legacy list form (`['donor_id', 'year']`) → values are the names.
+     *  - Typed assoc form (`['donor_id' => [type: int], ...]`) → keys
+     *    are the names; types are validator-only metadata.
+     *
+     * @since 1.1.2
+     *
+     * @param array $trigger_args Email config's `trigger_args` value.
+     * @return string[] Positional list of names.
+     */
+    protected static function trigger_arg_names( array $trigger_args ): array {
+        if ( empty( $trigger_args ) ) {
+            return [];
+        }
+        $first = array_key_first( $trigger_args );
+        return is_string( $first ) ? array_keys( $trigger_args ) : array_values( $trigger_args );
     }
 
     /**
@@ -206,8 +230,8 @@ class Config_Email extends WC_Email {
      * @since 1.1.2
      */
     protected function fire_sent_event(): void {
-        $arg_names   = $this->config['trigger_args'] ?? [];
-        $primary_arg = $arg_names[0] ?? null;
+        $names       = self::trigger_arg_names( $this->config['trigger_args'] ?? [] );
+        $primary_arg = $names[0] ?? null;
         $object_id   = $primary_arg ? (int) ( $this->trigger_args[ $primary_arg ] ?? 0 ) : 0;
 
         $object_type = null;
