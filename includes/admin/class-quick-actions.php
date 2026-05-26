@@ -198,14 +198,25 @@ class Quick_Actions {
             wp_die( __( 'Donor not found.', 'starter-shelter' ) );
         }
 
-        // Get current year's donations.
-        $year = (int) wp_date( 'Y' );
+        // Compute the annual giving summary via the shelter-reports ability.
+        // The email's `donor-annual-summary` declares this shape in its
+        // trigger_args; firing with a matching summary lets placeholders
+        // resolve cleanly at runtime.
+        $year     = (int) wp_date( 'Y' );
+        $summary  = [
+            'grand_formatted' => Helpers\format_currency( 0 ),
+            'donations'       => [ 'count' => 0, 'formatted' => Helpers\format_currency( 0 ) ],
+        ];
 
-        // Trigger the annual summary email.
-        do_action( 'starter_shelter_annual_summary', $donor_id, [
-            'donor' => $donor,
-            'year'  => $year,
-        ] );
+        $ability = wp_get_ability( 'shelter-reports/annual-summary' );
+        if ( $ability ) {
+            $result = $ability->execute( [ 'donor_id' => $donor_id, 'year' => $year ] );
+            if ( is_array( $result ) ) {
+                $summary = $result;
+            }
+        }
+
+        do_action( 'starter_shelter_annual_summary', $donor_id, $year, $summary );
 
         wp_safe_redirect( add_query_arg( [
             'post_type' => 'sd_donor',

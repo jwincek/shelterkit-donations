@@ -331,22 +331,27 @@ return [
 			'title'         => 'Annual Giving Summary',
 			'description'   => 'Annual summary of donations for tax purposes',
 			'trigger_hook'  => 'starter_shelter_annual_summary',
-			// Typed trigger_args: documents the expected producer call
-			// shape so placeholder args-paths can be statically walked.
-			// AUDIT NOTE: the actual producer at handle_send_statement
-			// fires `do_action('starter_shelter_annual_summary', $donor_id, [donor, year])`
-			// — two args, no summary object. The placeholders below
-			// reference args.summary.X but the producer doesn't pass
-			// one. Tracked separately; declaring the shape here makes
-			// the gap visible.
+			// trigger_args shape matches what the producer at
+			// Quick_Actions::handle_send_statement now fires, which is
+			// the output of `wp_get_ability('shelter-reports/annual-summary')`.
+			// Properties declared here are only those the placeholders
+			// reference; the template reads additional paths
+			// (memorials, memberships, by_allocation, etc.) directly
+			// from $args['summary'] without statically-walked routes.
 			'trigger_args'  => [
 				'donor_id' => [ 'type' => 'integer' ],
 				'year'     => [ 'type' => 'integer' ],
 				'summary'  => [
 					'type'       => 'object',
 					'properties' => [
-						'total_formatted' => [ 'type' => 'string' ],
-						'count'           => [ 'type' => 'integer' ],
+						'grand_formatted' => [ 'type' => 'string' ],
+						'donations'       => [
+							'type'       => 'object',
+							'properties' => [
+								'count'     => [ 'type' => 'integer' ],
+								'formatted' => [ 'type' => 'string' ],
+							],
+						],
 					],
 				],
 			],
@@ -360,8 +365,8 @@ return [
 			'placeholders'   => [
 				'donor_name'      => 'donor.full_name',
 				'year'            => 'args.year',
-				'total_donations' => 'args.summary.total_formatted',
-				'donation_count'  => 'args.summary.count',
+				'total_donations' => 'args.summary.grand_formatted',
+				'donation_count'  => 'args.summary.donations.count',
 			],
 		],
 	],

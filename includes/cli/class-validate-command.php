@@ -109,7 +109,8 @@ class Validate_Command {
 				$this->check_manifest_products(),
 				$this->check_manifest_meta_boxes(),
 				$this->check_manifest_checkout_fields(),
-				$this->check_manifest_emails()
+				$this->check_manifest_emails(),
+				$this->check_producer_arg_counts()
 			);
 		}
 
@@ -127,6 +128,200 @@ class Validate_Command {
 			require STARTER_SHELTER_PATH . 'includes/core/class-field-manifest.php';
 		}
 		Field_Manifest::init( STARTER_SHELTER_PATH . 'config' );
+	}
+
+	/**
+	 * Check 11: producer-side arg-count check.
+	 *
+	 * For every email that declares a trigger_hook + trigger_args, find
+	 * the matching `do_action('hook', ...)` call sites in PHP source and
+	 * flag producers that fire FEWER args than the email expects. The
+	 * "expecting more than the producer fires" case is the runtime bug:
+	 * the listener registers for N args, gets only M < N from the
+	 * producer, and the missing args arrive as null. Catches contract
+	 * drift like donor-annual-summary directly.
+	 *
+	 * Producers that fire MORE args than an email expects are not
+	 * flagged — `add_action` registers the listener for only as many
+	 * args as it declared, so extra producer args are silently dropped.
+	 * That's a documentation gap (the email could declare a richer
+	 * shape) but not a runtime bug, so it's out of scope for this check.
+	 *
+	 * Uses a token-based parser (not regex) so multi-line do_action
+	 * calls, nested arrays, and function-call args are counted correctly.
+	 *
+	 * Calls without a literal-string first arg (`do_action($hook, ...)`)
+	 * are skipped — the hook name isn't statically resolvable.
+	 *
+	 * @return array<int, array{file: string, line: int, message: string}>
+	 */
+	private function check_producer_arg_counts(): array {
+		// Map: trigger_hook → list of { email_id, count, source }.
+		$expected = [];
+
+		foreach ( Field_Manifest::list_all_manifests() as $name ) {
+			$manifest = Field_Manifest::get( $name );
+			if ( ! is_array( $manifest ) ) {
+				continue;
+			}
+			$source_file = sprintf( 'config/manifests/%s.php', $name );
+			foreach ( $manifest['emails'] ?? [] as $email_id => $cfg ) {
+				$hook = $cfg['trigger_hook'] ?? null;
+				$args = $cfg['trigger_args'] ?? [];
+				if ( is_string( $hook ) && is_array( $args ) && ! empty( $args ) ) {
+					$expected[ $hook ][] = [
+						'email_id' => $email_id,
+						'count'    => count( $args ),
+						'source'   => $source_file,
+					];
+				}
+			}
+		}
+
+		// Also include any unmigrated emails still in emails.json.
+		$emails_raw  = @file_get_contents( STARTER_SHELTER_PATH . 'config/emails.json' );
+		$emails_json = is_string( $emails_raw ) ? json_decode( $emails_raw, true ) : null;
+		if ( is_array( $emails_json ) ) {
+			foreach ( $emails_json['emails'] ?? [] as $email_id => $cfg ) {
+				$hook = $cfg['trigger_hook'] ?? null;
+				$args = $cfg['trigger_args'] ?? [];
+				if ( is_string( $hook ) && is_array( $args ) && ! empty( $args ) ) {
+					$expected[ $hook ][] = [
+						'email_id' => $email_id,
+						'count'    => count( $args ),
+						'source'   => 'config/emails.json',
+					];
+				}
+			}
+		}
+
+		if ( empty( $expected ) ) {
+			return [];
+		}
+
+		$findings = [];
+
+		foreach ( $this->iter_php_files() as $file ) {
+			$contents = @file_get_contents( $file );
+			if ( ! is_string( $contents ) ) {
+				continue;
+			}
+
+			foreach ( $this->parse_do_action_calls( $contents ) as $call ) {
+				if ( ! isset( $expected[ $call['hook'] ] ) ) {
+					continue;
+				}
+
+				// arg_count from the parser counts ALL args including the
+				// hook name itself; listener args = arg_count - 1.
+				$producer_listener_args = $call['arg_count'] - 1;
+
+				foreach ( $expected[ $call['hook'] ] as $exp ) {
+					// Only the producer-too-few case is a runtime bug —
+					// producer-too-many is silently dropped by the
+					// listener's declared arg count. See method docblock.
+					if ( $exp['count'] <= $producer_listener_args ) {
+						continue;
+					}
+					$findings[] = [
+						'file'    => $this->relative_path( $file ),
+						'line'    => $call['line'],
+						'message' => sprintf(
+							'do_action("%s") fires only %d listener arg(s); email "%s" (%s) expects %d trigger_args — missing args arrive as null at runtime.',
+							$call['hook'],
+							$producer_listener_args,
+							$exp['email_id'],
+							$exp['source'],
+							$exp['count']
+						),
+					];
+				}
+			}
+		}
+
+		return $findings;
+	}
+
+	/**
+	 * Token-based parser for `do_action('hook_name', ...)` calls.
+	 *
+	 * Returns one entry per call with the hook name, total arg count
+	 * (including the hook name), and the line the call starts on.
+	 * Only calls whose first arg is a literal string starting with
+	 * `starter_shelter_` are returned; dynamic-hook-name calls are
+	 * skipped.
+	 *
+	 * @since 1.1.2
+	 *
+	 * @param string $contents PHP file contents.
+	 * @return array<int, array{hook: string, arg_count: int, line: int}>
+	 */
+	private function parse_do_action_calls( string $contents ): array {
+		$tokens = @token_get_all( $contents );
+		if ( ! is_array( $tokens ) ) {
+			return [];
+		}
+
+		$calls = [];
+		$n     = count( $tokens );
+
+		for ( $i = 0; $i < $n; $i++ ) {
+			$t = $tokens[ $i ];
+			if ( ! is_array( $t ) || T_STRING !== $t[0] || 'do_action' !== $t[1] ) {
+				continue;
+			}
+
+			// Find the `(` opening the call, skipping whitespace.
+			$j = $i + 1;
+			while ( $j < $n && is_array( $tokens[ $j ] ) && T_WHITESPACE === $tokens[ $j ][0] ) {
+				$j++;
+			}
+			if ( $j >= $n || ! is_string( $tokens[ $j ] ) || '(' !== $tokens[ $j ] ) {
+				continue;
+			}
+
+			$line      = $t[2];
+			$depth     = 1;
+			$arg_count = 1; // We're inside the first arg slot at $j+1.
+			$hook_name = null;
+			$k         = $j;
+
+			for ( $k = $j + 1; $k < $n; $k++ ) {
+				$tk = $tokens[ $k ];
+
+				if ( is_string( $tk ) ) {
+					if ( '(' === $tk || '[' === $tk || '{' === $tk ) {
+						$depth++;
+					} elseif ( ')' === $tk ) {
+						$depth--;
+						if ( 0 === $depth ) {
+							break;
+						}
+					} elseif ( ']' === $tk || '}' === $tk ) {
+						$depth--;
+					} elseif ( ',' === $tk && 1 === $depth ) {
+						$arg_count++;
+					}
+				} else {
+					// Capture the first literal string at depth 1 as the hook.
+					if ( null === $hook_name && 1 === $depth && T_CONSTANT_ENCAPSED_STRING === $tk[0] ) {
+						$hook_name = trim( $tk[1], "'\"" );
+					}
+				}
+			}
+
+			if ( is_string( $hook_name ) && str_starts_with( $hook_name, 'starter_shelter_' ) ) {
+				$calls[] = [
+					'hook'      => $hook_name,
+					'arg_count' => $arg_count,
+					'line'      => $line,
+				];
+			}
+
+			$i = $k;
+		}
+
+		return $calls;
 	}
 
 	/**
