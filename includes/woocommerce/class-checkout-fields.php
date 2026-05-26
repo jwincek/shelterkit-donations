@@ -128,29 +128,6 @@ class Checkout_Fields {
                 'meta_key'    => '_sd_is_anonymous',
             ],
 
-            // Donation fields.
-            'dedication' => [
-                'type'        => 'text',
-                'label'       => __( 'Dedication (optional)', 'starter-shelter' ),
-                'placeholder' => __( 'In honor of...', 'starter-shelter' ),
-                'required'    => false,
-                'priority'    => 20,
-                'class'       => [ 'form-row-wide' ],
-                'meta_key'    => '_sd_dedication',
-                'product_types' => [ 'donation' ],
-            ],
-
-            'campaign_id' => [
-                'type'        => 'select',
-                'label'       => __( 'Support a Campaign (optional)', 'starter-shelter' ),
-                'required'    => false,
-                'priority'    => 30,
-                'class'       => [ 'form-row-wide' ],
-                'meta_key'    => '_sd_campaign_id',
-                'options'     => 'campaigns', // Dynamic options.
-                'product_types' => [ 'donation' ],
-            ],
-
             // Memorial fields.
             'honoree_name' => [
                 'type'        => 'text',

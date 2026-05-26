@@ -127,9 +127,13 @@ class Validate_Command {
 
 	/**
 	 * Check 9: per-manifest sanity for the checkout_fields they declare.
-	 * Each field name referenced in the checkout_fields block must
-	 * exist in the manifest's `fields` section (otherwise the projector
-	 * silently emits an entry with no label/type).
+	 *
+	 * Self-contained entries (no matching entity field) are allowed —
+	 * the overlay can fully describe the field. But any entry's
+	 * projected output must resolve at least an `input_type` (so the
+	 * checkout renderer knows what widget to render). A typo that
+	 * matches neither a fields entry nor supplies its own input_type
+	 * is flagged.
 	 *
 	 * @return array<int, array{file: string, line: int, message: string}>
 	 */
@@ -150,13 +154,16 @@ class Validate_Command {
 			$fields        = $manifest['fields'] ?? [];
 			$manifest_file = sprintf( 'config/manifests/%s.php', $entity );
 
-			foreach ( array_keys( $checkout_fields ) as $field_name ) {
-				if ( ! isset( $fields[ $field_name ] ) ) {
+			foreach ( $checkout_fields as $field_name => $overlay ) {
+				$form          = $fields[ $field_name ]['form'] ?? [];
+				$has_input     = isset( $form['input_type'] )
+					|| ( is_array( $overlay ) && isset( $overlay['input_type'] ) );
+				if ( ! $has_input ) {
 					$findings[] = [
 						'file'    => $manifest_file,
 						'line'    => 0,
 						'message' => sprintf(
-							'checkout_fields lists "%s" that does not exist in %s.fields.',
+							'checkout_fields "%s" can\'t resolve an input_type — not a field in %s.fields and overlay doesn\'t supply one.',
 							$field_name,
 							$entity
 						),

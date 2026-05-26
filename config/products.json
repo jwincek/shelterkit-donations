@@ -1,49 +1,5 @@
 {
   "products": {
-    "shelter-donations": {
-      "ability": "shelter-donations/create",
-      "product_type": "donation",
-      "description": "General shelter donations",
-      "input_mapping": {
-        "allocation": {
-          "source": "attribute",
-          "key": "preferred-allocation",
-          "transform": "normalize_allocation",
-          "default": "general-fund"
-        },
-        "donor_name": {
-          "source": "item_meta",
-          "key": "_sd_donor_name"
-        },
-        "dedication": {
-          "source": "item_meta",
-          "key": "_sd_dedication",
-          "fallback": {
-            "source": "order_meta",
-            "key": "_sd_dedication"
-          }
-        },
-        "is_anonymous": {
-          "source": "item_meta",
-          "key": "_sd_is_anonymous",
-          "fallback": {
-            "source": "order_meta",
-            "key": "_sd_is_anonymous"
-          },
-          "transform": "boolean",
-          "default": false
-        },
-        "campaign_id": {
-          "source": "item_meta",
-          "key": "_sd_campaign_id",
-          "fallback": {
-            "source": "order_meta",
-            "key": "_sd_campaign_id"
-          }
-        }
-      }
-    },
-
     "shelter-donations-in-memoriam": {
       "ability": "shelter-memorials/create",
       "product_type": "memorial",

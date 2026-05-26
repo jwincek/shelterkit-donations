@@ -72,31 +72,6 @@ class Meta_Boxes {
      */
     private static function get_hard_coded_meta_box_config(): array {
         return [
-            'sd_donation' => [
-                'boxes' => [
-                    'donation_details' => [
-                        'title'    => __( 'Donation Details', 'starter-shelter' ),
-                        'context'  => 'normal',
-                        'priority' => 'high',
-                        'fields'   => [
-                            'amount'        => [ 'label' => __( 'Amount', 'starter-shelter' ), 'type' => 'currency', 'required' => true ],
-                            'donor_id'      => [ 'label' => __( 'Donor', 'starter-shelter' ), 'type' => 'post_select', 'post_type' => 'sd_donor' ],
-                            'donation_date' => [ 'label' => __( 'Donation Date', 'starter-shelter' ), 'type' => 'datetime', 'default' => 'now' ],
-                            'allocation'    => [ 'label' => __( 'Allocation', 'starter-shelter' ), 'type' => 'select', 'options' => 'allocations' ],
-                            'is_anonymous'  => [ 'label' => __( 'Anonymous Donation', 'starter-shelter' ), 'type' => 'checkbox' ],
-                            'dedication'    => [ 'label' => __( 'Dedication Message', 'starter-shelter' ), 'type' => 'textarea', 'rows' => 3 ],
-                        ],
-                    ],
-                    'order_info' => [
-                        'title'    => __( 'Order Information', 'starter-shelter' ),
-                        'context'  => 'side',
-                        'fields'   => [
-                            'wc_order_id' => [ 'label' => __( 'WooCommerce Order', 'starter-shelter' ), 'type' => 'order_link', 'readonly' => true ],
-                        ],
-                    ],
-                ],
-            ],
-
             'sd_memorial' => [
                 'boxes' => [
                     'memorial_details' => [

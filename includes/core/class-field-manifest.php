@@ -99,12 +99,35 @@ class Field_Manifest {
 
 		$section = [];
 		foreach ( [ 'meta_prefix', 'fields', 'computed', 'relations' ] as $key ) {
-			if ( isset( $manifest[ $key ] ) ) {
+			if ( ! isset( $manifest[ $key ] ) ) {
+				continue;
+			}
+			if ( 'fields' === $key ) {
+				// Strip UI-only `form` sub-blocks — those are surface
+				// metadata for meta-boxes / checkout-fields projectors,
+				// not entity-schema attributes.
+				$section['fields'] = array_map( [ self::class, 'strip_internal_keys' ], $manifest['fields'] );
+			} else {
 				$section[ $key ] = $manifest[ $key ];
 			}
 		}
 
 		return $section;
+	}
+
+	/**
+	 * Remove internal-only keys (e.g., `form`) from an entity-field
+	 * definition before exposing it to schema-shaped consumers like
+	 * entities.json and the ability $entity-ref resolver.
+	 *
+	 * @since 1.1.2
+	 *
+	 * @param array<string, mixed> $field Field definition.
+	 * @return array<string, mixed>
+	 */
+	private static function strip_internal_keys( array $field ): array {
+		unset( $field['form'] );
+		return $field;
 	}
 
 	/**
@@ -190,17 +213,21 @@ class Field_Manifest {
 	private static function project_schema( array $schema, array $entity_fields ): array {
 		$out = [ 'type' => 'object' ];
 
-		foreach ( [ 'required', 'oneOf', 'anyOf', 'allOf' ] as $key ) {
+		foreach ( [ 'description', 'required', 'oneOf', 'anyOf', 'allOf' ] as $key ) {
 			if ( isset( $schema[ $key ] ) ) {
 				$out[ $key ] = $schema[ $key ];
 			}
 		}
 
-		$props = [];
-		foreach ( $schema['properties'] ?? [] as $name => $prop ) {
-			$props[ $name ] = self::resolve_property( $prop, $entity_fields );
+		// Only emit a `properties` block when one was declared — some
+		// schemas (e.g., shelter-donations/get output) are description-only.
+		if ( isset( $schema['properties'] ) ) {
+			$props = [];
+			foreach ( $schema['properties'] as $name => $prop ) {
+				$props[ $name ] = self::resolve_property( $prop, $entity_fields );
+			}
+			$out['properties'] = $props;
 		}
-		$out['properties'] = $props;
 
 		return $out;
 	}
@@ -228,6 +255,7 @@ class Field_Manifest {
 		unset( $overrides['$entity'] );
 
 		$base = $entity_fields[ $ref_name ] ?? [];
+		$base = self::strip_internal_keys( $base );
 
 		return array_merge( $base, $overrides );
 	}
@@ -311,33 +339,37 @@ class Field_Manifest {
 	/**
 	 * Project one checkout field into the legacy config shape.
 	 *
+	 * Overlay attrs override the field's intrinsic `form` shape — the
+	 * same field can render differently per surface (e.g., sd_donation
+	 * dedication is a textarea in meta-boxes but a text input at
+	 * checkout). Entries without a matching entity field are allowed
+	 * if the overlay supplies its own input_type and label (e.g.,
+	 * campaign_id, which lives as a taxonomy relation rather than a
+	 * meta field).
+	 *
 	 * @since 1.1.2
 	 *
-	 * @param string               $field_name  Entity field name.
-	 * @param array<string, mixed> $form        The field's intrinsic form shape.
+	 * @param string               $field_name  Field name (entity field or self-contained).
+	 * @param array<string, mixed> $form        The field's intrinsic form shape (may be empty).
 	 * @param array<string, mixed> $overlay     The checkout_fields overlay.
 	 * @param string               $meta_prefix Entity meta prefix (for meta_key derivation).
 	 * @return array<string, mixed>
 	 */
 	private static function project_checkout_field( string $field_name, array $form, array $overlay, string $meta_prefix ): array {
+		$merged = array_merge( $form, $overlay );
+
 		$out = [];
-
-		if ( isset( $form['input_type'] ) ) {
-			$out['type'] = $form['input_type'];
+		if ( isset( $merged['input_type'] ) ) {
+			$out['type'] = $merged['input_type'];
 		}
-		if ( isset( $form['label'] ) ) {
-			$out['label'] = self::translate( $form['label'] );
-		}
-
-		// Checkout-overlay attrs (placeholder/description i18n'd).
-		foreach ( [ 'placeholder', 'description' ] as $key ) {
-			if ( isset( $overlay[ $key ] ) ) {
-				$out[ $key ] = self::translate( $overlay[ $key ] );
+		foreach ( [ 'label', 'placeholder', 'description' ] as $key ) {
+			if ( isset( $merged[ $key ] ) ) {
+				$out[ $key ] = self::translate( $merged[ $key ] );
 			}
 		}
 		foreach ( [ 'required', 'priority', 'class', 'options', 'product_types', 'conditional' ] as $key ) {
-			if ( isset( $overlay[ $key ] ) ) {
-				$out[ $key ] = $overlay[ $key ];
+			if ( isset( $merged[ $key ] ) ) {
+				$out[ $key ] = $merged[ $key ];
 			}
 		}
 
