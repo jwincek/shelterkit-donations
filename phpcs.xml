@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<ruleset name="Starter Shelter">
+    <description>PHP cross-version compatibility ruleset for the Starter Shelter plugin.</description>
+
+    <file>starter-shelter.php</file>
+    <file>includes</file>
+
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>*/node_modules/*</exclude-pattern>
+    <exclude-pattern>*/assets/*</exclude-pattern>
+
+    <arg name="basepath" value="."/>
+    <arg name="colors"/>
+    <arg name="extensions" value="php"/>
+    <arg value="ps"/>
+
+    <!-- composer.json declares "php": ">=8.1", so check usage against
+         the minimum supported version upward. -->
+    <config name="testVersion" value="8.1-"/>
+    <rule ref="PHPCompatibilityWP"/>
+</ruleset>

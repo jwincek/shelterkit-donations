@@ -62,4 +62,9 @@ jobs:
         run: composer install --no-interaction --prefer-dist
 
       - name: Check PHP syntax
-        run: find starter-shelter.php includes/ -name '*.php' -exec php -l {} + | grep -v 'No syntax errors'
+        # `php -l` runs once per file via xargs (works on all PHP versions
+        # — multi-file `php -l` only became reliable in 8.3). xargs aborts
+        # on `php -l`'s exit 255 (parse error) and propagates that as a
+        # non-zero exit, which fails the step. Parse-error lines surface
+        # on stderr; success lines are discarded.
+        run: find starter-shelter.php includes/ -name '*.php' -print0 | xargs -0 -n1 php -l > /dev/null
