@@ -103,7 +103,8 @@ class Validate_Command {
 				$findings,
 				$this->check_manifest_coverage(),
 				$this->check_manifest_abilities(),
-				$this->check_manifest_products()
+				$this->check_manifest_products(),
+				$this->check_manifest_meta_boxes()
 			);
 		}
 
@@ -121,6 +122,58 @@ class Validate_Command {
 			require STARTER_SHELTER_PATH . 'includes/core/class-field-manifest.php';
 		}
 		Field_Manifest::init( STARTER_SHELTER_PATH . 'config' );
+	}
+
+	/**
+	 * Check 8: per-manifest sanity for the meta_boxes they declare.
+	 * Every field name referenced in a box's `fields` list (whether
+	 * bare string or map key with overrides) must exist in the
+	 * manifest's `fields` section. Catches typos that would otherwise
+	 * surface as a missing-key warning in the admin UI.
+	 *
+	 * @return array<int, array{file: string, line: int, message: string}>
+	 */
+	private function check_manifest_meta_boxes(): array {
+		$findings = [];
+
+		foreach ( Field_Manifest::list_entities() as $entity ) {
+			$manifest = Field_Manifest::get( $entity );
+			if ( null === $manifest ) {
+				continue;
+			}
+
+			$meta_boxes = $manifest['meta_boxes'] ?? null;
+			if ( ! is_array( $meta_boxes ) ) {
+				continue;
+			}
+
+			$fields        = $manifest['fields'] ?? [];
+			$manifest_file = sprintf( 'config/manifests/%s.php', $entity );
+
+			foreach ( $meta_boxes as $box_id => $box_cfg ) {
+				$box_fields = $box_cfg['fields'] ?? [];
+				foreach ( $box_fields as $key => $value ) {
+					$field_name = is_int( $key ) ? $value : $key;
+					if ( ! is_string( $field_name ) ) {
+						continue;
+					}
+					if ( ! isset( $fields[ $field_name ] ) ) {
+						$findings[] = [
+							'file'    => $manifest_file,
+							'line'    => 0,
+							'message' => sprintf(
+								'Meta box "%s" lists field "%s" that does not exist in %s.fields.',
+								$box_id,
+								$field_name,
+								$entity
+							),
+						];
+					}
+				}
+			}
+		}
+
+		return $findings;
 	}
 
 	/**

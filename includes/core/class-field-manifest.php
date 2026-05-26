@@ -262,6 +262,136 @@ class Field_Manifest {
 	}
 
 	/**
+	 * Collect meta-box declarations across all manifests, projected
+	 * into the shape `Meta_Boxes::get_meta_box_config()` expects
+	 * (keyed by post type).
+	 *
+	 * Each meta_box.fields entry is either a bare field name (use the
+	 * field's intrinsic `form` shape) or a `name => overrides` map
+	 * (merge overrides over the form shape).
+	 *
+	 * Labels are wrapped in `__()` if WordPress is loaded so they
+	 * remain translatable at the existing call sites; CLI-time
+	 * validation works with plain strings.
+	 *
+	 * @since 1.1.2
+	 *
+	 * @return array<string, array{boxes: array<string, array<string, mixed>>}>
+	 */
+	public static function get_meta_boxes(): array {
+		$out = [];
+
+		foreach ( self::list_entities() as $entity ) {
+			$manifest = self::get( $entity );
+			if ( null === $manifest ) {
+				continue;
+			}
+
+			$meta_boxes = $manifest['meta_boxes'] ?? null;
+			if ( ! is_array( $meta_boxes ) ) {
+				continue;
+			}
+
+			$fields = $manifest['fields'] ?? [];
+
+			$boxes = [];
+			foreach ( $meta_boxes as $box_id => $box_cfg ) {
+				$boxes[ $box_id ] = self::project_meta_box( $box_cfg, $fields );
+			}
+
+			$out[ $entity ] = [ 'boxes' => $boxes ];
+		}
+
+		return $out;
+	}
+
+	/**
+	 * Project one meta-box declaration into the legacy config shape.
+	 *
+	 * @since 1.1.2
+	 *
+	 * @param array<string, mixed> $box_cfg Manifest-author box config.
+	 * @param array<string, mixed> $fields  The entity's `fields` map.
+	 * @return array<string, mixed>
+	 */
+	private static function project_meta_box( array $box_cfg, array $fields ): array {
+		$out = [];
+
+		foreach ( [ 'title', 'context', 'priority', 'show_when' ] as $key ) {
+			if ( ! isset( $box_cfg[ $key ] ) ) {
+				continue;
+			}
+			$out[ $key ] = ( 'title' === $key ) ? self::translate( $box_cfg[ $key ] ) : $box_cfg[ $key ];
+		}
+
+		$projected_fields = [];
+		foreach ( $box_cfg['fields'] ?? [] as $key => $value ) {
+			// Bare string entry: `'donor_id'` → keyed by integer index,
+			// value is the field name.
+			// Map entry: `'amount' => [ 'label' => 'Amount Paid' ]` → keyed
+			// by field name, value is the override map.
+			if ( is_int( $key ) ) {
+				$field_name = $value;
+				$overrides  = [];
+			} else {
+				$field_name = $key;
+				$overrides  = is_array( $value ) ? $value : [];
+			}
+
+			$projected_fields[ $field_name ] = self::project_form_field(
+				$field_name,
+				$fields[ $field_name ]['form'] ?? [],
+				$overrides
+			);
+		}
+		$out['fields'] = $projected_fields;
+
+		return $out;
+	}
+
+	/**
+	 * Project one field's form shape into the legacy meta-box field
+	 * config (keys: type, label, plus pass-through attributes).
+	 *
+	 * @since 1.1.2
+	 *
+	 * @param string               $field_name Entity field name (for diagnostics).
+	 * @param array<string, mixed> $form       The field's intrinsic form shape.
+	 * @param array<string, mixed> $overrides  Per-box overrides.
+	 * @return array<string, mixed>
+	 */
+	private static function project_form_field( string $field_name, array $form, array $overrides ): array {
+		$merged = array_merge( $form, $overrides );
+
+		$out = [];
+		if ( isset( $merged['input_type'] ) ) {
+			$out['type'] = $merged['input_type'];
+		}
+		if ( isset( $merged['label'] ) ) {
+			$out['label'] = self::translate( $merged['label'] );
+		}
+
+		// Pass-through attributes consumed by Meta_Boxes::render_field.
+		foreach ( [ 'required', 'readonly', 'rows', 'options', 'post_type', 'default', 'description', 'show_when' ] as $key ) {
+			if ( isset( $merged[ $key ] ) ) {
+				$out[ $key ] = ( 'description' === $key ) ? self::translate( $merged[ $key ] ) : $merged[ $key ];
+			}
+		}
+
+		return $out;
+	}
+
+	/**
+	 * i18n a label string if WordPress is loaded; otherwise pass through.
+	 *
+	 * @param string $text Plain label string from the manifest.
+	 * @return string
+	 */
+	private static function translate( string $text ): string {
+		return function_exists( '__' ) ? __( $text, 'starter-shelter' ) : $text;
+	}
+
+	/**
 	 * List entity names that have a manifest on disk.
 	 *
 	 * @since 1.1.2

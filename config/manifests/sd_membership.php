@@ -26,31 +26,59 @@ return [
 		'donor_id' => [
 			'type'        => 'integer',
 			'description' => 'ID of the associated donor',
+			'form'        => [
+				'label'      => 'Member',
+				'input_type' => 'post_select',
+				'post_type'  => 'sd_donor',
+			],
 		],
 		'tier' => [
 			'type'        => 'string',
 			'description' => 'Membership tier slug',
+			'form'        => [
+				'label'      => 'Tier',
+				'input_type' => 'tier_select',
+			],
 		],
 		'membership_type' => [
 			'type'        => 'string',
 			'enum'        => [ 'individual', 'family', 'business' ],
 			'default'     => 'individual',
 			'description' => 'Type of membership',
+			'form'        => [
+				'label'      => 'Type',
+				'input_type' => 'select',
+				// admin-only subset of the entity enum; "family" is a valid
+				// value at the entity level but not currently editable.
+				'options'    => [ 'individual' => 'Individual', 'business' => 'Business' ],
+			],
 		],
 		'amount' => [
 			'type'        => 'number',
 			'minimum'     => 0,
 			'description' => 'Membership amount',
+			'form'        => [
+				'label'      => 'Amount Paid',
+				'input_type' => 'currency',
+			],
 		],
 		'start_date' => [
 			'type'        => 'string',
 			'format'      => 'date',
 			'description' => 'Membership start date',
+			'form'        => [
+				'label'      => 'Start Date',
+				'input_type' => 'date',
+			],
 		],
 		'end_date' => [
 			'type'        => 'string',
 			'format'      => 'date',
 			'description' => 'Membership expiration date',
+			'form'        => [
+				'label'      => 'End Date',
+				'input_type' => 'date',
+			],
 		],
 		'wc_order_id' => [
 			'type'        => 'integer',
@@ -64,24 +92,46 @@ return [
 		'business_name' => [
 			'type'        => 'string',
 			'description' => 'Business name (business memberships only)',
+			'form'        => [
+				'label'      => 'Business Name',
+				'input_type' => 'text',
+			],
 		],
 		'business_website' => [
 			'type'        => 'string',
 			'format'      => 'uri',
 			'description' => 'Business website URL (business memberships only)',
+			'form'        => [
+				'label'      => 'Website',
+				'input_type' => 'url',
+			],
 		],
 		'business_description' => [
 			'type'        => 'string',
 			'description' => 'Business description (business memberships only)',
+			'form'        => [
+				'label'      => 'Description',
+				'input_type' => 'textarea',
+				'rows'       => 3,
+			],
 		],
 		'logo_attachment_id' => [
 			'type'        => 'integer',
 			'description' => 'WordPress attachment ID of the business logo',
+			'form'        => [
+				'label'      => 'Business Logo',
+				'input_type' => 'image',
+			],
 		],
 		'logo_status' => [
 			'type'        => 'string',
 			'enum'        => [ 'pending', 'approved', 'rejected' ],
 			'description' => 'Moderation status of the business logo',
+			'form'        => [
+				'label'      => 'Logo Status',
+				'input_type' => 'status_badge',
+				'readonly'   => true,
+			],
 		],
 		'logo_rejection_reason' => [
 			'type'        => 'string',
@@ -432,6 +482,45 @@ return [
 					'source' => 'static',
 					'value'  => 'individual',
 				],
+			],
+		],
+	],
+
+	/*
+	 * Admin meta boxes for the CPT edit screen. Each box lists fields
+	 * by name; the field's UI shape comes from `fields.<name>.form`
+	 * above. A `name => overrides` entry in the field list overrides
+	 * the intrinsic form attributes per-box.
+	 *
+	 * Box-level `show_when` hides the entire box conditionally; field-
+	 * level `show_when` lives on the field's `form` block (none used
+	 * for sd_membership today). The projector produces a config shape
+	 * compatible with Meta_Boxes::render_field's switch on `type`.
+	 */
+	'meta_boxes' => [
+		'membership_details' => [
+			'title'    => 'Membership Details',
+			'context'  => 'normal',
+			'priority' => 'high',
+			'fields'   => [
+				'donor_id',
+				'membership_type',
+				'tier',
+				'amount',
+				'start_date',
+				'end_date',
+			],
+		],
+		'business_info' => [
+			'title'     => 'Business Information',
+			'context'   => 'normal',
+			'show_when' => [ 'membership_type' => 'business' ],
+			'fields'    => [
+				'business_name',
+				'business_website',
+				'business_description',
+				'logo_attachment_id',
+				'logo_status',
 			],
 		],
 	],

@@ -11,7 +11,7 @@ declare( strict_types = 1 );
 
 namespace Starter_Shelter\Admin;
 
-use Starter_Shelter\Core\{ Config, Entity_Hydrator };
+use Starter_Shelter\Core\{ Config, Entity_Hydrator, Field_Manifest };
 use Starter_Shelter\Helpers;
 
 /**
@@ -45,9 +45,32 @@ class Meta_Boxes {
     /**
      * Get meta box configuration for all post types.
      *
+     * Manifest-owned entities (config/manifests/<entity>.php with a
+     * `meta_boxes` block) replace the corresponding hard-coded entry.
+     * Unmigrated entities continue to use the hard-coded definition
+     * below; entities migrate one at a time.
+     *
      * @return array Meta box configurations.
      */
     private static function get_meta_box_config(): array {
+        $config = self::get_hard_coded_meta_box_config();
+
+        foreach ( Field_Manifest::get_meta_boxes() as $post_type => $cfg ) {
+            $config[ $post_type ] = $cfg;
+        }
+
+        return $config;
+    }
+
+    /**
+     * Legacy hard-coded meta-box config. Each entry is migrated into
+     * its entity manifest (`config/manifests/<entity>.php` `meta_boxes`
+     * block) one at a time; this method shrinks as that happens.
+     *
+     * @return array Hard-coded meta box configurations for unmigrated
+     *               entities only.
+     */
+    private static function get_hard_coded_meta_box_config(): array {
         return [
             'sd_donation' => [
                 'boxes' => [
@@ -69,36 +92,6 @@ class Meta_Boxes {
                         'context'  => 'side',
                         'fields'   => [
                             'wc_order_id' => [ 'label' => __( 'WooCommerce Order', 'starter-shelter' ), 'type' => 'order_link', 'readonly' => true ],
-                        ],
-                    ],
-                ],
-            ],
-
-            'sd_membership' => [
-                'boxes' => [
-                    'membership_details' => [
-                        'title'    => __( 'Membership Details', 'starter-shelter' ),
-                        'context'  => 'normal',
-                        'priority' => 'high',
-                        'fields'   => [
-                            'donor_id'        => [ 'label' => __( 'Member', 'starter-shelter' ), 'type' => 'post_select', 'post_type' => 'sd_donor' ],
-                            'membership_type' => [ 'label' => __( 'Type', 'starter-shelter' ), 'type' => 'select', 'options' => [ 'individual' => 'Individual', 'business' => 'Business' ] ],
-                            'tier'            => [ 'label' => __( 'Tier', 'starter-shelter' ), 'type' => 'tier_select' ],
-                            'amount'          => [ 'label' => __( 'Amount Paid', 'starter-shelter' ), 'type' => 'currency' ],
-                            'start_date'      => [ 'label' => __( 'Start Date', 'starter-shelter' ), 'type' => 'date' ],
-                            'end_date'        => [ 'label' => __( 'End Date', 'starter-shelter' ), 'type' => 'date' ],
-                        ],
-                    ],
-                    'business_info' => [
-                        'title'     => __( 'Business Information', 'starter-shelter' ),
-                        'context'   => 'normal',
-                        'show_when' => [ 'membership_type' => 'business' ],
-                        'fields'    => [
-                            'business_name'        => [ 'label' => __( 'Business Name', 'starter-shelter' ), 'type' => 'text' ],
-                            'business_website'     => [ 'label' => __( 'Website', 'starter-shelter' ), 'type' => 'url' ],
-                            'business_description' => [ 'label' => __( 'Description', 'starter-shelter' ), 'type' => 'textarea', 'rows' => 3 ],
-                            'logo_attachment_id'   => [ 'label' => __( 'Business Logo', 'starter-shelter' ), 'type' => 'image' ],
-                            'logo_status'          => [ 'label' => __( 'Logo Status', 'starter-shelter' ), 'type' => 'status_badge', 'readonly' => true ],
                         ],
                     ],
                 ],
