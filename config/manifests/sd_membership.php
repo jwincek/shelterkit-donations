@@ -42,14 +42,12 @@ return [
 		],
 		'membership_type' => [
 			'type'        => 'string',
-			'enum'        => [ 'individual', 'family', 'business' ],
+			'enum'        => [ 'individual', 'business' ],
 			'default'     => 'individual',
-			'description' => 'Type of membership',
+			'description' => 'Type of membership. "family" was previously listed in this enum but is conceptually a TIER within individual memberships (see config/tiers.json individual.family), not a separate type.',
 			'form'        => [
 				'label'      => 'Type',
 				'input_type' => 'select',
-				// admin-only subset of the entity enum; "family" is a valid
-				// value at the entity level but not currently editable.
 				'options'    => [ 'individual' => 'Individual', 'business' => 'Business' ],
 			],
 		],
@@ -169,6 +167,15 @@ return [
 		'amount_formatted' => [
 			'function' => 'format_currency',
 			'args'     => [ 'amount' ],
+		],
+		// Surfaces the tier's benefits list on every hydrated membership
+		// so consumers (e.g., templates/emails/membership-welcome.php)
+		// read real data instead of empty fallback. Previously only the
+		// create() ability return value included this; entity hydration
+		// didn't.
+		'benefits' => [
+			'function' => 'get_tier_benefits',
+			'args'     => [ 'tier', 'membership_type' ],
 		],
 	],
 	'relations' => [

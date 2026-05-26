@@ -77,9 +77,12 @@ return [
 			'form'         => [
 				'label'      => 'Type',
 				'input_type' => 'select',
-				// Admin options include legacy 'human' and 'honor' keys
-				// for editing rows that haven't been normalized yet.
-				'options'    => [ 'human' => 'Person', 'pet' => 'Pet', 'honor' => 'In Honor Of' ],
+				// Canonical options matching the entity enum. Legacy rows
+				// stored with 'human'/'honor'/'memory' values are
+				// normalized to 'person' on read via
+				// Helpers\normalize_memorial_type; an admin re-saving such
+				// a row writes the canonical value back.
+				'options'    => [ 'person' => 'Person', 'pet' => 'Pet' ],
 			],
 		],
 		'pet_species' => [

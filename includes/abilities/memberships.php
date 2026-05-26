@@ -37,8 +37,11 @@ function create( array $input ): array|WP_Error {
         }
     }
 
-    // Determine membership amount from tier if not provided.
-    $tier   = $input['tier'] ?? 'friend';
+    // Determine membership amount from tier if not provided. The schema
+    // marks `tier` as required, so this fallback is normally dead code;
+    // use a real tier slug here ('friend' was previously a donor-
+    // recognition label from Helpers, not a valid membership tier).
+    $tier   = $input['tier'] ?? 'single';
     $type   = $input['membership_type'] ?? 'individual';
     $amount = $input['amount'] ?? Helpers\get_tier_amount( $tier, $type );
 

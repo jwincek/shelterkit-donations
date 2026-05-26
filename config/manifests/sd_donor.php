@@ -226,10 +226,9 @@ return [
 				'required'   => [ 'donor_id' ],
 				'properties' => [
 					'donor_id'   => [ 'type' => 'integer', 'description' => 'Donor post ID' ],
-					'first_name' => [ 'type' => 'string', 'maxLength' => 100 ],
-					'last_name'  => [ 'type' => 'string', 'maxLength' => 100 ],
-					// Note: maxLength here is 20, not the entity's 30. Audit-tracked drift.
-					'phone'      => [ 'type' => 'string', 'maxLength' => 20 ],
+					'first_name' => [ '$entity' => 'first_name' ],
+					'last_name'  => [ '$entity' => 'last_name' ],
+					'phone'      => [ '$entity' => 'phone' ],
 					'communication_preferences' => [
 						'type'        => 'object',
 						'description' => 'Communication preferences. Persisted as meta key `_sd_communication_preferences`.',
