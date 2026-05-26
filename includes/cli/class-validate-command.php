@@ -71,6 +71,9 @@ class Validate_Command {
 		foreach ( Field_Manifest::get_products() as $sku_prefix => $cfg ) {
 			$products_config['products'][ $sku_prefix ] = $cfg;
 		}
+		foreach ( Field_Manifest::get_emails() as $email_id => $cfg ) {
+			$emails_config['emails'][ $email_id ] = $cfg;
+		}
 
 		$findings = [];
 
@@ -105,7 +108,8 @@ class Validate_Command {
 				$this->check_manifest_abilities(),
 				$this->check_manifest_products(),
 				$this->check_manifest_meta_boxes(),
-				$this->check_manifest_checkout_fields()
+				$this->check_manifest_checkout_fields(),
+				$this->check_manifest_emails()
 			);
 		}
 
@@ -123,6 +127,184 @@ class Validate_Command {
 			require STARTER_SHELTER_PATH . 'includes/core/class-field-manifest.php';
 		}
 		Field_Manifest::init( STARTER_SHELTER_PATH . 'config' );
+	}
+
+	/**
+	 * Check 10: per-manifest sanity for the emails they declare:
+	 *
+	 *  - email id must not also appear in emails.json (single source);
+	 *  - each placeholder dot-path rooted in a declared entity alias
+	 *    must resolve to an existing field or computed entry;
+	 *  - the walker recurses through `properties` sub-trees on
+	 *    object-typed entity fields, so paths like
+	 *    `memorial.notify_family.enabled` validate against the
+	 *    notify_family.properties.enabled declaration.
+	 *
+	 * `args.*` paths are skipped — the args' shape isn't statically
+	 * knowable from the email config. Paths whose root entity isn't
+	 * migrated to a manifest yet are also skipped.
+	 *
+	 * @return array<int, array{file: string, line: int, message: string}>
+	 */
+	private function check_manifest_emails(): array {
+		$emails_raw  = file_get_contents( STARTER_SHELTER_PATH . 'config/emails.json' );
+		$emails_json = is_string( $emails_raw ) ? json_decode( $emails_raw, true ) : null;
+		$json_emails = is_array( $emails_json ) ? ( $emails_json['emails'] ?? [] ) : [];
+
+		$findings = [];
+
+		foreach ( Field_Manifest::list_entities() as $entity ) {
+			$manifest = Field_Manifest::get( $entity );
+			if ( null === $manifest ) {
+				continue;
+			}
+
+			$emails = $manifest['emails'] ?? null;
+			if ( ! is_array( $emails ) ) {
+				continue;
+			}
+
+			$manifest_file = sprintf( 'config/manifests/%s.php', $entity );
+
+			foreach ( $emails as $email_id => $email_cfg ) {
+				// Duplicate-source check.
+				if ( isset( $json_emails[ $email_id ] ) ) {
+					$findings[] = [
+						'file'    => 'config/emails.json',
+						'line'    => 0,
+						'message' => sprintf(
+							'Email "%s" is declared in both %s and config/emails.json. The manifest is the source of truth; remove from emails.json.',
+							$email_id,
+							$manifest_file
+						),
+					];
+				}
+
+				// Placeholder-path resolution. Each placeholder value is a
+				// dot-path like `donor.full_name` or
+				// `memorial.notify_family.enabled`. Validate the entity-
+				// rooted prefix; skip `args.*`.
+				$entities_in_email = $email_cfg['entities'] ?? [];
+
+				foreach ( ( $email_cfg['placeholders'] ?? [] ) as $name => $path ) {
+					$err = $this->validate_path( $path, $entities_in_email, $email_id, "placeholder $name" );
+					if ( null !== $err ) {
+						$findings[] = [
+							'file'    => $manifest_file,
+							'line'    => 0,
+							'message' => $err,
+						];
+					}
+				}
+
+				// Also walk `condition` and `recipient_field` if present —
+				// same path format.
+				foreach ( [ 'condition', 'recipient_field' ] as $key ) {
+					if ( ! isset( $email_cfg[ $key ] ) ) {
+						continue;
+					}
+					$err = $this->validate_path(
+						$email_cfg[ $key ],
+						$entities_in_email,
+						$email_id,
+						$key
+					);
+					if ( null !== $err ) {
+						$findings[] = [
+							'file'    => $manifest_file,
+							'line'    => 0,
+							'message' => $err,
+						];
+					}
+				}
+			}
+		}
+
+		return $findings;
+	}
+
+	/**
+	 * Validate a single placeholder dot-path against the email's
+	 * declared entities. Returns an error message string on failure,
+	 * or null on success / skip.
+	 *
+	 * @since 1.1.2
+	 *
+	 * @param string $path              Dot-path (e.g., `donor.full_name`).
+	 * @param array  $entities_in_email Email's `entities` block.
+	 * @param string $email_id          Email id for diagnostics.
+	 * @param string $context           Where the path came from (for diagnostics).
+	 * @return string|null
+	 */
+	private function validate_path( string $path, array $entities_in_email, string $email_id, string $context ): ?string {
+		$parts = explode( '.', $path );
+		$root  = $parts[0] ?? '';
+
+		// args.* — shape isn't statically validatable.
+		if ( 'args' === $root ) {
+			return null;
+		}
+
+		if ( ! isset( $entities_in_email[ $root ] ) ) {
+			return sprintf(
+				'Email "%s" %s "%s" references "%s" which is not in the email\'s `entities` block (or `args`).',
+				$email_id,
+				$context,
+				$path,
+				$root
+			);
+		}
+
+		$entity_type = $entities_in_email[ $root ]['entity'] ?? null;
+		if ( ! is_string( $entity_type ) ) {
+			return null;
+		}
+
+		$entity_manifest = Field_Manifest::get( $entity_type );
+		if ( null === $entity_manifest ) {
+			// Entity not migrated yet — can't validate. Skip silently.
+			return null;
+		}
+
+		// Walk the rest of the path against fields → properties → properties...
+		$node = array_merge(
+			$entity_manifest['fields']   ?? [],
+			$entity_manifest['computed'] ?? []
+		);
+
+		for ( $i = 1; $i < count( $parts ); $i++ ) {
+			$key = $parts[ $i ];
+			if ( ! isset( $node[ $key ] ) ) {
+				return sprintf(
+					'Email "%s" %s "%s" references "%s" which does not exist in %s.',
+					$email_id,
+					$context,
+					$path,
+					implode( '.', array_slice( $parts, 0, $i + 1 ) ),
+					$entity_type
+				);
+			}
+			$next = $node[ $key ];
+			if ( ! is_array( $next ) ) {
+				return null;
+			}
+			// If there are more path components, descend into `properties`.
+			if ( $i + 1 < count( $parts ) ) {
+				if ( ! isset( $next['properties'] ) || ! is_array( $next['properties'] ) ) {
+					return sprintf(
+						'Email "%s" %s "%s" descends past "%s" but %s has no declared `properties` sub-tree.',
+						$email_id,
+						$context,
+						$path,
+						implode( '.', array_slice( $parts, 0, $i + 1 ) ),
+						implode( '.', array_slice( $parts, 0, $i + 1 ) )
+					);
+				}
+				$node = $next['properties'];
+			}
+		}
+
+		return null;
 	}
 
 	/**

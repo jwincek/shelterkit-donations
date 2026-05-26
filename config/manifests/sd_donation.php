@@ -407,4 +407,33 @@ return [
 			'fields'  => [ 'wc_order_id' ],
 		],
 	],
+
+	/*
+	 * WooCommerce email definitions owned by this entity. Same shape as
+	 * the legacy `emails.json.emails` entries. Placeholder values are
+	 * dot-paths into hydrated entity_data; the validator walks them
+	 * against the referenced entities' manifests.
+	 */
+	'emails' => [
+		'donation-receipt' => [
+			'title'         => 'Donation Receipt',
+			'description'   => 'Sent to donors after a successful donation',
+			'trigger_hook'  => 'starter_shelter_donation_created',
+			'trigger_args'  => [ 'donation_id', 'donor_id', 'input' ],
+			'entities'      => [
+				'donation' => [ 'entity' => 'sd_donation', 'id_from' => 'donation_id' ],
+				'donor'    => [ 'entity' => 'sd_donor',    'id_from' => 'donor_id' ],
+			],
+			'recipient_type' => 'donor',
+			'subject'        => 'Thank you for your donation to {site_name}!',
+			'heading'        => 'Thank You for Your Generosity!',
+			'template'       => 'emails/donation-receipt.php',
+			'placeholders'   => [
+				'donor_name' => 'donor.full_name',
+				'amount'     => 'donation.amount_formatted',
+				'allocation' => 'donation.allocation_label',
+				'date'       => 'donation.date_formatted',
+			],
+		],
+	],
 ];

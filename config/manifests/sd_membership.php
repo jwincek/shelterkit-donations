@@ -547,4 +547,90 @@ return [
 			],
 		],
 	],
+
+	/*
+	 * WooCommerce email definitions owned by this entity. See
+	 * sd_donation.php for the placeholder validation convention.
+	 */
+	'emails' => [
+		'membership-welcome' => [
+			'title'         => 'Membership Welcome',
+			'description'   => 'Sent to new members after joining',
+			'trigger_hook'  => 'starter_shelter_membership_created',
+			'trigger_args'  => [ 'membership_id', 'donor_id', 'input' ],
+			'entities'      => [
+				'membership' => [ 'entity' => 'sd_membership', 'id_from' => 'membership_id' ],
+				'donor'      => [ 'entity' => 'sd_donor',      'id_from' => 'donor_id' ],
+			],
+			'recipient_type' => 'donor',
+			'subject'        => 'Welcome to the {site_name} family!',
+			'heading'        => 'Welcome, New Member!',
+			'template'       => 'emails/membership-welcome.php',
+			'placeholders'   => [
+				'donor_name'  => 'donor.full_name',
+				'tier'        => 'membership.tier_label',
+				'expiry_date' => 'membership.end_date',
+			],
+		],
+
+		'membership-renewal' => [
+			'title'         => 'Membership Renewal Reminder',
+			'description'   => 'Sent when membership is expiring soon',
+			'trigger_hook'  => 'starter_shelter_membership_expiring',
+			'trigger_args'  => [ 'membership_id', 'donor_id' ],
+			'entities'      => [
+				'membership' => [ 'entity' => 'sd_membership', 'id_from' => 'membership_id' ],
+				'donor'      => [ 'entity' => 'sd_donor',      'id_from' => 'donor_id' ],
+			],
+			'recipient_type' => 'donor',
+			'subject'        => 'Your {site_name} membership expires soon',
+			'heading'        => 'Time to Renew Your Membership',
+			'template'       => 'emails/membership-renewal.php',
+			'placeholders'   => [
+				'donor_name'     => 'donor.full_name',
+				'tier'           => 'membership.tier_label',
+				'expiry_date'    => 'membership.end_date',
+				'days_remaining' => 'membership.days_remaining',
+			],
+		],
+
+		'logo-approved' => [
+			'title'         => 'Business Logo Approved',
+			'description'   => 'Sent when a business membership logo is approved',
+			'trigger_hook'  => 'starter_shelter_logo_approved',
+			'trigger_args'  => [ 'membership_id', 'donor_id' ],
+			'entities'      => [
+				'membership' => [ 'entity' => 'sd_membership', 'id_from' => 'membership_id' ],
+				'donor'      => [ 'entity' => 'sd_donor',      'id_from' => 'donor_id' ],
+			],
+			'recipient_type' => 'donor',
+			'subject'        => 'Your business logo has been approved - {site_name}',
+			'heading'        => 'Logo Approved!',
+			'template'       => 'emails/logo-approved.php',
+			'placeholders'   => [
+				'donor_name'    => 'donor.full_name',
+				'business_name' => 'membership.business_name',
+			],
+		],
+
+		'logo-rejected' => [
+			'title'         => 'Business Logo Rejected',
+			'description'   => 'Sent when a business membership logo is rejected',
+			'trigger_hook'  => 'starter_shelter_logo_rejected',
+			'trigger_args'  => [ 'membership_id', 'donor_id', 'reason' ],
+			'entities'      => [
+				'membership' => [ 'entity' => 'sd_membership', 'id_from' => 'membership_id' ],
+				'donor'      => [ 'entity' => 'sd_donor',      'id_from' => 'donor_id' ],
+			],
+			'recipient_type' => 'donor',
+			'subject'        => 'Action required: Your business logo needs attention - {site_name}',
+			'heading'        => 'Logo Update Required',
+			'template'       => 'emails/logo-rejected.php',
+			'placeholders'   => [
+				'donor_name'       => 'donor.full_name',
+				'business_name'    => 'membership.business_name',
+				'rejection_reason' => 'args.reason',
+			],
+		],
+	],
 ];

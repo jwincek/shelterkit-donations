@@ -148,9 +148,39 @@ return [
 		// Legacy nested-storage placeholder; canonical storage is the
 		// five flat notify_family_* fields below. Use
 		// Helpers\get_memorial_notify_family($id) for a read-both view.
+		// Sub-properties match config/schemas/notify-family.json so that
+		// email placeholders like `memorial.notify_family.enabled` can
+		// be validated recursively by the manifest checker.
 		'notify_family' => [
 			'type'        => 'object',
 			'description' => 'Legacy: nested family-notification meta. Canonical storage is the five flat notify_family_* fields below. Use Helpers\\get_memorial_notify_family($id) for a read-both view.',
+			'properties'  => [
+				'enabled' => [
+					'type'        => 'boolean',
+					'default'     => false,
+					'description' => 'Whether to send notification to family',
+				],
+				'name' => [
+					'type'        => 'string',
+					'maxLength'   => 100,
+					'description' => 'Name of family member to notify',
+				],
+				'email' => [
+					'type'        => 'string',
+					'format'      => 'email',
+					'description' => 'Email address for notification',
+				],
+				'address' => [
+					'type'        => 'string',
+					'maxLength'   => 500,
+					'description' => 'Mailing address for physical card notification',
+				],
+				'send_card' => [
+					'type'        => 'boolean',
+					'default'     => false,
+					'description' => 'Whether to send a physical card',
+				],
+			],
 		],
 		'notify_family_enabled' => [
 			'type'         => 'boolean',
@@ -557,6 +587,58 @@ return [
 				'notify_family_name',
 				'notify_family_email',
 				'family_notified_date',
+			],
+		],
+	],
+
+	/*
+	 * WooCommerce email definitions owned by this entity. See
+	 * sd_donation.php for the placeholder validation convention.
+	 *
+	 * `memorial-family-notification` placeholders reference paths into
+	 * the composite `notify_family` field — validator walks the
+	 * properties sub-tree declared on that field above.
+	 */
+	'emails' => [
+		'memorial-confirmation' => [
+			'title'         => 'Memorial Donation Confirmation',
+			'description'   => 'Sent to donors after creating a memorial',
+			'trigger_hook'  => 'starter_shelter_memorial_created',
+			'trigger_args'  => [ 'memorial_id', 'donor_id' ],
+			'entities'      => [
+				'memorial' => [ 'entity' => 'sd_memorial', 'id_from' => 'memorial_id' ],
+				'donor'    => [ 'entity' => 'sd_donor',    'id_from' => 'donor_id' ],
+			],
+			'recipient_type' => 'donor',
+			'subject'        => 'Your memorial for {honoree_name} has been created',
+			'heading'        => 'Memorial Created',
+			'template'       => 'emails/memorial-confirmation.php',
+			'placeholders'   => [
+				'donor_name'   => 'donor.full_name',
+				'honoree_name' => 'memorial.honoree_name',
+				'amount'       => 'memorial.amount_formatted',
+			],
+		],
+
+		'memorial-family-notification' => [
+			'title'           => 'Memorial Family Notification',
+			'description'     => 'Sent to family members when a memorial is created in honor of their loved one',
+			'trigger_hook'    => 'starter_shelter_memorial_created',
+			'trigger_args'    => [ 'memorial_id', 'donor_id' ],
+			'entities'        => [
+				'memorial' => [ 'entity' => 'sd_memorial', 'id_from' => 'memorial_id' ],
+				'donor'    => [ 'entity' => 'sd_donor',    'id_from' => 'donor_id' ],
+			],
+			'condition'       => 'memorial.notify_family.enabled',
+			'recipient_type'  => 'custom',
+			'recipient_field' => 'memorial.notify_family.email',
+			'subject'         => 'A donation has been made in memory of {honoree_name}',
+			'heading'         => 'A Special Tribute',
+			'template'        => 'emails/memorial-family-notification.php',
+			'placeholders'    => [
+				'honoree_name'    => 'memorial.honoree_name',
+				'donor_name'      => 'donor.full_name',
+				'tribute_message' => 'memorial.tribute_message',
 			],
 		],
 	],

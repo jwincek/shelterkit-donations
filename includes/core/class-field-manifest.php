@@ -116,9 +116,12 @@ class Field_Manifest {
 	}
 
 	/**
-	 * Strip UI-only keys from an entity-field definition before it
-	 * appears in the merged entities.json (Entity_Hydrator doesn't
-	 * care about UI metadata).
+	 * Strip manifest-internal keys from an entity-field definition
+	 * before it appears in the merged entities.json:
+	 *
+	 *  - `form`: UI metadata for meta-boxes / checkout-fields projectors.
+	 *  - `properties`: nested-object shape used by the validator's
+	 *    placeholder-path walker; not consumed by Entity_Hydrator.
 	 *
 	 * @since 1.1.2
 	 *
@@ -126,15 +129,15 @@ class Field_Manifest {
 	 * @return array<string, mixed>
 	 */
 	private static function strip_internal_keys( array $field ): array {
-		unset( $field['form'] );
+		unset( $field['form'], $field['properties'] );
 		return $field;
 	}
 
 	/**
-	 * Strip entity-storage keys (`form`, `show_in_rest`) when an
-	 * entity field is being projected into a JSON Schema (ability
-	 * input/output property). Those attrs only belong on the entity
-	 * declaration, not on the schema.
+	 * Strip entity-only keys when an entity field is being projected
+	 * into a JSON Schema (ability input/output property). In addition
+	 * to the keys stripped by `strip_internal_keys()`, also drop
+	 * `show_in_rest` (entity-storage hint that isn't a JSON Schema attr).
 	 *
 	 * @since 1.1.2
 	 *
@@ -142,7 +145,7 @@ class Field_Manifest {
 	 * @return array<string, mixed>
 	 */
 	private static function strip_storage_keys( array $field ): array {
-		unset( $field['form'], $field['show_in_rest'] );
+		unset( $field['form'], $field['properties'], $field['show_in_rest'] );
 		return $field;
 	}
 
@@ -274,6 +277,36 @@ class Field_Manifest {
 		$base = self::strip_storage_keys( $base );
 
 		return array_merge( $base, $overrides );
+	}
+
+	/**
+	 * Collect email declarations across all manifests, projected into
+	 * the emails.json shape (`{ "<email-id>": {...config...} }`).
+	 *
+	 * Emails pass through verbatim — the same shape Config_Email
+	 * consumes today. Per-email placeholder paths are validated by
+	 * `wp starter-shelter validate --check=manifests` against the
+	 * referenced entities' field/computed/object-properties trees.
+	 *
+	 * @since 1.1.2
+	 *
+	 * @return array<string, array<string, mixed>>
+	 */
+	public static function get_emails(): array {
+		$out = [];
+
+		foreach ( self::list_entities() as $entity ) {
+			$manifest = self::get( $entity );
+			if ( null === $manifest ) {
+				continue;
+			}
+
+			foreach ( $manifest['emails'] ?? [] as $email_id => $cfg ) {
+				$out[ $email_id ] = $cfg;
+			}
+		}
+
+		return $out;
 	}
 
 	/**

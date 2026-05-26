@@ -107,6 +107,12 @@ class Config {
             $data = self::merge_manifest_products( $data );
         }
 
+        // Merge in manifest-owned emails (WooCommerce email definitions
+        // with placeholder paths into hydrated entities). Same pattern.
+        if ( 'emails' === $name ) {
+            $data = self::merge_manifest_emails( $data );
+        }
+
         // Resolve $ref references recursively. Runs AFTER manifest merges
         // so refs contributed by manifests (e.g., sd_memorial's
         // notify_family pointing to schemas/notify-family.json) are
@@ -189,6 +195,28 @@ class Config {
         }
 
         $data['products'] = $products;
+        return $data;
+    }
+
+    /**
+     * Merge manifest-owned email declarations into the emails config.
+     *
+     * Each manifest email replaces the corresponding emails.json entry.
+     * Validator catches drift if both sources declare the same email id.
+     *
+     * @since 1.1.2
+     *
+     * @param array $data Parsed emails.json data.
+     * @return array Data with manifest emails merged in.
+     */
+    private static function merge_manifest_emails( array $data ): array {
+        $emails = $data['emails'] ?? [];
+
+        foreach ( Field_Manifest::get_emails() as $email_id => $cfg ) {
+            $emails[ $email_id ] = $cfg;
+        }
+
+        $data['emails'] = $emails;
         return $data;
     }
 
