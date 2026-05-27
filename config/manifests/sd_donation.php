@@ -285,12 +285,13 @@ return [
 				'properties' => [
 					'period' => [
 						'type'    => 'string',
-						'enum'    => [ 'fiscal_year', 'calendar_year', 'month', 'quarter', 'all_time' ],
+						'enum'    => [ 'today', 'week', 'month', 'quarter', 'year', 'ytd', 'fiscal_year', 'calendar_year', 'all_time', 'custom' ],
 						'default' => 'fiscal_year',
+						'description' => 'Reporting period; matches Helpers\\get_date_range_for_period.',
 					],
 					'fiscal_year' => [
 						'type'        => 'integer',
-						'description' => 'Specific fiscal year',
+						'description' => 'Specific fiscal year (period=fiscal_year).',
 					],
 				],
 			],

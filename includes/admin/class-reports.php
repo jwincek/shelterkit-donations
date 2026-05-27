@@ -84,9 +84,12 @@ class Reports {
             true
         );
 
+        // Nonce action must match the one check_ajax_referer expects in
+        // handle_export() — otherwise the Export CSV button silently fails
+        // via wp_die() when the user clicks it.
         wp_localize_script( 'sd-reports', 'sdReports', [
             'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-            'nonce'   => wp_create_nonce( 'sd_reports_nonce' ),
+            'nonce'   => wp_create_nonce( 'sd_export_report' ),
         ] );
     }
 
@@ -168,9 +171,11 @@ class Reports {
                         <?php esc_html_e( 'Filter', 'starter-shelter' ); ?>
                     </button>
                     
+                    <?php if ( 'campaigns' !== $active_tab ) : // Campaigns tab has per-row export links in the table; the top button has no campaign_id to send. ?>
                     <button type="button" class="button sd-export-btn" data-tab="<?php echo esc_attr( $active_tab ); ?>">
                         <?php esc_html_e( 'Export CSV', 'starter-shelter' ); ?>
                     </button>
+                    <?php endif; ?>
                 </form>
             </div>
 
@@ -636,11 +641,18 @@ class Reports {
 
         switch ( $report ) {
             case 'campaign':
+                // Per-campaign export (link rendered with campaign_id in
+                // the campaigns table). Distinct from the top-bar
+                // Export CSV button which doesn't carry a campaign_id.
                 self::export_campaign_report( $output );
                 break;
             case 'memberships':
                 self::export_memberships_report( $output, $period );
                 break;
+            case 'memorials':
+                self::export_memorials_report( $output, $period );
+                break;
+            case 'donations':
             default:
                 self::export_donations_report( $output, $period );
                 break;
@@ -745,6 +757,56 @@ class Reports {
                 $membership['end_date'] ?? '',
                 $membership['is_active'] ? __( 'Active', 'starter-shelter' ) : __( 'Expired', 'starter-shelter' ),
                 $membership['amount'] ?? 0,
+            ] );
+        }
+    }
+
+    /**
+     * Export memorials report to CSV.
+     *
+     * @since 1.1.3
+     *
+     * @param resource $output File handle.
+     * @param string   $period Report period.
+     */
+    private static function export_memorials_report( $output, string $period ): void {
+        fputcsv( $output, [
+            __( 'Honoree', 'starter-shelter' ),
+            __( 'Type', 'starter-shelter' ),
+            __( 'Donor', 'starter-shelter' ),
+            __( 'Email', 'starter-shelter' ),
+            __( 'Date', 'starter-shelter' ),
+            __( 'Amount', 'starter-shelter' ),
+            __( 'Family Notified', 'starter-shelter' ),
+        ] );
+
+        $ability = wp_get_ability( 'shelter-memorials/list' );
+        if ( ! $ability ) {
+            return;
+        }
+
+        // Period scope is intentional but the list ability filters by
+        // year, not period range. For now, pull all and let the user
+        // filter in their spreadsheet — the per-period semantics are
+        // already reflected in the dashboard stats view.
+        $result = $ability->execute( [
+            'type'     => 'all',
+            'per_page' => 1000,
+        ] );
+
+        if ( is_wp_error( $result ) ) {
+            return;
+        }
+
+        foreach ( $result['items'] ?? [] as $memorial ) {
+            fputcsv( $output, [
+                $memorial['honoree_name'] ?? '',
+                $memorial['memorial_type'] ?? '',
+                $memorial['donor']['full_name'] ?? '',
+                $memorial['donor']['email'] ?? '',
+                $memorial['donation_date'] ?? '',
+                $memorial['amount'] ?? 0,
+                ! empty( $memorial['family_notified_date'] ) ? $memorial['family_notified_date'] : '',
             ] );
         }
     }
