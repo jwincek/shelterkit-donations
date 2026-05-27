@@ -41,13 +41,32 @@ class Campaign_Admin {
         add_action( 'init', [ self::class, 'register_term_meta' ] );
 
         // Term-edit form rendering + save handlers. WP core verifies the
-        // form's _wp_http_referer nonce before invoking created_*/edited_*,
+        // form's _wp_http_referer nonce before invoking created_/edited_,
         // so a separate nonce check here would be redundant.
         $tax = self::TAXONOMY;
         add_action( "{$tax}_add_form_fields",  [ self::class, 'render_add_fields' ] );
         add_action( "{$tax}_edit_form_fields", [ self::class, 'render_edit_fields' ] );
         add_action( "created_{$tax}",          [ self::class, 'save_fields' ] );
         add_action( "edited_{$tax}",           [ self::class, 'save_fields' ] );
+
+        // The sd_donation CPT lives under the 'starter-shelter' menu, but
+        // taxonomies attached to a CPT with a custom show_in_menu parent
+        // don't auto-follow there — so add an explicit submenu link.
+        add_action( 'admin_menu', [ self::class, 'register_submenu' ] );
+    }
+
+    /**
+     * Add a "Campaigns" item to the Shelter Donations menu that opens
+     * the standard WP taxonomy edit page for sd_campaign.
+     */
+    public static function register_submenu(): void {
+        add_submenu_page(
+            Menu::MENU_SLUG,
+            __( 'Campaigns', 'starter-shelter' ),
+            __( 'Campaigns', 'starter-shelter' ),
+            'manage_categories',
+            'edit-tags.php?taxonomy=' . self::TAXONOMY . '&post_type=sd_donation'
+        );
     }
 
     /**
