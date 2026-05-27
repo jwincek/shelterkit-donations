@@ -314,15 +314,20 @@ function dashboard_stats( array $input = [] ): array {
         AND post_status = 'publish'"
     );
 
+    // LEFT JOIN + COALESCE so donors missing _sd_created_date (legacy
+    // imports, manual DB edits) still count by their post_date. Both
+    // standard creation paths (Helpers\get_or_create_donor and
+    // Admin\Donor_Lookup) write the meta, but the audit flagged this
+    // as a known fragility (§5.3).
     $donor_new = (int) $wpdb->get_var( $wpdb->prepare(
         "SELECT COUNT(*)
         FROM {$wpdb->posts} p
-        INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_created_date'
+        LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_created_date'
         WHERE p.post_type = 'sd_donor'
         AND p.post_status = 'publish'
-        AND pm.meta_value BETWEEN %s AND %s",
+        AND COALESCE( pm.meta_value, p.post_date ) BETWEEN %s AND %s",
         $range['start'],
-        $range['end']
+        $range['end'] . ' 23:59:59'
     ) );
 
     $donation_total   = (float) $donation_stats->total;
