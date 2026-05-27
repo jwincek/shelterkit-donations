@@ -677,6 +677,43 @@ class Reports {
     }
 
     /**
+     * Resolve donor display name + email for a set of donor IDs in one shot.
+     *
+     * The list abilities (shelter-donations / shelter-memberships /
+     * shelter-memorials) return `donor_id` per row but not the donor's
+     * display fields. Rather than fetch each donor individually inside
+     * the export loop (N+1 queries), batch-hydrate via Query.
+     *
+     * @since 1.1.3
+     *
+     * @param int[] $donor_ids List of donor post IDs (duplicates / 0s allowed).
+     * @return array<int, array{name:string, email:string}> Keyed by donor ID.
+     */
+    private static function batch_donor_info( array $donor_ids ): array {
+        $ids = array_filter( array_unique( array_map( 'intval', $donor_ids ) ) );
+        if ( empty( $ids ) ) {
+            return [];
+        }
+
+        $donors = \Starter_Shelter\Core\Query::for( 'sd_donor' )
+            ->withArgs( [ 'post__in' => $ids ] )
+            ->get( count( $ids ) );
+
+        $map = [];
+        foreach ( $donors as $donor ) {
+            $name = $donor['display_name'] ?? '';
+            if ( '' === $name ) {
+                $name = $donor['full_name'] ?? '';
+            }
+            $map[ (int) $donor['id'] ] = [
+                'name'  => (string) $name,
+                'email' => (string) ( $donor['email'] ?? '' ),
+            ];
+        }
+        return $map;
+    }
+
+    /**
      * Export donations report to CSV.
      *
      * @since 1.0.0
@@ -703,25 +740,59 @@ class Reports {
         }
 
         $date_range = \Starter_Shelter\Helpers\get_date_range_for_period( $period );
-        
-        $result = $ability->execute( [
-            'date_from' => $date_range['start'],
-            'date_to'   => $date_range['end'],
-            'per_page'  => 1000,
-        ] );
 
-        if ( is_wp_error( $result ) ) {
-            return;
-        }
+        // Paginate through results — the shelter-donations/list schema
+        // caps per_page at 100, so a single call with per_page=1000 (as
+        // an earlier version of this code did) errors silently and
+        // produces a header-only CSV. Loop until total_pages is reached.
+        $per_page    = 100;
+        $page        = 1;
+        $total_pages = 1;
+        $all_items   = [];
 
-        foreach ( $result['items'] ?? [] as $donation ) {
+        do {
+            $result = $ability->execute( [
+                'date_from' => $date_range['start'],
+                'date_to'   => $date_range['end'],
+                'page'      => $page,
+                'per_page'  => $per_page,
+            ] );
+
+            if ( is_wp_error( $result ) ) {
+                return;
+            }
+
+            $items       = $result['items'] ?? [];
+            $all_items   = array_merge( $all_items, $items );
+            $total_pages = (int) ( $result['total_pages'] ?? 1 );
+            $page++;
+        } while ( $page <= $total_pages );
+
+        // Batch-resolve donor display + email (the list ability returns
+        // only donor_id, not the donor entity).
+        $donor_map = self::batch_donor_info( array_column( $all_items, 'donor_id' ) );
+
+        foreach ( $all_items as $donation ) {
+            $donor_id = (int) ( $donation['donor_id'] ?? 0 );
+            $donor    = $donor_map[ $donor_id ] ?? [ 'name' => '', 'email' => '' ];
+
+            // Campaign is a taxonomy relation — array of { id, name, slug }.
+            // Flatten to a comma-separated list of names for the CSV column.
+            $campaign_names = '';
+            if ( ! empty( $donation['campaign'] ) && is_array( $donation['campaign'] ) ) {
+                $campaign_names = implode(
+                    ', ',
+                    array_filter( array_map( static fn( $c ) => is_array( $c ) ? ( $c['name'] ?? '' ) : '', $donation['campaign'] ) )
+                );
+            }
+
             fputcsv( $output, [
                 $donation['date_formatted'] ?? '',
-                $donation['donor']['full_name'] ?? '',
-                $donation['donor']['email'] ?? '',
+                $donation['donor_name'] ?? $donor['name'],
+                $donor['email'],
                 $donation['amount'] ?? 0,
                 $donation['allocation_label'] ?? '',
-                $donation['campaign_name'] ?? '',
+                $campaign_names,
                 $donation['is_anonymous'] ? __( 'Yes', 'starter-shelter' ) : __( 'No', 'starter-shelter' ),
             ] );
         }
@@ -761,10 +832,15 @@ class Reports {
             return;
         }
 
-        foreach ( $result['items'] ?? [] as $membership ) {
+        $items     = $result['items'] ?? [];
+        $donor_map = self::batch_donor_info( array_column( $items, 'donor_id' ) );
+
+        foreach ( $items as $membership ) {
+            $donor_id = (int) ( $membership['donor_id'] ?? 0 );
+            $donor    = $donor_map[ $donor_id ] ?? [ 'name' => '', 'email' => '' ];
             fputcsv( $output, [
-                $membership['donor']['full_name'] ?? '',
-                $membership['donor']['email'] ?? '',
+                $donor['name'],
+                $donor['email'],
                 $membership['tier_label'] ?? '',
                 $membership['membership_type'] ?? '',
                 $membership['start_date'] ?? '',
@@ -812,12 +888,17 @@ class Reports {
             return;
         }
 
-        foreach ( $result['items'] ?? [] as $memorial ) {
+        $items     = $result['items'] ?? [];
+        $donor_map = self::batch_donor_info( array_column( $items, 'donor_id' ) );
+
+        foreach ( $items as $memorial ) {
+            $donor_id = (int) ( $memorial['donor_id'] ?? 0 );
+            $donor    = $donor_map[ $donor_id ] ?? [ 'name' => '', 'email' => '' ];
             fputcsv( $output, [
                 $memorial['honoree_name'] ?? '',
                 $memorial['memorial_type'] ?? '',
-                $memorial['donor']['full_name'] ?? '',
-                $memorial['donor']['email'] ?? '',
+                $memorial['donor_display_name'] ?? $memorial['donor_name'] ?? $donor['name'],
+                $donor['email'],
                 $memorial['donation_date'] ?? '',
                 $memorial['amount'] ?? 0,
                 ! empty( $memorial['family_notified_date'] ) ? $memorial['family_notified_date'] : '',
