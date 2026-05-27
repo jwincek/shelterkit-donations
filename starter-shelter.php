@@ -75,6 +75,12 @@ function starter_shelter_init(): void {
     // Initialize CPT and taxonomy registration.
     Starter_Shelter\Core\CPT_Registry::init();
 
+    // Register sd_campaign term meta (_sd_goal, _sd_end_date) for REST
+    // and add matching fields to the WP term-edit form. Runs from
+    // starter_shelter_init so register_term_meta hooks to `init` in
+    // both admin AND frontend/REST contexts.
+    Starter_Shelter\Admin\Campaign_Admin::init();
+
     // Initialize entity hydrator.
     Starter_Shelter\Core\Entity_Hydrator::init();
 
