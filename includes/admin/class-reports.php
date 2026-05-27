@@ -587,35 +587,17 @@ class Reports {
      * @return float Total raised.
      */
     private static function get_campaign_raised( int $campaign_id, string $period ): float {
-        global $wpdb;
+        $query = \Starter_Shelter\Core\Query::for( 'sd_donation' )
+            ->whereInTaxonomy( 'sd_campaign', $campaign_id );
 
-        $date_clause = '';
         if ( 'all_time' !== $period ) {
-            $date_range = \Starter_Shelter\Helpers\get_date_range_for_period( $period );
-            if ( $date_range['start'] && $date_range['end'] ) {
-                $date_clause = $wpdb->prepare(
-                    "AND pm_date.meta_value >= %s AND pm_date.meta_value <= %s",
-                    $date_range['start'],
-                    $date_range['end'] . ' 23:59:59'
-                );
+            $range = \Starter_Shelter\Helpers\get_date_range_for_period( $period );
+            if ( ! empty( $range['start'] ) && ! empty( $range['end'] ) ) {
+                $query->whereDateBetween( 'donation_date', $range['start'], $range['end'] );
             }
         }
 
-        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $date_clause is already prepared.
-        $raised = (float) $wpdb->get_var( $wpdb->prepare( "
-            SELECT COALESCE( SUM( pm_amount.meta_value ), 0 )
-            FROM {$wpdb->posts} p
-            JOIN {$wpdb->postmeta} pm_amount ON p.ID = pm_amount.post_id AND pm_amount.meta_key = '_sd_amount'
-            JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
-            JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
-            LEFT JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = '_sd_donation_date'
-            WHERE p.post_type = 'sd_donation'
-              AND p.post_status = 'publish'
-              AND tt.term_id = %d
-              $date_clause
-        ", $campaign_id ) );
-
-        return $raised;
+        return $query->sum( 'amount' );
     }
 
     /**

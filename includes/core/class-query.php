@@ -579,62 +579,27 @@ class Query {
      * @return float The sum.
      */
     public function sum( string $field ): float {
-        global $wpdb;
-
-        $meta_key = $this->meta_prefix . $field;
-        $args     = $this->build_args( 1, -1 );
-
-        $where_clauses = [ "p.post_type = %s", "p.post_status = %s" ];
-        $where_values  = [ $this->post_type, is_array( $this->post_status ) ? $this->post_status[0] : $this->post_status ];
-
-        $meta_joins  = [];
-        $meta_wheres = [];
-        $i           = 0;
-
-        foreach ( $this->meta_query as $mq ) {
-            if ( isset( $mq['relation'] ) ) {
-				continue; // Skip OR groups in sum (simplified).
-			}
-            $alias           = "pm$i";
-            $meta_joins[]    = "INNER JOIN {$wpdb->postmeta} $alias ON p.ID = $alias.post_id";
-            $meta_wheres[]   = $wpdb->prepare( "$alias.meta_key = %s", $mq['key'] );
-
-            if ( isset( $mq['value'] ) && isset( $mq['compare'] ) ) {
-                $compare = $mq['compare'];
-                $value   = $mq['value'];
-
-                if ( 'BETWEEN' === $compare && is_array( $value ) ) {
-                    $meta_wheres[] = $wpdb->prepare( "$alias.meta_value BETWEEN %s AND %s", $value[0], $value[1] );
-                } elseif ( 'LIKE' === $compare ) {
-                    $meta_wheres[] = $wpdb->prepare( "$alias.meta_value LIKE %s", '%' . $wpdb->esc_like( $value ) . '%' );
-                } elseif ( 'IN' === $compare && is_array( $value ) ) {
-                    $placeholders  = implode( ',', array_fill( 0, count( $value ), '%s' ) );
-                    $meta_wheres[] = $wpdb->prepare( "$alias.meta_value IN ($placeholders)", ...$value );
-                } else {
-                    $meta_wheres[] = $wpdb->prepare( "$alias.meta_value = %s", $value );
-                }
-            }
-
-            $i++;
+        // Resolve the matching post IDs via WP_Query so every filter Query
+        // supports — meta_query (incl. OR groups), tax_query, date_query,
+        // search, post__in — applies correctly. The previous implementation
+        // hand-built joins from meta_query only, silently ignoring
+        // taxonomy and OR-grouped filters.
+        $ids = $this->pluckIds();
+        if ( empty( $ids ) ) {
+            return 0.0;
         }
 
-        $joins_sql = implode( ' ', $meta_joins );
-        $joins_sql .= " INNER JOIN {$wpdb->postmeta} pm_sum ON p.ID = pm_sum.post_id AND pm_sum.meta_key = %s";
-        $where_values[] = $meta_key;
-
-        $where_sql = implode( ' AND ', array_merge( $where_clauses, $meta_wheres ) );
+        global $wpdb;
+        $meta_key     = $this->meta_prefix . $field;
+        $placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
 
         // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-        $sql = $wpdb->prepare(
-            "SELECT COALESCE(SUM(CAST(pm_sum.meta_value AS DECIMAL(15,2))), 0) 
-             FROM {$wpdb->posts} p 
-             $joins_sql 
-             WHERE $where_sql",
-            ...$where_values
-        );
-
-        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-        return (float) $wpdb->get_var( $sql );
+        return (float) $wpdb->get_var( $wpdb->prepare(
+            "SELECT COALESCE( SUM( CAST( meta_value AS DECIMAL(15,2) ) ), 0 )
+             FROM {$wpdb->postmeta}
+             WHERE post_id IN ( $placeholders ) AND meta_key = %s",
+            ...array_merge( $ids, [ $meta_key ] )
+        ) );
     }
 
     /**
