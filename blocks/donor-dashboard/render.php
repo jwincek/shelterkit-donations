@@ -272,9 +272,12 @@ $wrapper_attributes = get_block_wrapper_attributes( [
 
         <!-- Quick Actions -->
         <section class="sd-dashboard-actions">
-            <a href="<?php echo esc_url( home_url( '/donate/' ) ); ?>" class="sd-action-button wp-element-button">
+            <?php $donation_url = Helpers\get_donation_page_url(); ?>
+            <?php if ( $donation_url ) : ?>
+            <a href="<?php echo esc_url( $donation_url ); ?>" class="sd-action-button wp-element-button">
                 <?php esc_html_e( 'Make a Gift', 'starter-shelter' ); ?>
             </a>
+            <?php endif; ?>
             <a href="<?php echo esc_url( wc_get_account_endpoint_url( 'edit-account' ) ); ?>" class="sd-action-button sd-action-secondary">
                 <?php esc_html_e( 'Update Profile', 'starter-shelter' ); ?>
             </a>

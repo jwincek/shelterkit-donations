@@ -135,6 +135,10 @@ class Settings {
             echo '<p>' . esc_html__( 'Your organization details for receipts and communications.', 'starter-shelter' ) . '</p>';
         }, self::PAGE_SLUG . '_general' );
 
+        add_settings_section( 'sd_pages', __( 'Pages', 'starter-shelter' ), function() {
+            echo '<p>' . esc_html__( 'Map donate and join CTAs to specific pages on your site. When unset, those buttons are hidden rather than emit broken /donate/ links.', 'starter-shelter' ) . '</p>';
+        }, self::PAGE_SLUG . '_general' );
+
         add_settings_section( 'sd_features', __( 'Features', 'starter-shelter' ), function() {
             echo '<p>' . esc_html__( 'Enable or disable plugin features.', 'starter-shelter' ) . '</p>';
         }, self::PAGE_SLUG . '_general' );
@@ -172,6 +176,15 @@ class Settings {
         ], 'general' );
 
         self::add_field( 'org_phone', __( 'Phone Number', 'starter-shelter' ), 'sd_organization', 'text', [], 'general' );
+
+        // Page mappings.
+        self::add_field( 'donation_page', __( 'Donation Page', 'starter-shelter' ), 'sd_pages', 'page', [
+            'description' => __( 'Where "Donate Now" buttons (including campaign-card on donation drives) should link. Campaign-card appends ?campaign={id}.', 'starter-shelter' ),
+        ], 'general' );
+
+        self::add_field( 'membership_page', __( 'Membership Page', 'starter-shelter' ), 'sd_pages', 'page', [
+            'description' => __( 'Where "Join Now" buttons (campaign-card on membership drives) should link. Campaign-card appends ?campaign={id}.', 'starter-shelter' ),
+        ], 'general' );
 
         // Feature toggles
         foreach ( [
@@ -265,6 +278,8 @@ class Settings {
         $sanitized['org_address'] = sanitize_textarea_field( $input['org_address'] ?? '' );
         $sanitized['fiscal_year_start_month'] = absint( $input['fiscal_year_start_month'] ?? 7 );
         $sanitized['renewal_reminder_days'] = min( 90, max( 7, absint( $input['renewal_reminder_days'] ?? 30 ) ) );
+        $sanitized['donation_page']   = absint( $input['donation_page']   ?? 0 );
+        $sanitized['membership_page'] = absint( $input['membership_page'] ?? 0 );
 
         foreach ( [ 'feature_anonymous_donations', 'feature_dedications', 'feature_family_notifications', 'feature_renewal_reminders', 'feature_annual_statements' ] as $f ) {
             $sanitized[ $f ] = ! empty( $input[ $f ] );
@@ -280,6 +295,8 @@ class Settings {
             'org_ein'                       => '',
             'org_address'                   => '',
             'org_phone'                     => '',
+            'donation_page'                 => 0,
+            'membership_page'               => 0,
             'email_from_name'               => get_bloginfo( 'name' ),
             'email_from_address'            => get_option( 'admin_email' ),
             'logo_moderation_email'         => get_option( 'admin_email' ),

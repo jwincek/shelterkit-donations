@@ -255,14 +255,26 @@ $interactive_attrs = sprintf(
         <?php endif; ?>
     </div>
 
-    <?php if ( $show_donate_btn && $campaign_data['is_active'] ) : ?>
+    <?php
+    // Resolve the CTA target via the admin-selected page settings. When
+    // no page is configured we deliberately omit the button rather than
+    // emit a broken /donate/ link — admins notice the missing CTA and
+    // configure Settings → General → Pages.
+    $button_url = $is_member_drive
+        ? Helpers\get_membership_page_url()
+        : Helpers\get_donation_page_url();
+    if ( $show_donate_btn && $campaign_data['is_active'] && $button_url ) :
+        $button_label = $is_member_drive
+            ? __( 'Join Now', 'starter-shelter' )
+            : __( 'Donate Now', 'starter-shelter' );
+        ?>
     <div class="sd-campaign-action">
-        <a 
-            href="<?php echo esc_url( add_query_arg( 'campaign', $campaign_id, '/donate/' ) ); ?>"
-            class="sd-donate-button wp-element-button"
+        <a
+            href="<?php echo esc_url( add_query_arg( 'campaign', $campaign_id, $button_url ) ); ?>"
+            class="sd-donate-button"
             data-wp-on--click="actions.handleDonate"
         >
-            <?php esc_html_e( 'Donate Now', 'starter-shelter' ); ?>
+            <?php echo esc_html( $button_label ); ?>
         </a>
     </div>
     <?php endif; ?>

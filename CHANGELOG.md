@@ -8,12 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- New `donation_page` and `membership_page` settings (Settings → General → Pages). `campaign-card` uses them to build the CTA target — donation drives link to the donation page, membership drives link to the membership page, both with `?campaign={id}` appended. Same settings replace the hardcoded `home_url('/donate/')` in `donor-dashboard/render.php` and `class-my-account.php::render_no_donor_message()`. When a page is unset the button is hidden rather than emitting a broken link, so admins notice the missing CTA and configure it. Two new helpers: `Helpers\get_donation_page_url()` and `Helpers\get_membership_page_url()`.
 - `campaign-card` block now has an editor inspector: campaign picker (sourced from `window.starterShelterBlocks.campaigns`), display-option toggles (goal / raised-or-joined / donors / end date / donate button), and a progress-bar color swatch. Server-side render in the canvas previews the selected campaign.
+- `campaign-card` button label is now type-aware: "Donate Now" on donation drives, "Join Now" on membership drives.
+- `campaign-card` editor preview now loads the block's style.css (via new `editorStyle` declaration in block.json), so the progress bar and stats render the same in the editor as on the frontend.
 
 ### Changed
 - `List_Columns` column configuration is now built lazily on first access instead of during plugin bootstrap, so `__()` calls no longer run before the `init` hook.
 - `validate_item_meta()` return type relaxed from `true|WP_Error` to `bool|WP_Error`; the `true` literal type requires PHP 8.2+ and the plugin still declares an 8.1 floor.
 - `campaign-card` block.json: removed `"ancestor": []` (empty array meant "no valid ancestors", hiding the block from the inserter even though it was registered). Added `"editorScript": "file:./edit.js"`.
+- `campaign-card` donate button no longer carries `wp-element-button`, so themes stop overriding the configured `progressBarColor`. Added `box-sizing: border-box` to the card and descendants to prevent the full-width button overflowing the card (root cause: `width: 100%` + `padding: 0.875rem 1.5rem` under default `content-box`).
 
 ### Fixed
 - `List_Columns` row layout no longer scrambles after Quick Edit. `register_columns()` and `register_sortable()` called `get_current_screen()` to disambiguate post type, but that global is null during `wp_ajax_inline_save()` — the filter then fell through to WP's default columns (`cb`, `title`, `date`), and the AJAX-returned row HTML didn't match the 8-cell table on the page. Filters now capture `$post_type` in a closure at registration time, removing the screen lookup entirely.

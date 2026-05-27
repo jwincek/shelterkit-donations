@@ -76,5 +76,6 @@
     "viewScriptModule": "file:./view.js",
     "editorScript": "file:./edit.js",
     "style": "file:./style.css",
+    "editorStyle": "file:./style.css",
     "render": "file:./render.php"
 }

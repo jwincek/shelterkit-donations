@@ -12,12 +12,22 @@
     --sd-card-border: #e5e7eb;
     --sd-card-radius: 12px;
     --sd-text-muted: #6b7280;
-    
+
+    box-sizing: border-box;
     padding: 1.5rem;
     background: var(--sd-card-bg);
     border: 1px solid var(--sd-card-border);
     border-radius: var(--sd-card-radius);
     max-width: 400px;
+}
+
+/* Defensive: ensure descendants don't grow past the card's content box
+   when themes set them to content-box. Critical for the full-width
+   donate button whose padding would otherwise overflow. */
+.sd-campaign-card *,
+.sd-campaign-card *::before,
+.sd-campaign-card *::after {
+    box-sizing: border-box;
 }
 
 /* Header */

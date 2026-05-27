@@ -11,6 +11,7 @@ declare( strict_types = 1 );
 namespace Starter_Shelter\Helpers;
 
 use Starter_Shelter\Core\Config;
+use Starter_Shelter\Admin\Settings;
 
 /**
  * Format a number as currency.
@@ -933,4 +934,41 @@ function get_allocation_label( string $allocation ): string {
         'rescue-operations' => __( 'Rescue Operations', 'starter-shelter' ),
         default             => ucwords( str_replace( [ '-', '_' ], ' ', $allocation ) ),
     };
+}
+
+/**
+ * Resolve the permalink of the admin-selected donation page.
+ *
+ * Empty string when no page is configured — callers should treat that
+ * as "hide the CTA" rather than fall back to a guessed URL like the
+ * previously-hardcoded /donate/, which 404s on sites that never created
+ * such a page.
+ *
+ * @since 1.1.2
+ *
+ * @return string Permalink, or empty string when unset.
+ */
+function get_donation_page_url(): string {
+    $page_id = (int) Settings::get( 'donation_page', 0 );
+    if ( $page_id <= 0 ) {
+        return '';
+    }
+    return (string) ( get_permalink( $page_id ) ?: '' );
+}
+
+/**
+ * Resolve the permalink of the admin-selected membership page.
+ *
+ * Same empty-string contract as {@see get_donation_page_url()}.
+ *
+ * @since 1.1.2
+ *
+ * @return string Permalink, or empty string when unset.
+ */
+function get_membership_page_url(): string {
+    $page_id = (int) Settings::get( 'membership_page', 0 );
+    if ( $page_id <= 0 ) {
+        return '';
+    }
+    return (string) ( get_permalink( $page_id ) ?: '' );
 }

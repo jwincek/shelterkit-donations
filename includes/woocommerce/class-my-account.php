@@ -723,10 +723,13 @@ class My_Account {
      * @since 1.0.0
      */
     private static function render_no_donor_message(): void {
+        $donation_url = Helpers\get_donation_page_url();
         ?>
         <div class="sd-no-donor">
             <p><?php esc_html_e( 'You don\'t have a donor profile yet. Make your first donation to get started!', 'starter-shelter' ); ?></p>
-            <a href="<?php echo esc_url( home_url( '/donate/' ) ); ?>" class="button"><?php esc_html_e( 'Donate Now', 'starter-shelter' ); ?></a>
+            <?php if ( $donation_url ) : ?>
+            <a href="<?php echo esc_url( $donation_url ); ?>" class="button"><?php esc_html_e( 'Donate Now', 'starter-shelter' ); ?></a>
+            <?php endif; ?>
         </div>
         <?php
     }
