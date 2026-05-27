@@ -641,22 +641,50 @@ class Activity_Log {
     }
 
     /**
-     * Get client IP address.
+     * Get the client IP for audit log entries.
+     *
+     * Defaults to REMOTE_ADDR only. Forwarded-header values
+     * (X-Forwarded-For, X-Real-IP, CF-Connecting-IP) are NOT trusted
+     * because any HTTP client can set them — honoring them would let
+     * an attacker write arbitrary IPs into the audit log and defeat
+     * its forensic purpose.
+     *
+     * Sites that sit behind a known reverse proxy or CDN (Cloudflare,
+     * nginx, a load balancer) can hook `starter_shelter_activity_log_client_ip`
+     * to extract the real client IP from $_SERVER themselves. Validate
+     * before returning. Example:
+     *
+     *     add_filter( 'starter_shelter_activity_log_client_ip',
+     *         function ( $ip ) {
+     *             $trusted = [ '203.0.113.10' ]; // your proxy
+     *             if ( ! in_array( $_SERVER['REMOTE_ADDR'] ?? '', $trusted, true ) ) {
+     *                 return $ip;
+     *             }
+     *             $forwarded = trim( explode( ',', $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '' )[0] );
+     *             return filter_var( $forwarded, FILTER_VALIDATE_IP ) ?: $ip;
+     *         }
+     *     );
+     *
+     * @since 2.1.0
+     * @since 1.1.3 Stopped trusting forwarded headers by default.
+     *
+     * @return string|null Validated IP, or null if none available.
      */
     private static function get_client_ip(): ?string {
-        $ip_keys = [ 'HTTP_CF_CONNECTING_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_REAL_IP', 'REMOTE_ADDR' ];
+        $remote_addr = isset( $_SERVER['REMOTE_ADDR'] ) ? trim( (string) $_SERVER['REMOTE_ADDR'] ) : '';
+        $ip          = filter_var( $remote_addr, FILTER_VALIDATE_IP ) ? $remote_addr : null;
 
-        foreach ( $ip_keys as $key ) {
-            if ( ! empty( $_SERVER[ $key ] ) ) {
-                $ip = explode( ',', $_SERVER[ $key ] )[0];
-                $ip = trim( $ip );
-                if ( filter_var( $ip, FILTER_VALIDATE_IP ) ) {
-                    return $ip;
-                }
-            }
-        }
+        /**
+         * Filters the resolved client IP for activity log entries.
+         *
+         * See {@see Activity_Log::get_client_ip()} for the threat model and
+         * the recommended pattern for trusting a known proxy.
+         *
+         * @param string|null $ip Default-resolved IP (REMOTE_ADDR or null).
+         */
+        $ip = apply_filters( 'starter_shelter_activity_log_client_ip', $ip );
 
-        return null;
+        return is_string( $ip ) && filter_var( $ip, FILTER_VALIDATE_IP ) ? $ip : null;
     }
 
     /**
