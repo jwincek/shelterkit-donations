@@ -683,6 +683,99 @@ function recent_activity( array $input = [] ): array {
 }
 
 /**
+ * Compute progress for a campaign, type-aware.
+ *
+ * Single source of truth for "where is this campaign right now?"
+ * Replaces (or backs) the four-or-five places in the codebase that
+ * reimplemented "raised vs goal" logic. The return shape carries
+ * everything a consumer needs to render either flavor of progress —
+ * dollar bar or member-count bar — without re-fetching anything.
+ *
+ * @since 1.1.3
+ *
+ * @param array $input
+ *   - campaign_id (int, required) — sd_campaign term ID.
+ *   - date_from (string, optional Y-m-d) — restrict the period.
+ *   - date_to (string, optional Y-m-d).
+ * @return array|WP_Error {
+ *   type, goal, goal_unit, end_date, raised, member_count, progress, remaining
+ * }
+ */
+function campaign_progress( array $input ): array|WP_Error {
+    $campaign_id = (int) ( $input['campaign_id'] ?? 0 );
+    if ( ! $campaign_id ) {
+        return new WP_Error(
+            'invalid_campaign_id',
+            __( 'Valid campaign ID is required.', 'starter-shelter' ),
+            [ 'status' => 400 ]
+        );
+    }
+
+    $term = get_term( $campaign_id, 'sd_campaign' );
+    if ( ! $term || is_wp_error( $term ) ) {
+        return new WP_Error(
+            'campaign_not_found',
+            __( 'Campaign not found.', 'starter-shelter' ),
+            [ 'status' => 404 ]
+        );
+    }
+
+    $type     = (string) ( get_term_meta( $campaign_id, '_sd_campaign_type', true ) ?: 'donation_drive' );
+    $goal     = (float) get_term_meta( $campaign_id, '_sd_goal', true );
+    $end_date = (string) get_term_meta( $campaign_id, '_sd_end_date', true );
+    $tier     = (string) get_term_meta( $campaign_id, '_sd_membership_tier_filter', true );
+
+    $date_from = $input['date_from'] ?? null;
+    $date_to   = $input['date_to']   ?? null;
+
+    $raised       = 0.0;
+    $member_count = 0;
+
+    if ( 'donation_drive' === $type ) {
+        $q = Query::for( 'sd_donation' )->whereInTaxonomy( 'sd_campaign', $campaign_id );
+        if ( $date_from && $date_to ) {
+            $q->whereDateBetween( 'donation_date', $date_from, $date_to );
+        }
+        $raised = $q->sum( 'amount' );
+    } else { // membership_drive
+        $q = Query::for( 'sd_membership' )->whereInTaxonomy( 'sd_campaign', $campaign_id );
+        if ( $date_from && $date_to ) {
+            $q->whereDateBetween( 'start_date', $date_from, $date_to );
+        }
+        if ( '' !== $tier ) {
+            $q->where( 'tier', $tier );
+        }
+        $member_count = $q->count();
+    }
+
+    $primary  = 'donation_drive' === $type ? $raised : (float) $member_count;
+    $progress = $goal > 0 ? min( 100.0, round( ( $primary / $goal ) * 100, 1 ) ) : 0.0;
+    $remaining = max( 0.0, $goal - $primary );
+
+    return [
+        'campaign_id'         => $campaign_id,
+        'name'                => $term->name,
+        'type'                => $type,
+        'goal'                => $goal,
+        'goal_unit'           => 'donation_drive' === $type ? 'currency' : 'members',
+        'goal_formatted'      => 'donation_drive' === $type
+            ? Helpers\format_currency( $goal )
+            : sprintf( _n( '%d member', '%d members', (int) $goal, 'starter-shelter' ), (int) $goal ),
+        'end_date'            => $end_date,
+        'tier_filter'         => $tier,
+        'raised'              => $raised,
+        'raised_formatted'    => Helpers\format_currency( $raised ),
+        'member_count'        => $member_count,
+        'progress'            => $progress,
+        'remaining'           => $remaining,
+        'remaining_formatted' => 'donation_drive' === $type
+            ? Helpers\format_currency( $remaining )
+            : sprintf( _n( '%d to go', '%d to go', (int) $remaining, 'starter-shelter' ), (int) $remaining ),
+        'is_active'           => ! $end_date || strtotime( $end_date ) >= time(),
+    ];
+}
+
+/**
  * Get campaign report.
  *
  * @since 1.0.0

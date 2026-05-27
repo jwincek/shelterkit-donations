@@ -343,6 +343,49 @@
         }
       }
     },
+    "shelter-reports/campaign-progress": {
+      "label": "Campaign Progress",
+      "description": "Type-aware progress for an sd_campaign term. donation_drive returns raised dollars; membership_drive returns count of new memberships (optionally restricted by tier). Replaces ad-hoc 'raised' reimplementations across the codebase.",
+      "category": "shelter-reports",
+      "permission": "public",
+      "meta": {
+        "annotations": {
+          "readonly": true,
+          "destructive": false,
+          "idempotent": true
+        },
+        "show_in_rest": true
+      },
+      "input_schema": {
+        "type": "object",
+        "required": [ "campaign_id" ],
+        "properties": {
+          "campaign_id": { "type": "integer", "description": "sd_campaign term ID." },
+          "date_from":   { "type": "string", "description": "Optional Y-m-d to bound the lookback." },
+          "date_to":     { "type": "string", "description": "Optional Y-m-d to bound the lookback." }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "campaign_id":  { "type": "integer" },
+          "name":         { "type": "string" },
+          "type":         { "type": "string", "description": "donation_drive | membership_drive" },
+          "goal":         { "type": "number" },
+          "goal_unit":    { "type": "string", "description": "currency | members" },
+          "goal_formatted": { "type": "string" },
+          "end_date":     { "type": "string" },
+          "tier_filter":  { "type": "string" },
+          "raised":       { "type": "number", "description": "Sum of donation amounts (donation_drive); 0 otherwise." },
+          "raised_formatted": { "type": "string" },
+          "member_count": { "type": "integer", "description": "New memberships matched (membership_drive); 0 otherwise." },
+          "progress":     { "type": "number", "description": "0..100 percent of goal." },
+          "remaining":    { "type": "number" },
+          "remaining_formatted": { "type": "string" },
+          "is_active":    { "type": "boolean" }
+        }
+      }
+    },
     "shelter-reports/campaign-report": {
       "label": "Generate Campaign Report",
       "description": "Generates a detailed report for a specific campaign",
