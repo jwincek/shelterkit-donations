@@ -32,6 +32,19 @@ class Campaign_Admin {
     private const TAXONOMY = 'sd_campaign';
 
     /**
+     * Recognized campaign types. `donation_drive` is the historical
+     * default — campaigns count $ raised from sd_donation. `membership_drive`
+     * counts new memberships (optionally restricted by tier_filter)
+     * against a numeric goal. (Audit-campaigns §4 also names a 'mixed'
+     * type; deferred until there's a concrete use case to inform its
+     * progress-display design.)
+     */
+    private const TYPES = [
+        'donation_drive'   => 'Donation Drive',
+        'membership_drive' => 'Membership Drive',
+    ];
+
+    /**
      * Initialize hooks. Safe to call from any priority — the work happens
      * on `init` (for register_term_meta) and on taxonomy-specific
      * add/edit/save actions that only fire from the term-edit admin
@@ -76,7 +89,7 @@ class Campaign_Admin {
     public static function register_term_meta(): void {
         register_term_meta( self::TAXONOMY, '_sd_goal', [
             'type'              => 'number',
-            'description'       => 'Campaign fundraising goal in USD.',
+            'description'       => 'Campaign goal: dollars (donation_drive) or member count (membership_drive).',
             'single'            => true,
             'show_in_rest'      => true,
             'sanitize_callback' => static fn( $value ) => max( 0.0, (float) $value ),
@@ -91,6 +104,35 @@ class Campaign_Admin {
             'sanitize_callback' => [ self::class, 'sanitize_end_date' ],
             'auth_callback'     => static fn() => current_user_can( 'manage_options' ),
         ] );
+
+        register_term_meta( self::TAXONOMY, '_sd_campaign_type', [
+            'type'              => 'string',
+            'description'       => 'Campaign type: donation_drive (default) or membership_drive.',
+            'single'            => true,
+            'show_in_rest'      => true,
+            'sanitize_callback' => [ self::class, 'sanitize_campaign_type' ],
+            'auth_callback'     => static fn() => current_user_can( 'manage_options' ),
+        ] );
+
+        register_term_meta( self::TAXONOMY, '_sd_membership_tier_filter', [
+            'type'              => 'string',
+            'description'       => 'Optional tier slug that restricts which memberships count toward a membership_drive goal.',
+            'single'            => true,
+            'show_in_rest'      => true,
+            'sanitize_callback' => 'sanitize_key',
+            'auth_callback'     => static fn() => current_user_can( 'manage_options' ),
+        ] );
+    }
+
+    /**
+     * Coerce campaign_type to a recognized enum value; falls back to
+     * 'donation_drive' for unknown / empty / legacy values.
+     *
+     * @param mixed $value Raw submitted value.
+     */
+    public static function sanitize_campaign_type( $value ): string {
+        $v = is_string( $value ) ? sanitize_key( $value ) : '';
+        return array_key_exists( $v, self::TYPES ) ? $v : 'donation_drive';
     }
 
     /**
@@ -120,9 +162,25 @@ class Campaign_Admin {
     public static function render_add_fields(): void {
         ?>
         <div class="form-field">
-            <label for="sd_goal"><?php esc_html_e( 'Fundraising Goal (USD)', 'starter-shelter' ); ?></label>
+            <label for="sd_campaign_type"><?php esc_html_e( 'Campaign Type', 'starter-shelter' ); ?></label>
+            <select name="sd_campaign_type" id="sd_campaign_type">
+                <?php foreach ( self::TYPES as $value => $label ) : ?>
+                <option value="<?php echo esc_attr( $value ); ?>" <?php selected( $value, 'donation_drive' ); ?>>
+                    <?php echo esc_html( $label ); ?>
+                </option>
+                <?php endforeach; ?>
+            </select>
+            <p><?php esc_html_e( 'Donation Drive: goal is dollars raised. Membership Drive: goal is count of new members.', 'starter-shelter' ); ?></p>
+        </div>
+        <div class="form-field">
+            <label for="sd_goal"><?php esc_html_e( 'Goal', 'starter-shelter' ); ?></label>
             <input type="number" name="sd_goal" id="sd_goal" value="" min="0" step="0.01" />
-            <p><?php esc_html_e( 'Target amount in dollars. Used to compute progress on the campaign card.', 'starter-shelter' ); ?></p>
+            <p><?php esc_html_e( 'Donation Drive: target in dollars. Membership Drive: number of new memberships.', 'starter-shelter' ); ?></p>
+        </div>
+        <div class="form-field">
+            <label for="sd_membership_tier_filter"><?php esc_html_e( 'Tier Filter (Membership Drive only)', 'starter-shelter' ); ?></label>
+            <input type="text" name="sd_membership_tier_filter" id="sd_membership_tier_filter" value="" />
+            <p><?php esc_html_e( 'Optional tier slug to restrict counting (e.g. "guardian"). Leave blank to count all memberships.', 'starter-shelter' ); ?></p>
         </div>
         <div class="form-field">
             <label for="sd_end_date"><?php esc_html_e( 'End Date', 'starter-shelter' ); ?></label>
@@ -138,14 +196,36 @@ class Campaign_Admin {
      * @param \WP_Term $term The taxonomy term being edited.
      */
     public static function render_edit_fields( \WP_Term $term ): void {
-        $goal     = get_term_meta( $term->term_id, '_sd_goal', true );
-        $end_date = (string) get_term_meta( $term->term_id, '_sd_end_date', true );
+        $goal          = get_term_meta( $term->term_id, '_sd_goal', true );
+        $end_date      = (string) get_term_meta( $term->term_id, '_sd_end_date', true );
+        $current_type  = self::sanitize_campaign_type( get_term_meta( $term->term_id, '_sd_campaign_type', true ) );
+        $tier_filter   = (string) get_term_meta( $term->term_id, '_sd_membership_tier_filter', true );
         ?>
         <tr class="form-field">
-            <th scope="row"><label for="sd_goal"><?php esc_html_e( 'Fundraising Goal (USD)', 'starter-shelter' ); ?></label></th>
+            <th scope="row"><label for="sd_campaign_type"><?php esc_html_e( 'Campaign Type', 'starter-shelter' ); ?></label></th>
+            <td>
+                <select name="sd_campaign_type" id="sd_campaign_type">
+                    <?php foreach ( self::TYPES as $value => $label ) : ?>
+                    <option value="<?php echo esc_attr( $value ); ?>" <?php selected( $value, $current_type ); ?>>
+                        <?php echo esc_html( $label ); ?>
+                    </option>
+                    <?php endforeach; ?>
+                </select>
+                <p class="description"><?php esc_html_e( 'Donation Drive: goal is dollars raised. Membership Drive: goal is count of new members.', 'starter-shelter' ); ?></p>
+            </td>
+        </tr>
+        <tr class="form-field">
+            <th scope="row"><label for="sd_goal"><?php esc_html_e( 'Goal', 'starter-shelter' ); ?></label></th>
             <td>
                 <input type="number" name="sd_goal" id="sd_goal" value="<?php echo esc_attr( '' === $goal ? '' : (string) (float) $goal ); ?>" min="0" step="0.01" />
-                <p class="description"><?php esc_html_e( 'Target amount in dollars. Used to compute progress on the campaign card.', 'starter-shelter' ); ?></p>
+                <p class="description"><?php esc_html_e( 'Donation Drive: target in dollars. Membership Drive: number of new memberships.', 'starter-shelter' ); ?></p>
+            </td>
+        </tr>
+        <tr class="form-field">
+            <th scope="row"><label for="sd_membership_tier_filter"><?php esc_html_e( 'Tier Filter', 'starter-shelter' ); ?></label></th>
+            <td>
+                <input type="text" name="sd_membership_tier_filter" id="sd_membership_tier_filter" value="<?php echo esc_attr( $tier_filter ); ?>" />
+                <p class="description"><?php esc_html_e( 'Membership Drive only. Optional tier slug to restrict counting (e.g. "guardian"). Leave blank to count all memberships.', 'starter-shelter' ); ?></p>
             </td>
         </tr>
         <tr class="form-field">
@@ -180,6 +260,20 @@ class Campaign_Admin {
                 update_term_meta( $term_id, '_sd_end_date', $end_date );
             } else {
                 delete_term_meta( $term_id, '_sd_end_date' );
+            }
+        }
+
+        if ( array_key_exists( 'sd_campaign_type', $_POST ) ) {
+            $type = self::sanitize_campaign_type( wp_unslash( $_POST['sd_campaign_type'] ) );
+            update_term_meta( $term_id, '_sd_campaign_type', $type );
+        }
+
+        if ( array_key_exists( 'sd_membership_tier_filter', $_POST ) ) {
+            $tier = sanitize_key( wp_unslash( $_POST['sd_membership_tier_filter'] ) );
+            if ( '' !== $tier ) {
+                update_term_meta( $term_id, '_sd_membership_tier_filter', $tier );
+            } else {
+                delete_term_meta( $term_id, '_sd_membership_tier_filter' );
             }
         }
     }
