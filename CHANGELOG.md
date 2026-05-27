@@ -7,9 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `campaign-card` block now has an editor inspector: campaign picker (sourced from `window.starterShelterBlocks.campaigns`), display-option toggles (goal / raised-or-joined / donors / end date / donate button), and a progress-bar color swatch. Server-side render in the canvas previews the selected campaign.
+
 ### Changed
 - `List_Columns` column configuration is now built lazily on first access instead of during plugin bootstrap, so `__()` calls no longer run before the `init` hook.
 - `validate_item_meta()` return type relaxed from `true|WP_Error` to `bool|WP_Error`; the `true` literal type requires PHP 8.2+ and the plugin still declares an 8.1 floor.
+- `campaign-card` block.json: removed `"ancestor": []` (empty array meant "no valid ancestors", hiding the block from the inserter even though it was registered). Added `"editorScript": "file:./edit.js"`.
 
 ### Fixed
 - `List_Columns` row layout no longer scrambles after Quick Edit. `register_columns()` and `register_sortable()` called `get_current_screen()` to disambiguate post type, but that global is null during `wp_ajax_inline_save()` — the filter then fell through to WP's default columns (`cb`, `title`, `date`), and the AJAX-returned row HTML didn't match the 8-cell table on the page. Filters now capture `$post_type` in a closure at registration time, removing the screen lookup entirely.

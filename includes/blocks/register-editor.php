@@ -36,6 +36,7 @@ function register_editor_assets(): void {
         'starter-shelter-membership-form-editor-script',
         'starter-shelter-memorial-wall-editor-script',
         'starter-shelter-campaign-progress-editor-script',
+        'starter-shelter-campaign-card-editor-script',
         'starter-shelter-donor-dashboard-editor-script',
         'starter-shelter-contribution-tabs-editor-script',
     ];

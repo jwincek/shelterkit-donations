@@ -9,7 +9,6 @@
     "description": "Display a fundraising campaign with progress bar. Can be used as a standalone block or within Query Loop.",
     "keywords": [ "campaign", "fundraiser", "goal", "progress", "donation" ],
     "textdomain": "starter-shelter",
-    "ancestor": [],
     "usesContext": [ "postId", "postType" ],
     "supports": {
         "html": false,
@@ -75,6 +74,7 @@
         "viewportWidth": 400
     },
     "viewScriptModule": "file:./view.js",
+    "editorScript": "file:./edit.js",
     "style": "file:./style.css",
     "render": "file:./render.php"
 }
