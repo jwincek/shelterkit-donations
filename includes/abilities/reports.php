@@ -15,6 +15,25 @@ use Starter_Shelter\Helpers;
 use WP_Error;
 
 /**
+ * Days-ahead window for the main dashboard "Expiring Soon" stat.
+ *
+ * Long-term-planning view: shows admins how many memberships will need
+ * renewal in the next month. Deliberately wider than the urgent
+ * action-items window — different audience and intent.
+ */
+const EXPIRING_SOON_WINDOW_DAYS = 30;
+
+/**
+ * Days-ahead window for the urgent "Action Required" list.
+ *
+ * Powers the menu-badge count and the dashboard widget's action items.
+ * Short on purpose: signals "act now, this is about to expire" rather
+ * than "plan for upcoming renewals." Override per call via
+ * shelter-reports/action-items' `expiring_window_days` input.
+ */
+const ACTION_ITEMS_WINDOW_DAYS = 7;
+
+/**
  * Generate annual donor summary.
  *
  * @since 1.0.0
@@ -197,7 +216,7 @@ function dashboard_stats( array $input = [] ): array {
 
     global $wpdb;
     $today           = wp_date( 'Y-m-d' );
-    $expiring_window = wp_date( 'Y-m-d', strtotime( '+30 days' ) );
+    $expiring_window = wp_date( 'Y-m-d', strtotime( '+' . EXPIRING_SOON_WINDOW_DAYS . ' days' ) );
 
     // Donations: count, sum, unique donors in period.
     $donation_stats = $wpdb->get_row( $wpdb->prepare(
@@ -514,7 +533,7 @@ function membership_retention( array $input = [] ): array {
  */
 function action_items( array $input = [] ): array {
     $items = [];
-    $expiring_window = (int) ( $input['expiring_window_days'] ?? 7 );
+    $expiring_window = (int) ( $input['expiring_window_days'] ?? ACTION_ITEMS_WINDOW_DAYS );
 
     // Pending logo reviews.
     if ( class_exists( '\\Starter_Shelter\\Admin\\Logo_Moderation' ) ) {

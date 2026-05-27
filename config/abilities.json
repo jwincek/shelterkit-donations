@@ -286,7 +286,7 @@
           "expiring_window_days": {
             "type": "integer",
             "default": 7,
-            "description": "Membership end_date window (days from today)."
+            "description": "Membership end_date window (days from today). Default mirrors ACTION_ITEMS_WINDOW_DAYS in includes/abilities/reports.php."
           }
         }
       },

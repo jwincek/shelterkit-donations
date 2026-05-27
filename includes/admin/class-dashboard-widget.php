@@ -86,6 +86,11 @@ class Dashboard_Widget {
      */
     private const CACHE_TTL = 900;
 
+    /**
+     * Number of items shown in the widget's "Recent Activity" feed.
+     */
+    private const RECENT_ACTIVITY_COUNT = 5;
+
     public static function render_widget(): void {
         $period = get_user_option( 'sd_dashboard_period' ) ?: 'month';
 
@@ -167,7 +172,7 @@ class Dashboard_Widget {
         <div class="sd-widget-recent">
             <h4><?php esc_html_e( 'Recent Activity', 'starter-shelter' ); ?></h4>
             <?php 
-            $recent = self::get_recent_activity( 5 );
+            $recent = self::get_recent_activity( self::RECENT_ACTIVITY_COUNT );
             if ( ! empty( $recent ) ) :
             ?>
             <ul>
@@ -326,7 +331,7 @@ class Dashboard_Widget {
      * @param int $count Number of items.
      * @return array Recent activity.
      */
-    private static function get_recent_activity( int $count = 5 ): array {
+    private static function get_recent_activity( int $count = self::RECENT_ACTIVITY_COUNT ): array {
         // Pull the structured feed from the ability — the data layer is
         // now CPT-agnostic structured items, no SQL here. Display
         // formatting (icons, sprintf, time-ago) stays in this view layer.
