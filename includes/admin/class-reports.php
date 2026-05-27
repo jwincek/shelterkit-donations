@@ -309,6 +309,91 @@ class Reports {
             </tbody>
         </table>
         <?php endif; ?>
+
+        <?php self::render_donations_table( $period ); ?>
+        <?php
+    }
+
+    /**
+     * Render a "recent donations" table for the Donations tab.
+     *
+     * Calls shelter-donations/list (per_page=20, ordered newest first)
+     * and renders a wp-list-table. Each row links to the post edit
+     * screen; a "View all" link below points to the donations CPT list.
+     *
+     * @since 1.1.3
+     */
+    private static function render_donations_table( string $period ): void {
+        $range  = \Starter_Shelter\Helpers\get_date_range_for_period( $period );
+        $result = self::fetch_stats(
+            'shelter-donations/list',
+            [
+                'date_from' => $range['start'],
+                'date_to'   => $range['end'],
+                'per_page'  => 20,
+            ],
+            __( 'Unable to load recent donations.', 'starter-shelter' )
+        );
+        $items = $result['items'] ?? [];
+        if ( empty( $items ) ) {
+            return;
+        }
+
+        $donor_map = self::batch_donor_info( array_column( $items, 'donor_id' ) );
+        $total     = (int) ( $result['total'] ?? count( $items ) );
+        ?>
+        <h3><?php esc_html_e( 'Recent Donations', 'starter-shelter' ); ?></h3>
+        <table class="wp-list-table widefat fixed striped">
+            <thead>
+                <tr>
+                    <th><?php esc_html_e( 'Date', 'starter-shelter' ); ?></th>
+                    <th><?php esc_html_e( 'Donor', 'starter-shelter' ); ?></th>
+                    <th><?php esc_html_e( 'Amount', 'starter-shelter' ); ?></th>
+                    <th><?php esc_html_e( 'Allocation', 'starter-shelter' ); ?></th>
+                    <th><?php esc_html_e( 'Campaign', 'starter-shelter' ); ?></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ( $items as $donation ) :
+                    $donor_id     = (int) ( $donation['donor_id'] ?? 0 );
+                    $donor        = $donor_map[ $donor_id ] ?? [ 'name' => '', 'email' => '' ];
+                    $display_name = $donation['is_anonymous']
+                        ? __( 'Anonymous', 'starter-shelter' )
+                        : ( $donation['donor_name'] ?: $donor['name'] ?: __( 'Unknown', 'starter-shelter' ) );
+                    $campaigns    = is_array( $donation['campaign'] ?? null )
+                        ? implode( ', ', array_filter( array_map( static fn( $c ) => is_array( $c ) ? ( $c['name'] ?? '' ) : '', $donation['campaign'] ) ) )
+                        : '';
+                    $edit_url     = (int) ( $donation['id'] ?? 0 ) > 0 ? get_edit_post_link( (int) $donation['id'] ) : '';
+                ?>
+                <tr>
+                    <td><?php echo esc_html( $donation['date_formatted'] ?? '' ); ?></td>
+                    <td><?php echo esc_html( $display_name ); ?></td>
+                    <td><?php echo esc_html( $donation['amount_formatted'] ?? '$' . number_format( (float) ( $donation['amount'] ?? 0 ), 2 ) ); ?></td>
+                    <td><?php echo esc_html( $donation['allocation_label'] ?? '' ); ?></td>
+                    <td><?php echo esc_html( $campaigns ); ?></td>
+                    <td>
+                        <?php if ( $edit_url ) : ?>
+                        <a href="<?php echo esc_url( $edit_url ); ?>"><?php esc_html_e( 'View', 'starter-shelter' ); ?></a>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+        <?php if ( $total > count( $items ) ) : ?>
+        <p>
+            <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=sd_donation' ) ); ?>">
+                <?php
+                printf(
+                    /* translators: %d: total donation count */
+                    esc_html__( 'View all %d donations in the admin list', 'starter-shelter' ),
+                    $total
+                );
+                ?>
+            </a>
+        </p>
+        <?php endif; ?>
         <?php
     }
 
@@ -376,6 +461,85 @@ class Reports {
             </tbody>
         </table>
         <?php endif; ?>
+
+        <?php self::render_memberships_table(); ?>
+        <?php
+    }
+
+    /**
+     * Render a "recent memberships" table for the Memberships tab.
+     *
+     * Period filter doesn't apply (the membership list ability has no
+     * date-range input — memberships are filtered by status). Showing
+     * 20 most recent regardless of period.
+     *
+     * @since 1.1.3
+     */
+    private static function render_memberships_table(): void {
+        $result = self::fetch_stats(
+            'shelter-memberships/list',
+            [
+                'status'   => 'all',
+                'per_page' => 20,
+            ],
+            __( 'Unable to load recent memberships.', 'starter-shelter' )
+        );
+        $items = $result['items'] ?? [];
+        if ( empty( $items ) ) {
+            return;
+        }
+
+        $donor_map = self::batch_donor_info( array_column( $items, 'donor_id' ) );
+        $total     = (int) ( $result['total'] ?? count( $items ) );
+        ?>
+        <h3><?php esc_html_e( 'Recent Memberships', 'starter-shelter' ); ?></h3>
+        <table class="wp-list-table widefat fixed striped">
+            <thead>
+                <tr>
+                    <th><?php esc_html_e( 'Member', 'starter-shelter' ); ?></th>
+                    <th><?php esc_html_e( 'Tier', 'starter-shelter' ); ?></th>
+                    <th><?php esc_html_e( 'Type', 'starter-shelter' ); ?></th>
+                    <th><?php esc_html_e( 'Start', 'starter-shelter' ); ?></th>
+                    <th><?php esc_html_e( 'End', 'starter-shelter' ); ?></th>
+                    <th><?php esc_html_e( 'Status', 'starter-shelter' ); ?></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ( $items as $membership ) :
+                    $donor_id = (int) ( $membership['donor_id'] ?? 0 );
+                    $donor    = $donor_map[ $donor_id ] ?? [ 'name' => '', 'email' => '' ];
+                    $edit_url = (int) ( $membership['id'] ?? 0 ) > 0 ? get_edit_post_link( (int) $membership['id'] ) : '';
+                ?>
+                <tr>
+                    <td><?php echo esc_html( $donor['name'] ?: __( 'Unknown', 'starter-shelter' ) ); ?></td>
+                    <td><?php echo esc_html( $membership['tier_label'] ?? '' ); ?></td>
+                    <td><?php echo esc_html( ucfirst( $membership['membership_type'] ?? '' ) ); ?></td>
+                    <td><?php echo esc_html( $membership['start_date'] ?? '' ); ?></td>
+                    <td><?php echo esc_html( $membership['end_date'] ?? '' ); ?></td>
+                    <td><?php echo ! empty( $membership['is_active'] ) ? esc_html__( 'Active', 'starter-shelter' ) : esc_html__( 'Expired', 'starter-shelter' ); ?></td>
+                    <td>
+                        <?php if ( $edit_url ) : ?>
+                        <a href="<?php echo esc_url( $edit_url ); ?>"><?php esc_html_e( 'View', 'starter-shelter' ); ?></a>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+        <?php if ( $total > count( $items ) ) : ?>
+        <p>
+            <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=sd_membership' ) ); ?>">
+                <?php
+                printf(
+                    /* translators: %d: total membership count */
+                    esc_html__( 'View all %d memberships in the admin list', 'starter-shelter' ),
+                    $total
+                );
+                ?>
+            </a>
+        </p>
+        <?php endif; ?>
         <?php
     }
 
@@ -412,6 +576,93 @@ class Reports {
                 <span class="sd-stat-label"><?php esc_html_e( 'Memorial Donations', 'starter-shelter' ); ?></span>
             </div>
         </div>
+
+        <?php self::render_memorials_table(); ?>
+        <?php
+    }
+
+    /**
+     * Render a "recent memorials" table for the Memorials tab.
+     *
+     * The memorial list ability filters by year, not period range —
+     * showing 20 most recent regardless of period for now. (A later
+     * pass could push period awareness down into the ability.)
+     *
+     * @since 1.1.3
+     */
+    private static function render_memorials_table(): void {
+        $result = self::fetch_stats(
+            'shelter-memorials/list',
+            [
+                'type'     => 'all',
+                'per_page' => 20,
+            ],
+            __( 'Unable to load recent memorials.', 'starter-shelter' )
+        );
+        $items = $result['items'] ?? [];
+        if ( empty( $items ) ) {
+            return;
+        }
+
+        $donor_map = self::batch_donor_info( array_column( $items, 'donor_id' ) );
+        $total     = (int) ( $result['total'] ?? count( $items ) );
+        ?>
+        <h3><?php esc_html_e( 'Recent Memorials', 'starter-shelter' ); ?></h3>
+        <table class="wp-list-table widefat fixed striped">
+            <thead>
+                <tr>
+                    <th><?php esc_html_e( 'Honoree', 'starter-shelter' ); ?></th>
+                    <th><?php esc_html_e( 'Type', 'starter-shelter' ); ?></th>
+                    <th><?php esc_html_e( 'Donor', 'starter-shelter' ); ?></th>
+                    <th><?php esc_html_e( 'Date', 'starter-shelter' ); ?></th>
+                    <th><?php esc_html_e( 'Amount', 'starter-shelter' ); ?></th>
+                    <th><?php esc_html_e( 'Family Notified', 'starter-shelter' ); ?></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ( $items as $memorial ) :
+                    $donor_id  = (int) ( $memorial['donor_id'] ?? 0 );
+                    $donor     = $donor_map[ $donor_id ] ?? [ 'name' => '', 'email' => '' ];
+                    $donor_lbl = $memorial['is_anonymous']
+                        ? __( 'Anonymous', 'starter-shelter' )
+                        : ( $memorial['donor_display_name'] ?? $memorial['donor_name'] ?? $donor['name'] ?? __( 'Unknown', 'starter-shelter' ) );
+                    $edit_url  = (int) ( $memorial['id'] ?? 0 ) > 0 ? get_edit_post_link( (int) $memorial['id'] ) : '';
+                    $notified  = ! empty( $memorial['family_notified_date'] )
+                        ? esc_html( $memorial['family_notified_date'] )
+                        : ( ! empty( $memorial['notify_family_enabled'] )
+                            ? '<em>' . esc_html__( 'Pending', 'starter-shelter' ) . '</em>'
+                            : '—' );
+                ?>
+                <tr>
+                    <td><?php echo esc_html( $memorial['honoree_name'] ?? '' ); ?></td>
+                    <td><?php echo esc_html( $memorial['memorial_type_label'] ?? $memorial['memorial_type'] ?? '' ); ?></td>
+                    <td><?php echo esc_html( $donor_lbl ); ?></td>
+                    <td><?php echo esc_html( $memorial['date_formatted'] ?? $memorial['donation_date'] ?? '' ); ?></td>
+                    <td><?php echo esc_html( $memorial['amount_formatted'] ?? '$' . number_format( (float) ( $memorial['amount'] ?? 0 ), 2 ) ); ?></td>
+                    <td><?php echo wp_kses_post( $notified ); ?></td>
+                    <td>
+                        <?php if ( $edit_url ) : ?>
+                        <a href="<?php echo esc_url( $edit_url ); ?>"><?php esc_html_e( 'View', 'starter-shelter' ); ?></a>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+        <?php if ( $total > count( $items ) ) : ?>
+        <p>
+            <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=sd_memorial' ) ); ?>">
+                <?php
+                printf(
+                    /* translators: %d: total memorial count */
+                    esc_html__( 'View all %d memorials in the admin list', 'starter-shelter' ),
+                    $total
+                );
+                ?>
+            </a>
+        </p>
+        <?php endif; ?>
         <?php
     }
 
