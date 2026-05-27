@@ -54,14 +54,24 @@ class List_Columns {
         // notice.
 
         foreach ( self::POST_TYPES as $post_type ) {
-            // Register columns.
-            add_filter( "manage_{$post_type}_posts_columns", [ self::class, 'register_columns' ] );
+            // Register columns. Capture $post_type in the closure rather than
+            // calling get_current_screen() inside the callback — that global
+            // is null during Quick-Edit's wp_ajax_inline_save context, which
+            // would silently fall through to WP's default columns and ship a
+            // 3-cell row HTML for replacement into our 8-column table.
+            add_filter(
+                "manage_{$post_type}_posts_columns",
+                static fn( array $columns ): array => self::register_columns( $columns, $post_type )
+            );
 
             // Render column content.
             add_action( "manage_{$post_type}_posts_custom_column", [ self::class, 'render_column' ], 10, 2 );
 
-            // Make columns sortable.
-            add_filter( "manage_edit-{$post_type}_sortable_columns", [ self::class, 'register_sortable' ] );
+            // Make columns sortable. Same closure-capture rationale as above.
+            add_filter(
+                "manage_edit-{$post_type}_sortable_columns",
+                static fn( array $columns ): array => self::register_sortable( $columns, $post_type )
+            );
         }
 
         // Handle custom sorting.
@@ -158,17 +168,17 @@ class List_Columns {
      *
      * @since 1.0.0
      *
-     * @param array $columns Existing columns.
+     * @param array  $columns   Existing columns.
+     * @param string $post_type Post type slug (captured in closure at init).
      * @return array Modified columns.
      */
-    public static function register_columns( array $columns ): array {
-        $screen     = get_current_screen();
+    public static function register_columns( array $columns, string $post_type ): array {
         $configured = self::get_columns();
-        if ( ! $screen || ! isset( $configured[ $screen->post_type ] ) ) {
+        if ( ! isset( $configured[ $post_type ] ) ) {
             return $columns;
         }
 
-        return $configured[ $screen->post_type ]['columns'];
+        return $configured[ $post_type ]['columns'];
     }
 
     /**
@@ -563,18 +573,17 @@ class List_Columns {
      *
      * @since 1.0.0
      *
-     * @param array $columns Sortable columns.
+     * @param array  $columns   Sortable columns.
+     * @param string $post_type Post type slug (captured in closure at init).
      * @return array Modified sortable columns.
      */
-    public static function register_sortable( array $columns ): array {
-        $screen     = get_current_screen();
+    public static function register_sortable( array $columns, string $post_type ): array {
         $configured = self::get_columns();
-        if ( ! $screen || ! isset( $configured[ $screen->post_type ] ) ) {
+        if ( ! isset( $configured[ $post_type ] ) ) {
             return $columns;
         }
 
-        $config = $configured[ $screen->post_type ];
-        foreach ( $config['sortable'] ?? [] as $col ) {
+        foreach ( $configured[ $post_type ]['sortable'] ?? [] as $col ) {
             $columns[ $col ] = $col;
         }
 
