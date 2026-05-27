@@ -6,7 +6,7 @@
         "plural": "Campaigns",
         "menu_name": "Campaigns"
       },
-      "post_types": ["sd_donation"],
+      "post_types": ["sd_donation", "sd_membership"],
       "public": true,
       "show_ui": true,
       "show_in_rest": true,

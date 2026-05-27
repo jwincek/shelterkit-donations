@@ -91,6 +91,13 @@ function create( array $input ): array|WP_Error {
         }
     }
 
+    // Attach the campaign term (if any) so this membership counts toward
+    // a `membership_drive`-type campaign's progress. Mirrors the
+    // corresponding line in includes/abilities/donations.php.
+    if ( ! empty( $input['campaign_id'] ) ) {
+        wp_set_object_terms( $membership_id, [ (int) $input['campaign_id'] ], 'sd_campaign' );
+    }
+
     // Update donor lifetime giving.
     Helpers\update_donor_lifetime_giving( $donor_id, (float) $amount );
 

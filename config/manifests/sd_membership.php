@@ -247,6 +247,10 @@ return [
 						'type'    => 'boolean',
 						'default' => false,
 					],
+					'campaign_id' => [
+						'type'        => 'integer',
+						'description' => 'Optional sd_campaign term ID. When set, the new membership is attached to the campaign and counts toward its progress (membership_drive type).',
+					],
 				],
 			],
 			'output' => [
@@ -432,6 +436,14 @@ return [
 					'transform' => 'boolean',
 					'default'   => false,
 				],
+				'campaign_id' => [
+					'source'   => 'item_meta',
+					'key'      => '_sd_campaign_id',
+					'fallback' => [
+						'source' => 'order_meta',
+						'key'    => '_sd_campaign_id',
+					],
+				],
 			],
 		],
 
@@ -479,6 +491,14 @@ return [
 					],
 					'transform' => 'boolean',
 					'default'   => false,
+				],
+				'campaign_id' => [
+					'source'   => 'item_meta',
+					'key'      => '_sd_campaign_id',
+					'fallback' => [
+						'source' => 'order_meta',
+						'key'    => '_sd_campaign_id',
+					],
 				],
 			],
 		],
