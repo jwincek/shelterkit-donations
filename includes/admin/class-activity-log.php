@@ -36,6 +36,17 @@ class Activity_Log {
     private const PAGE_SLUG = 'starter-shelter-activity';
 
     /**
+     * Closed enumeration of category keys emitted by log_X methods.
+     *
+     * Used by the filter dropdown on the activity-log page instead of a
+     * `SELECT DISTINCT event_category` against the log table — that
+     * scan is unnecessary because the producer set is small, finite,
+     * and known at compile time. Keep this in sync with the
+     * get_category_icon() map.
+     */
+    private const KNOWN_CATEGORIES = [ 'admin', 'donation', 'email', 'membership', 'system' ];
+
+    /**
      * Initialize activity log.
      */
     public static function init(): void {
@@ -338,11 +349,20 @@ class Activity_Log {
      */
     public static function log_settings_changed( $old_value, $new_value ): void {
         $admin_user = wp_get_current_user();
-        
-        // Find what changed.
+
+        // Walk the union of old + new keys so a setting that was removed
+        // (key in old but not new) is also captured as changed. Previously
+        // we iterated only $new_value, missing removals — uncommon with
+        // the Options API but worth doing right.
+        $old_arr  = is_array( $old_value ) ? $old_value : [];
+        $new_arr  = is_array( $new_value ) ? $new_value : [];
+        $all_keys = array_unique( array_merge( array_keys( $old_arr ), array_keys( $new_arr ) ) );
+
         $changed = [];
-        foreach ( $new_value as $key => $value ) {
-            if ( ! isset( $old_value[ $key ] ) || $old_value[ $key ] !== $value ) {
+        foreach ( $all_keys as $key ) {
+            $old_v = $old_arr[ $key ] ?? null;
+            $new_v = $new_arr[ $key ] ?? null;
+            if ( $old_v !== $new_v ) {
                 $changed[] = $key;
             }
         }
@@ -491,8 +511,8 @@ class Activity_Log {
         
         $logs = $wpdb->get_results( $wpdb->prepare( $query, $params ) );
 
-        // Get categories for filter.
-        $categories = $wpdb->get_col( "SELECT DISTINCT event_category FROM $table_name ORDER BY event_category" );
+        // Filter dropdown uses the closed enumeration — no scan needed.
+        $categories = self::KNOWN_CATEGORIES;
 
         ?>
         <div class="wrap sd-activity-log">

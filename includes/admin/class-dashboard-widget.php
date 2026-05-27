@@ -232,10 +232,19 @@ class Dashboard_Widget {
      * Render widget configuration form.
      */
     public static function render_widget_config(): void {
-        if ( isset( $_POST['sd_dashboard_period'] ) ) {
+        // WP core's dashboard widget plumbing nonce-verifies the POST
+        // before calling this callback, so the update_user_option below
+        // is currently safe. Belt-and-braces: also verify the
+        // 'edit-dashboard' nonce ourselves so a hypothetical future core
+        // refactor that removed the outer check wouldn't open a (small)
+        // self-CSRF on the user's own dashboard preference.
+        $nonce_ok = isset( $_POST['_wpnonce'] )
+            && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'edit-dashboard' );
+
+        if ( isset( $_POST['sd_dashboard_period'] ) && $nonce_ok ) {
             update_user_option( get_current_user_id(), 'sd_dashboard_period', sanitize_key( $_POST['sd_dashboard_period'] ) );
         }
-        
+
         $period = get_user_option( 'sd_dashboard_period' ) ?: 'month';
         ?>
         <p>
