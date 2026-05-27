@@ -66,44 +66,68 @@ if ( ! $campaign_id ) {
     return;
 }
 
-// Get campaign data using the binding source.
-$campaign_data = \Starter_Shelter\Blocks\get_campaign_value(
-    [ 'id' => $campaign_id, 'field' => '' ],
-    $block,
-    ''
-);
+// Pull type-aware progress through the single-source ability. Falls
+// back to the older block-binding helper if the ability isn't
+// registered for some reason (older WP without abilities API, etc.).
+$progress = function_exists( 'wp_get_ability' )
+    ? wp_get_ability( 'shelter-reports/campaign-progress' )
+    : null;
+$prog_data = $progress ? $progress->execute( [ 'campaign_id' => $campaign_id ] ) : null;
 
-// If campaign data is an error or empty, extract manually.
-if ( ! $campaign_data ) {
+if ( ! $prog_data || is_wp_error( $prog_data ) ) {
+    // Last-resort fallback: hydrate manually from term + term meta.
     $campaign = get_term( $campaign_id, 'sd_campaign' );
-    
     if ( ! $campaign || is_wp_error( $campaign ) ) {
         return;
     }
-    
-    $goal   = (float) get_term_meta( $campaign_id, '_sd_goal', true );
-    $end_date = get_term_meta( $campaign_id, '_sd_end_date', true );
-    $raised = \Starter_Shelter\Blocks\calculate_campaign_raised( $campaign_id );
-    $donors = \Starter_Shelter\Blocks\calculate_campaign_donors( $campaign_id );
-    $progress = $goal > 0 ? min( 100, ( $raised / $goal ) * 100 ) : 0;
-    
-    $campaign_data = [
-        'id'                  => $campaign_id,
+    $goal     = (float) get_term_meta( $campaign_id, '_sd_goal', true );
+    $end_date = (string) get_term_meta( $campaign_id, '_sd_end_date', true );
+    $prog_data = [
         'name'                => $campaign->name,
-        'description'         => $campaign->description,
+        'type'                => (string) ( get_term_meta( $campaign_id, '_sd_campaign_type', true ) ?: 'donation_drive' ),
         'goal'                => $goal,
+        'goal_unit'           => 'currency',
         'goal_formatted'      => Helpers\format_currency( $goal ),
-        'raised'              => $raised,
-        'raised_formatted'    => Helpers\format_currency( $raised ),
-        'progress'            => round( $progress, 1 ),
-        'remaining'           => max( 0, $goal - $raised ),
-        'remaining_formatted' => Helpers\format_currency( max( 0, $goal - $raised ) ),
+        'raised'              => 0.0,
+        'raised_formatted'    => Helpers\format_currency( 0 ),
+        'member_count'        => 0,
+        'progress'            => 0.0,
+        'remaining'           => $goal,
+        'remaining_formatted' => Helpers\format_currency( $goal ),
         'end_date'            => $end_date,
-        'end_date_formatted'  => $end_date ? Helpers\format_date( $end_date ) : '',
         'is_active'           => ! $end_date || strtotime( $end_date ) >= time(),
-        'donor_count'         => $donors,
     ];
 }
+
+$is_member_drive = 'members' === ( $prog_data['goal_unit'] ?? 'currency' );
+
+// Compose the per-card display fields the existing template expects.
+// The "value" line beside "Raised" / "Members joined" labels comes from
+// raised_formatted (for $) or member_count (for member drives).
+$campaign_data = [
+    'id'                  => $campaign_id,
+    'name'                => $prog_data['name'] ?? '',
+    'description'         => get_term( $campaign_id, 'sd_campaign' )?->description ?? '',
+    'type'                => $prog_data['type'] ?? 'donation_drive',
+    'goal_unit'           => $prog_data['goal_unit'] ?? 'currency',
+    'goal'                => $prog_data['goal'] ?? 0,
+    'goal_formatted'      => $prog_data['goal_formatted'] ?? '',
+    'raised'              => $prog_data['raised'] ?? 0,
+    'raised_formatted'    => $prog_data['raised_formatted'] ?? '',
+    'member_count'        => (int) ( $prog_data['member_count'] ?? 0 ),
+    'progress'            => round( (float) ( $prog_data['progress'] ?? 0 ), 1 ),
+    'remaining'           => $prog_data['remaining'] ?? 0,
+    'remaining_formatted' => $prog_data['remaining_formatted'] ?? '',
+    'end_date'            => $prog_data['end_date'] ?? '',
+    'end_date_formatted'  => ! empty( $prog_data['end_date'] ) ? Helpers\format_date( $prog_data['end_date'] ) : '',
+    'is_active'           => $prog_data['is_active'] ?? true,
+    // Compatibility — donor_count was a legacy field; for membership
+    // drives it would be misleading. Carry it for donation drives, 0
+    // otherwise. Better dedicated metric would be a separate ability.
+    'donor_count'         => $is_member_drive ? 0 : ( function_exists( '\\Starter_Shelter\\Blocks\\calculate_campaign_donors' )
+        ? (int) \Starter_Shelter\Blocks\calculate_campaign_donors( $campaign_id )
+        : 0 ),
+];
 
 // Block settings.
 $show_goal        = $attributes['showGoal'] ?? true;
@@ -189,10 +213,17 @@ $interactive_attrs = sprintf(
     <div class="sd-campaign-stats">
         <?php if ( $show_raised ) : ?>
         <div class="sd-campaign-stat sd-stat-raised">
+            <?php if ( $is_member_drive ) : ?>
+            <span class="sd-stat-value" data-wp-text="state.campaign.member_count">
+                <?php echo esc_html( (string) $campaign_data['member_count'] ); ?>
+            </span>
+            <span class="sd-stat-label"><?php esc_html_e( 'Joined', 'starter-shelter' ); ?></span>
+            <?php else : ?>
             <span class="sd-stat-value" data-wp-text="state.campaign.raised_formatted">
                 <?php echo esc_html( $campaign_data['raised_formatted'] ); ?>
             </span>
             <span class="sd-stat-label"><?php esc_html_e( 'Raised', 'starter-shelter' ); ?></span>
+            <?php endif; ?>
         </div>
         <?php endif; ?>
 
@@ -205,10 +236,10 @@ $interactive_attrs = sprintf(
         </div>
         <?php endif; ?>
 
-        <?php if ( $show_donors ) : ?>
+        <?php if ( $show_donors && ! $is_member_drive ) : ?>
         <div class="sd-campaign-stat sd-stat-donors">
             <span class="sd-stat-value" data-wp-text="state.campaign.donor_count">
-                <?php echo esc_html( $campaign_data['donor_count'] ); ?>
+                <?php echo esc_html( (string) $campaign_data['donor_count'] ); ?>
             </span>
             <span class="sd-stat-label"><?php esc_html_e( 'Donors', 'starter-shelter' ); ?></span>
         </div>
