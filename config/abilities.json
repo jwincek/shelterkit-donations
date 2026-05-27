@@ -192,6 +192,46 @@
         }
       }
     },
+    "shelter-reports/donation-trend": {
+      "label": "Donation Trend",
+      "description": "Aggregate donation totals over time, bucketed by day / iso-week / month depending on the period's span. Replaces a GROUP BY DATE_FORMAT() query in the reports view.",
+      "category": "shelter-reports",
+      "permission": "admin",
+      "meta": {
+        "annotations": {
+          "readonly": true,
+          "destructive": false,
+          "idempotent": true
+        },
+        "show_in_rest": true
+      },
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "period": {
+            "type": "string",
+            "default": "fiscal_year",
+            "description": "Reporting period (see Helpers\\get_date_range_for_period)."
+          },
+          "fiscal_year": {
+            "type": "integer",
+            "description": "Specific fiscal year when period='fiscal_year'."
+          }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "period":     { "type": "string" },
+          "bucket":     { "type": "string", "description": "day | week | month" },
+          "date_range": { "type": "object" },
+          "buckets": {
+            "type": "array",
+            "description": "Each: { key, period_start, total, count }"
+          }
+        }
+      }
+    },
     "shelter-reports/membership-retention": {
       "label": "Membership Retention",
       "description": "Computes the renewal rate for memberships whose end_date fell in a trailing window. Self-correlated SQL is encapsulated here so the renderer stays presentation-only.",

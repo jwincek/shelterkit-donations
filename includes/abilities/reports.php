@@ -347,6 +347,86 @@ function dashboard_stats( array $input = [] ): array {
 }
 
 /**
+ * Bucket donation totals over time for the trend chart.
+ *
+ * Selects the grouping bucket (day / iso-week / month) based on the
+ * period's span, then runs the GROUP BY DATE_FORMAT(...) aggregate that
+ * Query builder can't express. Returns plain buckets; the renderer
+ * picks the label format from the `bucket` field and draws the SVG.
+ *
+ * @since 1.1.3
+ *
+ * @param array $input Optional. `period` and `fiscal_year` (see
+ *                     Helpers\get_date_range_for_period). Default 'fiscal_year'.
+ * @return array{
+ *     period: string,
+ *     bucket: string,
+ *     date_range: array{start:string, end:string},
+ *     buckets: array<int, array{ key:string, period_start:string, total:float, count:int }>
+ * }
+ */
+function donation_trend( array $input = [] ): array {
+    $period = $input['period'] ?? 'fiscal_year';
+    $range  = Helpers\get_date_range_for_period(
+        $period,
+        null,
+        $input['fiscal_year'] ?? null
+    );
+    $start = $range['start'];
+    $end   = $range['end'];
+
+    $days_span = max( 1, (int) ( ( strtotime( $end ) - strtotime( $start ) ) / DAY_IN_SECONDS ) );
+    if ( $days_span <= 14 ) {
+        $group_format = '%Y-%m-%d';
+        $bucket       = 'day';
+    } elseif ( $days_span <= 90 ) {
+        $group_format = '%x-%v'; // ISO year-week
+        $bucket       = 'week';
+    } else {
+        $group_format = '%Y-%m';
+        $bucket       = 'month';
+    }
+
+    global $wpdb;
+    $rows = $wpdb->get_results( $wpdb->prepare(
+        "SELECT
+            DATE_FORMAT( pm_date.meta_value, %s ) as period_key,
+            MIN( pm_date.meta_value ) as period_start,
+            COALESCE( SUM( pm_amount.meta_value + 0 ), 0 ) as total,
+            COUNT( * ) as count
+        FROM {$wpdb->posts} p
+        JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = '_sd_donation_date'
+        JOIN {$wpdb->postmeta} pm_amount ON p.ID = pm_amount.post_id AND pm_amount.meta_key = '_sd_amount'
+        WHERE p.post_type = 'sd_donation'
+          AND p.post_status = 'publish'
+          AND pm_date.meta_value >= %s
+          AND pm_date.meta_value <= %s
+        GROUP BY period_key
+        ORDER BY period_start ASC",
+        $group_format,
+        $start,
+        $end . ' 23:59:59'
+    ) );
+
+    $buckets = [];
+    foreach ( $rows as $row ) {
+        $buckets[] = [
+            'key'          => (string) $row->period_key,
+            'period_start' => (string) $row->period_start,
+            'total'        => (float) $row->total,
+            'count'        => (int) $row->count,
+        ];
+    }
+
+    return [
+        'period'     => $period,
+        'bucket'     => $bucket,
+        'date_range' => $range,
+        'buckets'    => $buckets,
+    ];
+}
+
+/**
  * Compute membership retention for a trailing window.
  *
  * "Retention" here means: of the memberships whose end_date fell in the

@@ -462,50 +462,29 @@ class Reports {
      * @param string $period The reporting period.
      */
     private static function render_donation_trend_chart( string $period ): void {
-        global $wpdb;
-
-        $date_range = \Starter_Shelter\Helpers\get_date_range_for_period( $period );
-        $start = $date_range['start'] ?? wp_date( 'Y-m-01' );
-        $end   = $date_range['end'] ?? wp_date( 'Y-m-d' );
-
-        // Determine grouping based on date span.
-        $days_span = max( 1, (int) ( ( strtotime( $end ) - strtotime( $start ) ) / DAY_IN_SECONDS ) );
-
-        if ( $days_span <= 14 ) {
-            $group_format = '%Y-%m-%d';
-            $label_format = 'M j';
-        } elseif ( $days_span <= 90 ) {
-            $group_format = '%x-%v'; // ISO year-week
-            $label_format = 'M j';
-        } else {
-            $group_format = '%Y-%m';
-            $label_format = 'M Y';
-        }
-
-        $rows = $wpdb->get_results( $wpdb->prepare( "
-            SELECT
-                DATE_FORMAT( pm_date.meta_value, %s ) as period_key,
-                MIN( pm_date.meta_value ) as period_start,
-                SUM( pm_amount.meta_value ) as total,
-                COUNT( * ) as count
-            FROM {$wpdb->posts} p
-            JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = '_sd_donation_date'
-            JOIN {$wpdb->postmeta} pm_amount ON p.ID = pm_amount.post_id AND pm_amount.meta_key = '_sd_amount'
-            WHERE p.post_type = 'sd_donation'
-              AND p.post_status = 'publish'
-              AND pm_date.meta_value >= %s
-              AND pm_date.meta_value <= %s
-            GROUP BY period_key
-            ORDER BY period_start ASC
-        ", $group_format, $start, $end . ' 23:59:59' ) );
-
-        if ( empty( $rows ) ) {
+        $ability = function_exists( 'wp_get_ability' )
+            ? wp_get_ability( 'shelter-reports/donation-trend' )
+            : null;
+        if ( ! $ability ) {
             return;
         }
 
-        // Build chart data.
-        $max_total = max( array_map( fn( $r ) => (float) $r->total, $rows ) );
-        $bar_count = count( $rows );
+        $data = $ability->execute( [ 'period' => $period ] );
+        if ( is_wp_error( $data ) || ! is_array( $data ) ) {
+            return;
+        }
+
+        $buckets = $data['buckets'] ?? [];
+        if ( empty( $buckets ) ) {
+            return;
+        }
+
+        // Pick the date label format from the bucket type — 'day'/'week'
+        // get a short month-day label, 'month' gets month-year.
+        $label_format = 'month' === ( $data['bucket'] ?? 'day' ) ? 'M Y' : 'M j';
+
+        $max_total = max( array_map( static fn( $b ) => (float) $b['total'], $buckets ) );
+        $bar_count = count( $buckets );
         $chart_w   = 600;
         $chart_h   = 200;
         $bar_gap   = 4;
@@ -520,22 +499,21 @@ class Reports {
                     <!-- Grid lines -->
                     <?php for ( $i = 0; $i <= 4; $i++ ) :
                         $y = $chart_h - ( $chart_h * $i / 4 );
-                        $val = $max_total * $i / 4;
                     ?>
                     <line x1="0" y1="<?php echo $y; ?>" x2="<?php echo $total_w; ?>" y2="<?php echo $y; ?>" stroke="#e0e0e0" stroke-width="0.5" />
                     <?php endfor; ?>
 
                     <!-- Bars -->
-                    <?php foreach ( $rows as $i => $row ) :
-                        $bar_h = $max_total > 0 ? ( (float) $row->total / $max_total ) * $chart_h : 0;
+                    <?php foreach ( $buckets as $i => $bucket ) :
+                        $bar_h = $max_total > 0 ? ( (float) $bucket['total'] / $max_total ) * $chart_h : 0;
                         $x = $i * ( $bar_w + $bar_gap );
                         $y = $chart_h - $bar_h;
-                        $label = wp_date( $label_format, strtotime( $row->period_start ) );
+                        $label = wp_date( $label_format, strtotime( $bucket['period_start'] ) );
                     ?>
                     <g>
                         <rect x="<?php echo $x; ?>" y="<?php echo $y; ?>" width="<?php echo $bar_w; ?>" height="<?php echo $bar_h; ?>"
                             fill="#059669" rx="2" opacity="0.85">
-                            <title><?php echo esc_attr( $label . ': $' . number_format( (float) $row->total, 2 ) . ' (' . $row->count . ' donations)' ); ?></title>
+                            <title><?php echo esc_attr( $label . ': $' . number_format( (float) $bucket['total'], 2 ) . ' (' . $bucket['count'] . ' donations)' ); ?></title>
                         </rect>
                         <?php if ( $bar_count <= 15 ) : ?>
                         <text x="<?php echo $x + $bar_w / 2; ?>" y="<?php echo $chart_h + 14; ?>" text-anchor="middle" fill="#666" font-size="9">
