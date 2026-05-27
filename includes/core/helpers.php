@@ -480,14 +480,34 @@ function get_memorial_notify_family( int $memorial_id ): array {
 /**
  * Get date range for a reporting period.
  *
- * @since 1.0.0
+ * For `'custom'` periods, callers must pass `$date_from` / `$date_to` as
+ * `Y-m-d` strings (the helper validates the format and falls back to the
+ * year start / today when invalid). Earlier revisions of this helper read
+ * `$_GET['date_from']` / `$_POST['date_to']` directly, which made
+ * behavior depend on request globals invisible at the call site and
+ * skipped strict format validation. Callers (admin pages, AJAX handlers)
+ * are now responsible for extracting and forwarding those values.
  *
- * @param string   $period      Period type: 'fiscal_year', 'calendar_year', 'quarter', 'month', 'custom'.
- * @param int|null $year        Optional specific year.
- * @param int|null $fiscal_year Optional fiscal year (for fiscal_year period).
+ * @since 1.0.0
+ * @since 1.1.3 Replaced superglobal reads with explicit $date_from /
+ *               $date_to parameters; format-validates them as Y-m-d.
+ *
+ * @param string      $period      Period: 'today', 'week', 'month', 'quarter',
+ *                                 'year', 'ytd', 'fiscal_year', 'calendar_year',
+ *                                 'all_time', or 'custom'.
+ * @param int|null    $year        Optional specific year.
+ * @param int|null    $fiscal_year Optional fiscal year (period='fiscal_year').
+ * @param string|null $date_from   Custom range start (Y-m-d, period='custom').
+ * @param string|null $date_to     Custom range end (Y-m-d, period='custom').
  * @return array{start: string, end: string} Date range.
  */
-function get_date_range_for_period( string $period, ?int $year = null, ?int $fiscal_year = null ): array {
+function get_date_range_for_period(
+    string $period,
+    ?int $year = null,
+    ?int $fiscal_year = null,
+    ?string $date_from = null,
+    ?string $date_to = null
+): array {
     $year = $year ?? (int) wp_date( 'Y' );
 
     return match ( $period ) {
@@ -518,8 +538,8 @@ function get_date_range_for_period( string $period, ?int $year = null, ?int $fis
             'end'   => wp_date( 'Y-m-d' ),
         ],
         'custom' => [
-            'start' => sanitize_text_field( $_GET['date_from'] ?? $_POST['date_from'] ?? "$year-01-01" ),
-            'end'   => sanitize_text_field( $_GET['date_to'] ?? $_POST['date_to'] ?? wp_date( 'Y-m-d' ) ),
+            'start' => validate_ymd_or_null( $date_from ) ?? "$year-01-01",
+            'end'   => validate_ymd_or_null( $date_to )   ?? wp_date( 'Y-m-d' ),
         ],
         'all_time' => [
             'start' => '2000-01-01',
@@ -530,6 +550,27 @@ function get_date_range_for_period( string $period, ?int $year = null, ?int $fis
             'end'   => "$year-12-31",
         ],
     };
+}
+
+/**
+ * Strict Y-m-d format validation.
+ *
+ * Returns the string if it parses cleanly as Y-m-d (and round-trips,
+ * so '2026-13-01' is rejected), or null otherwise. Useful as a guard
+ * for date strings arriving from user input.
+ *
+ * @since 1.1.3
+ *
+ * @param string|null $value Candidate date string.
+ * @return string|null Validated Y-m-d, or null.
+ */
+function validate_ymd_or_null( ?string $value ): ?string {
+    if ( ! is_string( $value ) || '' === $value ) {
+        return null;
+    }
+    $value = sanitize_text_field( $value );
+    $d     = \DateTime::createFromFormat( 'Y-m-d', $value );
+    return ( $d && $d->format( 'Y-m-d' ) === $value ) ? $value : null;
 }
 
 /**
