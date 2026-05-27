@@ -29,6 +29,18 @@ class Reports {
     private const PAGE_SLUG = 'starter-shelter-reports';
 
     /**
+     * Submenu page hook name returned by add_submenu_page().
+     *
+     * Cached because the admin_enqueue_scripts callback receives the
+     * hook name to filter on. Building the expected hook by hand is
+     * fragile — WP derives it from the parent's sanitize_title(menu_title)
+     * (see wp-admin/includes/plugin.php::get_plugin_page_hookname).
+     *
+     * @since 1.1.3
+     */
+    private static string $page_hook = '';
+
+    /**
      * Initialize reports page.
      *
      * @since 1.0.0
@@ -45,7 +57,7 @@ class Reports {
      * @since 1.0.0
      */
     public static function add_reports_page(): void {
-        add_submenu_page(
+        self::$page_hook = (string) add_submenu_page(
             Menu::MENU_SLUG,
             __( 'Shelter Donations Reports', 'starter-shelter' ),
             __( 'Reports', 'starter-shelter' ),
@@ -63,9 +75,11 @@ class Reports {
      * @param string $hook The current admin page hook.
      */
     public static function enqueue_assets( string $hook ): void {
-        // The hook for submenu pages under a custom menu is: {parent_slug}_page_{page_slug}
-        // For our case: starter-shelter_page_starter-shelter-reports
-        if ( Menu::MENU_SLUG . '_page_' . self::PAGE_SLUG !== $hook ) {
+        // Compare against the hook returned by add_submenu_page (cached
+        // in self::$page_hook). WP derives the hook from the parent's
+        // sanitize_title(menu_title), NOT the parent slug — so building
+        // the expected name from MENU_SLUG would silently mismatch.
+        if ( '' === self::$page_hook || $hook !== self::$page_hook ) {
             return;
         }
 

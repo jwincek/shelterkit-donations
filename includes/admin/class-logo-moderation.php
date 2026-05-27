@@ -38,6 +38,15 @@ class Logo_Moderation {
     private const NONCE_ACTION = 'sd_logo_moderation';
 
     /**
+     * Submenu page hook from add_submenu_page().
+     *
+     * Cached so enqueue_assets() can match against the actual hook WP
+     * derives (from sanitize_title(menu_title), NOT the parent slug —
+     * see wp-admin/includes/plugin.php::get_plugin_page_hookname).
+     */
+    private static string $page_hook = '';
+
+    /**
      * Initialize logo moderation.
      *
      * @since 1.0.0
@@ -59,7 +68,7 @@ class Logo_Moderation {
      * @since 1.0.0
      */
     public static function add_menu_page(): void {
-        add_submenu_page(
+        self::$page_hook = (string) add_submenu_page(
             Menu::MENU_SLUG,
             __( 'Logo Moderation', 'starter-shelter' ),
             __( 'Logo Moderation', 'starter-shelter' ),
@@ -127,7 +136,7 @@ class Logo_Moderation {
      * @param string $hook The current admin page hook.
      */
     public static function enqueue_assets( string $hook ): void {
-        if ( Menu::MENU_SLUG . '_page_' . self::PAGE_SLUG !== $hook ) {
+        if ( '' === self::$page_hook || $hook !== self::$page_hook ) {
             return;
         }
 

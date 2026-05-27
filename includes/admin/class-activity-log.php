@@ -47,6 +47,15 @@ class Activity_Log {
     private const KNOWN_CATEGORIES = [ 'admin', 'donation', 'email', 'membership', 'system' ];
 
     /**
+     * Submenu page hook from add_submenu_page().
+     *
+     * Cached so enqueue_assets() can match against the actual hook WP
+     * derives (from sanitize_title(menu_title), NOT the parent slug —
+     * see wp-admin/includes/plugin.php::get_plugin_page_hookname).
+     */
+    private static string $page_hook = '';
+
+    /**
      * Initialize activity log.
      */
     public static function init(): void {
@@ -121,7 +130,7 @@ class Activity_Log {
      * Add activity log page to admin menu.
      */
     public static function add_menu_page(): void {
-        add_submenu_page(
+        self::$page_hook = (string) add_submenu_page(
             Menu::MENU_SLUG,
             __( 'Activity Log', 'starter-shelter' ),
             __( 'Activity Log', 'starter-shelter' ),
@@ -135,7 +144,7 @@ class Activity_Log {
      * Enqueue admin assets.
      */
     public static function enqueue_assets( string $hook ): void {
-        if ( Menu::MENU_SLUG . '_page_' . self::PAGE_SLUG !== $hook ) {
+        if ( '' === self::$page_hook || $hook !== self::$page_hook ) {
             return;
         }
 
