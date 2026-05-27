@@ -636,6 +636,11 @@ function recent_activity( array $input = [] ): array {
                 'type'         => $post_type,
                 'id'           => $post_id,
                 'post_date'    => $post->post_date,
+                // UTC epoch — safe to compare against time() regardless of
+                // server PHP TZ vs WP TZ mismatch. strtotime($post_date)
+                // parses in server PHP TZ which can be wrong; get_post_time
+                // 'U' true returns the canonical GMT timestamp.
+                'created_ts'   => (int) get_post_time( 'U', true, $post_id ),
                 'amount'       => (float) ( $entity['amount'] ?? 0 ),
                 'donor_id'     => (int) ( $entity['donor_id'] ?? 0 ),
                 'is_anonymous' => (bool) ( $entity['is_anonymous'] ?? false ),

@@ -359,7 +359,11 @@ class Dashboard_Widget {
             }
 
             $amount = Helpers\format_currency( (float) ( $row['amount'] ?? 0 ) );
-            $time   = human_time_diff( strtotime( $row['post_date'] ?? 'now' ), time() ) . ' ' . __( 'ago', 'starter-shelter' );
+            // created_ts is a UTC epoch from the ability — directly
+            // comparable with time(). Falling back to strtotime(post_date)
+            // would mix server-PHP-TZ with UTC.
+            $ts     = (int) ( $row['created_ts'] ?? time() );
+            $time   = human_time_diff( $ts, time() ) . ' ' . __( 'ago', 'starter-shelter' );
 
             switch ( $row['type'] ?? '' ) {
                 case 'sd_donation':

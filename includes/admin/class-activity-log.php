@@ -553,11 +553,20 @@ class Activity_Log {
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ( $logs as $log ) : ?>
+                    <?php foreach ( $logs as $log ) :
+                        // created_at is stored as the WP site's local time
+                        // (`current_time('mysql')`). mysql2date with format
+                        // 'U' interprets the string in the WP timezone and
+                        // returns a UTC epoch — safe to hand to wp_date,
+                        // which then formats in the WP timezone again.
+                        // Using strtotime() here would apply the server
+                        // PHP timezone offset, which can differ from WP's.
+                        $log_ts = (int) mysql2date( 'U', $log->created_at );
+                        ?>
                     <tr>
                         <td class="column-time">
-                            <span class="sd-log-date"><?php echo esc_html( wp_date( 'M j', strtotime( $log->created_at ) ) ); ?></span>
-                            <span class="sd-log-time"><?php echo esc_html( wp_date( 'g:i a', strtotime( $log->created_at ) ) ); ?></span>
+                            <span class="sd-log-date"><?php echo esc_html( wp_date( 'M j', $log_ts ) ); ?></span>
+                            <span class="sd-log-time"><?php echo esc_html( wp_date( 'g:i a', $log_ts ) ); ?></span>
                         </td>
                         <td class="column-category">
                             <span class="sd-category-badge sd-category-<?php echo esc_attr( $log->event_category ); ?>">

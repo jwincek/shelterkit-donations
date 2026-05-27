@@ -328,7 +328,7 @@
         "properties": {
           "items": {
             "type": "array",
-            "description": "Each item: { type, id, post_date, amount, donor_id, donor_name, is_anonymous, tier, honoree_name }."
+            "description": "Each item: { type, id, post_date, created_ts, amount, donor_id, donor_name, is_anonymous, tier, honoree_name }."
           }
         }
       }
