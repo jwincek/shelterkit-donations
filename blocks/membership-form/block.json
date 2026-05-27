@@ -73,6 +73,9 @@
             "type": "boolean",
             "default": false
         },
+        "campaignId": {
+            "type": "number"
+        },
         "title": {
             "type": "string",
             "default": "Become a Member"

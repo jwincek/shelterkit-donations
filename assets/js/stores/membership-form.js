@@ -31,7 +31,7 @@ const { state, actions } = store( NAMESPACE, {
 	actions: {
 		initForm() {
 			const ctx = getContext();
-			const { formId, membershipType = 'individual', defaultTier = null } = ctx;
+			const { formId, membershipType = 'individual', defaultTier = null, campaignId = null } = ctx;
 
 			if ( ! state.forms[ formId ] ) {
 				state.forms[ formId ] = {
@@ -40,6 +40,7 @@ const { state, actions } = store( NAMESPACE, {
 					isAnonymous: false,
 					donorName: '',
 					logoPreview: '',
+					campaignId,
 					isProcessing: false,
 					error: null,
 					success: null,
@@ -148,6 +149,7 @@ const { state, actions } = store( NAMESPACE, {
 					formData.append( 'amount', tier.price || tier.amount || 0 );
 					formData.append( 'tier', form.selectedTier );
 
+					if ( form.campaignId ) formData.append( 'campaign_id', form.campaignId );
 					if ( form.isAnonymous ) formData.append( 'is_anonymous', '1' );
 					if ( form.donorName ) {
 						formData.append( 'donor_name', form.donorName );

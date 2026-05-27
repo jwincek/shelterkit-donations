@@ -937,6 +937,38 @@ function get_allocation_label( string $allocation ): string {
 }
 
 /**
+ * Resolve a campaign ID from `?campaign=<id>` in the current request.
+ *
+ * Returns 0 unless the query var is present AND resolves to a valid
+ * `sd_campaign` term — never trust the raw query string to flow into
+ * input mappings unfiltered.
+ *
+ * Use this from form-block renderers to auto-tag conversions to the
+ * originating campaign (campaign-card → /donate/?campaign={id} →
+ * donation-form picks up the id without admin needing to wire the
+ * block attribute per-page).
+ *
+ * @since 1.1.2
+ *
+ * @return int Validated term ID, or 0.
+ */
+function resolve_campaign_id_from_request(): int {
+    $raw = $_GET['campaign'] ?? '';
+    if ( '' === $raw ) {
+        return 0;
+    }
+    $candidate = absint( $raw );
+    if ( $candidate <= 0 ) {
+        return 0;
+    }
+    $term = get_term( $candidate, 'sd_campaign' );
+    if ( ! $term || is_wp_error( $term ) ) {
+        return 0;
+    }
+    return (int) $term->term_id;
+}
+
+/**
  * Resolve the permalink of the admin-selected donation page.
  *
  * Empty string when no page is configured — callers should treat that

@@ -9,6 +9,7 @@
 declare( strict_types = 1 );
 
 use Starter_Shelter\Core\Config;
+use Starter_Shelter\Helpers;
 
 $form_id          = $attributes['formId'] ?: wp_unique_id( 'sd-membership-' );
 $membership_type  = $attributes['membershipType'] ?? 'individual';
@@ -21,6 +22,14 @@ $show_anonymous   = $attributes['showAnonymous'] ?? false;
 $title            = $attributes['title'] ?? __( 'Become a Member', 'starter-shelter' );
 $subtitle         = $attributes['subtitle'] ?? __( 'Join our community of animal advocates.', 'starter-shelter' );
 $submit_text      = $attributes['submitButtonText'] ?? __( 'Join Now', 'starter-shelter' );
+
+// Campaign source of truth: explicit block attribute wins; otherwise
+// auto-tag from `?campaign={id}` so a click through campaign-card
+// (membership_drive type) lands here and the new membership is
+// attached to the originating campaign.
+$campaign_id = (int) ( $attributes['campaignId'] ?? 0 ) ?: Helpers\resolve_campaign_id_from_request();
+$campaign_id = $campaign_id ?: null;
+$campaign    = $campaign_id ? get_term( $campaign_id, 'sd_campaign' ) : null;
 
 // Get tiers from config (nested under 'tiers' key in tiers.json).
 $all_tiers        = Config::get_item( 'tiers', 'tiers', [] );
@@ -44,6 +53,7 @@ wp_interactivity_state( 'starter-shelter/membership-form', [
             'isAnonymous'    => false,
             'donorName'      => '',
             'logoPreview'    => '',
+            'campaignId'     => $campaign_id,
             'isProcessing'   => false,
             'error'          => null,
             'success'        => null,
@@ -55,6 +65,7 @@ $context = wp_json_encode( [
     'formId'            => $form_id,
     'membershipType'    => $membership_type,
     'defaultTier'       => $default_tier,
+    'campaignId'        => $campaign_id,
     'checkoutUrl'       => $checkout_url,
     'productConfigured' => $product_ok,
     'ajaxUrl'           => admin_url( 'admin-ajax.php' ),
@@ -80,6 +91,9 @@ $current_tiers = ( $membership_type === 'business' ) ? $business_tiers : $indivi
     <div class="sd-form-header">
         <?php if ( $title ) : ?><h2 class="sd-form-title"><?php echo esc_html( $title ); ?></h2><?php endif; ?>
         <?php if ( $subtitle ) : ?><p class="sd-form-subtitle"><?php echo esc_html( $subtitle ); ?></p><?php endif; ?>
+        <?php if ( $campaign && ! is_wp_error( $campaign ) ) : ?>
+            <div class="sd-campaign-badge"><?php printf( esc_html__( 'Supporting: %s', 'starter-shelter' ), '<strong>' . esc_html( $campaign->name ) . '</strong>' ); ?></div>
+        <?php endif; ?>
         <?php if ( ! $product_ok ) : ?>
             <div class="sd-config-warning" role="alert"><p><?php esc_html_e( 'Membership form not configured.', 'starter-shelter' ); ?></p></div>
         <?php endif; ?>

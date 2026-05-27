@@ -12,6 +12,7 @@
 declare( strict_types = 1 );
 
 use Starter_Shelter\Core\Config;
+use Starter_Shelter\Helpers;
 
 $form_id = $attributes['formId'] ?: wp_unique_id( 'sd-donation-' );
 
@@ -20,7 +21,12 @@ $preset_amounts   = $attributes['presetAmounts'] ?? [ 25, 50, 100, 250, 500 ];
 $default_amount   = $attributes['defaultAmount'] ?? 50;
 $show_allocation  = $attributes['showAllocation'] ?? true;
 $show_anonymous   = $attributes['showAnonymous'] ?? true;
-$campaign_id      = $attributes['campaignId'] ?? null;
+// Campaign source of truth: explicit block attribute wins; otherwise
+// auto-tag from `?campaign={id}` so a click through campaign-card
+// (or any campaign-aware deep link) lands here and the resulting
+// donation is attached to the originating campaign.
+$campaign_id      = (int) ( $attributes['campaignId'] ?? 0 ) ?: Helpers\resolve_campaign_id_from_request();
+$campaign_id      = $campaign_id ?: null;
 $title            = $attributes['title'] ?? __( 'Make a Donation', 'starter-shelter' );
 $subtitle         = $attributes['subtitle'] ?? __( 'Your gift helps animals in need.', 'starter-shelter' );
 $submit_text      = $attributes['submitButtonText'] ?? __( 'Add to Cart', 'starter-shelter' );
