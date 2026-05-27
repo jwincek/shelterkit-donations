@@ -382,57 +382,28 @@ class Dashboard_Widget {
             return $cached;
         }
 
+        // Single source of truth lives in the ability (same call the
+        // menu badge uses). Flatten each item into the widget's display
+        // shape: { count, label, url }. The ability returns singular and
+        // plural label variants; _n() picks the right one for each count.
         $items = [];
-
-        // Pending logo reviews.
-        $pending_logos = Logo_Moderation::get_pending_count();
-        if ( $pending_logos > 0 ) {
-            $items[] = [
-                'count' => $pending_logos,
-                'label' => _n( 'logo pending review', 'logos pending review', $pending_logos, 'starter-shelter' ),
-                'url'   => admin_url( 'admin.php?page=starter-shelter-logos' ),
-            ];
-        }
-
-        // Expiring memberships (next 7 days).
-        global $wpdb;
-        $expiring_soon = (int) $wpdb->get_var( $wpdb->prepare( "
-            SELECT COUNT(*)
-            FROM {$wpdb->posts} p
-            JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_end_date'
-            WHERE p.post_type = 'sd_membership'
-            AND p.post_status = 'publish'
-            AND pm.meta_value BETWEEN %s AND %s
-        ", wp_date( 'Y-m-d' ), wp_date( 'Y-m-d', strtotime( '+7 days' ) ) ) );
-
-        if ( $expiring_soon > 0 ) {
-            $items[] = [
-                'count' => $expiring_soon,
-                'label' => _n( 'membership expiring in 7 days', 'memberships expiring in 7 days', $expiring_soon, 'starter-shelter' ),
-                'url'   => admin_url( 'edit.php?post_type=sd_membership&expiring=7' ),
-            ];
-        }
-
-        // Pending family notifications.
-        $pending_notifications = (int) $wpdb->get_var( "
-            SELECT COUNT(*)
-            FROM {$wpdb->posts} p
-            JOIN {$wpdb->postmeta} pm_notify ON p.ID = pm_notify.post_id 
-                AND pm_notify.meta_key = '_sd_notify_family_enabled' 
-                AND pm_notify.meta_value = '1'
-            LEFT JOIN {$wpdb->postmeta} pm_sent ON p.ID = pm_sent.post_id 
-                AND pm_sent.meta_key = '_sd_family_notified_date'
-            WHERE p.post_type = 'sd_memorial'
-            AND p.post_status = 'publish'
-            AND (pm_sent.meta_value IS NULL OR pm_sent.meta_value = '')
-        " );
-
-        if ( $pending_notifications > 0 ) {
-            $items[] = [
-                'count' => $pending_notifications,
-                'label' => _n( 'family notification pending', 'family notifications pending', $pending_notifications, 'starter-shelter' ),
-                'url'   => admin_url( 'edit.php?post_type=sd_memorial&notify_pending=1' ),
-            ];
+        if ( function_exists( 'wp_get_ability' ) ) {
+            $ability = wp_get_ability( 'shelter-reports/action-items' );
+            if ( $ability ) {
+                $result = $ability->execute( [] );
+                if ( is_array( $result ) ) {
+                    foreach ( $result['items'] ?? [] as $item ) {
+                        $count = (int) ( $item['count'] ?? 0 );
+                        $items[] = [
+                            'count' => $count,
+                            'label' => 1 === $count
+                                ? ( $item['label'] ?? '' )
+                                : ( $item['label_plural'] ?? $item['label'] ?? '' ),
+                            'url'   => $item['url'] ?? '#',
+                        ];
+                    }
+                }
+            }
         }
 
         set_transient( 'sd_dashboard_action_items', $items, self::CACHE_TTL );
@@ -446,127 +417,65 @@ class Dashboard_Widget {
      * @return array Recent activity.
      */
     private static function get_recent_activity( int $count = 5 ): array {
-        global $wpdb;
+        // Pull the structured feed from the ability — the data layer is
+        // now CPT-agnostic structured items, no SQL here. Display
+        // formatting (icons, sprintf, time-ago) stays in this view layer.
+        if ( ! function_exists( 'wp_get_ability' ) ) {
+            return [];
+        }
 
-        // Get recent donations, memberships, and memorials.
-        $results = $wpdb->get_results( $wpdb->prepare( "
-            (
-                SELECT 
-                    p.ID, 
-                    p.post_type, 
-                    p.post_date,
-                    pm_amount.meta_value as amount,
-                    pm_donor.meta_value as donor_id,
-                    pm_anon.meta_value as is_anonymous,
-                    NULL as honoree_name,
-                    NULL as tier
-                FROM {$wpdb->posts} p
-                LEFT JOIN {$wpdb->postmeta} pm_amount ON p.ID = pm_amount.post_id AND pm_amount.meta_key = '_sd_amount'
-                LEFT JOIN {$wpdb->postmeta} pm_donor ON p.ID = pm_donor.post_id AND pm_donor.meta_key = '_sd_donor_id'
-                LEFT JOIN {$wpdb->postmeta} pm_anon ON p.ID = pm_anon.post_id AND pm_anon.meta_key = '_sd_is_anonymous'
-                WHERE p.post_type = 'sd_donation' AND p.post_status = 'publish'
-                ORDER BY p.post_date DESC
-                LIMIT %d
-            )
-            UNION ALL
-            (
-                SELECT 
-                    p.ID, 
-                    p.post_type, 
-                    p.post_date,
-                    pm_amount.meta_value as amount,
-                    pm_donor.meta_value as donor_id,
-                    NULL as is_anonymous,
-                    NULL as honoree_name,
-                    pm_tier.meta_value as tier
-                FROM {$wpdb->posts} p
-                LEFT JOIN {$wpdb->postmeta} pm_amount ON p.ID = pm_amount.post_id AND pm_amount.meta_key = '_sd_amount'
-                LEFT JOIN {$wpdb->postmeta} pm_donor ON p.ID = pm_donor.post_id AND pm_donor.meta_key = '_sd_donor_id'
-                LEFT JOIN {$wpdb->postmeta} pm_tier ON p.ID = pm_tier.post_id AND pm_tier.meta_key = '_sd_tier'
-                WHERE p.post_type = 'sd_membership' AND p.post_status = 'publish'
-                ORDER BY p.post_date DESC
-                LIMIT %d
-            )
-            UNION ALL
-            (
-                SELECT 
-                    p.ID, 
-                    p.post_type, 
-                    p.post_date,
-                    pm_amount.meta_value as amount,
-                    pm_donor.meta_value as donor_id,
-                    pm_anon.meta_value as is_anonymous,
-                    pm_honoree.meta_value as honoree_name,
-                    NULL as tier
-                FROM {$wpdb->posts} p
-                LEFT JOIN {$wpdb->postmeta} pm_amount ON p.ID = pm_amount.post_id AND pm_amount.meta_key = '_sd_amount'
-                LEFT JOIN {$wpdb->postmeta} pm_donor ON p.ID = pm_donor.post_id AND pm_donor.meta_key = '_sd_donor_id'
-                LEFT JOIN {$wpdb->postmeta} pm_anon ON p.ID = pm_anon.post_id AND pm_anon.meta_key = '_sd_is_anonymous'
-                LEFT JOIN {$wpdb->postmeta} pm_honoree ON p.ID = pm_honoree.post_id AND pm_honoree.meta_key = '_sd_honoree_name'
-                WHERE p.post_type = 'sd_memorial' AND p.post_status = 'publish'
-                ORDER BY p.post_date DESC
-                LIMIT %d
-            )
-            ORDER BY post_date DESC
-            LIMIT %d
-        ", $count, $count, $count, $count ) );
+        $ability = wp_get_ability( 'shelter-reports/recent-activity' );
+        if ( ! $ability ) {
+            return [];
+        }
 
-        // Batch-load all donor names to avoid N+1 queries.
-        $donor_ids = array_filter( array_unique( array_map( fn( $r ) => (int) $r->donor_id, $results ) ) );
-        $donor_names = [];
-
-        if ( ! empty( $donor_ids ) ) {
-            // Single query to get all donor display names.
-            $placeholders = implode( ',', array_fill( 0, count( $donor_ids ), '%d' ) );
-            $donor_rows = $wpdb->get_results( $wpdb->prepare(
-                "SELECT p.ID, COALESCE( pm.meta_value, p.post_title ) as display_name
-                 FROM {$wpdb->posts} p
-                 LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_display_name'
-                 WHERE p.ID IN ( $placeholders )",
-                ...$donor_ids
-            ) );
-
-            foreach ( $donor_rows as $dr ) {
-                $donor_names[ (int) $dr->ID ] = $dr->display_name;
-            }
+        $result = $ability->execute( [ 'limit' => $count ] );
+        if ( ! is_array( $result ) ) {
+            return [];
         }
 
         $activity = [];
-        foreach ( $results as $row ) {
+        foreach ( $result['items'] ?? [] as $row ) {
             $donor_name = __( 'Someone', 'starter-shelter' );
-            if ( $row->donor_id && ! $row->is_anonymous ) {
-                $donor_name = $donor_names[ (int) $row->donor_id ] ?? $donor_name;
-            } elseif ( $row->is_anonymous ) {
+            if ( ! empty( $row['is_anonymous'] ) ) {
                 $donor_name = __( 'Anonymous', 'starter-shelter' );
+            } elseif ( ! empty( $row['donor_name'] ) ) {
+                $donor_name = $row['donor_name'];
             }
 
-            switch ( $row->post_type ) {
+            $amount = Helpers\format_currency( (float) ( $row['amount'] ?? 0 ) );
+            $time   = human_time_diff( strtotime( $row['post_date'] ?? 'now' ), time() ) . ' ' . __( 'ago', 'starter-shelter' );
+
+            switch ( $row['type'] ?? '' ) {
                 case 'sd_donation':
                     $activity[] = [
                         'icon'   => '💰',
-                        'text'   => sprintf( '<strong>%s</strong> donated', esc_html( $donor_name ) ),
-                        'amount' => Helpers\format_currency( (float) $row->amount ),
-                        'time'   => human_time_diff( strtotime( $row->post_date ), time() ) . ' ago',
+                        /* translators: %s: donor name */
+                        'text'   => sprintf( '<strong>%s</strong> ' . esc_html__( 'donated', 'starter-shelter' ), esc_html( $donor_name ) ),
+                        'amount' => $amount,
+                        'time'   => $time,
                     ];
                     break;
 
                 case 'sd_membership':
-                    $tier_label = ucfirst( $row->tier ?? '' );
+                    $tier_label = ucfirst( $row['tier'] ?? '' );
                     $activity[] = [
                         'icon'   => '🏅',
-                        'text'   => sprintf( '<strong>%s</strong> joined as %s', esc_html( $donor_name ), esc_html( $tier_label ) ),
-                        'amount' => Helpers\format_currency( (float) $row->amount ),
-                        'time'   => human_time_diff( strtotime( $row->post_date ), time() ) . ' ago',
+                        /* translators: 1: donor name 2: tier label */
+                        'text'   => sprintf( '<strong>%1$s</strong> ' . esc_html__( 'joined as', 'starter-shelter' ) . ' %2$s', esc_html( $donor_name ), esc_html( $tier_label ) ),
+                        'amount' => $amount,
+                        'time'   => $time,
                     ];
                     break;
 
                 case 'sd_memorial':
-                    $honoree = $row->honoree_name ?? __( 'someone special', 'starter-shelter' );
+                    $honoree = $row['honoree_name'] ?? __( 'someone special', 'starter-shelter' );
                     $activity[] = [
                         'icon'   => '❤️',
-                        'text'   => sprintf( 'Memorial for <strong>%s</strong>', esc_html( $honoree ) ),
-                        'amount' => Helpers\format_currency( (float) $row->amount ),
-                        'time'   => human_time_diff( strtotime( $row->post_date ), time() ) . ' ago',
+                        /* translators: %s: honoree name */
+                        'text'   => sprintf( esc_html__( 'Memorial for', 'starter-shelter' ) . ' <strong>%s</strong>', esc_html( $honoree ) ),
+                        'amount' => $amount,
+                        'time'   => $time,
                     ];
                     break;
             }

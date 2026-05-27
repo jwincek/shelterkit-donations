@@ -347,6 +347,162 @@ function dashboard_stats( array $input = [] ): array {
 }
 
 /**
+ * Get pending admin action items.
+ *
+ * Returns a unified list of items needing admin attention: pending logo
+ * reviews, memberships expiring soon, family notifications not yet sent.
+ * Single source of truth for two consumers — the menu badge (which sums
+ * the counts) and the dashboard widget's action list (which renders the
+ * structured items). Each item carries a `type`, `count`, singular and
+ * plural labels, and a deep-link URL.
+ *
+ * @since 1.1.3
+ *
+ * @param array $input Optional. `expiring_window_days` (default 7).
+ * @return array{ items: array<int, array{type:string, count:int, label:string, label_plural:string, url:string}> }
+ */
+function action_items( array $input = [] ): array {
+    $items = [];
+    $expiring_window = (int) ( $input['expiring_window_days'] ?? 7 );
+
+    // Pending logo reviews.
+    if ( class_exists( '\\Starter_Shelter\\Admin\\Logo_Moderation' ) ) {
+        $pending_logos = (int) \Starter_Shelter\Admin\Logo_Moderation::get_pending_count();
+        if ( $pending_logos > 0 ) {
+            $items[] = [
+                'type'         => 'pending_logos',
+                'count'        => $pending_logos,
+                'label'        => __( 'logo pending review', 'starter-shelter' ),
+                'label_plural' => __( 'logos pending review', 'starter-shelter' ),
+                'url'          => admin_url( 'admin.php?page=starter-shelter-logos' ),
+            ];
+        }
+    }
+
+    // Memberships expiring within the configured window.
+    $expiring = Query::for( 'sd_membership' )
+        ->whereDateBetween(
+            'end_date',
+            wp_date( 'Y-m-d' ),
+            wp_date( 'Y-m-d', strtotime( "+{$expiring_window} days" ) )
+        )
+        ->count();
+    if ( $expiring > 0 ) {
+        $items[] = [
+            'type'         => 'expiring_memberships',
+            'count'        => $expiring,
+            /* translators: %d: number of days */
+            'label'        => sprintf( __( 'membership expiring in %d days', 'starter-shelter' ), $expiring_window ),
+            'label_plural' => sprintf( __( 'memberships expiring in %d days', 'starter-shelter' ), $expiring_window ),
+            'url'          => admin_url( 'edit.php?post_type=sd_membership&expiring=' . $expiring_window ),
+        ];
+    }
+
+    // Memorials with notify_family_enabled but no recorded family_notified_date.
+    $pending_notifications = Query::for( 'sd_memorial' )
+        ->where( 'notify_family_enabled', '1' )
+        ->whereNotExists( 'family_notified_date' )
+        ->count();
+    if ( $pending_notifications > 0 ) {
+        $items[] = [
+            'type'         => 'pending_notifications',
+            'count'        => $pending_notifications,
+            'label'        => __( 'family notification pending', 'starter-shelter' ),
+            'label_plural' => __( 'family notifications pending', 'starter-shelter' ),
+            'url'          => admin_url( 'edit.php?post_type=sd_memorial&notify_pending=1' ),
+        ];
+    }
+
+    return [ 'items' => $items ];
+}
+
+/**
+ * Get recent admin activity feed (donations, memberships, memorials).
+ *
+ * Replaces a hand-rolled 60-line UNION ALL across three CPTs with a
+ * per-type Query::for() pass + an in-PHP merge. Each item is plain
+ * structured data — no display formatting — so consumers can render
+ * however they like.
+ *
+ * @since 1.1.3
+ *
+ * @param array $input Optional. `limit` (default 5).
+ * @return array{ items: array<int, array{
+ *     type: string,
+ *     id: int,
+ *     post_date: string,
+ *     amount: float,
+ *     donor_id: int,
+ *     donor_name: ?string,
+ *     is_anonymous: bool,
+ *     tier: ?string,
+ *     honoree_name: ?string
+ * }> }
+ */
+function recent_activity( array $input = [] ): array {
+    $limit = max( 1, (int) ( $input['limit'] ?? 5 ) );
+
+    // Fetch the most recent N from each CPT (ordered by post_date), then
+    // merge + re-sort + slice in PHP. The per-type fetch is cheap because
+    // each is a single primed WP_Query under the hood.
+    $merged = [];
+    foreach ( [ 'sd_donation', 'sd_membership', 'sd_memorial' ] as $post_type ) {
+        $entities = Query::for( $post_type )
+            ->orderBy( 'date', 'DESC' )
+            ->get( $limit );
+
+        foreach ( $entities as $entity ) {
+            $post_id = (int) ( $entity['id'] ?? 0 );
+            if ( ! $post_id ) {
+                continue;
+            }
+            // The post is cached by the WP_Query above, so this is free.
+            $post = get_post( $post_id );
+            if ( ! $post ) {
+                continue;
+            }
+
+            $merged[] = [
+                'type'         => $post_type,
+                'id'           => $post_id,
+                'post_date'    => $post->post_date,
+                'amount'       => (float) ( $entity['amount'] ?? 0 ),
+                'donor_id'     => (int) ( $entity['donor_id'] ?? 0 ),
+                'is_anonymous' => (bool) ( $entity['is_anonymous'] ?? false ),
+                'tier'         => $entity['tier'] ?? null,           // memberships only
+                'honoree_name' => $entity['honoree_name'] ?? null,   // memorials only
+            ];
+        }
+    }
+
+    // Sort the merged list by post_date desc and take the top N. String
+    // comparison works for MySQL DATETIME / 'Y-m-d H:i:s'.
+    usort( $merged, static fn( $a, $b ) => strcmp( $b['post_date'], $a['post_date'] ) );
+    $merged = array_slice( $merged, 0, $limit );
+
+    // Batch-resolve donor names: one Query for all donor_ids referenced.
+    $donor_ids = array_filter( array_unique( array_column( $merged, 'donor_id' ) ) );
+    $donor_names = [];
+    if ( ! empty( $donor_ids ) ) {
+        $donors = Query::for( 'sd_donor' )
+            ->withArgs( [ 'post__in' => $donor_ids ] )
+            ->get( count( $donor_ids ) );
+        foreach ( $donors as $donor ) {
+            $name = $donor['display_name'] ?? '';
+            if ( '' === $name ) {
+                $name = $donor['full_name'] ?? '';
+            }
+            $donor_names[ (int) $donor['id'] ] = '' === $name ? null : $name;
+        }
+    }
+    foreach ( $merged as $idx => $item ) {
+        $merged[ $idx ]['donor_name'] = $donor_names[ $item['donor_id'] ] ?? null;
+    }
+
+    return [ 'items' => $merged ];
+}
+
+/**
  * Get campaign report.
  *
  * @since 1.0.0

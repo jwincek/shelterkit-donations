@@ -192,6 +192,72 @@
         }
       }
     },
+    "shelter-reports/action-items": {
+      "label": "Get Pending Action Items",
+      "description": "Returns the unified list of items needing admin attention (pending logos, expiring memberships, family notifications). Consumed by the menu badge and the dashboard-widget action list.",
+      "category": "shelter-reports",
+      "permission": "admin",
+      "meta": {
+        "annotations": {
+          "readonly": true,
+          "destructive": false,
+          "idempotent": true
+        },
+        "show_in_rest": true
+      },
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "expiring_window_days": {
+            "type": "integer",
+            "default": 7,
+            "description": "Membership end_date window (days from today)."
+          }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "Each item: { type, count, label, label_plural, url }."
+          }
+        }
+      }
+    },
+    "shelter-reports/recent-activity": {
+      "label": "Get Recent Activity",
+      "description": "Returns the most recent donations, memberships, and memorials as a unified feed for the dashboard widget. Replaces a 60-line raw UNION ALL query with Query::for() per CPT + merge in PHP.",
+      "category": "shelter-reports",
+      "permission": "admin",
+      "meta": {
+        "annotations": {
+          "readonly": true,
+          "destructive": false,
+          "idempotent": true
+        },
+        "show_in_rest": true
+      },
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "default": 5,
+            "description": "Maximum items to return across all three CPTs."
+          }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "Each item: { type, id, post_date, amount, donor_id, donor_name, is_anonymous, tier, honoree_name }."
+          }
+        }
+      }
+    },
     "shelter-reports/campaign-report": {
       "label": "Generate Campaign Report",
       "description": "Generates a detailed report for a specific campaign",

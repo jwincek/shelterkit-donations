@@ -235,39 +235,21 @@ class Menu {
             return (int) $cached;
         }
 
-        global $wpdb;
+        // Single source of truth — same ability the dashboard widget
+        // consumes for its action list. We just sum the counts here.
         $count = 0;
-
-        // Pending logo reviews.
-        if ( class_exists( __NAMESPACE__ . '\\Logo_Moderation' ) ) {
-            $count += Logo_Moderation::get_pending_count();
+        if ( function_exists( 'wp_get_ability' ) ) {
+            $ability = wp_get_ability( 'shelter-reports/action-items' );
+            if ( $ability ) {
+                $result = $ability->execute( [] );
+                if ( is_array( $result ) ) {
+                    foreach ( $result['items'] ?? [] as $item ) {
+                        $count += (int) ( $item['count'] ?? 0 );
+                    }
+                }
+            }
         }
 
-        // Expiring memberships (next 7 days).
-        $count += (int) $wpdb->get_var( $wpdb->prepare( "
-            SELECT COUNT(*)
-            FROM {$wpdb->posts} p
-            JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_end_date'
-            WHERE p.post_type = 'sd_membership'
-            AND p.post_status = 'publish'
-            AND pm.meta_value BETWEEN %s AND %s
-        ", wp_date( 'Y-m-d' ), wp_date( 'Y-m-d', strtotime( '+7 days' ) ) ) );
-
-        // Pending family notifications.
-        $count += (int) $wpdb->get_var( "
-            SELECT COUNT(*)
-            FROM {$wpdb->posts} p
-            JOIN {$wpdb->postmeta} pm_notify ON p.ID = pm_notify.post_id
-                AND pm_notify.meta_key = '_sd_notify_family_enabled'
-                AND pm_notify.meta_value = '1'
-            LEFT JOIN {$wpdb->postmeta} pm_sent ON p.ID = pm_sent.post_id
-                AND pm_sent.meta_key = '_sd_family_notified_date'
-            WHERE p.post_type = 'sd_memorial'
-            AND p.post_status = 'publish'
-            AND (pm_sent.meta_value IS NULL OR pm_sent.meta_value = '')
-        " );
-
-        // Cache for 10 minutes.
         set_transient( 'sd_menu_pending_count', $count, 600 );
 
         return $count;
