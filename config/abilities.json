@@ -192,6 +192,41 @@
         }
       }
     },
+    "shelter-reports/membership-retention": {
+      "label": "Membership Retention",
+      "description": "Computes the renewal rate for memberships whose end_date fell in a trailing window. Self-correlated SQL is encapsulated here so the renderer stays presentation-only.",
+      "category": "shelter-reports",
+      "permission": "admin",
+      "meta": {
+        "annotations": {
+          "readonly": true,
+          "destructive": false,
+          "idempotent": true
+        },
+        "show_in_rest": true
+      },
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "window_months": {
+            "type": "integer",
+            "default": 12,
+            "description": "Trailing window in months."
+          }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "window_months":  { "type": "integer" },
+          "window_start":   { "type": "string" },
+          "window_end":     { "type": "string" },
+          "expired_count":  { "type": "integer" },
+          "renewed_count":  { "type": "integer" },
+          "retention_rate": { "type": "number" }
+        }
+      }
+    },
     "shelter-reports/action-items": {
       "label": "Get Pending Action Items",
       "description": "Returns the unified list of items needing admin attention (pending logos, expiring memberships, family notifications). Consumed by the menu badge and the dashboard-widget action list.",

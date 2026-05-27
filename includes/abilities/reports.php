@@ -347,6 +347,77 @@ function dashboard_stats( array $input = [] ): array {
 }
 
 /**
+ * Compute membership retention for a trailing window.
+ *
+ * "Retention" here means: of the memberships whose end_date fell in the
+ * window, how many of those donors had a subsequent membership that
+ * started on or after the expiry. The renewed-count query is a
+ * self-correlated join on sd_membership — Query::for() can't express
+ * that — so it stays raw, but it's now in the data layer (an ability)
+ * rather than the renderer.
+ *
+ * @since 1.1.3
+ *
+ * @param array $input Optional. `window_months` (default 12).
+ * @return array{
+ *     window_months: int,
+ *     window_start: string,
+ *     window_end: string,
+ *     expired_count: int,
+ *     renewed_count: int,
+ *     retention_rate: float
+ * }
+ */
+function membership_retention( array $input = [] ): array {
+    $months = max( 1, (int) ( $input['window_months'] ?? 12 ) );
+    $from   = wp_date( 'Y-m-d', strtotime( "-{$months} months" ) );
+    $to     = wp_date( 'Y-m-d' );
+
+    // Expired-in-window count via Query builder.
+    $expired_count = Query::for( 'sd_membership' )
+        ->whereDateBetween( 'end_date', $from, $to )
+        ->count();
+
+    // Renewed = same donor, different membership, start_date >= the
+    // expired one's end_date. Self-correlated join doesn't fit Query.
+    global $wpdb;
+    $renewed_count = (int) $wpdb->get_var( $wpdb->prepare(
+        "SELECT COUNT( DISTINCT expired.ID )
+        FROM {$wpdb->posts} expired
+        JOIN {$wpdb->postmeta} pm_end ON expired.ID = pm_end.post_id AND pm_end.meta_key = '_sd_end_date'
+        JOIN {$wpdb->postmeta} pm_donor ON expired.ID = pm_donor.post_id AND pm_donor.meta_key = '_sd_donor_id'
+        JOIN {$wpdb->posts} renewed ON renewed.post_type = 'sd_membership'
+            AND renewed.post_status = 'publish'
+            AND renewed.ID != expired.ID
+        JOIN {$wpdb->postmeta} pm_donor2 ON renewed.ID = pm_donor2.post_id
+            AND pm_donor2.meta_key = '_sd_donor_id'
+            AND pm_donor2.meta_value = pm_donor.meta_value
+        JOIN {$wpdb->postmeta} pm_start ON renewed.ID = pm_start.post_id
+            AND pm_start.meta_key = '_sd_start_date'
+            AND pm_start.meta_value >= pm_end.meta_value
+        WHERE expired.post_type = 'sd_membership'
+          AND expired.post_status = 'publish'
+          AND pm_end.meta_value >= %s
+          AND pm_end.meta_value <= %s",
+        $from,
+        $to
+    ) );
+
+    $rate = $expired_count > 0
+        ? round( ( $renewed_count / $expired_count ) * 100, 1 )
+        : 0.0;
+
+    return [
+        'window_months'  => $months,
+        'window_start'   => $from,
+        'window_end'     => $to,
+        'expired_count'  => $expired_count,
+        'renewed_count'  => $renewed_count,
+        'retention_rate' => $rate,
+    ];
+}
+
+/**
  * Get pending admin action items.
  *
  * Returns a unified list of items needing admin attention: pending logo

@@ -563,44 +563,22 @@ class Reports {
      * @since 2.1.0
      */
     private static function render_retention_metric(): void {
-        global $wpdb;
+        $ability = function_exists( 'wp_get_ability' )
+            ? wp_get_ability( 'shelter-reports/membership-retention' )
+            : null;
+        if ( ! $ability ) {
+            return;
+        }
 
-        // Count total memberships that have expired in the last 12 months.
-        $year_ago = wp_date( 'Y-m-d', strtotime( '-12 months' ) );
-        $today    = wp_date( 'Y-m-d' );
+        $stats = $ability->execute( [] );
+        if ( is_wp_error( $stats ) || ! is_array( $stats ) ) {
+            return;
+        }
 
-        $expired_count = (int) $wpdb->get_var( $wpdb->prepare( "
-            SELECT COUNT( DISTINCT p.ID )
-            FROM {$wpdb->posts} p
-            JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_end_date'
-            WHERE p.post_type = 'sd_membership'
-              AND p.post_status = 'publish'
-              AND pm.meta_value >= %s
-              AND pm.meta_value <= %s
-        ", $year_ago, $today ) );
+        $retention_rate = (float) ( $stats['retention_rate'] ?? 0 );
+        $renewed_count  = (int) ( $stats['renewed_count'] ?? 0 );
+        $expired_count  = (int) ( $stats['expired_count'] ?? 0 );
 
-        // Count memberships that were renewed (donor has another active membership after expiry).
-        $renewed_count = (int) $wpdb->get_var( $wpdb->prepare( "
-            SELECT COUNT( DISTINCT expired.ID )
-            FROM {$wpdb->posts} expired
-            JOIN {$wpdb->postmeta} pm_end ON expired.ID = pm_end.post_id AND pm_end.meta_key = '_sd_end_date'
-            JOIN {$wpdb->postmeta} pm_donor ON expired.ID = pm_donor.post_id AND pm_donor.meta_key = '_sd_donor_id'
-            JOIN {$wpdb->posts} renewed ON renewed.post_type = 'sd_membership'
-                AND renewed.post_status = 'publish'
-                AND renewed.ID != expired.ID
-            JOIN {$wpdb->postmeta} pm_donor2 ON renewed.ID = pm_donor2.post_id
-                AND pm_donor2.meta_key = '_sd_donor_id'
-                AND pm_donor2.meta_value = pm_donor.meta_value
-            JOIN {$wpdb->postmeta} pm_start ON renewed.ID = pm_start.post_id
-                AND pm_start.meta_key = '_sd_start_date'
-                AND pm_start.meta_value >= pm_end.meta_value
-            WHERE expired.post_type = 'sd_membership'
-              AND expired.post_status = 'publish'
-              AND pm_end.meta_value >= %s
-              AND pm_end.meta_value <= %s
-        ", $year_ago, $today ) );
-
-        $retention_rate = $expired_count > 0 ? round( ( $renewed_count / $expired_count ) * 100, 1 ) : 0;
         $rate_color = $retention_rate >= 70 ? '#059669' : ( $retention_rate >= 40 ? '#d97706' : '#dc2626' );
 
         ?>
