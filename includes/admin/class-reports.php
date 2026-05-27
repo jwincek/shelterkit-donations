@@ -197,6 +197,38 @@ class Reports {
     }
 
     /**
+     * Resolve a stats ability and execute it, echoing inline error
+     * markup on failure. Returns null when the caller should bail.
+     *
+     * Eliminates the eight-line "get ability, check null, execute,
+     * check WP_Error" prelude that the three report-tab renderers
+     * had been hand-rolling.
+     *
+     * @since 1.1.3
+     *
+     * @param string $ability_id    Ability identifier (e.g. 'shelter-reports/dashboard-stats').
+     * @param array  $args          Input array passed to execute().
+     * @param string $error_message Localized "Unable to load X statistics." string
+     *                              shown when the ability is unregistered.
+     * @return array|null The ability's result, or null on failure.
+     */
+    private static function fetch_stats( string $ability_id, array $args, string $error_message ): ?array {
+        $ability = function_exists( 'wp_get_ability' ) ? wp_get_ability( $ability_id ) : null;
+        if ( ! $ability ) {
+            echo '<p>' . esc_html( $error_message ) . '</p>';
+            return null;
+        }
+
+        $stats = $ability->execute( $args );
+        if ( is_wp_error( $stats ) ) {
+            echo '<p class="error">' . esc_html( $stats->get_error_message() ) . '</p>';
+            return null;
+        }
+
+        return is_array( $stats ) ? $stats : null;
+    }
+
+    /**
      * Render donations report tab.
      *
      * @since 1.0.0
@@ -204,21 +236,14 @@ class Reports {
      * @param string $period The reporting period.
      */
     private static function render_donations_report( string $period ): void {
-        // Use the dashboard-stats ability.
-        $ability = wp_get_ability( 'shelter-donations/get-stats' );
-        
-        if ( ! $ability ) {
-            echo '<p>' . esc_html__( 'Unable to load donation statistics.', 'starter-shelter' ) . '</p>';
+        $stats = self::fetch_stats(
+            'shelter-donations/get-stats',
+            [ 'period' => $period ],
+            __( 'Unable to load donation statistics.', 'starter-shelter' )
+        );
+        if ( ! $stats ) {
             return;
         }
-
-        $stats = $ability->execute( [ 'period' => $period ] );
-
-        if ( is_wp_error( $stats ) ) {
-            echo '<p class="error">' . esc_html( $stats->get_error_message() ) . '</p>';
-            return;
-        }
-
         ?>
         <div class="sd-stats-cards">
             <div class="sd-stat-card">
@@ -276,21 +301,14 @@ class Reports {
      * @param string $period The reporting period.
      */
     private static function render_memberships_report( string $period ): void {
-        // Use the dashboard-stats ability.
-        $ability = wp_get_ability( 'shelter-reports/dashboard-stats' );
-        
-        if ( ! $ability ) {
-            echo '<p>' . esc_html__( 'Unable to load membership statistics.', 'starter-shelter' ) . '</p>';
+        $stats = self::fetch_stats(
+            'shelter-reports/dashboard-stats',
+            [ 'period' => $period ],
+            __( 'Unable to load membership statistics.', 'starter-shelter' )
+        );
+        if ( ! $stats ) {
             return;
         }
-
-        $stats = $ability->execute( [ 'period' => $period ] );
-
-        if ( is_wp_error( $stats ) ) {
-            echo '<p class="error">' . esc_html( $stats->get_error_message() ) . '</p>';
-            return;
-        }
-
         $membership_stats = $stats['memberships'] ?? [];
 
         ?>
@@ -350,20 +368,14 @@ class Reports {
      * @param string $period The reporting period.
      */
     private static function render_memorials_report( string $period ): void {
-        $ability = wp_get_ability( 'shelter-reports/dashboard-stats' );
-        
-        if ( ! $ability ) {
-            echo '<p>' . esc_html__( 'Unable to load memorial statistics.', 'starter-shelter' ) . '</p>';
+        $stats = self::fetch_stats(
+            'shelter-reports/dashboard-stats',
+            [ 'period' => $period ],
+            __( 'Unable to load memorial statistics.', 'starter-shelter' )
+        );
+        if ( ! $stats ) {
             return;
         }
-
-        $stats = $ability->execute( [ 'period' => $period ] );
-
-        if ( is_wp_error( $stats ) ) {
-            echo '<p class="error">' . esc_html( $stats->get_error_message() ) . '</p>';
-            return;
-        }
-
         $memorial_stats = $stats['memorials'] ?? [];
 
         ?>

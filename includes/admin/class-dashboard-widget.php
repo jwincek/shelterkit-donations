@@ -35,10 +35,16 @@ class Dashboard_Widget {
         add_action( 'wp_dashboard_setup', [ self::class, 'register_widget' ] );
         add_action( 'wp_ajax_sd_dashboard_refresh', [ self::class, 'ajax_refresh' ] );
 
-        // Invalidate stats cache when shelter records change.
+        // Invalidate cached stats + action items when shelter records change.
+        // Mirrors class-menu's hook list so the widget's action-items count
+        // doesn't stay stale for up to 15 min after a logo approval or a
+        // family notification (audit §4.7).
         foreach ( [ 'sd_donation', 'sd_membership', 'sd_memorial', 'sd_donor' ] as $cpt ) {
             add_action( "save_post_{$cpt}", [ self::class, 'invalidate_cache' ] );
         }
+        add_action( 'starter_shelter_logo_approved', [ self::class, 'invalidate_cache' ] );
+        add_action( 'starter_shelter_logo_rejected', [ self::class, 'invalidate_cache' ] );
+        add_action( 'starter_shelter_memorial_family_notification', [ self::class, 'invalidate_cache' ] );
     }
 
     /**
@@ -107,10 +113,6 @@ class Dashboard_Widget {
             set_transient( $cache_key, $stats, self::CACHE_TTL );
         }
 
-        $donation_stats   = $stats['donations'] ?? [];
-        $membership_stats = $stats['memberships'] ?? [];
-        $memorial_stats   = $stats['memorials'] ?? [];
-
         // Get action items (cached separately).
         $action_items = self::get_action_items();
 
@@ -138,55 +140,7 @@ class Dashboard_Widget {
 
         <!-- Stats Grid -->
         <div class="sd-widget-stats" id="sd-widget-stats">
-            <div class="sd-widget-stat sd-stat-primary">
-                <span class="sd-stat-icon">💰</span>
-                <div class="sd-stat-content">
-                    <span class="sd-widget-stat-value">
-                        <?php echo esc_html( Helpers\format_currency( $donation_stats['total'] ?? 0 ) ); ?>
-                    </span>
-                    <span class="sd-widget-stat-label"><?php esc_html_e( 'Donations', 'starter-shelter' ); ?></span>
-                </div>
-            </div>
-            
-            <div class="sd-widget-stat">
-                <span class="sd-stat-icon">📝</span>
-                <div class="sd-stat-content">
-                    <span class="sd-widget-stat-value">
-                        <?php echo esc_html( number_format( $donation_stats['count'] ?? 0 ) ); ?>
-                    </span>
-                    <span class="sd-widget-stat-label"><?php esc_html_e( 'Transactions', 'starter-shelter' ); ?></span>
-                </div>
-            </div>
-            
-            <div class="sd-widget-stat">
-                <span class="sd-stat-icon">👥</span>
-                <div class="sd-stat-content">
-                    <span class="sd-widget-stat-value">
-                        <?php echo esc_html( number_format( $donation_stats['unique_donors'] ?? 0 ) ); ?>
-                    </span>
-                    <span class="sd-widget-stat-label"><?php esc_html_e( 'Donors', 'starter-shelter' ); ?></span>
-                </div>
-            </div>
-            
-            <div class="sd-widget-stat">
-                <span class="sd-stat-icon">🏅</span>
-                <div class="sd-stat-content">
-                    <span class="sd-widget-stat-value">
-                        <?php echo esc_html( number_format( $membership_stats['new'] ?? 0 ) ); ?>
-                    </span>
-                    <span class="sd-widget-stat-label"><?php esc_html_e( 'New Members', 'starter-shelter' ); ?></span>
-                </div>
-            </div>
-
-            <div class="sd-widget-stat">
-                <span class="sd-stat-icon">❤️</span>
-                <div class="sd-stat-content">
-                    <span class="sd-widget-stat-value">
-                        <?php echo esc_html( number_format( $memorial_stats['total'] ?? 0 ) ); ?>
-                    </span>
-                    <span class="sd-widget-stat-label"><?php esc_html_e( 'Memorials', 'starter-shelter' ); ?></span>
-                </div>
-            </div>
+            <?php echo self::render_stats_grid( $stats ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
         </div>
 
         <?php if ( ! empty( $action_items ) ) : ?>
@@ -324,51 +278,7 @@ class Dashboard_Widget {
             set_transient( $cache_key, $stats, self::CACHE_TTL );
         }
 
-        $donation_stats   = $stats['donations'] ?? [];
-        $membership_stats = $stats['memberships'] ?? [];
-        $memorial_stats   = $stats['memorials'] ?? [];
-
-        ob_start();
-        ?>
-        <div class="sd-widget-stat sd-stat-primary">
-            <span class="sd-stat-icon">💰</span>
-            <div class="sd-stat-content">
-                <span class="sd-widget-stat-value"><?php echo esc_html( Helpers\format_currency( $donation_stats['total'] ?? 0 ) ); ?></span>
-                <span class="sd-widget-stat-label"><?php esc_html_e( 'Donations', 'starter-shelter' ); ?></span>
-            </div>
-        </div>
-        <div class="sd-widget-stat">
-            <span class="sd-stat-icon">📝</span>
-            <div class="sd-stat-content">
-                <span class="sd-widget-stat-value"><?php echo esc_html( number_format( $donation_stats['count'] ?? 0 ) ); ?></span>
-                <span class="sd-widget-stat-label"><?php esc_html_e( 'Transactions', 'starter-shelter' ); ?></span>
-            </div>
-        </div>
-        <div class="sd-widget-stat">
-            <span class="sd-stat-icon">👥</span>
-            <div class="sd-stat-content">
-                <span class="sd-widget-stat-value"><?php echo esc_html( number_format( $donation_stats['unique_donors'] ?? 0 ) ); ?></span>
-                <span class="sd-widget-stat-label"><?php esc_html_e( 'Donors', 'starter-shelter' ); ?></span>
-            </div>
-        </div>
-        <div class="sd-widget-stat">
-            <span class="sd-stat-icon">🏅</span>
-            <div class="sd-stat-content">
-                <span class="sd-widget-stat-value"><?php echo esc_html( number_format( $membership_stats['new'] ?? 0 ) ); ?></span>
-                <span class="sd-widget-stat-label"><?php esc_html_e( 'New Members', 'starter-shelter' ); ?></span>
-            </div>
-        </div>
-        <div class="sd-widget-stat">
-            <span class="sd-stat-icon">❤️</span>
-            <div class="sd-stat-content">
-                <span class="sd-widget-stat-value"><?php echo esc_html( number_format( $memorial_stats['total'] ?? 0 ) ); ?></span>
-                <span class="sd-widget-stat-label"><?php esc_html_e( 'Memorials', 'starter-shelter' ); ?></span>
-            </div>
-        </div>
-        <?php
-        $html = ob_get_clean();
-
-        wp_send_json_success( [ 'html' => $html ] );
+        wp_send_json_success( [ 'html' => self::render_stats_grid( $stats ) ] );
     }
 
     /**
@@ -482,6 +392,49 @@ class Dashboard_Widget {
         }
 
         return $activity;
+    }
+
+    /**
+     * Render the 5-card stats grid as an HTML string.
+     *
+     * Single source of truth for the widget body — both the initial
+     * render_widget() and the ajax_refresh() response build the inner
+     * grid from this. Each card has the same shape (icon + value +
+     * label) so the cards are produced from a small declarative table
+     * rather than five hand-written blocks.
+     *
+     * @since 1.1.3
+     *
+     * @param array $stats Output of `shelter-reports/dashboard-stats`.
+     * @return string Escaped HTML.
+     */
+    private static function render_stats_grid( array $stats ): string {
+        $donation_stats   = $stats['donations'] ?? [];
+        $membership_stats = $stats['memberships'] ?? [];
+        $memorial_stats   = $stats['memorials'] ?? [];
+
+        $cards = [
+            [ 'class' => 'sd-stat-primary', 'icon' => '💰', 'value' => Helpers\format_currency( (float) ( $donation_stats['total'] ?? 0 ) ),         'label' => __( 'Donations', 'starter-shelter' ) ],
+            [ 'class' => '',                'icon' => '📝', 'value' => number_format( (int)   ( $donation_stats['count'] ?? 0 ) ),                   'label' => __( 'Transactions', 'starter-shelter' ) ],
+            [ 'class' => '',                'icon' => '👥', 'value' => number_format( (int)   ( $donation_stats['unique_donors'] ?? 0 ) ),           'label' => __( 'Donors', 'starter-shelter' ) ],
+            [ 'class' => '',                'icon' => '🏅', 'value' => number_format( (int)   ( $membership_stats['new'] ?? 0 ) ),                   'label' => __( 'New Members', 'starter-shelter' ) ],
+            [ 'class' => '',                'icon' => '❤️', 'value' => number_format( (int)   ( $memorial_stats['total'] ?? 0 ) ),                   'label' => __( 'Memorials', 'starter-shelter' ) ],
+        ];
+
+        ob_start();
+        foreach ( $cards as $card ) {
+            $class = 'sd-widget-stat' . ( '' !== $card['class'] ? ' ' . $card['class'] : '' );
+            ?>
+            <div class="<?php echo esc_attr( $class ); ?>">
+                <span class="sd-stat-icon"><?php echo esc_html( $card['icon'] ); ?></span>
+                <div class="sd-stat-content">
+                    <span class="sd-widget-stat-value"><?php echo esc_html( $card['value'] ); ?></span>
+                    <span class="sd-widget-stat-label"><?php echo esc_html( $card['label'] ); ?></span>
+                </div>
+            </div>
+            <?php
+        }
+        return (string) ob_get_clean();
     }
 
     /**
