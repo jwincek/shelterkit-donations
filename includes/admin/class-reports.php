@@ -987,8 +987,16 @@ class Reports {
         $period      = sanitize_key( $_GET['period'] ?? 'month' );
         $campaign_id = absint( $_GET['campaign_id'] ?? 0 );
 
-        $filename_suffix = $campaign_id > 0 ? '-campaign-' . $campaign_id : '';
-        $filename        = 'shelter-' . $report . '-' . $period . $filename_suffix . '-' . wp_date( 'Y-m-d' ) . '.csv';
+        // The per-campaign export is inherently lifetime + per-campaign:
+        // the page-level period selector doesn't apply, and the
+        // campaign ID is the disambiguator. Avoid splicing the
+        // selector's default value ("month") into the filename.
+        if ( 'campaign' === $report ) {
+            $filename = 'shelter-campaign-' . $campaign_id . '-' . wp_date( 'Y-m-d' ) . '.csv';
+        } else {
+            $filename_suffix = $campaign_id > 0 ? '-campaign-' . $campaign_id : '';
+            $filename        = 'shelter-' . $report . '-' . $period . $filename_suffix . '-' . wp_date( 'Y-m-d' ) . '.csv';
+        }
 
         header( 'Content-Type: text/csv; charset=utf-8' );
         header( 'Content-Disposition: attachment; filename=' . $filename );
