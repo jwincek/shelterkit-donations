@@ -84,12 +84,6 @@ class Meta_Boxes {
             return;
         }
 
-        // sd_memorial meta boxes are replaced by PluginDocumentSettingPanel
-        // components in memorial-panel.js when the block editor is active.
-        if ( 'sd_memorial' === $post_type && use_block_editor_for_post( $post ) ) {
-            return;
-        }
-
         foreach ( self::$meta_boxes[ $post_type ]['boxes'] as $box_id => $box ) {
             add_meta_box(
                 'sd_' . $box_id,

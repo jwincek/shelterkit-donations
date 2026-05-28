@@ -1,8 +1,35 @@
 /**
- * Memorial Document Setting Panels.
+ * Memorial Document Setting Panels.  ⚠️ CURRENTLY UNUSED / PARKED.
  *
- * Replaces the classic meta boxes for sd_memorial with three
- * PluginDocumentSettingPanel components in the block editor sidebar.
+ * An alternative block-editor UX for creating/editing sd_memorial:
+ * three PluginDocumentSettingPanel components (Memorial Details,
+ * Donation Info with donor quick-create, Family Notification) in the
+ * editor sidebar, plus a pre-publish validation panel.
+ *
+ * This file is NOT enqueued. sd_memorial intentionally ships with the
+ * classic editor + manifest-driven meta boxes (Meta_Boxes) instead,
+ * because that path is the single source of truth for field config and
+ * avoids the maintenance costs that retired this panel:
+ *
+ *   1. It DUPLICATES field definitions that already live in
+ *      config/manifests/sd_memorial.php — the type/species option lists
+ *      below are hardcoded and will silently diverge from Settings →
+ *      Data. The meta-box renderer reads them from the manifest.
+ *   2. It depends on wp.editPost.PluginDocumentSettingPanel, deprecated
+ *      in WP 6.6 (moved to wp.editor) — a standing breakage risk.
+ *   3. The block editor commits meta AFTER save_post, which forced a
+ *      rest_after_insert_sd_memorial companion in class-rest-controller
+ *      to avoid title-syncing / firing the created-hook against stale
+ *      meta. The classic path writes meta before save_post @ 20.
+ *
+ * To revive it: re-add "editor" to sd_memorial supports in
+ * config/post-types.json, enqueue this file in
+ * includes/blocks/register-editor.php (with the sd_memorial canvas-
+ * hiding CSS), restore the use_block_editor_for_post() bypass in
+ * Meta_Boxes::register_meta_boxes(), and restore the REST_REQUEST
+ * deferral + rest_after_insert_sd_memorial handler in
+ * class-rest-controller.php. Also migrate the hardcoded option lists
+ * below to read from window.starterShelterBlocks before shipping.
  *
  * No build step required — uses wp.createElement via IIFE.
  *

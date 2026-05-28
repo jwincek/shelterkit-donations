@@ -58,7 +58,7 @@
         "with_front": false
       },
       "menu_icon": "dashicons-format-quote",
-      "supports": ["editor", "thumbnail", "excerpt", "custom-fields"],
+      "supports": ["thumbnail", "excerpt", "custom-fields"],
       "capability_type": "post",
       "capabilities": {
         "create_posts": "manage_options"
