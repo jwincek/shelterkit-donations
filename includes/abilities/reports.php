@@ -826,7 +826,7 @@ function campaign_progress( array $input ): array|WP_Error {
  * @return array|WP_Error Campaign statistics or error.
  */
 function campaign_report( array $input ): array|WP_Error {
-    $campaign_id = $input['campaign_id'] ?? 0;
+    $campaign_id = (int) ( $input['campaign_id'] ?? 0 );
 
     if ( ! $campaign_id ) {
         return new WP_Error(
@@ -845,42 +845,78 @@ function campaign_report( array $input ): array|WP_Error {
         );
     }
 
-    // Get donations for this campaign.
-    $donations = Query::for( 'sd_donation' )
-        ->whereInTaxonomy( 'sd_campaign', $campaign_id )
-        ->orderBy( 'donation_date', 'DESC' )
-        ->get();
+    $type = (string) ( get_term_meta( $campaign_id, '_sd_campaign_type', true ) ?: 'donation_drive' );
 
-    // Calculate stats.
-    $total = array_sum( array_column( $donations, 'amount' ) );
-    $donor_ids = array_unique( array_column( $donations, 'donor_id' ) );
+    // _sd_goal is the canonical meta key (matches campaign_progress and
+    // the Campaign_Admin term-meta writer). The earlier implementation
+    // read the unprefixed 'goal' key — silently null for every campaign
+    // so percent_of_goal / remaining were always null in the CSV header.
+    $goal_raw = get_term_meta( $campaign_id, '_sd_goal', true );
+    $goal     = '' !== $goal_raw && null !== $goal_raw ? (float) $goal_raw : null;
+    $tier     = (string) get_term_meta( $campaign_id, '_sd_membership_tier_filter', true );
 
-    // Get campaign goal from term meta.
-    $goal = get_term_meta( $campaign_id, 'goal', true );
-    $goal = $goal ? (float) $goal : null;
+    $campaign = [
+        'id'             => $campaign_id,
+        'name'           => $term->name,
+        'description'    => $term->description,
+        'type'           => $type,
+        'goal'           => $goal,
+        'goal_formatted' => null === $goal
+            ? null
+            : ( 'donation_drive' === $type
+                ? Helpers\format_currency( $goal )
+                : sprintf( _n( '%d member', '%d members', (int) $goal, 'starter-shelter' ), (int) $goal ) ),
+        'tier_filter'    => $tier,
+    ];
 
-    $donation_count = count( $donations );
-    $average        = $donation_count > 0 ? round( $total / $donation_count, 2 ) : 0;
-    $percent_of_goal = $goal ? min( 100, round( ( $total / $goal ) * 100, 1 ) ) : null;
-    $remaining      = $goal ? max( 0, $goal - $total ) : null;
+    if ( 'donation_drive' === $type ) {
+        $donations = Query::for( 'sd_donation' )
+            ->whereInTaxonomy( 'sd_campaign', $campaign_id )
+            ->orderBy( 'donation_date', 'DESC' )
+            ->get();
+
+        $total           = array_sum( array_column( $donations, 'amount' ) );
+        $donor_ids       = array_unique( array_column( $donations, 'donor_id' ) );
+        $donation_count  = count( $donations );
+        $average         = $donation_count > 0 ? round( $total / $donation_count, 2 ) : 0;
+        $percent_of_goal = $goal ? min( 100, round( ( $total / $goal ) * 100, 1 ) ) : null;
+        $remaining       = $goal ? max( 0.0, $goal - $total ) : null;
+
+        return [
+            'campaign'    => $campaign,
+            'progress'    => [
+                'total_raised'    => $total,
+                'total_formatted' => Helpers\format_currency( $total ),
+                'percent_of_goal' => $percent_of_goal,
+                'donation_count'  => $donation_count,
+                'donor_count'     => count( $donor_ids ),
+                'average'         => $average,
+                'remaining'       => $remaining,
+            ],
+            'donations'   => $donations,
+            'memberships' => [], // present-but-empty so consumers can pick one shape.
+        ];
+    }
+
+    // membership_drive
+    $q = Query::for( 'sd_membership' )->whereInTaxonomy( 'sd_campaign', $campaign_id );
+    if ( '' !== $tier ) {
+        $q->where( 'tier', $tier );
+    }
+    $memberships = $q->orderBy( 'start_date', 'DESC' )->get();
+
+    $member_count    = count( $memberships );
+    $percent_of_goal = $goal ? min( 100, round( ( $member_count / $goal ) * 100, 1 ) ) : null;
+    $remaining       = $goal ? max( 0.0, $goal - $member_count ) : null;
 
     return [
-        'campaign'  => [
-            'id'             => $campaign_id,
-            'name'           => $term->name,
-            'description'    => $term->description,
-            'goal'           => $goal,
-            'goal_formatted' => $goal ? Helpers\format_currency( $goal ) : null,
-        ],
-        'progress'  => [
-            'total_raised'    => $total,
-            'total_formatted' => Helpers\format_currency( $total ),
+        'campaign'    => $campaign,
+        'progress'    => [
+            'member_count'    => $member_count,
             'percent_of_goal' => $percent_of_goal,
-            'donation_count'  => $donation_count,
-            'donor_count'     => count( $donor_ids ),
-            'average'         => $average,
             'remaining'       => $remaining,
         ],
-        'donations' => $donations,
+        'donations'   => [], // present-but-empty for the consumer-uniformity reason above.
+        'memberships' => $memberships,
     ];
 }

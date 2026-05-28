@@ -416,16 +416,6 @@
           "campaign_id": {
             "type": "integer",
             "description": "Campaign term ID"
-          },
-          "include_donations": {
-            "type": "boolean",
-            "default": true,
-            "description": "Include individual donation records"
-          },
-          "include_donors": {
-            "type": "boolean",
-            "default": false,
-            "description": "Include donor breakdown"
           }
         }
       },
@@ -438,14 +428,15 @@
               "id": { "type": "integer" },
               "name": { "type": "string" },
               "description": { "type": "string" },
+              "type": { "type": "string", "description": "donation_drive | membership_drive" },
               "goal": { "type": "number" },
               "goal_formatted": { "type": "string" },
-              "start_date": { "type": "string" },
-              "end_date": { "type": "string" }
+              "tier_filter": { "type": "string" }
             }
           },
           "progress": {
             "type": "object",
+            "description": "Shape depends on campaign.type. donation_drive: { total_raised, total_formatted, percent_of_goal, donation_count, donor_count, average, remaining }. membership_drive: { member_count, percent_of_goal, remaining }.",
             "properties": {
               "total_raised": { "type": "number" },
               "total_formatted": { "type": "string" },
@@ -453,16 +444,17 @@
               "donation_count": { "type": "integer" },
               "donor_count": { "type": "integer" },
               "average": { "type": "number" },
-              "remaining": { "type": "number" }
+              "remaining": { "type": "number" },
+              "member_count": { "type": "integer" }
             }
           },
           "donations": {
             "type": "array",
-            "description": "Individual donations if include_donations is true"
+            "description": "Individual donations (donation_drive only — empty array for membership_drive)."
           },
-          "donors": {
+          "memberships": {
             "type": "array",
-            "description": "Donor breakdown if include_donors is true"
+            "description": "Individual memberships (membership_drive only — empty array for donation_drive)."
           }
         }
       }
