@@ -739,10 +739,10 @@ class Reports {
      * @param string $period The reporting period.
      */
     private static function render_campaigns_report( string $period ): void {
-        // Get active campaigns.
         $campaigns = get_terms( [
             'taxonomy'   => 'sd_campaign',
             'hide_empty' => false,
+            'orderby'    => 'name',
         ] );
 
         if ( is_wp_error( $campaigns ) || empty( $campaigns ) ) {
@@ -750,37 +750,103 @@ class Reports {
             return;
         }
 
+        // Type-aware progress comes from the single-source ability also
+        // consumed by campaign-card. One ability call per campaign — fine
+        // for typical campaign counts (<50). If this grows, the cleanup
+        // is a batch ability `shelter-reports/campaigns-progress` or a
+        // get_term_meta prime + computation here.
+        $progress_ability = function_exists( 'wp_get_ability' )
+            ? wp_get_ability( 'shelter-reports/campaign-progress' )
+            : null;
         ?>
+        <p class="description">
+            <em><?php esc_html_e( 'Campaigns show lifetime progress — the period selector above does not affect this tab.', 'starter-shelter' ); ?></em>
+        </p>
         <table class="wp-list-table widefat fixed striped">
             <thead>
                 <tr>
                     <th><?php esc_html_e( 'Campaign', 'starter-shelter' ); ?></th>
+                    <th><?php esc_html_e( 'Type', 'starter-shelter' ); ?></th>
                     <th><?php esc_html_e( 'Goal', 'starter-shelter' ); ?></th>
-                    <th><?php esc_html_e( 'Raised', 'starter-shelter' ); ?></th>
                     <th><?php esc_html_e( 'Progress', 'starter-shelter' ); ?></th>
-                    <th><?php esc_html_e( 'Donations', 'starter-shelter' ); ?></th>
+                    <th><?php esc_html_e( 'Ends', 'starter-shelter' ); ?></th>
+                    <th><?php esc_html_e( 'Status', 'starter-shelter' ); ?></th>
                     <th><?php esc_html_e( 'Actions', 'starter-shelter' ); ?></th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ( $campaigns as $campaign ) :
-                    $goal = (float) get_term_meta( $campaign->term_id, '_sd_goal', true );
+                    // Fall back to a synthetic row if the ability isn't
+                    // registered, so admins still see something useful.
+                    $data = $progress_ability
+                        ? $progress_ability->execute( [ 'campaign_id' => $campaign->term_id ] )
+                        : null;
+                    if ( is_wp_error( $data ) || ! is_array( $data ) ) {
+                        $data = [
+                            'goal_unit'         => 'currency',
+                            'goal_formatted'    => '—',
+                            'raised_formatted'  => '—',
+                            'member_count'      => 0,
+                            'progress'          => 0,
+                            'end_date'          => (string) get_term_meta( $campaign->term_id, '_sd_end_date', true ),
+                            'is_active'         => true,
+                        ];
+                    }
 
-                    // Calculate raised amount filtered by period.
-                    $raised = self::get_campaign_raised( $campaign->term_id, $period );
-                    $percent = $goal > 0 ? min( 100, ( $raised / $goal ) * 100 ) : 0;
+                    $is_member_drive = 'members' === ( $data['goal_unit'] ?? 'currency' );
+                    $is_active       = (bool) ( $data['is_active'] ?? true );
+                    $percent         = (float) ( $data['progress'] ?? 0 );
+                    $end_date        = (string) ( $data['end_date'] ?? '' );
+
+                    if ( $is_member_drive ) {
+                        $progress_text = sprintf(
+                            /* translators: 1: members joined, 2: goal formatted (e.g. "100 members"). */
+                            __( '%1$d / %2$s', 'starter-shelter' ),
+                            (int) ( $data['member_count'] ?? 0 ),
+                            $data['goal_formatted'] ?? ''
+                        );
+                    } else {
+                        $progress_text = sprintf(
+                            /* translators: 1: dollars raised, 2: dollars goal. */
+                            __( '%1$s / %2$s', 'starter-shelter' ),
+                            $data['raised_formatted'] ?? '$0',
+                            $data['goal_formatted']   ?? '$0'
+                        );
+                    }
                 ?>
                 <tr>
                     <td><strong><?php echo esc_html( $campaign->name ); ?></strong></td>
-                    <td><?php echo esc_html( '$' . number_format( $goal, 2 ) ); ?></td>
-                    <td><?php echo esc_html( '$' . number_format( $raised, 2 ) ); ?></td>
                     <td>
-                        <div class="sd-progress-bar">
-                            <div class="sd-progress-fill" style="width: <?php echo esc_attr( $percent ); ?>%;"></div>
-                        </div>
-                        <span><?php echo esc_html( number_format( $percent, 1 ) ); ?>%</span>
+                        <span class="sd-pill <?php echo $is_member_drive ? 'sd-pill--membership' : 'sd-pill--donation'; ?>">
+                            <?php echo esc_html( $is_member_drive
+                                ? __( 'Membership', 'starter-shelter' )
+                                : __( 'Donation', 'starter-shelter' )
+                            ); ?>
+                        </span>
                     </td>
-                    <td><?php echo esc_html( $campaign->count ); ?></td>
+                    <td><?php echo esc_html( $data['goal_formatted'] ?? '—' ); ?></td>
+                    <td>
+                        <span class="sd-campaign-progress-text">
+                            <?php echo esc_html( $progress_text ); ?>
+                            (<?php echo esc_html( number_format( $percent, 1 ) ); ?>%)
+                        </span>
+                        <div class="sd-progress-bar">
+                            <div class="sd-progress-fill" style="width: <?php echo esc_attr( min( 100, $percent ) ); ?>%;"></div>
+                        </div>
+                    </td>
+                    <td>
+                        <?php echo $end_date
+                            ? esc_html( \Starter_Shelter\Helpers\format_date( $end_date ) )
+                            : '—'; ?>
+                    </td>
+                    <td>
+                        <span class="sd-pill <?php echo $is_active ? 'sd-pill--active' : 'sd-pill--ended'; ?>">
+                            <?php echo esc_html( $is_active
+                                ? __( 'Active', 'starter-shelter' )
+                                : __( 'Ended', 'starter-shelter' )
+                            ); ?>
+                        </span>
+                    </td>
                     <td>
                         <a href="<?php echo esc_url( add_query_arg( [
                             'action'      => 'sd_export_report',
@@ -926,29 +992,6 @@ class Reports {
             </div>
         </div>
         <?php
-    }
-
-    /**
-     * Get the total raised for a campaign, filtered by period.
-     *
-     * @since 2.1.0
-     *
-     * @param int    $campaign_id Campaign term ID.
-     * @param string $period      Reporting period.
-     * @return float Total raised.
-     */
-    private static function get_campaign_raised( int $campaign_id, string $period ): float {
-        $query = \Starter_Shelter\Core\Query::for( 'sd_donation' )
-            ->whereInTaxonomy( 'sd_campaign', $campaign_id );
-
-        if ( 'all_time' !== $period ) {
-            $range = \Starter_Shelter\Helpers\get_date_range_for_period( $period );
-            if ( ! empty( $range['start'] ) && ! empty( $range['end'] ) ) {
-                $query->whereDateBetween( 'donation_date', $range['start'], $range['end'] );
-            }
-        }
-
-        return $query->sum( 'amount' );
     }
 
     /**

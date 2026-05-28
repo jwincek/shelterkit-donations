@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `campaign-card` editor preview now loads the block's style.css (via new `editorStyle` declaration in block.json), so the progress bar and stats render the same in the editor as on the frontend.
 
 ### Changed
+- Reports → Campaigns tab rebuilt on the type-aware `shelter-reports/campaign-progress` ability. New columns: Type (donation drive / membership drive pill), Goal (formatted per type — `$X` vs `Y members`), Progress ("$3,200 / $5,000 (64%)" or "75 / 100 members (75%)" with a fill bar), Ends (formatted end date), Status (Active / Ended pill), Actions. Replaces the previous table that hard-coded `_sd_goal` + a custom `get_campaign_raised()` helper (now removed) and surfaced `$campaign->count` mislabeled as "Donations" — that count was actually all-type post attachments. The tab now also displays a small note that it shows lifetime progress, since the page-level period selector doesn't apply per-campaign.
 - `List_Columns` column configuration is now built lazily on first access instead of during plugin bootstrap, so `__()` calls no longer run before the `init` hook.
 - `validate_item_meta()` return type relaxed from `true|WP_Error` to `bool|WP_Error`; the `true` literal type requires PHP 8.2+ and the plugin still declares an 8.1 floor.
 - `campaign-card` block.json: removed `"ancestor": []` (empty array meant "no valid ancestors", hiding the block from the inserter even though it was registered). Added `"editorScript": "file:./edit.js"`.

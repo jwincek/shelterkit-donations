@@ -126,6 +126,33 @@
     transition: width 0.3s ease;
 }
 
+/* Inline pill badges used by the Campaigns table (Type, Status) and
+   any future per-row classifier. Kept here so the Reports page has
+   its own self-contained badge styles — class-list-columns.php
+   defines a richer set but only enqueues on edit.php for CPTs. */
+.sd-pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    line-height: 1.4;
+}
+.sd-pill--donation   { background: #d1fae5; color: #065f46; }
+.sd-pill--membership { background: #dbeafe; color: #1e40af; }
+.sd-pill--active     { background: #d1fae5; color: #065f46; }
+.sd-pill--ended      { background: #f3f4f6; color: #6b7280; }
+
+/* Inline goal/progress text for the Campaigns table — keeps the
+   numeric tally on its own line above the bar. */
+.sd-campaign-progress-text {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
 /* Export Button */
 .sd-export-btn {
     margin-left: auto !important;
