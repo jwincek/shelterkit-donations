@@ -818,6 +818,174 @@ function campaign_progress( array $input ): array|WP_Error {
 }
 
 /**
+ * Batch progress for many campaigns at once.
+ *
+ * Same per-campaign payload as {@see campaign_progress()} but rolled
+ * up across many campaigns with 2-3 SQL queries instead of N. The
+ * Reports → Campaigns tab consumes this; for a single-campaign
+ * lookup (e.g., campaign-card) the singular version stays cheaper.
+ *
+ * Mechanics:
+ * 1. Resolve the campaign list (input `campaign_ids` or every
+ *    sd_campaign term).
+ * 2. Prime the term-meta cache with one call so the per-row meta
+ *    reads below hit cache, not DB.
+ * 3. One GROUP BY query per type (donations sum, memberships count)
+ *    aggregating across the campaign IDs.
+ * 4. Per-row synthesis. Campaigns with a `_sd_membership_tier_filter`
+ *    set fall back to a focused Query::for count (tier filtering
+ *    isn't easy to fold into the batched aggregate); typical
+ *    campaigns don't set the filter so this is the rare path.
+ *
+ * @since 1.1.4
+ *
+ * @param array $input
+ *   - campaign_ids (int[], optional) — empty/omitted = all campaigns.
+ *   - include_ended (bool, default true) — when false, drop expired campaigns.
+ * @return array{ campaigns: array<int, array> }
+ */
+function campaigns_progress( array $input = [] ): array {
+    $requested     = $input['campaign_ids'] ?? [];
+    $include_ended = (bool) ( $input['include_ended'] ?? true );
+
+    if ( empty( $requested ) ) {
+        $terms = get_terms( [
+            'taxonomy'   => 'sd_campaign',
+            'hide_empty' => false,
+            'orderby'    => 'name',
+        ] );
+    } else {
+        $requested = array_values( array_filter( array_map( 'intval', (array) $requested ) ) );
+        if ( empty( $requested ) ) {
+            return [ 'campaigns' => [] ];
+        }
+        $terms = get_terms( [
+            'taxonomy'   => 'sd_campaign',
+            'hide_empty' => false,
+            'include'    => $requested,
+            'orderby'    => 'include',
+        ] );
+    }
+
+    if ( is_wp_error( $terms ) || empty( $terms ) ) {
+        return [ 'campaigns' => [] ];
+    }
+
+    $terms_by_id  = [];
+    $campaign_ids = [];
+    foreach ( $terms as $t ) {
+        $tid                = (int) $t->term_id;
+        $terms_by_id[ $tid ] = $t;
+        $campaign_ids[]      = $tid;
+    }
+
+    update_termmeta_cache( $campaign_ids );
+
+    global $wpdb;
+    $placeholders = implode( ',', array_fill( 0, count( $campaign_ids ), '%d' ) );
+
+    $raised_rows = $wpdb->get_results( $wpdb->prepare(
+        "SELECT
+            tt.term_id,
+            COALESCE(SUM(pm_amount.meta_value + 0), 0) as raised
+        FROM {$wpdb->posts} p
+        INNER JOIN {$wpdb->postmeta} pm_amount ON p.ID = pm_amount.post_id AND pm_amount.meta_key = '_sd_amount'
+        INNER JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
+        INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id AND tt.taxonomy = 'sd_campaign'
+        WHERE p.post_type = 'sd_donation'
+          AND p.post_status = 'publish'
+          AND tt.term_id IN ({$placeholders})
+        GROUP BY tt.term_id",
+        ...$campaign_ids
+    ) );
+
+    $raised_by_id = [];
+    foreach ( $raised_rows as $r ) {
+        $raised_by_id[ (int) $r->term_id ] = (float) $r->raised;
+    }
+
+    $member_rows = $wpdb->get_results( $wpdb->prepare(
+        "SELECT
+            tt.term_id,
+            COUNT(*) as member_count
+        FROM {$wpdb->posts} p
+        INNER JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
+        INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id AND tt.taxonomy = 'sd_campaign'
+        WHERE p.post_type = 'sd_membership'
+          AND p.post_status = 'publish'
+          AND tt.term_id IN ({$placeholders})
+        GROUP BY tt.term_id",
+        ...$campaign_ids
+    ) );
+
+    $members_by_id = [];
+    foreach ( $member_rows as $r ) {
+        $members_by_id[ (int) $r->term_id ] = (int) $r->member_count;
+    }
+
+    $now       = time();
+    $campaigns = [];
+
+    foreach ( $campaign_ids as $cid ) {
+        $term = $terms_by_id[ $cid ] ?? null;
+        if ( ! $term ) {
+            continue;
+        }
+
+        $type     = (string) ( get_term_meta( $cid, '_sd_campaign_type', true ) ?: 'donation_drive' );
+        $goal     = (float) get_term_meta( $cid, '_sd_goal', true );
+        $end_date = (string) get_term_meta( $cid, '_sd_end_date', true );
+        $tier     = (string) get_term_meta( $cid, '_sd_membership_tier_filter', true );
+
+        $raised       = $raised_by_id[ $cid ] ?? 0.0;
+        $member_count = $members_by_id[ $cid ] ?? 0;
+
+        // tier_filter isn't representable in the batched GROUP BY (it's
+        // per-campaign meta, not per-row). Re-count for the rare case
+        // when the filter is actually set on a membership drive.
+        if ( 'membership_drive' === $type && '' !== $tier ) {
+            $member_count = (int) Query::for( 'sd_membership' )
+                ->whereInTaxonomy( 'sd_campaign', $cid )
+                ->where( 'tier', $tier )
+                ->count();
+        }
+
+        $primary   = 'donation_drive' === $type ? $raised : (float) $member_count;
+        $progress  = $goal > 0 ? min( 100.0, round( ( $primary / $goal ) * 100, 1 ) ) : 0.0;
+        $remaining = max( 0.0, $goal - $primary );
+        $is_active = ! $end_date || strtotime( $end_date ) >= $now;
+
+        if ( ! $include_ended && ! $is_active ) {
+            continue;
+        }
+
+        $campaigns[] = [
+            'campaign_id'         => $cid,
+            'name'                => $term->name,
+            'type'                => $type,
+            'goal'                => $goal,
+            'goal_unit'           => 'donation_drive' === $type ? 'currency' : 'members',
+            'goal_formatted'      => 'donation_drive' === $type
+                ? Helpers\format_currency( $goal )
+                : sprintf( _n( '%d member', '%d members', (int) $goal, 'starter-shelter' ), (int) $goal ),
+            'end_date'            => $end_date,
+            'tier_filter'         => $tier,
+            'raised'              => $raised,
+            'raised_formatted'    => Helpers\format_currency( $raised ),
+            'member_count'        => $member_count,
+            'progress'            => $progress,
+            'remaining'           => $remaining,
+            'remaining_formatted' => 'donation_drive' === $type
+                ? Helpers\format_currency( $remaining )
+                : sprintf( _n( '%d to go', '%d to go', (int) $remaining, 'starter-shelter' ), (int) $remaining ),
+            'is_active'           => $is_active,
+        ];
+    }
+
+    return [ 'campaigns' => $campaigns ];
+}
+
+/**
  * Get campaign report.
  *
  * @since 1.0.0

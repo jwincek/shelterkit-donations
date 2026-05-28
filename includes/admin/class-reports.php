@@ -739,25 +739,19 @@ class Reports {
      * @param string $period The reporting period.
      */
     private static function render_campaigns_report( string $period ): void {
-        $campaigns = get_terms( [
-            'taxonomy'   => 'sd_campaign',
-            'hide_empty' => false,
-            'orderby'    => 'name',
-        ] );
-
-        if ( is_wp_error( $campaigns ) || empty( $campaigns ) ) {
+        // Single batched call: 2-3 SQL queries for the entire table
+        // regardless of campaign count. Replaces the previous N-call
+        // pattern (one campaign-progress per row).
+        $result = self::fetch_stats(
+            'shelter-reports/campaigns-progress',
+            [],
+            __( 'Unable to load campaign progress.', 'starter-shelter' )
+        );
+        $rows = $result['campaigns'] ?? [];
+        if ( empty( $rows ) ) {
             echo '<p>' . esc_html__( 'No campaigns found.', 'starter-shelter' ) . '</p>';
             return;
         }
-
-        // Type-aware progress comes from the single-source ability also
-        // consumed by campaign-card. One ability call per campaign — fine
-        // for typical campaign counts (<50). If this grows, the cleanup
-        // is a batch ability `shelter-reports/campaigns-progress` or a
-        // get_term_meta prime + computation here.
-        $progress_ability = function_exists( 'wp_get_ability' )
-            ? wp_get_ability( 'shelter-reports/campaign-progress' )
-            : null;
         ?>
         <p class="description">
             <em><?php esc_html_e( 'Campaigns show lifetime progress — the period selector above does not affect this tab.', 'starter-shelter' ); ?></em>
@@ -775,47 +769,30 @@ class Reports {
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ( $campaigns as $campaign ) :
-                    // Fall back to a synthetic row if the ability isn't
-                    // registered, so admins still see something useful.
-                    $data = $progress_ability
-                        ? $progress_ability->execute( [ 'campaign_id' => $campaign->term_id ] )
-                        : null;
-                    if ( is_wp_error( $data ) || ! is_array( $data ) ) {
-                        $data = [
-                            'goal_unit'         => 'currency',
-                            'goal_formatted'    => '—',
-                            'raised_formatted'  => '—',
-                            'member_count'      => 0,
-                            'progress'          => 0,
-                            'end_date'          => (string) get_term_meta( $campaign->term_id, '_sd_end_date', true ),
-                            'is_active'         => true,
-                        ];
-                    }
-
-                    $is_member_drive = 'members' === ( $data['goal_unit'] ?? 'currency' );
-                    $is_active       = (bool) ( $data['is_active'] ?? true );
-                    $percent         = (float) ( $data['progress'] ?? 0 );
-                    $end_date        = (string) ( $data['end_date'] ?? '' );
+                <?php foreach ( $rows as $row ) :
+                    $is_member_drive = 'members' === ( $row['goal_unit'] ?? 'currency' );
+                    $is_active       = (bool) ( $row['is_active'] ?? true );
+                    $percent         = (float) ( $row['progress'] ?? 0 );
+                    $end_date        = (string) ( $row['end_date'] ?? '' );
 
                     if ( $is_member_drive ) {
                         $progress_text = sprintf(
                             /* translators: 1: members joined, 2: goal formatted (e.g. "100 members"). */
                             __( '%1$d / %2$s', 'starter-shelter' ),
-                            (int) ( $data['member_count'] ?? 0 ),
-                            $data['goal_formatted'] ?? ''
+                            (int) ( $row['member_count'] ?? 0 ),
+                            $row['goal_formatted'] ?? ''
                         );
                     } else {
                         $progress_text = sprintf(
                             /* translators: 1: dollars raised, 2: dollars goal. */
                             __( '%1$s / %2$s', 'starter-shelter' ),
-                            $data['raised_formatted'] ?? '$0',
-                            $data['goal_formatted']   ?? '$0'
+                            $row['raised_formatted'] ?? '$0',
+                            $row['goal_formatted']   ?? '$0'
                         );
                     }
                 ?>
                 <tr>
-                    <td><strong><?php echo esc_html( $campaign->name ); ?></strong></td>
+                    <td><strong><?php echo esc_html( $row['name'] ?? '' ); ?></strong></td>
                     <td>
                         <span class="sd-pill <?php echo $is_member_drive ? 'sd-pill--membership' : 'sd-pill--donation'; ?>">
                             <?php echo esc_html( $is_member_drive
@@ -824,7 +801,7 @@ class Reports {
                             ); ?>
                         </span>
                     </td>
-                    <td><?php echo esc_html( $data['goal_formatted'] ?? '—' ); ?></td>
+                    <td><?php echo esc_html( $row['goal_formatted'] ?? '—' ); ?></td>
                     <td>
                         <span class="sd-campaign-progress-text">
                             <?php echo esc_html( $progress_text ); ?>
@@ -851,7 +828,7 @@ class Reports {
                         <a href="<?php echo esc_url( add_query_arg( [
                             'action'      => 'sd_export_report',
                             'report'      => 'campaign',
-                            'campaign_id' => $campaign->term_id,
+                            'campaign_id' => (int) ( $row['campaign_id'] ?? 0 ),
                             '_wpnonce'    => wp_create_nonce( 'sd_export_report' ),
                         ], admin_url( 'admin-ajax.php' ) ) ); ?>" class="button button-small">
                             <?php esc_html_e( 'Export', 'starter-shelter' ); ?>

@@ -394,6 +394,44 @@
         }
       }
     },
+    "shelter-reports/campaigns-progress": {
+      "label": "Campaigns Progress (Batch)",
+      "description": "Batch sibling of shelter-reports/campaign-progress: returns the same per-campaign payload for many campaigns in 2-3 SQL queries (one GROUP BY per type + a term-meta prime) instead of N invocations. Used by the Reports → Campaigns tab.",
+      "category": "shelter-reports",
+      "permission": "admin",
+      "meta": {
+        "annotations": {
+          "readonly": true,
+          "destructive": false,
+          "idempotent": true
+        },
+        "show_in_rest": true
+      },
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "campaign_ids": {
+            "type": "array",
+            "items": { "type": "integer" },
+            "description": "Optional list of sd_campaign term IDs. Empty/omitted = all campaigns."
+          },
+          "include_ended": {
+            "type": "boolean",
+            "default": true,
+            "description": "When false, campaigns past their end_date are filtered out."
+          }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "campaigns": {
+            "type": "array",
+            "description": "Array of campaign-progress entries (same shape as shelter-reports/campaign-progress output)."
+          }
+        }
+      }
+    },
     "shelter-reports/campaign-report": {
       "label": "Generate Campaign Report",
       "description": "Generates a detailed report for a specific campaign",
