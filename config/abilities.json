@@ -150,6 +150,10 @@
           "fiscal_year": {
             "type": "integer",
             "description": "Specific fiscal year when period='fiscal_year'."
+          },
+          "campaign_id": {
+            "type": "integer",
+            "description": "Filter by sd_campaign term ID. 0/omitted = no filter. Scopes the donations/memberships/memorials rollups; donor counts stay unfiltered (donors aren't directly campaign-tagged)."
           }
         }
       },
@@ -226,6 +230,10 @@
           "fiscal_year": {
             "type": "integer",
             "description": "Specific fiscal year when period='fiscal_year'."
+          },
+          "campaign_id": {
+            "type": "integer",
+            "description": "Filter by sd_campaign term ID. 0/omitted = no filter. Restricts the bucketed totals to donations attached to the campaign."
           }
         }
       },

@@ -207,16 +207,32 @@ function donor_summary( array $input ): array|WP_Error {
  * @return array Dashboard statistics.
  */
 function dashboard_stats( array $input = [] ): array {
-    $period = $input['period'] ?? 'fiscal_year';
-    $range  = Helpers\get_date_range_for_period(
+    $period      = $input['period'] ?? 'fiscal_year';
+    $range       = Helpers\get_date_range_for_period(
         $period,
         null,
         $input['fiscal_year'] ?? null
     );
+    $campaign_id = (int) ( $input['campaign_id'] ?? 0 );
 
     global $wpdb;
     $today           = wp_date( 'Y-m-d' );
     $expiring_window = wp_date( 'Y-m-d', strtotime( '+' . EXPIRING_SOON_WINDOW_DAYS . ' days' ) );
+
+    // Optional sd_campaign tax_query join. Spliced into the donations,
+    // memberships, by-tier, and memorials queries. Donor counts stay
+    // unfiltered — donors aren't directly campaign-tagged; we'd be
+    // joining transitively through donations/memberships which would
+    // require a different shape.
+    $campaign_join  = '';
+    $campaign_where = '';
+    $campaign_args  = [];
+    if ( $campaign_id > 0 ) {
+        $campaign_join  = " INNER JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id"
+                        . " INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id AND tt.taxonomy = 'sd_campaign'";
+        $campaign_where = ' AND tt.term_id = %d';
+        $campaign_args  = [ $campaign_id ];
+    }
 
     // Donations: count, sum, unique donors in period.
     $donation_stats = $wpdb->get_row( $wpdb->prepare(
@@ -228,11 +244,14 @@ function dashboard_stats( array $input = [] ): array {
         INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_amount'
         INNER JOIN {$wpdb->postmeta} pd ON p.ID = pd.post_id AND pd.meta_key = '_sd_donor_id'
         INNER JOIN {$wpdb->postmeta} pdt ON p.ID = pdt.post_id AND pdt.meta_key = '_sd_donation_date'
+        {$campaign_join}
         WHERE p.post_type = 'sd_donation'
         AND p.post_status = 'publish'
-        AND pdt.meta_value BETWEEN %s AND %s",
+        AND pdt.meta_value BETWEEN %s AND %s
+        {$campaign_where}",
         $range['start'],
-        $range['end']
+        $range['end'],
+        ...$campaign_args
     ) );
 
     // Memberships: active (currently valid), new (started in period), expiring_soon
@@ -247,15 +266,18 @@ function dashboard_stats( array $input = [] ): array {
         INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_amount'
         INNER JOIN {$wpdb->postmeta} pe ON p.ID = pe.post_id AND pe.meta_key = '_sd_end_date'
         INNER JOIN {$wpdb->postmeta} ps ON p.ID = ps.post_id AND ps.meta_key = '_sd_start_date'
+        {$campaign_join}
         WHERE p.post_type = 'sd_membership'
-        AND p.post_status = 'publish'",
+        AND p.post_status = 'publish'
+        {$campaign_where}",
         $today,
         $range['start'],
         $range['end'],
         $today,
         $expiring_window,
         $range['start'],
-        $range['end']
+        $range['end'],
+        ...$campaign_args
     ) );
 
     // Memberships by tier (count + revenue per tier, scoped to period).
@@ -268,12 +290,15 @@ function dashboard_stats( array $input = [] ): array {
         INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_amount'
         INNER JOIN {$wpdb->postmeta} ps ON p.ID = ps.post_id AND ps.meta_key = '_sd_start_date'
         INNER JOIN {$wpdb->postmeta} pt ON p.ID = pt.post_id AND pt.meta_key = '_sd_tier'
+        {$campaign_join}
         WHERE p.post_type = 'sd_membership'
         AND p.post_status = 'publish'
         AND ps.meta_value BETWEEN %s AND %s
+        {$campaign_where}
         GROUP BY pt.meta_value",
         $range['start'],
-        $range['end']
+        $range['end'],
+        ...$campaign_args
     ) );
 
     $by_tier = [];
@@ -299,11 +324,14 @@ function dashboard_stats( array $input = [] ): array {
         FROM {$wpdb->posts} p
         INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_amount'
         INNER JOIN {$wpdb->postmeta} pdt ON p.ID = pdt.post_id AND pdt.meta_key = '_sd_donation_date'
+        {$campaign_join}
         WHERE p.post_type = 'sd_memorial'
         AND p.post_status = 'publish'
-        AND pdt.meta_value BETWEEN %s AND %s",
+        AND pdt.meta_value BETWEEN %s AND %s
+        {$campaign_where}",
         $range['start'],
-        $range['end']
+        $range['end'],
+        ...$campaign_args
     ) );
 
     // Donors: lifetime total and new-in-period.
@@ -390,14 +418,15 @@ function dashboard_stats( array $input = [] ): array {
  * }
  */
 function donation_trend( array $input = [] ): array {
-    $period = $input['period'] ?? 'fiscal_year';
-    $range  = Helpers\get_date_range_for_period(
+    $period      = $input['period'] ?? 'fiscal_year';
+    $range       = Helpers\get_date_range_for_period(
         $period,
         null,
         $input['fiscal_year'] ?? null
     );
-    $start = $range['start'];
-    $end   = $range['end'];
+    $campaign_id = (int) ( $input['campaign_id'] ?? 0 );
+    $start       = $range['start'];
+    $end         = $range['end'];
 
     $days_span = max( 1, (int) ( ( strtotime( $end ) - strtotime( $start ) ) / DAY_IN_SECONDS ) );
     if ( $days_span <= 14 ) {
@@ -412,6 +441,16 @@ function donation_trend( array $input = [] ): array {
     }
 
     global $wpdb;
+    $campaign_join  = '';
+    $campaign_where = '';
+    $campaign_args  = [];
+    if ( $campaign_id > 0 ) {
+        $campaign_join  = " INNER JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id"
+                        . " INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id AND tt.taxonomy = 'sd_campaign'";
+        $campaign_where = ' AND tt.term_id = %d';
+        $campaign_args  = [ $campaign_id ];
+    }
+
     $rows = $wpdb->get_results( $wpdb->prepare(
         "SELECT
             DATE_FORMAT( pm_date.meta_value, %s ) as period_key,
@@ -421,15 +460,18 @@ function donation_trend( array $input = [] ): array {
         FROM {$wpdb->posts} p
         JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = '_sd_donation_date'
         JOIN {$wpdb->postmeta} pm_amount ON p.ID = pm_amount.post_id AND pm_amount.meta_key = '_sd_amount'
+        {$campaign_join}
         WHERE p.post_type = 'sd_donation'
           AND p.post_status = 'publish'
           AND pm_date.meta_value >= %s
           AND pm_date.meta_value <= %s
+          {$campaign_where}
         GROUP BY period_key
         ORDER BY period_start ASC",
         $group_format,
         $start,
-        $end . ' 23:59:59'
+        $end . ' 23:59:59',
+        ...$campaign_args
     ) );
 
     $buckets = [];

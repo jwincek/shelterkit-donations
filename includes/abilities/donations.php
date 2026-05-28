@@ -143,8 +143,23 @@ function get_stats( array $input = [] ): array {
         null,
         $input['fiscal_year'] ?? null
     );
+    $campaign_id = (int) ( $input['campaign_id'] ?? 0 );
 
     global $wpdb;
+
+    // Optional sd_campaign tax_query join. Built once and spliced into
+    // both queries below. We can't express this with Query::for because
+    // get_stats relies on raw SUM/COUNT aggregates the builder doesn't
+    // emit.
+    $campaign_join  = '';
+    $campaign_where = '';
+    $campaign_args  = [];
+    if ( $campaign_id > 0 ) {
+        $campaign_join  = " INNER JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id"
+                        . " INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id AND tt.taxonomy = 'sd_campaign'";
+        $campaign_where = ' AND tt.term_id = %d';
+        $campaign_args  = [ $campaign_id ];
+    }
 
     $stats = $wpdb->get_row( $wpdb->prepare(
         "SELECT
@@ -155,11 +170,14 @@ function get_stats( array $input = [] ): array {
         INNER JOIN {$wpdb->postmeta} pm_amount ON p.ID = pm_amount.post_id AND pm_amount.meta_key = '_sd_amount'
         INNER JOIN {$wpdb->postmeta} pm_donor ON p.ID = pm_donor.post_id AND pm_donor.meta_key = '_sd_donor_id'
         INNER JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = '_sd_donation_date'
+        {$campaign_join}
         WHERE p.post_type = 'sd_donation'
         AND p.post_status = 'publish'
-        AND pm_date.meta_value BETWEEN %s AND %s",
+        AND pm_date.meta_value BETWEEN %s AND %s
+        {$campaign_where}",
         $range['start'],
-        $range['end']
+        $range['end'],
+        ...$campaign_args
     ) );
 
     // Per-allocation breakdown for the "By Allocation" report table.
@@ -172,12 +190,15 @@ function get_stats( array $input = [] ): array {
         INNER JOIN {$wpdb->postmeta} pm_amount ON p.ID = pm_amount.post_id AND pm_amount.meta_key = '_sd_amount'
         INNER JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = '_sd_donation_date'
         LEFT JOIN {$wpdb->postmeta} pm_alloc ON p.ID = pm_alloc.post_id AND pm_alloc.meta_key = '_sd_allocation'
+        {$campaign_join}
         WHERE p.post_type = 'sd_donation'
         AND p.post_status = 'publish'
         AND pm_date.meta_value BETWEEN %s AND %s
+        {$campaign_where}
         GROUP BY allocation",
         $range['start'],
-        $range['end']
+        $range['end'],
+        ...$campaign_args
     ) );
 
     $by_allocation = [];

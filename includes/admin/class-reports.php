@@ -231,7 +231,7 @@ class Reports {
                         '<p class="description"><em>%s</em></p>',
                         esc_html( sprintf(
                             /* translators: %s: campaign name. */
-                            __( 'Showing records attached to campaign: %s. Stats cards remain period-wide for comparison.', 'starter-shelter' ),
+                            __( 'Filtered by campaign: %s. Donor totals (lifetime / new) are not campaign-scoped — they reflect the period only.', 'starter-shelter' ),
                             $campaign_term->name
                         ) )
                     );
@@ -296,9 +296,13 @@ class Reports {
      * @param string $period The reporting period.
      */
     private static function render_donations_report( string $period, int $campaign_id = 0 ): void {
+        $args = [ 'period' => $period ];
+        if ( $campaign_id > 0 ) {
+            $args['campaign_id'] = $campaign_id;
+        }
         $stats = self::fetch_stats(
             'shelter-donations/get-stats',
-            [ 'period' => $period ],
+            $args,
             __( 'Unable to load donation statistics.', 'starter-shelter' )
         );
         if ( ! $stats ) {
@@ -326,7 +330,7 @@ class Reports {
 
         <?php
         // Donation trend chart.
-        self::render_donation_trend_chart( $period );
+        self::render_donation_trend_chart( $period, $campaign_id );
         ?>
 
         <?php if ( ! empty( $stats['by_allocation'] ) ) : ?>
@@ -450,9 +454,13 @@ class Reports {
      * @param string $period The reporting period.
      */
     private static function render_memberships_report( string $period, int $campaign_id = 0 ): void {
+        $args = [ 'period' => $period ];
+        if ( $campaign_id > 0 ) {
+            $args['campaign_id'] = $campaign_id;
+        }
         $stats = self::fetch_stats(
             'shelter-reports/dashboard-stats',
-            [ 'period' => $period ],
+            $args,
             __( 'Unable to load membership statistics.', 'starter-shelter' )
         );
         if ( ! $stats ) {
@@ -600,9 +608,13 @@ class Reports {
      * @param string $period The reporting period.
      */
     private static function render_memorials_report( string $period, int $campaign_id = 0 ): void {
+        $args = [ 'period' => $period ];
+        if ( $campaign_id > 0 ) {
+            $args['campaign_id'] = $campaign_id;
+        }
         $stats = self::fetch_stats(
             'shelter-reports/dashboard-stats',
-            [ 'period' => $period ],
+            $args,
             __( 'Unable to load memorial statistics.', 'starter-shelter' )
         );
         if ( ! $stats ) {
@@ -796,7 +808,7 @@ class Reports {
      *
      * @param string $period The reporting period.
      */
-    private static function render_donation_trend_chart( string $period ): void {
+    private static function render_donation_trend_chart( string $period, int $campaign_id = 0 ): void {
         $ability = function_exists( 'wp_get_ability' )
             ? wp_get_ability( 'shelter-reports/donation-trend' )
             : null;
@@ -804,7 +816,11 @@ class Reports {
             return;
         }
 
-        $data = $ability->execute( [ 'period' => $period ] );
+        $args = [ 'period' => $period ];
+        if ( $campaign_id > 0 ) {
+            $args['campaign_id'] = $campaign_id;
+        }
+        $data = $ability->execute( $args );
         if ( is_wp_error( $data ) || ! is_array( $data ) ) {
             return;
         }

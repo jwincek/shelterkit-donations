@@ -293,6 +293,10 @@ return [
 						'type'        => 'integer',
 						'description' => 'Specific fiscal year (period=fiscal_year).',
 					],
+					'campaign_id' => [
+						'type'        => 'integer',
+						'description' => 'Filter by sd_campaign term ID. 0/omitted = no filter. Scopes total, count, donor_count, average, and by_allocation to donations attached to the campaign.',
+					],
 				],
 			],
 			'output' => [
