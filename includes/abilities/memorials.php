@@ -42,11 +42,19 @@ function create( array $input ): array|WP_Error {
     // haven't migrated yet (CC-2 read-both, write-canonical).
     $memorial_date = $input['donation_date'] ?? $input['date'] ?? wp_date( 'Y-m-d H:i:s' );
 
-    // Get donor display name for denormalized search.
+    // Denormalized donor name for the wall + search. This is a
+    // per-tribute copy, so prefer the name supplied for THIS memorial
+    // (the form's "Your Name" field). get_or_create_donor intentionally
+    // does NOT overwrite an existing donor's canonical _sd_display_name,
+    // so a returning email would otherwise show the stored donor name
+    // instead of what the giver typed here. Fall back to the donor
+    // record only when no name was supplied.
     $donor_display_name = '';
     if ( ! ( $input['is_anonymous'] ?? false ) ) {
-        $donor_display_name = get_post_meta( $donor_id, '_sd_display_name', true )
-            ?: get_the_title( $donor_id );
+        $supplied = trim( (string) ( $input['donor_name'] ?? '' ) );
+        $donor_display_name = '' !== $supplied
+            ? \Starter_Shelter\Admin\Shared\Donor_Lookup::sanitize_display_name( $supplied )
+            : ( get_post_meta( $donor_id, '_sd_display_name', true ) ?: get_the_title( $donor_id ) );
     }
 
     // Create memorial post.
