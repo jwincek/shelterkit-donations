@@ -60,6 +60,7 @@ function create( array $input ): array|WP_Error {
             '_sd_donor_display_name' => $donor_display_name,
             '_sd_honoree_name'       => $input['honoree_name'],
             '_sd_memorial_type'      => Helpers\normalize_memorial_type( (string) ( $input['memorial_type'] ?? '' ) ),
+            '_sd_dedication_type'    => 'honor' === ( $input['dedication_type'] ?? 'memory' ) ? 'honor' : 'memory',
             '_sd_pet_species'        => $input['pet_species'] ?? '',
             '_sd_tribute_message'    => $input['tribute_message'] ?? '',
             '_sd_amount'             => (float) ( $input['amount'] ?? 0 ),

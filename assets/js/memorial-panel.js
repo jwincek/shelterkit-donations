@@ -91,16 +91,28 @@
 				label:    __( 'Honoree Name', 'starter-shelter' ),
 				value:    m.meta._sd_honoree_name || '',
 				onChange: function( v ) { m.set( '_sd_honoree_name', v ); },
+				help:     __( 'Also used as the post title.', 'starter-shelter' ),
+				__nextHasNoMarginBottom: true,
+			} ),
+			// Two orthogonal axes, mirroring the customer-facing
+			// memorial-form: dedication (the occasion) + honoree type
+			// (the subject). The old single "Type" select conflated them.
+			el( SelectControl, {
+				label:   __( 'Dedication', 'starter-shelter' ),
+				value:   m.meta._sd_dedication_type || 'memory',
+				options: [
+					{ value: 'memory', label: __( 'In Memory Of', 'starter-shelter' ) },
+					{ value: 'honor',  label: __( 'In Honor Of', 'starter-shelter' ) },
+				],
+				onChange: function( v ) { m.set( '_sd_dedication_type', v ); },
 				__nextHasNoMarginBottom: true,
 			} ),
 			el( SelectControl, {
-				label:   __( 'Type', 'starter-shelter' ),
-				value:   m.meta._sd_memorial_type || '',
+				label:   __( 'Honoree Type', 'starter-shelter' ),
+				value:   m.meta._sd_memorial_type || 'person',
 				options: [
-					{ value: '',      label: __( '— Select —', 'starter-shelter' ) },
-					{ value: 'human', label: __( 'Person', 'starter-shelter' ) },
-					{ value: 'pet',   label: __( 'Pet', 'starter-shelter' ) },
-					{ value: 'honor', label: __( 'In Honor Of', 'starter-shelter' ) },
+					{ value: 'person', label: __( 'Person', 'starter-shelter' ) },
+					{ value: 'pet',    label: __( 'Pet', 'starter-shelter' ) },
 				],
 				onChange: function( v ) { m.set( '_sd_memorial_type', v ); },
 				__nextHasNoMarginBottom: true,

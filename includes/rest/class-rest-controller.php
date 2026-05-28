@@ -743,6 +743,16 @@ function process_memorial_save( int $post_id, \WP_Post $post, bool $update ): vo
         return;
     }
 
+    // Block-editor (and any REST) saves write meta AFTER save_post fires,
+    // so reading _sd_* here would see stale/empty values — and step 5
+    // would fire the created-hook with blank data. Defer those to
+    // rest_after_insert_sd_memorial (below), which runs once meta is
+    // committed. The classic-editor path writes meta via meta-box save
+    // handlers before this priority-20 hook, so it stays here.
+    if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+        return;
+    }
+
     // Prevent recursion from wp_update_post in the helper.
     static $processing = [];
     if ( isset( $processing[ $post_id ] ) ) {
@@ -758,3 +768,35 @@ function process_memorial_save( int $post_id, \WP_Post $post, bool $update ): vo
     unset( $processing[ $post_id ] );
 }
 add_action( 'save_post_sd_memorial', __NAMESPACE__ . '\\process_memorial_save', 20, 3 );
+
+/**
+ * REST counterpart of process_memorial_save().
+ *
+ * Fires after the block editor (or any REST client) has written the
+ * post AND its meta, so Helpers\process_memorial_save() reads the
+ * freshly-saved _sd_* values. The save_post handler above bails on
+ * REST_REQUEST and hands off here. Note: the ability-create path uses
+ * a direct wp_insert_post (not the posts controller), so this hook
+ * does not double-fire for checkout-created memorials.
+ *
+ * @since 1.1.4
+ *
+ * @param \WP_Post         $post     Inserted/updated post.
+ * @param \WP_REST_Request $request  REST request (unused).
+ * @param bool             $creating True when creating a new post.
+ */
+function process_memorial_save_rest( \WP_Post $post, $request, bool $creating ): void {
+    static $processing = [];
+    if ( isset( $processing[ $post->ID ] ) ) {
+        return;
+    }
+    $processing[ $post->ID ] = true;
+
+    \Starter_Shelter\Helpers\process_memorial_save( $post->ID, [
+        'is_new'        => $creating,
+        'import_source' => 'admin_editor',
+    ] );
+
+    unset( $processing[ $post->ID ] );
+}
+add_action( 'rest_after_insert_sd_memorial', __NAMESPACE__ . '\\process_memorial_save_rest', 10, 3 );

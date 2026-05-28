@@ -68,6 +68,24 @@ return [
 				'required'   => true,
 			],
 		],
+		// The occasion: in memory of (deceased) vs in honor of (living).
+		// Orthogonal to `memorial_type` (the subject — person vs pet).
+		// The customer-facing memorial-form collects this as
+		// `dedicationType`; before 1.1.4 it was captured into order-item
+		// meta but never mapped into the memorial post, so the wall
+		// couldn't tell a memorial from an honorarium.
+		'dedication_type' => [
+			'type'         => 'string',
+			'enum'         => [ 'memory', 'honor' ],
+			'default'      => 'memory',
+			'show_in_rest' => true,
+			'description'  => 'Occasion: memory (In Memory Of, deceased) or honor (In Honor Of, living). Orthogonal to memorial_type.',
+			'form'         => [
+				'label'      => 'Dedication',
+				'input_type' => 'select',
+				'options'    => [ 'memory' => 'In Memory Of', 'honor' => 'In Honor Of' ],
+			],
+		],
 		'memorial_type' => [
 			'type'         => 'string',
 			'enum'         => [ 'person', 'pet' ],
@@ -75,7 +93,7 @@ return [
 			'show_in_rest' => true,
 			'description'  => "Subject of the memorial (canonical values; legacy rows may contain 'human', 'honor', or 'memory' — normalized to 'person' on read via Helpers\\normalize_memorial_type)",
 			'form'         => [
-				'label'      => 'Type',
+				'label'      => 'Honoree Type',
 				'input_type' => 'select',
 				// Canonical options matching the entity enum. Legacy rows
 				// stored with 'human'/'honor'/'memory' values are
@@ -315,6 +333,11 @@ return [
 						'type' => 'string',
 						'enum' => [ 'person', 'pet' ],
 					],
+					'dedication_type' => [
+						'type'    => 'string',
+						'enum'    => [ 'memory', 'honor' ],
+						'default' => 'memory',
+					],
 					'pet_species'     => [ '$entity' => 'pet_species' ],
 					'tribute_message' => [ '$entity' => 'tribute_message' ],
 					'amount'          => [ '$entity' => 'amount' ],
@@ -411,6 +434,12 @@ return [
 					'source'    => 'attribute',
 					'key'       => 'in-memoriam-type',
 					'transform' => 'lowercase',
+				],
+				'dedication_type' => [
+					'source'   => 'item_meta',
+					'key'      => '_sd_dedication_type',
+					'fallback' => [ 'source' => 'order_meta', 'key' => '_sd_dedication_type' ],
+					'default'  => 'memory',
 				],
 				'donor_name' => [
 					'source' => 'item_meta',
@@ -599,6 +628,7 @@ return [
 			'priority' => 'high',
 			'fields'   => [
 				'honoree_name',
+				'dedication_type',
 				'memorial_type',
 				'pet_species',
 				'tribute_message',
