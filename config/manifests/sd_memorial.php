@@ -363,6 +363,10 @@ return [
 					'year'     => [ 'type' => 'integer' ],
 					'search'   => [ 'type' => 'string' ],
 					'donor_id' => [ 'type' => 'integer' ],
+					'campaign_id' => [
+						'type'        => 'integer',
+						'description' => 'Filter by sd_campaign term ID. 0/omitted = no filter.',
+					],
 					'page'     => [ 'type' => 'integer', 'default' => 1 ],
 					'per_page' => [ 'type' => 'integer', 'default' => 12 ],
 				],

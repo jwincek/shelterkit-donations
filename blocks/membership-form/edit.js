@@ -5,6 +5,8 @@
     const { __ } = wp.i18n;
     const ServerSideRender = wp.serverSideRender;
 
+    const blockData = window.starterShelterBlocks || {};
+
     const Edit = function( props ) {
         const { attributes, setAttributes } = props;
         const blockProps = useBlockProps();
@@ -75,7 +77,19 @@
                         checked: attributes.showAnonymous,
                         onChange: function( value ) { setAttributes( { showAnonymous: value } ); },
                     } )
-                )
+                ),
+                // Hide the panel when no campaigns exist yet (only the
+                // "— Select Campaign —" sentinel). Matches the gate in
+                // donation-form/edit.js.
+                blockData.campaigns && blockData.campaigns.length > 1 ? el( PanelBody, { title: __( 'Campaign', 'starter-shelter' ), initialOpen: false },
+                    el( SelectControl, {
+                        label: __( 'Link to Campaign', 'starter-shelter' ),
+                        value: attributes.campaignId || 0,
+                        options: blockData.campaigns,
+                        onChange: function( value ) { setAttributes( { campaignId: parseInt( value, 10 ) || null } ); },
+                        help: __( 'When set, every signup through this form attaches to the campaign. Leave unset to let the form auto-tag from ?campaign={id} in the URL.', 'starter-shelter' ),
+                    } )
+                ) : null
             ),
             el( 'div', blockProps,
                 el( ServerSideRender, {

@@ -112,6 +112,7 @@ function list_memorials( array $input = [] ): array {
     $query = Query::for( 'sd_memorial' )
         ->withPermalinks()                    // ← one-line addition
         ->where( 'donor_id', $input['donor_id'] ?? null )
+        ->whereInTaxonomy( 'sd_campaign', $input['campaign_id'] ?? null )
         ->searchMultiple( [ 'honoree_name', 'donor_display_name' ], $input['search'] ?? null )
         ->orderBy( 'donation_date', 'DESC' );
 

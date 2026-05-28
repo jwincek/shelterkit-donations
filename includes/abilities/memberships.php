@@ -249,6 +249,7 @@ function list_memberships( array $input = [] ): array {
         ->where( 'donor_id', $input['donor_id'] ?? null )
         ->where( 'tier', $input['tier'] ?? null )
         ->where( 'membership_type', $input['membership_type'] ?? null )
+        ->whereInTaxonomy( 'sd_campaign', $input['campaign_id'] ?? null )
         ->orderBy( 'end_date', 'DESC' );
 
     // Filter by status (active/expired/expiring).

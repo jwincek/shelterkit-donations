@@ -117,8 +117,28 @@ class Reports {
             return;
         }
 
-        $active_tab = sanitize_key( $_GET['tab'] ?? 'donations' );
-        $period     = sanitize_key( $_GET['period'] ?? 'month' );
+        $active_tab  = sanitize_key( $_GET['tab'] ?? 'donations' );
+        $period      = sanitize_key( $_GET['period'] ?? 'month' );
+        $campaign_id = absint( $_GET['campaign_id'] ?? 0 );
+
+        // Validate campaign_id against the taxonomy — drop garbage IDs
+        // before they reach ability inputs (defense-in-depth; the list
+        // abilities also call whereInTaxonomy which would no-op).
+        if ( $campaign_id > 0 ) {
+            $campaign_term = get_term( $campaign_id, 'sd_campaign' );
+            if ( ! $campaign_term || is_wp_error( $campaign_term ) ) {
+                $campaign_id = 0;
+            }
+        }
+
+        $campaign_terms = get_terms( [
+            'taxonomy'   => 'sd_campaign',
+            'hide_empty' => false,
+            'orderby'    => 'name',
+        ] );
+        if ( is_wp_error( $campaign_terms ) ) {
+            $campaign_terms = [];
+        }
 
         ?>
         <div class="wrap sd-reports">
@@ -180,7 +200,18 @@ class Reports {
                         <span>—</span>
                         <input type="date" name="date_to" value="<?php echo esc_attr( sanitize_text_field( $_GET['date_to'] ?? '' ) ); ?>" />
                     </span>
-                    
+
+                    <?php if ( 'campaigns' !== $active_tab && ! empty( $campaign_terms ) ) : ?>
+                    <select name="campaign_id" id="sd-campaign-filter">
+                        <option value="0"><?php esc_html_e( 'All Campaigns', 'starter-shelter' ); ?></option>
+                        <?php foreach ( $campaign_terms as $term ) : ?>
+                            <option value="<?php echo esc_attr( (string) $term->term_id ); ?>" <?php selected( $campaign_id, $term->term_id ); ?>>
+                                <?php echo esc_html( $term->name ); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <?php endif; ?>
+
                     <button type="submit" class="button">
                         <?php esc_html_e( 'Filter', 'starter-shelter' ); ?>
                     </button>
@@ -195,18 +226,28 @@ class Reports {
 
             <div class="sd-reports-content">
                 <?php
+                if ( $campaign_id > 0 && isset( $campaign_term ) && $campaign_term ) {
+                    printf(
+                        '<p class="description"><em>%s</em></p>',
+                        esc_html( sprintf(
+                            /* translators: %s: campaign name. */
+                            __( 'Showing records attached to campaign: %s. Stats cards remain period-wide for comparison.', 'starter-shelter' ),
+                            $campaign_term->name
+                        ) )
+                    );
+                }
                 switch ( $active_tab ) {
                     case 'memberships':
-                        self::render_memberships_report( $period );
+                        self::render_memberships_report( $period, $campaign_id );
                         break;
                     case 'memorials':
-                        self::render_memorials_report( $period );
+                        self::render_memorials_report( $period, $campaign_id );
                         break;
                     case 'campaigns':
                         self::render_campaigns_report( $period );
                         break;
                     default:
-                        self::render_donations_report( $period );
+                        self::render_donations_report( $period, $campaign_id );
                         break;
                 }
                 ?>
@@ -254,7 +295,7 @@ class Reports {
      *
      * @param string $period The reporting period.
      */
-    private static function render_donations_report( string $period ): void {
+    private static function render_donations_report( string $period, int $campaign_id = 0 ): void {
         $stats = self::fetch_stats(
             'shelter-donations/get-stats',
             [ 'period' => $period ],
@@ -310,7 +351,7 @@ class Reports {
         </table>
         <?php endif; ?>
 
-        <?php self::render_donations_table( $period ); ?>
+        <?php self::render_donations_table( $period, $campaign_id ); ?>
         <?php
     }
 
@@ -323,15 +364,19 @@ class Reports {
      *
      * @since 1.1.3
      */
-    private static function render_donations_table( string $period ): void {
-        $range  = \Starter_Shelter\Helpers\get_date_range_for_period( $period );
+    private static function render_donations_table( string $period, int $campaign_id = 0 ): void {
+        $range = \Starter_Shelter\Helpers\get_date_range_for_period( $period );
+        $args  = [
+            'date_from' => $range['start'],
+            'date_to'   => $range['end'],
+            'per_page'  => 20,
+        ];
+        if ( $campaign_id > 0 ) {
+            $args['campaign_id'] = $campaign_id;
+        }
         $result = self::fetch_stats(
             'shelter-donations/list',
-            [
-                'date_from' => $range['start'],
-                'date_to'   => $range['end'],
-                'per_page'  => 20,
-            ],
+            $args,
             __( 'Unable to load recent donations.', 'starter-shelter' )
         );
         $items = $result['items'] ?? [];
@@ -404,7 +449,7 @@ class Reports {
      *
      * @param string $period The reporting period.
      */
-    private static function render_memberships_report( string $period ): void {
+    private static function render_memberships_report( string $period, int $campaign_id = 0 ): void {
         $stats = self::fetch_stats(
             'shelter-reports/dashboard-stats',
             [ 'period' => $period ],
@@ -462,7 +507,7 @@ class Reports {
         </table>
         <?php endif; ?>
 
-        <?php self::render_memberships_table(); ?>
+        <?php self::render_memberships_table( $campaign_id ); ?>
         <?php
     }
 
@@ -475,13 +520,17 @@ class Reports {
      *
      * @since 1.1.3
      */
-    private static function render_memberships_table(): void {
+    private static function render_memberships_table( int $campaign_id = 0 ): void {
+        $args = [
+            'status'   => 'all',
+            'per_page' => 20,
+        ];
+        if ( $campaign_id > 0 ) {
+            $args['campaign_id'] = $campaign_id;
+        }
         $result = self::fetch_stats(
             'shelter-memberships/list',
-            [
-                'status'   => 'all',
-                'per_page' => 20,
-            ],
+            $args,
             __( 'Unable to load recent memberships.', 'starter-shelter' )
         );
         $items = $result['items'] ?? [];
@@ -550,7 +599,7 @@ class Reports {
      *
      * @param string $period The reporting period.
      */
-    private static function render_memorials_report( string $period ): void {
+    private static function render_memorials_report( string $period, int $campaign_id = 0 ): void {
         $stats = self::fetch_stats(
             'shelter-reports/dashboard-stats',
             [ 'period' => $period ],
@@ -577,7 +626,7 @@ class Reports {
             </div>
         </div>
 
-        <?php self::render_memorials_table(); ?>
+        <?php self::render_memorials_table( $campaign_id ); ?>
         <?php
     }
 
@@ -590,13 +639,17 @@ class Reports {
      *
      * @since 1.1.3
      */
-    private static function render_memorials_table(): void {
+    private static function render_memorials_table( int $campaign_id = 0 ): void {
+        $args = [
+            'type'     => 'all',
+            'per_page' => 20,
+        ];
+        if ( $campaign_id > 0 ) {
+            $args['campaign_id'] = $campaign_id;
+        }
         $result = self::fetch_stats(
             'shelter-memorials/list',
-            [
-                'type'     => 'all',
-                'per_page' => 20,
-            ],
+            $args,
             __( 'Unable to load recent memorials.', 'starter-shelter' )
         );
         $items = $result['items'] ?? [];
@@ -894,10 +947,12 @@ class Reports {
             wp_die( __( 'Permission denied.', 'starter-shelter' ) );
         }
 
-        $report = sanitize_key( $_GET['report'] ?? 'donations' );
-        $period = sanitize_key( $_GET['period'] ?? 'month' );
+        $report      = sanitize_key( $_GET['report'] ?? 'donations' );
+        $period      = sanitize_key( $_GET['period'] ?? 'month' );
+        $campaign_id = absint( $_GET['campaign_id'] ?? 0 );
 
-        $filename = 'shelter-' . $report . '-' . $period . '-' . wp_date( 'Y-m-d' ) . '.csv';
+        $filename_suffix = $campaign_id > 0 ? '-campaign-' . $campaign_id : '';
+        $filename        = 'shelter-' . $report . '-' . $period . $filename_suffix . '-' . wp_date( 'Y-m-d' ) . '.csv';
 
         header( 'Content-Type: text/csv; charset=utf-8' );
         header( 'Content-Disposition: attachment; filename=' . $filename );
@@ -908,18 +963,19 @@ class Reports {
             case 'campaign':
                 // Per-campaign export (link rendered with campaign_id in
                 // the campaigns table). Distinct from the top-bar
-                // Export CSV button which doesn't carry a campaign_id.
+                // Export CSV button which now also threads campaign_id
+                // when the filter is set.
                 self::export_campaign_report( $output );
                 break;
             case 'memberships':
-                self::export_memberships_report( $output, $period );
+                self::export_memberships_report( $output, $period, $campaign_id );
                 break;
             case 'memorials':
-                self::export_memorials_report( $output, $period );
+                self::export_memorials_report( $output, $period, $campaign_id );
                 break;
             case 'donations':
             default:
-                self::export_donations_report( $output, $period );
+                self::export_donations_report( $output, $period, $campaign_id );
                 break;
         }
 
@@ -972,7 +1028,7 @@ class Reports {
      * @param resource $output File handle.
      * @param string   $period Report period.
      */
-    private static function export_donations_report( $output, string $period ): void {
+    private static function export_donations_report( $output, string $period, int $campaign_id = 0 ): void {
         // CSV headers.
         fputcsv( $output, [
             __( 'Date', 'starter-shelter' ),
@@ -1002,12 +1058,16 @@ class Reports {
         $all_items   = [];
 
         do {
-            $result = $ability->execute( [
+            $args = [
                 'date_from' => $date_range['start'],
                 'date_to'   => $date_range['end'],
                 'page'      => $page,
                 'per_page'  => $per_page,
-            ] );
+            ];
+            if ( $campaign_id > 0 ) {
+                $args['campaign_id'] = $campaign_id;
+            }
+            $result = $ability->execute( $args );
 
             if ( is_wp_error( $result ) ) {
                 return;
@@ -1057,7 +1117,7 @@ class Reports {
      * @param resource $output File handle.
      * @param string   $period Report period.
      */
-    private static function export_memberships_report( $output, string $period ): void {
+    private static function export_memberships_report( $output, string $period, int $campaign_id = 0 ): void {
         fputcsv( $output, [
             __( 'Member', 'starter-shelter' ),
             __( 'Email', 'starter-shelter' ),
@@ -1074,10 +1134,14 @@ class Reports {
             return;
         }
 
-        $result = $ability->execute( [
+        $args = [
             'status'   => 'all',
             'per_page' => 1000,
-        ] );
+        ];
+        if ( $campaign_id > 0 ) {
+            $args['campaign_id'] = $campaign_id;
+        }
+        $result = $ability->execute( $args );
 
         if ( is_wp_error( $result ) ) {
             return;
@@ -1110,7 +1174,7 @@ class Reports {
      * @param resource $output File handle.
      * @param string   $period Report period.
      */
-    private static function export_memorials_report( $output, string $period ): void {
+    private static function export_memorials_report( $output, string $period, int $campaign_id = 0 ): void {
         fputcsv( $output, [
             __( 'Honoree', 'starter-shelter' ),
             __( 'Type', 'starter-shelter' ),
@@ -1130,10 +1194,14 @@ class Reports {
         // year, not period range. For now, pull all and let the user
         // filter in their spreadsheet — the per-period semantics are
         // already reflected in the dashboard stats view.
-        $result = $ability->execute( [
+        $args = [
             'type'     => 'all',
             'per_page' => 1000,
-        ] );
+        ];
+        if ( $campaign_id > 0 ) {
+            $args['campaign_id'] = $campaign_id;
+        }
+        $result = $ability->execute( $args );
 
         if ( is_wp_error( $result ) ) {
             return;
