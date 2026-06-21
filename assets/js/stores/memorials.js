@@ -91,7 +91,12 @@ const { state, actions } = store( 'starter-shelter/memorials', {
         get hasActiveFilters() {
             const ctx = getContext();
             const f   = ctx.filters ?? {};
-            return !!( f.search || ( f.type && f.type !== 'all' ) || f.year );
+            return !!(
+                f.search ||
+                ( f.type && f.type !== 'all' ) ||
+                ( f.dedication && f.dedication !== 'all' ) ||
+                f.year
+            );
         },
 
         /**
@@ -346,7 +351,7 @@ const { state, actions } = store( 'starter-shelter/memorials', {
          */
         clearFilters: function* () {
             const ctx    = getContext();
-            ctx.filters  = { type: 'all', year: '', search: '' };
+            ctx.filters  = { type: 'all', dedication: 'all', year: '', search: '' };
             ctx.page     = 1;
 
             // Clear the search input DOM element directly.
@@ -403,6 +408,7 @@ const { state, actions } = store( 'starter-shelter/memorials', {
                 };
 
                 if ( filters.type && filters.type !== 'all' ) input.type = filters.type;
+                if ( filters.dedication && filters.dedication !== 'all' ) input.dedication = filters.dedication;
                 if ( filters.year )   input.year   = parseInt( filters.year, 10 );
                 if ( filters.search ) input.search = filters.search;
 
@@ -528,6 +534,7 @@ function buildFilterUrl( ctx, page = 1 ) {
     // Strip all memorial-specific params (we'll re-add what's needed).
     url.searchParams.delete( 'memorial-page' );
     url.searchParams.delete( 'memorial-type' );
+    url.searchParams.delete( 'memorial-dedication' );
     url.searchParams.delete( 'memorial-year' );
     url.searchParams.delete( 'memorial-search' );
 
@@ -538,6 +545,9 @@ function buildFilterUrl( ctx, page = 1 ) {
     const f = ctx.filters ?? {};
     if ( f.type && f.type !== 'all' ) {
         url.searchParams.set( 'memorial-type', f.type );
+    }
+    if ( f.dedication && f.dedication !== 'all' ) {
+        url.searchParams.set( 'memorial-dedication', f.dedication );
     }
     if ( f.year ) {
         url.searchParams.set( 'memorial-year', f.year );

@@ -62,9 +62,13 @@ $empty_message    = $attributes['emptyMessage'] ?: __( 'No memorials found.', 's
 $current_page = max( 1, absint( $_GET['memorial-page'] ?? 1 ) );
 $search_term  = sanitize_text_field( $_GET['memorial-search'] ?? '' );
 $type_filter  = sanitize_key( $_GET['memorial-type'] ?? $default_type );
+$dedication_filter = sanitize_key( $_GET['memorial-dedication'] ?? 'all' );
 $year_filter  = sanitize_text_field( $_GET['memorial-year'] ?? '' );
 
-$has_active_filters = $search_term || ( $type_filter && 'all' !== $type_filter ) || $year_filter;
+$has_active_filters = $search_term
+    || ( $type_filter && 'all' !== $type_filter )
+    || ( $dedication_filter && 'all' !== $dedication_filter )
+    || $year_filter;
 
 // ─── Fetch data via Ability ──────────────────────────────────────────
 $ability = function_exists( 'wp_get_ability' )
@@ -76,9 +80,10 @@ if ( $ability ) {
     // schema validation (year=integer, search=string — neither
     // accepts null).
     $ability_input = [
-        'type'     => $type_filter,
-        'page'     => $current_page,
-        'per_page' => $per_page,
+        'type'       => $type_filter,
+        'dedication' => $dedication_filter,
+        'page'       => $current_page,
+        'per_page'   => $per_page,
     ];
     if ( $year_filter ) {
         $ability_input['year'] = (int) $year_filter;
@@ -108,6 +113,9 @@ if ( $ability ) {
 
     if ( 'all' !== $type_filter ) {
         $query->where( 'memorial_type', $type_filter );
+    }
+    if ( 'all' !== $dedication_filter ) {
+        $query->where( 'dedication_type', $dedication_filter );
     }
     if ( $year_filter ) {
         $query->whereInTaxonomy( 'sd_memorial_year', $year_filter, 'slug' );
@@ -139,7 +147,7 @@ if ( $show_year_filter ) {
 
 // ─── Base URL for filter navigation ──────────────────────────────────
 $base_url = remove_query_arg(
-    [ 'memorial-page', 'memorial-type', 'memorial-year', 'memorial-search' ]
+    [ 'memorial-page', 'memorial-type', 'memorial-dedication', 'memorial-year', 'memorial-search' ]
 );
 
 // ─── Pagination URLs (server-rendered for no-JS) ─────────────────────
@@ -148,20 +156,22 @@ $next_url = '';
 
 if ( $current_page > 1 ) {
     $prev_params = array_filter( [
-        'memorial-page'   => $current_page - 1 > 1 ? $current_page - 1 : null,
-        'memorial-type'   => 'all' !== $type_filter ? $type_filter : null,
-        'memorial-year'   => $year_filter ?: null,
-        'memorial-search' => $search_term ?: null,
+        'memorial-page'       => $current_page - 1 > 1 ? $current_page - 1 : null,
+        'memorial-type'       => 'all' !== $type_filter ? $type_filter : null,
+        'memorial-dedication' => 'all' !== $dedication_filter ? $dedication_filter : null,
+        'memorial-year'       => $year_filter ?: null,
+        'memorial-search'     => $search_term ?: null,
     ] );
     $prev_url = add_query_arg( $prev_params, $base_url );
 }
 
 if ( $current_page < $total_pages ) {
     $next_params = array_filter( [
-        'memorial-page'   => $current_page + 1,
-        'memorial-type'   => 'all' !== $type_filter ? $type_filter : null,
-        'memorial-year'   => $year_filter ?: null,
-        'memorial-search' => $search_term ?: null,
+        'memorial-page'       => $current_page + 1,
+        'memorial-type'       => 'all' !== $type_filter ? $type_filter : null,
+        'memorial-dedication' => 'all' !== $dedication_filter ? $dedication_filter : null,
+        'memorial-year'       => $year_filter ?: null,
+        'memorial-search'     => $search_term ?: null,
     ] );
     $next_url = add_query_arg( $next_params, $base_url );
 }
@@ -183,9 +193,10 @@ $context = [
 
     // Mutable filter state — changes on user interaction.
     'filters'         => [
-        'type'   => $type_filter,
-        'year'   => $year_filter,
-        'search' => $search_term,
+        'type'       => $type_filter,
+        'dedication' => $dedication_filter,
+        'year'       => $year_filter,
+        'search'     => $search_term,
     ],
 
     // Candle API URL for the toggle endpoint.
@@ -266,6 +277,18 @@ $wrapper_attributes = get_block_wrapper_attributes( [
                 <option value="all" <?php selected( $type_filter, 'all' ); ?>><?php esc_html_e( 'All Types', 'starter-shelter' ); ?></option>
                 <option value="person" <?php selected( $type_filter, 'person' ); ?>><?php esc_html_e( 'People', 'starter-shelter' ); ?></option>
                 <option value="pet" <?php selected( $type_filter, 'pet' ); ?>><?php esc_html_e( 'Pets', 'starter-shelter' ); ?></option>
+            </select>
+
+            <select
+                name="memorial-dedication"
+                class="sd-filter-select"
+                data-wp-bind--value="context.filters.dedication"
+                data-wp-on--change="actions.handleFilterChange"
+                aria-label="<?php esc_attr_e( 'Filter by dedication', 'starter-shelter' ); ?>"
+            >
+                <option value="all" <?php selected( $dedication_filter, 'all' ); ?>><?php esc_html_e( 'All Dedications', 'starter-shelter' ); ?></option>
+                <option value="memory" <?php selected( $dedication_filter, 'memory' ); ?>><?php esc_html_e( 'In Memory Of', 'starter-shelter' ); ?></option>
+                <option value="honor" <?php selected( $dedication_filter, 'honor' ); ?>><?php esc_html_e( 'In Honor Of', 'starter-shelter' ); ?></option>
             </select>
 
             <?php if ( $show_year_filter && ! empty( $years ) ) : ?>
@@ -526,7 +549,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
                 <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
             </svg>
             <p><?php echo esc_html( $empty_message ); ?></p>
-            <?php if ( $search_term || 'all' !== $type_filter || $year_filter ) : ?>
+            <?php if ( $search_term || 'all' !== $type_filter || 'all' !== $dedication_filter || $year_filter ) : ?>
             <a href="<?php echo esc_url( $base_url ); ?>" class="sd-clear-filters wp-element-button">
                 <?php esc_html_e( 'Clear Filters', 'starter-shelter' ); ?>
             </a>

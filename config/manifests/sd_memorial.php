@@ -387,6 +387,12 @@ return [
 						'enum'    => [ 'all', 'person', 'pet' ],
 						'default' => 'all',
 					],
+					'dedication' => [
+						'type'        => 'string',
+						'enum'        => [ 'all', 'memory', 'honor' ],
+						'default'     => 'all',
+						'description' => 'Filter by dedication occasion: memory (In Memory Of) or honor (In Honor Of). all = no filter.',
+					],
 					'year'     => [ 'type' => 'integer' ],
 					'search'   => [ 'type' => 'string' ],
 					'donor_id' => [ 'type' => 'integer' ],

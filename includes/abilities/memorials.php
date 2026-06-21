@@ -130,6 +130,12 @@ function list_memorials( array $input = [] ): array {
         $query->where( 'memorial_type', $type );
     }
 
+    // Dedication occasion (memory / honor) — orthogonal to memorial_type.
+    $dedication = $input['dedication'] ?? null;
+    if ( $dedication && 'all' !== $dedication ) {
+        $query->where( 'dedication_type', $dedication );
+    }
+
     if ( ! empty( $input['year'] ) ) {
         $query->whereInTaxonomy( 'sd_memorial_year', (string) $input['year'], 'slug' );
     }
