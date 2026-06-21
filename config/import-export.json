@@ -453,6 +453,10 @@
             "field": "memorial_type"
           },
           {
+            "header": "Dedication",
+            "computed": "dedication_type_label"
+          },
+          {
             "header": "Pet Species",
             "field": "pet_species"
           },

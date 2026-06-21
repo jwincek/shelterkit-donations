@@ -344,6 +344,21 @@
     padding: 1.25rem;
 }
 
+/* Dedication eyebrow ("In Memory Of" / "In Honor Of") */
+
+.sd-memorial-dedication {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin: 0 0 0.25rem;
+    color: var(--wp--preset--color--contrast-2, #555);
+}
+
+.sd-memorial-dedication:empty {
+    display: none;
+}
+
 .sd-memorial-name {
     font-size: 1.1em;
     font-weight: 600;

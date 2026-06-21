@@ -376,6 +376,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
                             </svg>
                             <span class="sd-badge-text" data-wp-text="state.typeBadgeLabel"></span>
                         </span>
+                        <p class="sd-memorial-dedication" data-wp-text="context.item.dedication_type_label"></p>
                         <h3 class="sd-memorial-name" data-wp-text="context.item.honoree_name"></h3>
                         <p class="sd-memorial-tribute" data-wp-text="state.truncatedTribute"></p>
 
@@ -459,6 +460,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
                         <span class="sd-badge-text"><?php echo $is_pet ? esc_html__( 'Pet', 'starter-shelter' ) : esc_html__( 'Person', 'starter-shelter' ); ?></span>
                     </span>
                     <?php endif; ?>
+                    <p class="sd-memorial-dedication"><?php echo esc_html( $item['dedication_type_label'] ?? '' ); ?></p>
                     <h3 class="sd-memorial-name"><?php echo esc_html( $item['honoree_name'] ?? '' ); ?></h3>
                     <?php if ( $tribute ) : ?>
                     <p class="sd-memorial-tribute"><?php echo esc_html( $tribute ); ?></p>

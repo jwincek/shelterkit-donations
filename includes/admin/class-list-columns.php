@@ -422,6 +422,12 @@ class List_Columns {
                 ];
                 $type_info = $types[ $type ];
                 echo '<span class="sd-type-badge">' . esc_html( $type_info['icon'] . ' ' . $type_info['label'] ) . '</span>';
+
+                // Dedication (In Memory Of / In Honor Of) — orthogonal to
+                // the person/pet subject, shown as a sub-line.
+                $dedication = $memorial['dedication_type_label']
+                    ?? Helpers\get_dedication_type_label( (string) ( $memorial['dedication_type'] ?? '' ) );
+                echo '<br><span class="sd-meta">' . esc_html( $dedication ) . '</span>';
                 break;
 
             case 'donor':

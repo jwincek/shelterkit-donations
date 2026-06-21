@@ -428,6 +428,41 @@ function normalize_memorial_type( string $raw ): string {
 }
 
 /**
+ * Normalize a dedication_type value to the canonical enum.
+ *
+ * The canonical dedication_type values are `memory` (In Memory Of, a
+ * deceased honoree) and `honor` (In Honor Of, a living honoree).
+ * Anything that isn't `honor` normalizes to `memory` — matching the
+ * field default and how `shelter-memorials/create` writes the value, so
+ * legacy rows with an empty `_sd_dedication_type` read as `memory`.
+ *
+ * Orthogonal to memorial_type (the subject — person vs pet).
+ *
+ * @since 1.1.5
+ *
+ * @param string $raw The raw dedication_type value.
+ * @return string Canonical value: `memory` or `honor`.
+ */
+function normalize_dedication_type( string $raw ): string {
+    return 'honor' === strtolower( trim( $raw ) ) ? 'honor' : 'memory';
+}
+
+/**
+ * Get the human-readable label for a dedication_type value.
+ *
+ * @since 1.1.5
+ *
+ * @param string $type The dedication type (memory or honor).
+ * @return string The human-readable label.
+ */
+function get_dedication_type_label( string $type ): string {
+    return match ( normalize_dedication_type( $type ) ) {
+        'honor' => __( 'In Honor Of', 'starter-shelter' ),
+        default => __( 'In Memory Of', 'starter-shelter' ),
+    };
+}
+
+/**
  * Resolve a memorial's family-notification settings as a nested array.
  *
  * Canonical storage is five flat `_sd_notify_family_*` meta keys. Legacy

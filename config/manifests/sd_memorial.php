@@ -297,6 +297,10 @@ return [
 			'function' => 'get_memorial_type_label',
 			'args'     => [ 'memorial_type' ],
 		],
+		'dedication_type_label' => [
+			'function' => 'get_dedication_type_label',
+			'args'     => [ 'dedication_type' ],
+		],
 	],
 	'relations' => [
 		'donor' => [
