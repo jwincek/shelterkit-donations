@@ -68,3 +68,35 @@ jobs:
         # non-zero exit, which fails the step. Parse-error lines surface
         # on stderr; success lines are discarded.
         run: find starter-shelter.php includes/ -name '*.php' -print0 | xargs -0 -n1 php -l > /dev/null
+
+  unit-tests:
+    name: PHP ${{ matrix.php }} Unit Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ["8.1", "8.2", "8.3"]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up PHP ${{ matrix.php }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          tools: composer
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ matrix.php }}-${{ hashFiles('composer.lock', 'composer.json') }}
+          restore-keys: composer-${{ matrix.php }}-
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      # Pure-function unit suite — no WordPress bootstrap, no database.
+      # WP functions the helpers call are stubbed in tests/bootstrap.php.
+      - name: Run unit tests
+        run: composer test

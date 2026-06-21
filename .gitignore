@@ -20,6 +20,10 @@ Desktop.ini
 # === WordPress environment ===
 .wp-env.override.json
 
+# === Testing ===
+/.phpunit.cache/
+/phpunit.xml
+
 # === Logs & debug ===
 *.log
 debug.log
