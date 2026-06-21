@@ -54,12 +54,15 @@ function create( array $input ): array|WP_Error {
     // For display in title, use the year from start date.
     $start_year = wp_date( 'Y', strtotime( $start_date ) );
 
-    // Create membership post.
+    // Create membership post. The pre-resolved donor_id path (importers,
+    // sync) may supply neither donor_name nor donor_email, so fall back
+    // to the donor record's title for the label.
+    $donor_label = $input['donor_name'] ?? $input['donor_email'] ?? get_the_title( $donor_id );
     $membership_id = wp_insert_post( [
         'post_type'   => 'sd_membership',
         'post_title'  => sprintf(
             '%s - %s (%s)',
-            $input['donor_name'] ?? $input['donor_email'],
+            $donor_label,
             Helpers\get_tier_label( $tier ),
             $start_year
         ),

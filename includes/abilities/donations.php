@@ -43,14 +43,13 @@ function create( array $input ): array|WP_Error {
     $donation_date = $input['donation_date'] ?? $input['date'] ?? wp_date( 'Y-m-d H:i:s' );
     $display_date = wp_date( 'Y-m-d', strtotime( $donation_date ) );
 
-    // Create donation post.
+    // Create donation post. The pre-resolved donor_id path (importers,
+    // sync) may supply neither donor_name nor donor_email, so fall back
+    // to the donor record's title for the label.
+    $donor_label = $input['donor_name'] ?? $input['donor_email'] ?? get_the_title( $donor_id );
     $donation_id = wp_insert_post( [
         'post_type'   => 'sd_donation',
-        'post_title'  => sprintf(
-            '%s - %s',
-            $input['donor_name'] ?? $input['donor_email'],
-            $display_date
-        ),
+        'post_title'  => sprintf( '%s - %s', $donor_label, $display_date ),
         'post_status' => 'publish',
         'post_date'   => $donation_date,
         'meta_input'  => [
