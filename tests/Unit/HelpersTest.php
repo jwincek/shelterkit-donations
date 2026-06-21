@@ -9,7 +9,6 @@ declare( strict_types = 1 );
 
 namespace Starter_Shelter\Tests\Unit;
 
-use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 use function Starter_Shelter\Helpers\get_dedication_type_label;
@@ -21,7 +20,9 @@ final class HelpersTest extends TestCase {
 
     // ─── normalize_memorial_type ─────────────────────────────────────
 
-    #[DataProvider( 'memorialTypeProvider' )]
+    /**
+     * @dataProvider memorialTypeProvider
+     */
     public function test_normalize_memorial_type( string $raw, string $expected ): void {
         $this->assertSame( $expected, normalize_memorial_type( $raw ) );
     }
@@ -41,7 +42,9 @@ final class HelpersTest extends TestCase {
 
     // ─── normalize_dedication_type ───────────────────────────────────
 
-    #[DataProvider( 'dedicationTypeProvider' )]
+    /**
+     * @dataProvider dedicationTypeProvider
+     */
     public function test_normalize_dedication_type( string $raw, string $expected ): void {
         $this->assertSame( $expected, normalize_dedication_type( $raw ) );
     }
@@ -59,7 +62,9 @@ final class HelpersTest extends TestCase {
 
     // ─── get_memorial_type_label ─────────────────────────────────────
 
-    #[DataProvider( 'memorialLabelProvider' )]
+    /**
+     * @dataProvider memorialLabelProvider
+     */
     public function test_get_memorial_type_label( string $raw, string $expected ): void {
         $this->assertSame( $expected, get_memorial_type_label( $raw ) );
     }
@@ -75,7 +80,9 @@ final class HelpersTest extends TestCase {
 
     // ─── get_dedication_type_label ───────────────────────────────────
 
-    #[DataProvider( 'dedicationLabelProvider' )]
+    /**
+     * @dataProvider dedicationLabelProvider
+     */
     public function test_get_dedication_type_label( string $raw, string $expected ): void {
         $this->assertSame( $expected, get_dedication_type_label( $raw ) );
     }

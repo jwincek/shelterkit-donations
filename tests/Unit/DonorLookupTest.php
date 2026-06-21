@@ -13,13 +13,14 @@ declare( strict_types = 1 );
 
 namespace Starter_Shelter\Tests\Unit;
 
-use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Starter_Shelter\Admin\Shared\Donor_Lookup;
 
 final class DonorLookupTest extends TestCase {
 
-    #[DataProvider( 'displayNameProvider' )]
+    /**
+     * @dataProvider displayNameProvider
+     */
     public function test_sanitize_display_name( string $raw, string $expected ): void {
         $this->assertSame( $expected, Donor_Lookup::sanitize_display_name( $raw ) );
     }

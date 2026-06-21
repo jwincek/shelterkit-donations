@@ -3,20 +3,19 @@
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
          bootstrap="tests/bootstrap.php"
          colors="true"
-         cacheDirectory=".phpunit.cache"
          failOnWarning="true"
          failOnRisky="true"
-         failOnDeprecation="true"
+         convertDeprecationsToExceptions="true"
          beStrictAboutOutputDuringTests="true">
     <testsuites>
         <testsuite name="unit">
             <directory>tests/Unit</directory>
         </testsuite>
     </testsuites>
-    <source>
+    <coverage>
         <include>
             <file>includes/core/helpers.php</file>
             <file>includes/admin/shared/class-donor-lookup.php</file>
         </include>
-    </source>
+    </coverage>
 </phpunit>

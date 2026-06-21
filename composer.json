@@ -16,7 +16,7 @@
 	"require-dev": {
 		"dealerdirect/phpcodesniffer-composer-installer": "^1.0",
 		"phpcompatibility/phpcompatibility-wp": "^2.1",
-		"phpunit/phpunit": "^10.5",
+		"phpunit/phpunit": "^9.6",
 		"wp-coding-standards/wpcs": "^3.0",
 		"yoast/phpunit-polyfills": "^2.0"
 	},
@@ -41,6 +41,7 @@
 		"lint": "phpcs",
 		"lint:fix": "phpcbf",
 		"test": "phpunit",
-		"test:unit": "phpunit --testsuite unit"
+		"test:unit": "phpunit --testsuite unit",
+		"test:integration": "phpunit -c phpunit-integration.xml.dist"
 	}
 }

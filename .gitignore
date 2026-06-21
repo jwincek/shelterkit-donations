@@ -22,7 +22,9 @@ Desktop.ini
 
 # === Testing ===
 /.phpunit.cache/
+/.phpunit.result.cache
 /phpunit.xml
+/phpunit-integration.xml
 
 # === Logs & debug ===
 *.log
