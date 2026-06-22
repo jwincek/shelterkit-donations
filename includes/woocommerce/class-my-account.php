@@ -69,18 +69,32 @@ class My_Account {
             return;
         }
 
-        if ( 'recognition' !== sanitize_key( wp_unslash( $_POST['sd_account_action'] ) ) ) {
-            return;
-        }
-
-        $nonce = isset( $_POST['sd_recognition_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['sd_recognition_nonce'] ) ) : '';
-        if ( ! wp_verify_nonce( $nonce, 'sd_recognition' ) ) {
-            wc_add_notice( __( 'Security check failed. Please try again.', 'starter-shelter' ), 'error' );
-            return;
-        }
-
+        $action   = sanitize_key( wp_unslash( $_POST['sd_account_action'] ) );
         $donor_id = self::get_current_donor_id();
         if ( ! $donor_id ) {
+            return;
+        }
+
+        switch ( $action ) {
+            case 'recognition':
+                self::handle_recognition( $donor_id );
+                break;
+            case 'cancel_membership':
+                self::handle_cancel_membership( $donor_id );
+                break;
+            case 'toggle_auto_renew':
+                self::handle_toggle_auto_renew( $donor_id );
+                break;
+        }
+    }
+
+    /**
+     * Save the public-recognition preference, then redirect (PRG).
+     *
+     * @param int $donor_id Current user's donor ID.
+     */
+    private static function handle_recognition( int $donor_id ): void {
+        if ( ! self::verify_action_nonce( 'sd_recognition_nonce', 'sd_recognition' ) ) {
             return;
         }
 
@@ -93,6 +107,101 @@ class My_Account {
                 : __( 'Saved. Your name will be hidden from the public members wall.', 'starter-shelter' )
         );
 
+        self::redirect_to_memberships();
+    }
+
+    /**
+     * Cancel one of the current user's own memberships via the ability.
+     *
+     * @param int $donor_id Current user's donor ID.
+     */
+    private static function handle_cancel_membership( int $donor_id ): void {
+        if ( ! self::verify_action_nonce( 'sd_membership_nonce', 'sd_membership_action' ) ) {
+            return;
+        }
+
+        $membership_id = isset( $_POST['membership_id'] ) ? absint( wp_unslash( $_POST['membership_id'] ) ) : 0;
+
+        if ( ! self::current_user_owns_membership( $membership_id, $donor_id ) ) {
+            wc_add_notice( __( 'That membership could not be found on your account.', 'starter-shelter' ), 'error' );
+            self::redirect_to_memberships();
+            return;
+        }
+
+        $input  = [ 'membership_id' => $membership_id, 'reason' => __( 'Cancelled by member from My Account.', 'starter-shelter' ) ];
+        $ability = function_exists( 'wp_get_ability' ) ? wp_get_ability( 'shelter-memberships/cancel' ) : null;
+        $result  = $ability ? $ability->execute( $input ) : \Starter_Shelter\Abilities\Memberships\cancel( $input );
+
+        if ( is_wp_error( $result ) ) {
+            wc_add_notice( $result->get_error_message(), 'error' );
+        } else {
+            wc_add_notice( __( 'Your membership has been cancelled.', 'starter-shelter' ) );
+        }
+
+        self::redirect_to_memberships();
+    }
+
+    /**
+     * Toggle auto-renew on one of the current user's own memberships.
+     *
+     * @param int $donor_id Current user's donor ID.
+     */
+    private static function handle_toggle_auto_renew( int $donor_id ): void {
+        if ( ! self::verify_action_nonce( 'sd_membership_nonce', 'sd_membership_action' ) ) {
+            return;
+        }
+
+        $membership_id = isset( $_POST['membership_id'] ) ? absint( wp_unslash( $_POST['membership_id'] ) ) : 0;
+
+        if ( ! self::current_user_owns_membership( $membership_id, $donor_id ) ) {
+            wc_add_notice( __( 'That membership could not be found on your account.', 'starter-shelter' ), 'error' );
+            self::redirect_to_memberships();
+            return;
+        }
+
+        $on = ! empty( $_POST['auto_renew'] );
+        update_post_meta( $membership_id, '_sd_auto_renew', $on );
+
+        wc_add_notice(
+            $on
+                ? __( 'Automatic renewal is now on for this membership.', 'starter-shelter' )
+                : __( 'Automatic renewal is now off for this membership.', 'starter-shelter' )
+        );
+
+        self::redirect_to_memberships();
+    }
+
+    /**
+     * Whether a membership belongs to the given donor (ownership guard for
+     * the self-service handlers). WooCommerce-free for direct testing.
+     *
+     * @param int $membership_id Membership post ID.
+     * @param int $donor_id      Donor post ID (the current user's).
+     * @return bool
+     */
+    public static function current_user_owns_membership( int $membership_id, int $donor_id ): bool {
+        if ( ! $membership_id || ! $donor_id ) {
+            return false;
+        }
+        return (int) get_post_meta( $membership_id, '_sd_donor_id', true ) === $donor_id;
+    }
+
+    /**
+     * Verify a POST nonce, adding an error notice on failure.
+     */
+    private static function verify_action_nonce( string $field, string $action ): bool {
+        $nonce = isset( $_POST[ $field ] ) ? sanitize_text_field( wp_unslash( $_POST[ $field ] ) ) : '';
+        if ( ! wp_verify_nonce( $nonce, $action ) ) {
+            wc_add_notice( __( 'Security check failed. Please try again.', 'starter-shelter' ), 'error' );
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Redirect back to My Memberships (post/redirect/get) and stop.
+     */
+    private static function redirect_to_memberships(): void {
         wp_safe_redirect( wc_get_account_endpoint_url( 'my-memberships' ) );
         exit;
     }
@@ -716,11 +825,32 @@ class My_Account {
                             <p class="sd-membership-amount"><?php echo esc_html( Helpers\format_currency( (float) $m['amount'] ) ); ?>/<?php esc_html_e( 'year', 'starter-shelter' ); ?></p>
                             <?php endif; ?>
                         </div>
-                        <?php if ( $m_expiring ) : ?>
                         <div class="sd-membership-actions">
-                            <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="button"><?php esc_html_e( 'Renew', 'starter-shelter' ); ?></a>
+                            <?php
+                            $renew_url = Helpers\get_membership_page_url();
+                            if ( $m_expiring && $renew_url ) :
+                                ?>
+                            <a href="<?php echo esc_url( $renew_url ); ?>" class="button"><?php esc_html_e( 'Renew', 'starter-shelter' ); ?></a>
+                            <?php endif; ?>
+
+                            <form method="post" class="sd-auto-renew-form">
+                                <?php wp_nonce_field( 'sd_membership_action', 'sd_membership_nonce' ); ?>
+                                <input type="hidden" name="sd_account_action" value="toggle_auto_renew">
+                                <input type="hidden" name="membership_id" value="<?php echo esc_attr( (string) ( $m['id'] ?? 0 ) ); ?>">
+                                <label class="sd-auto-renew-toggle">
+                                    <input type="checkbox" name="auto_renew" value="1" <?php checked( ! empty( $m['auto_renew'] ) ); ?> onchange="this.form.submit()">
+                                    <?php esc_html_e( 'Automatic renewal', 'starter-shelter' ); ?>
+                                </label>
+                                <noscript><button type="submit" class="button button-small"><?php esc_html_e( 'Save', 'starter-shelter' ); ?></button></noscript>
+                            </form>
+
+                            <form method="post" class="sd-cancel-form" onsubmit="return confirm('<?php echo esc_js( __( 'Cancel this membership? This cannot be undone.', 'starter-shelter' ) ); ?>');">
+                                <?php wp_nonce_field( 'sd_membership_action', 'sd_membership_nonce' ); ?>
+                                <input type="hidden" name="sd_account_action" value="cancel_membership">
+                                <input type="hidden" name="membership_id" value="<?php echo esc_attr( (string) ( $m['id'] ?? 0 ) ); ?>">
+                                <button type="submit" class="button button-small sd-cancel-btn"><?php esc_html_e( 'Cancel membership', 'starter-shelter' ); ?></button>
+                            </form>
                         </div>
-                        <?php endif; ?>
                     </div>
                     <?php endforeach; ?>
                     <?php endif; ?>
@@ -893,6 +1023,12 @@ class My_Account {
 .sd-recognition-pref h3 { margin-top: 0; }
 .sd-recognition-toggle { display: flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer; }
 .sd-recognition-help { color: #666; margin: 6px 0 12px; font-size: 0.9em; }
+
+/* Membership self-service actions (renew / auto-renew / cancel) */
+.sd-membership-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 10px; }
+.sd-membership-actions form { margin: 0; }
+.sd-auto-renew-toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 0.9em; cursor: pointer; }
+.sd-cancel-btn { color: #b32d2e; }
 
 /* Membership status */
 .sd-membership-status, .sd-recent-donations { background: #f8f8f8; padding: 20px; margin: 20px 0; border-radius: 4px; }

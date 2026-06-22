@@ -219,7 +219,22 @@ class Provider {
                     if ( isset( $input['user_id'] ) ) {
                         return (int) $input['user_id'] === $user_id;
                     }
-                    
+
+                    // Resolve ownership from an entity post id (e.g. cancel
+                    // takes membership_id, not donor_id) via the post's donor
+                    // → that donor's linked user. Without this, owner-scoped
+                    // abilities whose input is an entity id could never pass
+                    // for a non-admin, blocking legitimate self-service.
+                    foreach ( [ 'membership_id', 'memorial_id', 'donation_id' ] as $id_key ) {
+                        if ( ! empty( $input[ $id_key ] ) ) {
+                            $donor_id = (int) get_post_meta( (int) $input[ $id_key ], '_sd_donor_id', true );
+                            if ( ! $donor_id ) {
+                                return false;
+                            }
+                            return (int) get_post_meta( $donor_id, '_sd_user_id', true ) === $user_id;
+                        }
+                    }
+
                     return false;
                 },
                 
