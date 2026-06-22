@@ -328,6 +328,15 @@ class Entity_Hydrator {
 		}
 
 		if ( is_string( $value ) ) {
+			// Array/object meta comes back PHP-serialized from the bulk
+			// get_post_meta( $id ) path (that path doesn't unserialize),
+			// so try that first; fall back to JSON for values stored that
+			// way. Without this, object fields hydrate to [] (e.g. donor
+			// address, communication preferences).
+			$maybe = maybe_unserialize( $value );
+			if ( is_array( $maybe ) ) {
+				return $maybe;
+			}
 			$decoded = json_decode( $value, true );
 			return is_array( $decoded ) ? $decoded : [];
 		}

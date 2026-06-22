@@ -85,7 +85,76 @@ class My_Account {
             case 'toggle_auto_renew':
                 self::handle_toggle_auto_renew( $donor_id );
                 break;
+            case 'update_profile':
+                self::handle_update_profile( $donor_id );
+                break;
         }
+    }
+
+    /**
+     * Update the current user's own donor profile (name, phone) and mailing
+     * address via the owner-scoped donor abilities, then redirect (PRG).
+     *
+     * @param int $donor_id Current user's donor ID.
+     */
+    private static function handle_update_profile( int $donor_id ): void {
+        if ( ! self::verify_action_nonce( 'sd_profile_nonce', 'sd_profile_action' ) ) {
+            return;
+        }
+
+        $field = static fn ( string $key ): string => isset( $_POST[ $key ] ) ? sanitize_text_field( wp_unslash( $_POST[ $key ] ) ) : '';
+
+        $profile = self::execute_ability(
+            'shelter-donors/update-profile',
+            [
+                'donor_id'   => $donor_id,
+                'first_name' => $field( 'first_name' ),
+                'last_name'  => $field( 'last_name' ),
+                'phone'      => $field( 'phone' ),
+            ],
+            static fn ( $i ) => \Starter_Shelter\Abilities\Donors\update_profile( $i )
+        );
+
+        $address = self::execute_ability(
+            'shelter-donors/update-address',
+            [
+                'donor_id' => $donor_id,
+                'source'   => 'myaccount',
+                'address'  => [
+                    'address_1' => $field( 'address_1' ),
+                    'address_2' => $field( 'address_2' ),
+                    'city'      => $field( 'city' ),
+                    'state'     => $field( 'state' ),
+                    'postcode'  => $field( 'postcode' ),
+                    'country'   => $field( 'country' ) ?: 'US',
+                ],
+            ],
+            static fn ( $i ) => \Starter_Shelter\Abilities\Donors\update_address( $i )
+        );
+
+        if ( is_wp_error( $profile ) || is_wp_error( $address ) ) {
+            $error = is_wp_error( $profile ) ? $profile : $address;
+            wc_add_notice( $error->get_error_message(), 'error' );
+        } else {
+            wc_add_notice( __( 'Your contact details have been updated.', 'starter-shelter' ) );
+        }
+
+        wp_safe_redirect( wc_get_account_endpoint_url( 'donor-dashboard' ) );
+        exit;
+    }
+
+    /**
+     * Run an ability by name, falling back to a direct callback when the
+     * Abilities API isn't available. Returns the result or WP_Error.
+     *
+     * @param string   $name     Ability name.
+     * @param array    $input    Ability input.
+     * @param callable $fallback Receives $input, returns array|WP_Error.
+     * @return mixed
+     */
+    private static function execute_ability( string $name, array $input, callable $fallback ) {
+        $ability = function_exists( 'wp_get_ability' ) ? wp_get_ability( $name ) : null;
+        return $ability ? $ability->execute( $input ) : $fallback( $input );
     }
 
     /**
@@ -701,6 +770,59 @@ class My_Account {
                         <a href="<?php echo esc_url( $giving_url ); ?>"><?php esc_html_e( 'View All →', 'starter-shelter' ); ?></a>
                     </div>
                     <?php endif; ?>
+
+                    <?php
+                    $addr    = is_array( $donor['address'] ?? null ) ? $donor['address'] : [];
+                    $addr_1  = (string) ( $addr['address_1'] ?? $addr['line_1'] ?? '' );
+                    $addr_2  = (string) ( $addr['address_2'] ?? $addr['line_2'] ?? '' );
+                    $addr_zip = (string) ( $addr['postcode'] ?? $addr['postal_code'] ?? '' );
+                    ?>
+                    <div class="sd-profile-edit">
+                        <h3><?php esc_html_e( 'Contact Details', 'starter-shelter' ); ?></h3>
+                        <form method="post" class="sd-profile-form">
+                            <?php wp_nonce_field( 'sd_profile_action', 'sd_profile_nonce' ); ?>
+                            <input type="hidden" name="sd_account_action" value="update_profile">
+                            <p class="sd-field sd-field--half">
+                                <label for="sd-first-name"><?php esc_html_e( 'First name', 'starter-shelter' ); ?></label>
+                                <input type="text" id="sd-first-name" name="first_name" value="<?php echo esc_attr( (string) ( $donor['first_name'] ?? '' ) ); ?>">
+                            </p>
+                            <p class="sd-field sd-field--half">
+                                <label for="sd-last-name"><?php esc_html_e( 'Last name', 'starter-shelter' ); ?></label>
+                                <input type="text" id="sd-last-name" name="last_name" value="<?php echo esc_attr( (string) ( $donor['last_name'] ?? '' ) ); ?>">
+                            </p>
+                            <p class="sd-field">
+                                <label for="sd-phone"><?php esc_html_e( 'Phone', 'starter-shelter' ); ?></label>
+                                <input type="tel" id="sd-phone" name="phone" value="<?php echo esc_attr( (string) ( $donor['phone'] ?? '' ) ); ?>">
+                            </p>
+                            <p class="sd-field">
+                                <label for="sd-address-1"><?php esc_html_e( 'Address', 'starter-shelter' ); ?></label>
+                                <input type="text" id="sd-address-1" name="address_1" value="<?php echo esc_attr( $addr_1 ); ?>" placeholder="<?php esc_attr_e( 'Street address', 'starter-shelter' ); ?>">
+                            </p>
+                            <p class="sd-field">
+                                <label for="sd-address-2" class="screen-reader-text"><?php esc_html_e( 'Address line 2', 'starter-shelter' ); ?></label>
+                                <input type="text" id="sd-address-2" name="address_2" value="<?php echo esc_attr( $addr_2 ); ?>" placeholder="<?php esc_attr_e( 'Apt, suite, etc. (optional)', 'starter-shelter' ); ?>">
+                            </p>
+                            <p class="sd-field sd-field--half">
+                                <label for="sd-city"><?php esc_html_e( 'City', 'starter-shelter' ); ?></label>
+                                <input type="text" id="sd-city" name="city" value="<?php echo esc_attr( (string) ( $addr['city'] ?? '' ) ); ?>">
+                            </p>
+                            <p class="sd-field sd-field--half">
+                                <label for="sd-state"><?php esc_html_e( 'State', 'starter-shelter' ); ?></label>
+                                <input type="text" id="sd-state" name="state" value="<?php echo esc_attr( (string) ( $addr['state'] ?? '' ) ); ?>">
+                            </p>
+                            <p class="sd-field sd-field--half">
+                                <label for="sd-postcode"><?php esc_html_e( 'ZIP / Postal code', 'starter-shelter' ); ?></label>
+                                <input type="text" id="sd-postcode" name="postcode" value="<?php echo esc_attr( $addr_zip ); ?>">
+                            </p>
+                            <p class="sd-field sd-field--half">
+                                <label for="sd-country"><?php esc_html_e( 'Country', 'starter-shelter' ); ?></label>
+                                <input type="text" id="sd-country" name="country" maxlength="2" value="<?php echo esc_attr( (string) ( $addr['country'] ?? 'US' ) ); ?>">
+                            </p>
+                            <p class="sd-field sd-field--actions">
+                                <button type="submit" class="button"><?php esc_html_e( 'Save details', 'starter-shelter' ); ?></button>
+                            </p>
+                        </form>
+                    </div>
                 </div>
                 <?php
                 break;
@@ -1029,6 +1151,16 @@ class My_Account {
 .sd-membership-actions form { margin: 0; }
 .sd-auto-renew-toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 0.9em; cursor: pointer; }
 .sd-cancel-btn { color: #b32d2e; }
+
+/* Contact details edit form */
+.sd-profile-edit { background: #f8f8f8; padding: 20px; margin: 20px 0; border-radius: 4px; }
+.sd-profile-edit h3 { margin-top: 0; }
+.sd-profile-form { display: flex; flex-wrap: wrap; gap: 12px 16px; }
+.sd-field { display: flex; flex-direction: column; flex: 1 1 100%; margin: 0; }
+.sd-field--half { flex: 1 1 calc(50% - 16px); }
+.sd-field--actions { flex-basis: 100%; }
+.sd-field label { font-weight: 600; font-size: 0.9em; margin-bottom: 4px; }
+.sd-field input { width: 100%; }
 
 /* Membership status */
 .sd-membership-status, .sd-recent-donations { background: #f8f8f8; padding: 20px; margin: 20px 0; border-radius: 4px; }
