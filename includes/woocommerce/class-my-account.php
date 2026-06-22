@@ -44,6 +44,7 @@ class My_Account {
         add_action( 'init', [ self::class, 'register_endpoints' ] );
         add_filter( 'query_vars', [ self::class, 'add_query_vars' ] );
         add_filter( 'woocommerce_account_menu_items', [ self::class, 'add_menu_items' ] );
+        add_filter( 'woocommerce_account_menu_item_classes', [ self::class, 'highlight_my_giving' ], 10, 2 );
 
         foreach ( self::ENDPOINTS as $endpoint => $slug ) {
             add_action( "woocommerce_account_{$slug}_endpoint", [ self::class, 'render_' . str_replace( '-', '_', $endpoint ) ] );
@@ -556,15 +557,15 @@ class My_Account {
             return $items;
         }
 
+        // Consolidate the donor area under a single top-level item; the
+        // sub-sections (history, memberships, memorials, statement) are
+        // reached via the in-page sub-nav (render_account_nav). Keeps the
+        // WooCommerce account menu uncluttered.
         $new_items = [];
-        
+
         foreach ( $items as $key => $label ) {
             if ( 'customer-logout' === $key ) {
-                $new_items['donor-dashboard'] = __( 'Donor Dashboard', 'starter-shelter' );
-                $new_items['giving-history'] = __( 'Giving History', 'starter-shelter' );
-                $new_items['my-memberships'] = __( 'My Memberships', 'starter-shelter' );
-                $new_items['my-memorials'] = __( 'My Memorials', 'starter-shelter' );
-                $new_items['annual-statement'] = __( 'Annual Statement', 'starter-shelter' );
+                $new_items['donor-dashboard'] = __( 'My Giving', 'starter-shelter' );
             }
             $new_items[ $key ] = $label;
         }
@@ -862,8 +863,69 @@ class My_Account {
             return;
         }
 
+        // The template name matches its account endpoint slug, so it doubles
+        // as the active sub-nav tab.
+        self::render_account_nav( $template );
+
         extract( $args ); // phpcs:ignore
         include $template_path;
+    }
+
+    /**
+     * Render the donor-area sub-navigation (the in-page tab bar that
+     * replaces the per-section top-level account menu items).
+     *
+     * @since 2.2.0
+     *
+     * @param string $current Current endpoint slug (active tab).
+     */
+    private static function render_account_nav( string $current ): void {
+        $items = [
+            'donor-dashboard'  => __( 'Overview', 'starter-shelter' ),
+            'giving-history'   => __( 'Giving History', 'starter-shelter' ),
+            'my-memberships'   => __( 'Memberships', 'starter-shelter' ),
+            'my-memorials'     => __( 'Memorials', 'starter-shelter' ),
+            'annual-statement' => __( 'Annual Statement', 'starter-shelter' ),
+        ];
+
+        echo '<nav class="sd-account-subnav" aria-label="' . esc_attr__( 'Donor account sections', 'starter-shelter' ) . '">';
+        foreach ( $items as $slug => $label ) {
+            $is_current = ( $slug === $current );
+            printf(
+                '<a href="%s" class="sd-account-subnav__link%s"%s>%s</a>',
+                esc_url( wc_get_account_endpoint_url( $slug ) ),
+                $is_current ? ' is-active' : '',
+                $is_current ? ' aria-current="page"' : '',
+                esc_html( $label )
+            );
+        }
+        echo '</nav>';
+    }
+
+    /**
+     * Keep the single "My Giving" menu item highlighted while the member is
+     * on any of its sub-sections (WooCommerce only marks the exact endpoint).
+     *
+     * @since 2.2.0
+     *
+     * @param string[] $classes  Menu item CSS classes.
+     * @param string   $endpoint The menu item's endpoint.
+     * @return string[]
+     */
+    public static function highlight_my_giving( array $classes, string $endpoint ): array {
+        if ( 'donor-dashboard' !== $endpoint ) {
+            return $classes;
+        }
+
+        global $wp_query;
+        foreach ( [ 'giving-history', 'my-memberships', 'my-memorials', 'annual-statement' ] as $slug ) {
+            if ( isset( $wp_query->query_vars[ $slug ] ) ) {
+                $classes[] = 'is-active';
+                break;
+            }
+        }
+
+        return $classes;
     }
 
     /**
@@ -905,6 +967,12 @@ class My_Account {
      */
     private static function get_styles(): string {
         return '
+/* Donor area sub-navigation */
+.sd-account-subnav { display: flex; flex-wrap: wrap; gap: 2px; border-bottom: 1px solid #e0e0e0; margin: 0 0 24px; }
+.sd-account-subnav__link { padding: 8px 14px; text-decoration: none; color: #555; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.sd-account-subnav__link:hover { color: #1e1e1e; }
+.sd-account-subnav__link.is-active { color: #1e1e1e; font-weight: 600; border-bottom-color: var(--wp--preset--color--primary, #0073aa); }
+
 /* Dashboard stats — clickable cards */
 .sd-dashboard-stats { display: flex; gap: 20px; margin: 20px 0; flex-wrap: wrap; }
 .sd-stat { flex: 1; min-width: 120px; background: #f8f8f8; padding: 20px; text-align: center; border-radius: 4px; }
