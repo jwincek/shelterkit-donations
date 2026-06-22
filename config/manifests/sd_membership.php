@@ -177,6 +177,13 @@ return [
 			'function' => 'get_tier_benefits',
 			'args'     => [ 'tier', 'membership_type' ],
 		],
+		// Resolved business-logo URL (empty when no/invalid attachment).
+		// Mirrors sd_memorial's photo_url; consumed by the business-member
+		// slideshow block.
+		'logo_url' => [
+			'function' => 'get_attachment_url',
+			'args'     => [ 'logo_attachment_id', 'medium' ],
+		],
 	],
 	'relations' => [
 		'donor' => [
@@ -361,6 +368,32 @@ return [
 					'total'       => [ 'type' => 'integer' ],
 					'total_pages' => [ 'type' => 'integer' ],
 					'page'        => [ 'type' => 'integer' ],
+				],
+			],
+		],
+
+		'shelter-memberships/business-directory' => [
+			'label'       => 'Business Member Directory',
+			'description' => 'Active business members with an approved logo, for the public business-member slideshow.',
+			'callback'    => 'Starter_Shelter\\Abilities\\Memberships\\business_directory',
+			'permission'  => 'public',
+			'meta'        => [
+				'annotations'  => [ 'readonly' => true, 'destructive' => false, 'idempotent' => true ],
+				'show_in_rest' => true,
+			],
+			'input' => [
+				'properties' => [
+					'limit' => [
+						'type'        => 'integer',
+						'default'     => 50,
+						'description' => 'Maximum number of business members to return.',
+					],
+				],
+			],
+			'output' => [
+				'properties' => [
+					'items' => [ 'type' => 'array' ],
+					'total' => [ 'type' => 'integer' ],
 				],
 			],
 		],

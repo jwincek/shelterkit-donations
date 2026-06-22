@@ -271,6 +271,49 @@ function list_memberships( array $input = [] ): array {
 }
 
 /**
+ * List active business members with an approved logo.
+ *
+ * Powers the public business-member slideshow block. Eligibility:
+ * membership_type=business AND logo_status=approved AND still active
+ * (end_date >= today). Only entries with a resolvable logo URL are
+ * returned, sorted alphabetically by business name (in PHP, to avoid a
+ * meta-orderby that would drop rows missing the sort key).
+ *
+ * @since 2.2.0
+ *
+ * @param array $input Optional. `limit` (default 50).
+ * @return array{items: array<int, array>, total: int}
+ */
+function business_directory( array $input = [] ): array {
+    $limit = max( 1, min( 200, (int) ( $input['limit'] ?? 50 ) ) );
+
+    $result = Query::for( 'sd_membership' )
+        ->where( 'membership_type', 'business' )
+        ->where( 'logo_status', 'approved' )
+        ->whereCompare( 'end_date', wp_date( 'Y-m-d' ), '>=', 'DATE' )
+        ->orderBy( 'start_date', 'DESC' )
+        ->paginate( 1, $limit );
+
+    $items = array_values( array_filter(
+        $result['items'] ?? [],
+        static fn ( array $m ): bool => ! empty( $m['logo_url'] )
+    ) );
+
+    usort(
+        $items,
+        static fn ( array $a, array $b ): int => strcasecmp(
+            (string) ( $a['business_name'] ?? '' ),
+            (string) ( $b['business_name'] ?? '' )
+        )
+    );
+
+    return [
+        'items' => $items,
+        'total' => count( $items ),
+    ];
+}
+
+/**
  * Cancel an active membership.
  *
  * @since 1.0.0

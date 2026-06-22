@@ -1,0 +1,140 @@
+/**
+ * Business Member Slideshow block styles.
+ *
+ * @package Starter_Shelter
+ */
+
+.sd-business-slideshow {
+    --sd-bs-logo-height: 120px;
+    max-width: 100%;
+}
+
+/* Viewport clips the track; the track holds all slides side by side. */
+.sd-bs-viewport {
+    position: relative;
+    overflow: hidden;
+}
+
+.sd-bs-track {
+    display: flex;
+    transition: transform 0.45s ease;
+    will-change: transform;
+}
+
+.sd-bs-slide {
+    flex: 0 0 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+.sd-bs-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    color: inherit;
+}
+
+a.sd-bs-tile:hover .sd-bs-name,
+a.sd-bs-tile:focus-visible .sd-bs-name {
+    text-decoration: underline;
+}
+
+.sd-bs-logo {
+    height: var(--sd-bs-logo-height);
+    max-width: 100%;
+    width: auto;
+    object-fit: contain;
+}
+
+.sd-bs-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-align: center;
+    color: var(--wp--preset--color--contrast, #1e1e1e);
+}
+
+/* ─── Controls ──────────────────────────────────────────────────────── */
+
+.sd-bs-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.sd-bs-arrow,
+.sd-bs-play {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    border: 1px solid var(--wp--preset--color--contrast-3, #ccc);
+    border-radius: 50%;
+    background: var(--wp--preset--color--base, #fff);
+    color: var(--wp--preset--color--contrast, #1e1e1e);
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.sd-bs-arrow:hover,
+.sd-bs-play:hover {
+    background: var(--wp--preset--color--contrast-4, #f0f0f0);
+}
+
+.sd-bs-arrow:focus-visible,
+.sd-bs-play:focus-visible,
+.sd-bs-dot:focus-visible {
+    outline: 2px solid var(--wp--preset--color--primary, #0073aa);
+    outline-offset: 2px;
+}
+
+/* ─── Dots ──────────────────────────────────────────────────────────── */
+
+.sd-bs-dots {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.sd-bs-dot {
+    width: 0.6rem;
+    height: 0.6rem;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: var(--wp--preset--color--contrast-3, #ccc);
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.2s;
+}
+
+.sd-bs-dot.is-active {
+    background: var(--wp--preset--color--primary, #0073aa);
+    transform: scale(1.25);
+}
+
+.sd-bs-empty {
+    text-align: center;
+    color: var(--wp--preset--color--contrast-2, #666);
+    font-style: italic;
+}
+
+/* Honor reduced-motion: no sliding animation (autoplay is also skipped in
+   view.js when this is set). */
+@media (prefers-reduced-motion: reduce) {
+    .sd-bs-track {
+        transition: none;
+    }
+}
