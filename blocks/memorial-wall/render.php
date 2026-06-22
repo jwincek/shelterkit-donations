@@ -19,19 +19,11 @@
 
 declare( strict_types = 1 );
 
-// ─── Ensure the router is in the import map ──────────────────────────
-// The memorials.js store dynamically imports @wordpress/interactivity-router.
-// For the dynamic import to resolve, the router must be in the browser's
-// import map. WordPress only adds modules to the import map if they're
-// enqueued or are dependencies of enqueued modules.
-//
-// Our 'starter-shelter/memorials' module is registered with the router as
-// a dynamic dependency. By enqueueing it here, WordPress will:
-// 1. Add the router to the import map (so dynamic imports resolve)
-// 2. NOT modulepreload the router (because it's marked 'dynamic')
-//
-// The view.js also imports memorials.js via relative URL for editor
-// compatibility, but this enqueue ensures the import map is correct.
+// ─── Enqueue the interactivity store module ──────────────────────────
+// Filtering/pagination fetch results from the Abilities REST endpoint and
+// update context client-side (see memorials.js), so the Interactivity
+// Router is no longer a dependency. The store still owns candle toggles
+// and the data-wp-each grid.
 wp_enqueue_script_module( 'starter-shelter/memorials' );
 // Candle interactivity now lives inside the memorials store (see memorials.js)
 // to avoid namespace-merge ordering issues. The candles state namespace is
@@ -206,6 +198,13 @@ $context = [
     // Render config — set once at render time, read-only after that.
     'config'          => [
         'baseUrl'         => $base_url,
+        // REST base + nonce for the Abilities list endpoint (filtering,
+        // pagination, load-more). Server-provided so we don't depend on a
+        // wpApiSettings global that isn't enqueued on the frontend. The
+        // nonce is needed only for logged-in cookie auth; logged-out
+        // (incl. cached) requests run the public ability without it.
+        'restRoot'        => esc_url_raw( rest_url( '/' ) ),
+        'restNonce'       => wp_create_nonce( 'wp_rest' ),
         'perPage'         => $per_page,
         'paginationStyle' => $pagination_style,
         'truncateLength'  => $truncate_length,

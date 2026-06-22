@@ -7,11 +7,12 @@
  * - Instance state lives in data-wp-context (set by render.php).
  * - Context is split: mutable state at root, immutable config in ctx.config.
  * - Derived getters use getContext() — multi-instance safe.
- * - Filter/pagination changes use @wordpress/interactivity-router navigate()
- *   so the server re-renders HTML inside the data-wp-router-region.
- * - "Load More" mode uses REST + append when paginationStyle = 'load-more'.
- * - Search uses an immediate reactive update (context.filters.search)
- *   with debounced navigation via a data-wp-watch callback.
+ * - Filter / search / paged-pagination changes fetch results from the
+ *   Abilities REST endpoint and replace context.items, then sync the URL
+ *   via history.pushState. This keeps the loading indicator (isLoading)
+ *   bracketing the actual request precisely. A popstate listener reloads
+ *   on back/forward so the URL and the rendered filters stay in sync.
+ * - "Load More" mode uses the same REST endpoint but appends.
  * - Highlighting is applied client-side via a data-wp-watch callback
  *   that reads the search term and applies <mark> tags via DOM manipulation.
  *
@@ -305,7 +306,7 @@ const { state, actions } = store( 'starter-shelter/memorials', {
             };
             ctx.page = 1;
 
-            yield* doNavigate( ctx );
+            yield* fetchAndRender( ctx );
         },
 
         /**
@@ -325,7 +326,7 @@ const { state, actions } = store( 'starter-shelter/memorials', {
             ctx.filters = { ...ctx.filters, search: value };
             ctx.page    = 1;
 
-            yield* doNavigate( ctx );
+            yield* fetchAndRender( ctx );
         },
 
         /**
@@ -345,7 +346,7 @@ const { state, actions } = store( 'starter-shelter/memorials', {
             ctx.filters = { ...ctx.filters, search: value };
             ctx.page    = 1;
 
-            yield* doNavigate( ctx );
+            yield* fetchAndRender( ctx );
         } ),
 
         /**
@@ -365,7 +366,7 @@ const { state, actions } = store( 'starter-shelter/memorials', {
             const input   = region?.querySelector( '.sd-search-input' );
             if ( input ) input.value = '';
 
-            yield* doNavigate( ctx );
+            yield* fetchAndRender( ctx );
         },
 
         /**
@@ -389,7 +390,7 @@ const { state, actions } = store( 'starter-shelter/memorials', {
             const ctx     = getContext();
 
             ctx.page = newPage;
-            yield* doNavigate( ctx );
+            yield* fetchAndRender( ctx );
         } ),
 
         /**
@@ -417,29 +418,7 @@ const { state, actions } = store( 'starter-shelter/memorials', {
                 if ( filters.year )   input.year   = parseInt( filters.year, 10 );
                 if ( filters.search ) input.search = filters.search;
 
-                // Abilities API REST endpoint (WordPress 6.9).
-                // Namespace: wp-abilities/v1, route: /abilities/{name}/run.
-                const restRoot = wpApiSettings?.root ?? '/wp-json/';
-                const response = yield fetch(
-                    `${ restRoot }wp-abilities/v1/abilities/shelter-memorials%2Flist/run`,
-                    {
-                        method: 'POST',
-                        credentials: 'same-origin',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-WP-Nonce':  wpApiSettings?.nonce ?? '',
-                        },
-                        body: JSON.stringify( { input } ),
-                    }
-                );
-
-                if ( ! response.ok ) throw new Error( `HTTP ${ response.status }` );
-
-                const data = yield response.json();
-
-                // The Abilities REST endpoint returns the callback's output
-                // directly, or wrapped in an 'output' key.
-                const result = data.output ?? data;
+                const result = yield fetchList( ctx, input );
                 ctx.items = [ ...ctx.items, ...( result.items || [] ) ];
 
             } catch ( error ) {
@@ -523,6 +502,46 @@ const { state, actions } = store( 'starter-shelter/memorials', {
 // ─── Private helpers ──────────────────────────────────────────────────
 
 /**
+ * Fetch a page of memorials from the Abilities REST endpoint.
+ *
+ * REST base + nonce come from the block context (server-provided in
+ * render.php) rather than a wpApiSettings global, which isn't enqueued on
+ * the frontend. The list ability is public, so the nonce only matters for
+ * logged-in cookie auth.
+ *
+ * @param {Object} ctx   - The block context (for config.restRoot/restNonce).
+ * @param {Object} input - Ability input (page, per_page, filters).
+ * @return {Promise<Object>} The list ability output ({ items, total, ... }).
+ */
+async function fetchList( ctx, input ) {
+    const restRoot  = ctx.config?.restRoot ?? '/wp-json/';
+    const restNonce = ctx.config?.restNonce ?? '';
+
+    // shelter-memorials/list is a read-only ability, so the Abilities REST
+    // run endpoint requires GET with input as `input[...]` query params
+    // (POST/JSON-body is rejected with 405). The ability name keeps its
+    // literal slash in the path — the route regex allows it.
+    const params = new URLSearchParams();
+    for ( const [ key, value ] of Object.entries( input ) ) {
+        params.append( `input[${ key }]`, value );
+    }
+
+    const url = `${ restRoot }wp-abilities/v1/abilities/shelter-memorials/list/run?${ params.toString() }`;
+    const response = await fetch( url, {
+        method:      'GET',
+        credentials: 'same-origin',
+        headers:     { 'X-WP-Nonce': restNonce },
+    } );
+
+    if ( ! response.ok ) throw new Error( `HTTP ${ response.status }` );
+
+    const data = await response.json();
+    // The Abilities REST endpoint returns the callback's output directly,
+    // or wrapped in an 'output' key.
+    return data.output ?? data;
+}
+
+/**
  * Build a URL with current filter parameters.
  *
  * Derives from the current window.location (not a stored baseUrl) so that
@@ -565,28 +584,54 @@ function buildFilterUrl( ctx, page = 1 ) {
 }
 
 /**
- * Navigate to the filtered URL via the Interactivity Router.
+ * Apply the current filters/page by fetching results and replacing the
+ * grid, then sync the URL.
  *
- * Uses a monotonic counter to detect stale navigations: if a second
- * navigate fires while the first is in-flight, the first's finally{}
- * block detects the counter has advanced and skips resetting isLoading.
+ * Replaces the previous Interactivity-Router navigation. The router's
+ * navigate() resolves around when the region signal is swapped, which
+ * decoupled the loading indicator from the actual request — the dim
+ * could clear a beat before the new results painted. Fetching here (the
+ * same Abilities REST path "Load More" already uses) lets isLoading
+ * bracket the real request precisely: it stays true for the whole fetch
+ * and clears in the same render that shows the new items.
+ *
+ * A monotonic counter guards against races: if a newer apply starts
+ * while this one is in flight, this one neither writes results nor
+ * clears isLoading (the newer one owns both).
  *
  * @param {Object} ctx - The block context.
  */
-function* doNavigate( ctx ) {
+function* fetchAndRender( ctx ) {
     const myNavId = ++navCounter;
     ctx.isLoading = true;
 
+    const newUrl = buildFilterUrl( ctx, ctx.page );
+
     try {
-        const { actions: routerActions } = yield import(
-            '@wordpress/interactivity-router'
-        );
+        const filters = ctx.filters || {};
+        const input   = {
+            page:     ctx.page,
+            per_page: ctx.config?.perPage || 12,
+        };
 
-        const newUrl = buildFilterUrl( ctx, ctx.page );
+        if ( filters.type && filters.type !== 'all' ) input.type = filters.type;
+        if ( filters.dedication && filters.dedication !== 'all' ) input.dedication = filters.dedication;
+        if ( filters.year )   input.year   = parseInt( filters.year, 10 );
+        if ( filters.search ) input.search = filters.search;
 
-        yield routerActions.navigate( newUrl, { force: false } );
+        const result = yield fetchList( ctx, input );
 
-        // Smooth-scroll to the top of this archive.
+        // A newer apply superseded this one — drop the stale result.
+        if ( navCounter !== myNavId ) return;
+
+        ctx.items      = result.items || [];
+        ctx.total      = result.total ?? 0;
+        ctx.totalPages = result.total_pages ?? 0;
+        ctx.page       = result.page ?? ctx.page;
+
+        // Keep the URL bookmarkable/shareable without a full navigation.
+        window.history.pushState( {}, '', newUrl );
+
         const region = document.querySelector(
             `[data-wp-router-region="${ ctx.archiveId }"]`
         );
@@ -594,17 +639,25 @@ function* doNavigate( ctx ) {
             region.scrollIntoView( { behavior: 'smooth', block: 'start' } );
         }
     } catch ( error ) {
-        console.error( 'Memorial Wall: Navigation failed, falling back', error );
-        // Hard navigation as fallback.
-        window.location.href = buildFilterUrl( ctx, ctx.page );
+        console.error( 'Memorial Wall: filter failed, falling back', error );
+        // Hard navigation as a last resort so the user still gets results.
+        window.location.href = newUrl;
+        return;
     } finally {
-        // Only reset isLoading if we're still the latest navigation.
-        // If a newer navigation started, it owns isLoading now.
         if ( navCounter === myNavId ) {
             ctx.isLoading = false;
         }
     }
 }
+
+// Filtering now syncs the URL via history.pushState (instead of the
+// Interactivity Router). On a back/forward, reload so the server re-renders
+// the wall from the memorial-* query args — keeping the visible filters in
+// sync with the URL. Scoped to pages where this module loads (i.e. pages
+// with a Memorial Wall block).
+window.addEventListener( 'popstate', () => {
+    window.location.reload();
+} );
 
 
 export { state, actions };
