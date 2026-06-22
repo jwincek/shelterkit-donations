@@ -41,8 +41,13 @@ $current_page = isset( $_GET['history-page'] ) ? absint( $_GET['history-page'] )
     </form>
     <?php endif; ?>
 
-    <?php if ( empty( $donations['items'] ) ) : ?>
+    <?php if ( empty( $donations['items'] ) ) :
+        $donate_url = Helpers\get_donation_page_url();
+        ?>
     <p><?php esc_html_e( 'No donations found.', 'starter-shelter' ); ?></p>
+    <?php if ( $donate_url ) : ?>
+    <a href="<?php echo esc_url( $donate_url ); ?>" class="button"><?php esc_html_e( 'Make a Donation', 'starter-shelter' ); ?></a>
+    <?php endif; ?>
     <?php else : ?>
     <table class="sd-donations-table woocommerce-orders-table">
         <thead><tr><th><?php esc_html_e( 'Date', 'starter-shelter' ); ?></th><th><?php esc_html_e( 'Amount', 'starter-shelter' ); ?></th><th><?php esc_html_e( 'Allocation', 'starter-shelter' ); ?></th></tr></thead>

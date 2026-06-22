@@ -103,15 +103,22 @@ defined( 'ABSPATH' ) || exit;
                 Helpers\format_date( $m['end_date'] ?? '' )
             ) ); ?></p>
         </div>
+        <?php $rejoin_url = Helpers\get_membership_page_url(); ?>
+        <?php if ( $rejoin_url ) : ?>
         <div class="sd-membership-actions">
-            <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="button button-small"><?php esc_html_e( 'Rejoin', 'starter-shelter' ); ?></a>
+            <a href="<?php echo esc_url( $rejoin_url ); ?>" class="button button-small"><?php esc_html_e( 'Rejoin', 'starter-shelter' ); ?></a>
         </div>
+        <?php endif; ?>
     </div>
     <?php endforeach; ?>
     <?php endif; ?>
 
-    <?php if ( empty( $active_memberships ) && empty( $expired_memberships ) ) : ?>
+    <?php if ( empty( $active_memberships ) && empty( $expired_memberships ) ) :
+        $join_url = Helpers\get_membership_page_url();
+        ?>
     <p><?php esc_html_e( 'You don\'t have any memberships yet.', 'starter-shelter' ); ?></p>
-    <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="button"><?php esc_html_e( 'Become a Member', 'starter-shelter' ); ?></a>
+    <?php if ( $join_url ) : ?>
+    <a href="<?php echo esc_url( $join_url ); ?>" class="button"><?php esc_html_e( 'Become a Member', 'starter-shelter' ); ?></a>
+    <?php endif; ?>
     <?php endif; ?>
 </div>
