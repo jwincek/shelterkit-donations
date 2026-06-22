@@ -456,6 +456,13 @@
     margin-top: 2rem;
 }
 
+/* The pagination variants set display:flex, which overrides the UA
+   [hidden] rule — restore it so data-wp-bind--hidden actually hides the
+   nav (e.g. when filtering narrows results to a single page). */
+.sd-pagination[hidden] {
+    display: none;
+}
+
 /* Paged style */
 
 .sd-pagination--paged {

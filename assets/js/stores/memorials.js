@@ -127,6 +127,16 @@ const { state, actions } = store( 'starter-shelter/memorials', {
         },
 
         /**
+         * Derived: "Page X of Y" label for paged mode. Bound so it tracks
+         * the live page/total after client-side filtering (the SSR text is
+         * only the initial value).
+         */
+        get pagedInfo() {
+            const ctx = getContext();
+            return `Page ${ ctx.page ?? 1 } of ${ ctx.totalPages ?? 1 }`;
+        },
+
+        /**
          * Derived: previous page URL.
          */
         get prevPageUrl() {

@@ -566,11 +566,16 @@ $wrapper_attributes = get_block_wrapper_attributes( [
     </div>
 
     <?php // ─── Pagination ─────────────────────────────────────────── ?>
-    <?php if ( $show_pagination && $total_pages > 1 ) : ?>
+    <?php // Render whenever pagination is enabled (not only when the
+          // initial result set spans >1 page) so client-side filtering can
+          // reveal/hide it as the page count changes — e.g. broadening a
+          // shared filtered URL. Visibility is driven by the hidden binding;
+          // the SSR `hidden` attribute sets the correct pre-hydration state. ?>
+    <?php if ( $show_pagination ) : ?>
 
     <?php if ( 'load-more' === $pagination_style ) : ?>
     <?php // ─── Load More style ──────────────────────────────────── ?>
-    <nav class="sd-pagination sd-pagination--load-more" data-wp-bind--hidden="!state.hasMore">
+    <nav class="sd-pagination sd-pagination--load-more" data-wp-bind--hidden="!state.hasMore" <?php echo $current_page < $total_pages ? '' : 'hidden'; ?>>
         <button
             type="button"
             class="sd-load-more wp-element-button"
@@ -594,6 +599,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
         class="sd-pagination sd-pagination--paged"
         aria-label="<?php esc_attr_e( 'Memorial pagination', 'starter-shelter' ); ?>"
         data-wp-bind--hidden="!state.showPagedPagination"
+        <?php echo $total_pages > 1 ? '' : 'hidden'; ?>
     >
         <a
             href="<?php echo esc_url( $prev_url ?: '#' ); ?>"
@@ -607,7 +613,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
             <?php esc_html_e( 'Previous', 'starter-shelter' ); ?>
         </a>
 
-        <span class="sd-pagination-info">
+        <span class="sd-pagination-info" data-wp-text="state.pagedInfo">
             <?php
             printf(
                 /* translators: 1: current page, 2: total pages */
@@ -633,6 +639,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
     <?php endif; ?>
 
     <?php // ─── No-JS fallback ───────────────────────────────────── ?>
+    <?php if ( $total_pages > 1 ) : ?>
     <noscript>
         <nav class="sd-noscript-pagination">
             <?php
@@ -644,6 +651,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
             ?>
         </nav>
     </noscript>
+    <?php endif; ?>
 
     <?php endif; ?>
 </div>
