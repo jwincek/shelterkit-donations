@@ -52,6 +52,183 @@ class My_Account {
         add_filter( 'the_title', [ self::class, 'endpoint_titles' ], 10, 2 );
         add_action( 'wp_enqueue_scripts', [ self::class, 'enqueue_styles' ] );
         add_action( 'template_redirect', [ self::class, 'handle_account_actions' ] );
+        add_action( 'template_redirect', [ self::class, 'maybe_render_print_statement' ] );
+    }
+
+    /**
+     * Render a standalone, print-optimized contribution statement when the
+     * annual-statement endpoint is requested with ?print=1, then stop.
+     *
+     * This bypasses the theme/account chrome so a member can "Save as PDF"
+     * from their browser — a dependency-free receipt. The donor is resolved
+     * from the current session, so a member only ever prints their own.
+     *
+     * @since 2.2.0
+     */
+    public static function maybe_render_print_statement(): void {
+        if ( empty( $_GET['print'] ) || ! is_user_logged_in() || ! is_account_page() ) {
+            return;
+        }
+
+        global $wp_query;
+        if ( ! isset( $wp_query->query_vars['annual-statement'] ) ) {
+            return;
+        }
+
+        $donor_id = self::get_current_donor_id();
+        if ( ! $donor_id ) {
+            return;
+        }
+
+        $year    = isset( $_GET['year'] ) ? absint( wp_unslash( $_GET['year'] ) ) : (int) wp_date( 'Y' ) - 1;
+        $summary = self::execute_ability(
+            'shelter-reports/annual-summary',
+            [ 'donor_id' => $donor_id, 'year' => $year ],
+            static fn ( $i ) => \Starter_Shelter\Abilities\Reports\annual_summary( $i )
+        );
+
+        if ( ! is_array( $summary ) ) {
+            return; // Error/unavailable — fall through to the normal page.
+        }
+
+        // Fully assembled, individually-escaped document.
+        echo self::build_print_statement_html( $summary, $year ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+        exit;
+    }
+
+    /**
+     * Build the standalone print-statement HTML document.
+     *
+     * Separated from the handler (no echo/exit) so it's directly testable.
+     * Organization details come from the WooCommerce store settings; the
+     * tax/deductibility note is filterable so a site can add its EIN or
+     * 501(c)(3) language without overriding the whole document.
+     *
+     * @since 2.2.0
+     *
+     * @param array $summary shelter-reports/annual-summary output.
+     * @param int   $year    Tax year.
+     * @return string Full HTML document.
+     */
+    public static function build_print_statement_html( array $summary, int $year ): string {
+        $org_name = get_bloginfo( 'name' );
+        $org_address = implode( ', ', array_filter( [
+            (string) get_option( 'woocommerce_store_address' ),
+            (string) get_option( 'woocommerce_store_address_2' ),
+            trim( (string) get_option( 'woocommerce_store_city' ) . ' ' . (string) get_option( 'woocommerce_store_postcode' ) ),
+        ] ) );
+
+        $tax_note = (string) apply_filters(
+            'starter_shelter_receipt_tax_note',
+            __( 'No goods or services were provided in exchange for these contributions. Please retain this statement for your tax records.', 'starter-shelter' ),
+            $summary,
+            $year
+        );
+
+        // Build itemized rows across all three contribution types.
+        $rows = [];
+        foreach ( $summary['donations']['items'] ?? [] as $d ) {
+            $rows[] = [
+                'date'  => (string) ( $d['donation_date'] ?? '' ),
+                'desc'  => Helpers\get_allocation_label( (string) ( $d['allocation'] ?? 'general-fund' ) ),
+                'amount' => (string) ( $d['amount_formatted'] ?? Helpers\format_currency( (float) ( $d['amount'] ?? 0 ) ) ),
+            ];
+        }
+        foreach ( $summary['memorials']['items'] ?? [] as $m ) {
+            $rows[] = [
+                'date'  => (string) ( $m['donation_date'] ?? '' ),
+                'desc'  => sprintf( /* translators: %s: honoree name */ __( 'Memorial tribute — %s', 'starter-shelter' ), (string) ( $m['honoree_name'] ?? '' ) ),
+                'amount' => (string) ( $m['amount_formatted'] ?? Helpers\format_currency( (float) ( $m['amount'] ?? 0 ) ) ),
+            ];
+        }
+        foreach ( $summary['memberships']['items'] ?? [] as $m ) {
+            $rows[] = [
+                'date'  => (string) ( $m['start_date'] ?? '' ),
+                'desc'  => sprintf( /* translators: %s: tier */ __( 'Membership — %s', 'starter-shelter' ), (string) ( $m['tier_label'] ?? $m['tier'] ?? '' ) ),
+                'amount' => (string) ( $m['amount_formatted'] ?? Helpers\format_currency( (float) ( $m['amount'] ?? 0 ) ) ),
+            ];
+        }
+        usort( $rows, static fn ( $a, $b ) => strcmp( $a['date'], $b['date'] ) );
+
+        ob_start();
+        ?>
+<!DOCTYPE html>
+<html <?php language_attributes(); ?>>
+<head>
+    <meta charset="<?php bloginfo( 'charset' ); ?>">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><?php echo esc_html( sprintf( __( '%1$s Contribution Statement %2$d', 'starter-shelter' ), $org_name, $year ) ); ?></title>
+    <style>
+        body { font-family: Georgia, "Times New Roman", serif; color: #222; max-width: 720px; margin: 32px auto; padding: 0 24px; line-height: 1.5; }
+        .receipt-org { font-size: 1.4rem; font-weight: bold; margin: 0; }
+        .receipt-org-address { color: #555; margin: 2px 0 24px; }
+        h1 { font-size: 1.2rem; border-bottom: 2px solid #222; padding-bottom: 6px; }
+        .receipt-meta { margin: 16px 0; }
+        table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+        th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #ddd; }
+        td.amount, th.amount { text-align: right; white-space: nowrap; }
+        tfoot td { font-weight: bold; border-top: 2px solid #222; border-bottom: none; }
+        .tax-note { margin-top: 24px; font-size: 0.9rem; color: #333; }
+        .generated { color: #777; font-size: 0.8rem; margin-top: 24px; }
+        .no-print { margin-top: 24px; }
+        @media print { .no-print { display: none; } body { margin: 0; } }
+    </style>
+</head>
+<body onload="window.print()">
+    <p class="receipt-org"><?php echo esc_html( $org_name ); ?></p>
+    <?php if ( '' !== $org_address ) : ?>
+    <p class="receipt-org-address"><?php echo esc_html( $org_address ); ?></p>
+    <?php endif; ?>
+
+    <h1><?php echo esc_html( sprintf( __( 'Charitable Contribution Statement — %d', 'starter-shelter' ), $year ) ); ?></h1>
+
+    <div class="receipt-meta">
+        <strong><?php echo esc_html( (string) ( $summary['donor']['name'] ?? '' ) ); ?></strong><br>
+        <?php if ( ! empty( $summary['donor']['address'] ) ) : ?>
+        <?php echo esc_html( (string) $summary['donor']['address'] ); ?><br>
+        <?php endif; ?>
+        <?php if ( ! empty( $summary['donor']['email'] ) ) : ?>
+        <?php echo esc_html( (string) $summary['donor']['email'] ); ?>
+        <?php endif; ?>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th><?php esc_html_e( 'Date', 'starter-shelter' ); ?></th>
+                <th><?php esc_html_e( 'Description', 'starter-shelter' ); ?></th>
+                <th class="amount"><?php esc_html_e( 'Amount', 'starter-shelter' ); ?></th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php if ( empty( $rows ) ) : ?>
+            <tr><td colspan="3"><?php esc_html_e( 'No contributions recorded for this year.', 'starter-shelter' ); ?></td></tr>
+            <?php else : ?>
+                <?php foreach ( $rows as $row ) : ?>
+                <tr>
+                    <td><?php echo esc_html( Helpers\format_date( $row['date'] ) ); ?></td>
+                    <td><?php echo esc_html( $row['desc'] ); ?></td>
+                    <td class="amount"><?php echo esc_html( $row['amount'] ); ?></td>
+                </tr>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="2"><?php esc_html_e( 'Total contributions', 'starter-shelter' ); ?></td>
+                <td class="amount"><?php echo esc_html( (string) ( $summary['grand_formatted'] ?? '' ) ); ?></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <p class="tax-note"><?php echo esc_html( $tax_note ); ?></p>
+    <p class="generated"><?php echo esc_html( sprintf( __( 'Issued %s', 'starter-shelter' ), Helpers\format_date( (string) ( $summary['generated_date'] ?? wp_date( 'Y-m-d' ) ) ) ) ); ?></p>
+
+    <p class="no-print"><button type="button" onclick="window.print()"><?php esc_html_e( 'Print / Save as PDF', 'starter-shelter' ); ?></button></p>
+</body>
+</html>
+        <?php
+        return (string) ob_get_clean();
     }
 
     /**
@@ -1071,7 +1248,7 @@ class My_Account {
                                 <?php endforeach; ?>
                             </select>
                         </form>
-                        <a href="<?php echo esc_url( $print_url ); ?>" class="button" target="_blank"><?php esc_html_e( 'Print', 'starter-shelter' ); ?></a>
+                        <a href="<?php echo esc_url( $print_url ); ?>" class="button" target="_blank" rel="noopener"><?php esc_html_e( 'Print / Save as PDF', 'starter-shelter' ); ?></a>
                     </div>
 
                     <div class="sd-statement-content">
