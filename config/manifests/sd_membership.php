@@ -146,6 +146,19 @@ return [
 			'format'      => 'date-time',
 			'description' => 'When the membership was cancelled (if applicable)',
 		],
+		// Declared on the entity (not just the shared checkout field) so it
+		// hydrates and is persisted by create() — required for the public
+		// recognition wall to honor a member's opt-out. Mirrors sd_memorial.
+		'is_anonymous' => [
+			'type'         => 'boolean',
+			'default'      => false,
+			'show_in_rest' => true,
+			'description'  => 'Whether the member opted out of public recognition',
+			'form'         => [
+				'label'      => 'Anonymous',
+				'input_type' => 'checkbox',
+			],
+		],
 	],
 	'computed' => [
 		'tier_label' => [
@@ -387,6 +400,32 @@ return [
 						'type'        => 'integer',
 						'default'     => 50,
 						'description' => 'Maximum number of business members to return.',
+					],
+				],
+			],
+			'output' => [
+				'properties' => [
+					'items' => [ 'type' => 'array' ],
+					'total' => [ 'type' => 'integer' ],
+				],
+			],
+		],
+
+		'shelter-memberships/recognition-wall' => [
+			'label'       => 'Member Recognition Wall',
+			'description' => 'Active members who have not opted out of public recognition, for the tiered Members Wall block. Sorted highest tier first, then by name.',
+			'callback'    => 'Starter_Shelter\\Abilities\\Memberships\\recognition_wall',
+			'permission'  => 'public',
+			'meta'        => [
+				'annotations'  => [ 'readonly' => true, 'destructive' => false, 'idempotent' => true ],
+				'show_in_rest' => true,
+			],
+			'input' => [
+				'properties' => [
+					'limit' => [
+						'type'        => 'integer',
+						'default'     => 200,
+						'description' => 'Maximum number of members to return.',
 					],
 				],
 			],

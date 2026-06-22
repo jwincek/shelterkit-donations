@@ -1,0 +1,50 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "starter-shelter/members-wall",
+    "version": "1.0.0",
+    "title": "Members Wall",
+    "category": "starter-shelter",
+    "icon": "groups",
+    "description": "Tiered recognition wall of active members who haven't opted out, grouped by membership level.",
+    "keywords": [ "members", "supporters", "recognition", "wall", "tier", "donors" ],
+    "textdomain": "starter-shelter",
+    "supports": {
+        "html": false,
+        "align": [ "wide", "full" ],
+        "spacing": {
+            "margin": true,
+            "padding": true
+        },
+        "typography": {
+            "fontSize": true
+        }
+    },
+    "attributes": {
+        "groupByTier": {
+            "type": "boolean",
+            "default": true
+        },
+        "showLogos": {
+            "type": "boolean",
+            "default": true
+        },
+        "columns": {
+            "type": "number",
+            "default": 4
+        },
+        "maxItems": {
+            "type": "number",
+            "default": 200
+        }
+    },
+    "example": {
+        "attributes": {
+            "groupByTier": true
+        }
+    },
+    "editorScript": "file:./edit.js",
+    "style": "file:./style.css",
+    "editorStyle": "file:./style.css",
+    "render": "file:./render.php"
+}

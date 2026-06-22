@@ -77,6 +77,7 @@ function create( array $input ): array|WP_Error {
             '_sd_end_date'        => $end_date,
             '_sd_wc_order_id'     => $input['order_id'] ?? 0,
             '_sd_auto_renew'      => $input['auto_renew'] ?? false,
+            '_sd_is_anonymous'    => (bool) ( $input['is_anonymous'] ?? false ),
         ],
     ], true );
 
@@ -305,6 +306,76 @@ function business_directory( array $input = [] ): array {
             (string) ( $a['business_name'] ?? '' ),
             (string) ( $b['business_name'] ?? '' )
         )
+    );
+
+    return [
+        'items' => $items,
+        'total' => count( $items ),
+    ];
+}
+
+/**
+ * Active members for the public tiered recognition wall.
+ *
+ * Eligibility: active (end_date >= today) AND not opted out
+ * (is_anonymous falsy). Each item carries a resolved display name
+ * (business name for business members, otherwise the donor's display
+ * name) and tier_rank (the tier's dollar amount) so the block can group
+ * by tier and order tiers highest-first. Sorted by tier_rank DESC then
+ * display name; grouping into tier sections is left to the renderer.
+ *
+ * @since 2.2.0
+ *
+ * @param array $input Optional. `limit` (default 200).
+ * @return array{items: array<int, array>, total: int}
+ */
+function recognition_wall( array $input = [] ): array {
+    $limit = max( 1, min( 500, (int) ( $input['limit'] ?? 200 ) ) );
+
+    $result = Query::for( 'sd_membership' )
+        ->whereCompare( 'end_date', wp_date( 'Y-m-d' ), '>=', 'DATE' )
+        ->orderBy( 'start_date', 'DESC' )
+        ->paginate( 1, $limit );
+
+    $items = [];
+    foreach ( $result['items'] ?? [] as $m ) {
+        if ( ! empty( $m['is_anonymous'] ) ) {
+            continue; // Honor the member's opt-out.
+        }
+
+        $type        = (string) ( $m['membership_type'] ?? 'individual' );
+        $tier        = (string) ( $m['tier'] ?? '' );
+        $is_business = 'business' === $type;
+        $donor_id    = (int) ( $m['donor_id'] ?? 0 );
+
+        $display = $is_business ? (string) ( $m['business_name'] ?? '' ) : '';
+        if ( '' === trim( $display ) ) {
+            $display = (string) ( get_post_meta( $donor_id, '_sd_display_name', true ) ?: get_the_title( $donor_id ) );
+        }
+        if ( '' === trim( $display ) ) {
+            continue; // Nothing to recognize.
+        }
+
+        $items[] = [
+            'id'               => (int) ( $m['id'] ?? 0 ),
+            'display_name'     => $display,
+            'membership_type'  => $type,
+            'tier'             => $tier,
+            'tier_label'       => (string) ( $m['tier_label'] ?? Helpers\get_tier_label( $tier ) ),
+            'tier_rank'        => Helpers\get_tier_amount( $tier, $type ),
+            'logo_url'         => $is_business ? (string) ( $m['logo_url'] ?? '' ) : '',
+            'business_website' => $is_business ? (string) ( $m['business_website'] ?? '' ) : '',
+        ];
+    }
+
+    usort(
+        $items,
+        static function ( array $a, array $b ): int {
+            if ( $a['tier_rank'] !== $b['tier_rank'] ) {
+                return $b['tier_rank'] <=> $a['tier_rank']; // Highest tier first.
+            }
+            return strcasecmp( $a['display_name'], $b['display_name'] );
+        }
     );
 
     return [

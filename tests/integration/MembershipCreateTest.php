@@ -128,4 +128,29 @@ final class MembershipCreateTest extends WP_UnitTestCase {
             (float) get_post_meta( $created['donor_id'], '_sd_lifetime_giving', true )
         );
     }
+
+    public function test_is_anonymous_is_persisted_and_hydrates(): void {
+        $anon = create( [
+            'donor_email'  => 'anon@example.test',
+            'donor_name'   => 'Quiet Giver',
+            'tier'         => 'single',
+            'amount'       => 10,
+            'is_anonymous' => true,
+        ] );
+        $named = create( [
+            'donor_email' => 'named@example.test',
+            'donor_name'  => 'Proud Giver',
+            'tier'        => 'single',
+            'amount'      => 10,
+        ] );
+
+        // Persisted to meta...
+        $this->assertSame( '1', (string) get_post_meta( $anon['membership_id'], '_sd_is_anonymous', true ) );
+
+        // ...and hydrates as a typed boolean (previously absent entirely).
+        $anon_entity  = \Starter_Shelter\Core\Entity_Hydrator::get( 'sd_membership', $anon['membership_id'] );
+        $named_entity = \Starter_Shelter\Core\Entity_Hydrator::get( 'sd_membership', $named['membership_id'] );
+        $this->assertTrue( $anon_entity['is_anonymous'] );
+        $this->assertFalse( $named_entity['is_anonymous'], 'Defaults to false when not opted out.' );
+    }
 }

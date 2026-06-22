@@ -1,0 +1,94 @@
+/**
+ * Members Wall block styles.
+ *
+ * @package Starter_Shelter
+ */
+
+.sd-members-wall {
+    --sd-mw-columns: 4;
+}
+
+.sd-mw-tier + .sd-mw-tier {
+    margin-top: 2rem;
+}
+
+.sd-mw-tier-title {
+    margin: 0 0 1rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-align: center;
+    color: var(--wp--preset--color--contrast, #1e1e1e);
+}
+
+.sd-mw-grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(var(--sd-mw-columns, 4), 1fr);
+    gap: 1rem;
+}
+
+.sd-mw-item {
+    margin: 0;
+}
+
+.sd-mw-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    height: 100%;
+    min-height: 96px;
+    padding: 1rem;
+    box-sizing: border-box;
+    border: 1px solid var(--wp--preset--color--contrast-3, #e0e0e0);
+    border-radius: 6px;
+    background: var(--wp--preset--color--base, #fff);
+    text-decoration: none;
+    color: inherit;
+    text-align: center;
+}
+
+a.sd-mw-tile {
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+a.sd-mw-tile:hover,
+a.sd-mw-tile:focus-visible {
+    border-color: var(--wp--preset--color--primary, #0073aa);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.sd-mw-logo {
+    max-height: 64px;
+    max-width: 100%;
+    width: auto;
+    object-fit: contain;
+}
+
+.sd-mw-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--wp--preset--color--contrast, #1e1e1e);
+}
+
+.sd-mw-empty {
+    text-align: center;
+    color: var(--wp--preset--color--contrast-2, #666);
+    font-style: italic;
+}
+
+@media ( max-width: 782px ) {
+    .sd-mw-grid {
+        grid-template-columns: repeat( 2, 1fr );
+    }
+}
+
+@media ( max-width: 480px ) {
+    .sd-mw-grid {
+        grid-template-columns: 1fr;
+    }
+}
