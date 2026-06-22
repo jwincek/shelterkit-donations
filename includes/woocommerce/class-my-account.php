@@ -51,6 +51,113 @@ class My_Account {
 
         add_filter( 'the_title', [ self::class, 'endpoint_titles' ], 10, 2 );
         add_action( 'wp_enqueue_scripts', [ self::class, 'enqueue_styles' ] );
+        add_action( 'template_redirect', [ self::class, 'handle_account_actions' ] );
+    }
+
+    /**
+     * Process self-service POST actions from the account pages (PRG).
+     *
+     * Currently handles the public-recognition preference. Verifies the
+     * nonce, resolves the current user's own donor (so a user can only
+     * change their own record), applies the change, sets a notice, and
+     * redirects to avoid resubmission.
+     *
+     * @since 2.2.0
+     */
+    public static function handle_account_actions(): void {
+        if ( empty( $_POST['sd_account_action'] ) || ! is_user_logged_in() ) {
+            return;
+        }
+
+        if ( 'recognition' !== sanitize_key( wp_unslash( $_POST['sd_account_action'] ) ) ) {
+            return;
+        }
+
+        $nonce = isset( $_POST['sd_recognition_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['sd_recognition_nonce'] ) ) : '';
+        if ( ! wp_verify_nonce( $nonce, 'sd_recognition' ) ) {
+            wc_add_notice( __( 'Security check failed. Please try again.', 'starter-shelter' ), 'error' );
+            return;
+        }
+
+        $donor_id = self::get_current_donor_id();
+        if ( ! $donor_id ) {
+            return;
+        }
+
+        $list_publicly = ! empty( $_POST['sd_list_publicly'] );
+        self::set_recognition_preference( $donor_id, $list_publicly );
+
+        wc_add_notice(
+            $list_publicly
+                ? __( 'Saved. Your name will be listed on the public members wall.', 'starter-shelter' )
+                : __( 'Saved. Your name will be hidden from the public members wall.', 'starter-shelter' )
+        );
+
+        wp_safe_redirect( wc_get_account_endpoint_url( 'my-memberships' ) );
+        exit;
+    }
+
+    /**
+     * Apply a donor's public-recognition preference to their memberships.
+     *
+     * Opt-out model: unchecking public listing sets `is_anonymous` on every
+     * one of the donor's memberships, which the recognition-wall ability
+     * honors. WooCommerce-free so it can be unit-exercised directly.
+     *
+     * @since 2.2.0
+     *
+     * @param int  $donor_id      The donor post ID.
+     * @param bool $list_publicly Whether to list the member publicly.
+     * @return int Number of memberships updated.
+     */
+    public static function set_recognition_preference( int $donor_id, bool $list_publicly ): int {
+        if ( ! $donor_id ) {
+            return 0;
+        }
+
+        $anonymous   = ! $list_publicly;
+        $memberships = Query::for( 'sd_membership' )
+            ->where( 'donor_id', $donor_id )
+            ->get();
+
+        $count = 0;
+        foreach ( $memberships as $membership ) {
+            $membership_id = (int) ( $membership['id'] ?? 0 );
+            if ( $membership_id ) {
+                update_post_meta( $membership_id, '_sd_is_anonymous', $anonymous );
+                ++$count;
+            }
+        }
+
+        return $count;
+    }
+
+    /**
+     * Whether the donor is currently listed publicly (no active membership
+     * has opted out). Drives the checkbox's initial state.
+     *
+     * @since 2.2.0
+     *
+     * @param int $donor_id The donor post ID.
+     * @return bool
+     */
+    public static function is_listed_publicly( int $donor_id ): bool {
+        if ( ! $donor_id ) {
+            return false;
+        }
+
+        $memberships = Query::for( 'sd_membership' )
+            ->where( 'donor_id', $donor_id )
+            ->whereCompare( 'end_date', wp_date( 'Y-m-d' ), '>=', 'DATE' )
+            ->get();
+
+        foreach ( $memberships as $membership ) {
+            if ( ! empty( $membership['is_anonymous'] ) ) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -290,6 +397,7 @@ class My_Account {
         self::render_template( 'my-memberships', [
             'active_memberships'  => $active,
             'expired_memberships' => $expired,
+            'list_publicly'       => self::is_listed_publicly( $donor_id ),
         ] );
     }
 
@@ -568,6 +676,22 @@ class My_Account {
                 ?>
                 <div class="sd-my-memberships">
                     <?php if ( ! empty( $active_memberships ) ) : ?>
+                    <div class="sd-recognition-pref">
+                        <h3><?php esc_html_e( 'Public Recognition', 'starter-shelter' ); ?></h3>
+                        <form method="post" class="sd-recognition-form">
+                            <?php wp_nonce_field( 'sd_recognition', 'sd_recognition_nonce' ); ?>
+                            <input type="hidden" name="sd_account_action" value="recognition">
+                            <label class="sd-recognition-toggle">
+                                <input type="checkbox" name="sd_list_publicly" value="1" <?php checked( ! empty( $list_publicly ) ); ?>>
+                                <?php esc_html_e( 'List me on the public Members Wall', 'starter-shelter' ); ?>
+                            </label>
+                            <p class="sd-recognition-help">
+                                <?php esc_html_e( 'When unchecked, your name and logo are hidden from the public members wall.', 'starter-shelter' ); ?>
+                            </p>
+                            <button type="submit" class="button"><?php esc_html_e( 'Save preference', 'starter-shelter' ); ?></button>
+                        </form>
+                    </div>
+
                     <h3><?php esc_html_e( 'Active Memberships', 'starter-shelter' ); ?></h3>
                     <?php foreach ( $active_memberships as $m ) :
                         $m_days = (int) ( ( strtotime( $m['end_date'] ) - time() ) / DAY_IN_SECONDS );
@@ -763,6 +887,12 @@ class My_Account {
 .sd-stat-link:hover { background: #eef; transform: translateY(-2px); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
 .sd-stat-value { display: block; font-size: 1.8em; font-weight: bold; color: #1e1e1e; }
 .sd-stat-label { display: block; color: #666; margin-top: 5px; }
+
+/* Public recognition preference */
+.sd-recognition-pref { background: #f8f8f8; padding: 20px; margin: 0 0 24px; border-radius: 4px; }
+.sd-recognition-pref h3 { margin-top: 0; }
+.sd-recognition-toggle { display: flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer; }
+.sd-recognition-help { color: #666; margin: 6px 0 12px; font-size: 0.9em; }
 
 /* Membership status */
 .sd-membership-status, .sd-recent-donations { background: #f8f8f8; padding: 20px; margin: 20px 0; border-radius: 4px; }
