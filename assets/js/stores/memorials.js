@@ -104,8 +104,13 @@ const { state, actions } = store( 'starter-shelter/memorials', {
          */
         get resultsText() {
             const ctx = getContext();
-            if ( ctx.isLoading && ( ! ctx.items || ctx.items.length === 0 ) ) {
-                return 'Loading…';
+            // Any in-flight filter/pagination shows a busy message — the
+            // count area is aria-live, so this announces to screen readers
+            // too. (Initial empty load also lands here.)
+            if ( ctx.isLoading ) {
+                return ( ! ctx.items || ctx.items.length === 0 )
+                    ? 'Loading…'
+                    : 'Updating…';
             }
             const t = ctx.total ?? 0;
             return t === 1 ? '1 memorial' : `${ t } memorials`;

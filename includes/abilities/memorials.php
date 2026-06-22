@@ -131,9 +131,12 @@ function list_memorials( array $input = [] ): array {
     }
 
     // Dedication occasion (memory / honor) — orthogonal to memorial_type.
+    // Use whereDefaulted so the 'memory' filter also matches legacy rows
+    // with an empty/missing _sd_dedication_type, which display as
+    // "In Memory Of" via normalize_dedication_type's default.
     $dedication = $input['dedication'] ?? null;
     if ( $dedication && 'all' !== $dedication ) {
-        $query->where( 'dedication_type', $dedication );
+        $query->whereDefaulted( 'dedication_type', $dedication, 'memory' );
     }
 
     if ( ! empty( $input['year'] ) ) {

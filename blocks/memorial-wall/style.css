@@ -126,6 +126,21 @@
     box-shadow: 0 0 0 1px var(--wp--preset--color--primary, #0073aa);
 }
 
+/* Filter controls while a filter/navigation is in flight. Inputs are
+   disabled by the store (data-wp-bind--disabled) to prevent racing
+   changes; this is the matching visual cue. */
+.sd-controls--busy {
+    cursor: wait;
+}
+
+.sd-filter-select:disabled,
+.sd-search-input:disabled,
+.sd-search-button:disabled,
+.sd-clear-filters:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
 .sd-clear-filters {
     padding: 0.5rem 1rem;
     border: 1px solid var(--wp--preset--color--contrast-3, #ccc);

@@ -115,7 +115,8 @@ if ( $ability ) {
         $query->where( 'memorial_type', $type_filter );
     }
     if ( 'all' !== $dedication_filter ) {
-        $query->where( 'dedication_type', $dedication_filter );
+        // Match legacy empty/missing meta too (reads as 'memory').
+        $query->whereDefaulted( 'dedication_type', $dedication_filter, 'memory' );
     }
     if ( $year_filter ) {
         $query->whereInTaxonomy( 'sd_memorial_year', $year_filter, 'slug' );
@@ -240,7 +241,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
 
     <?php // ─── Controls: Search + Filters ─────────────────────────── ?>
     <?php if ( $show_search || $show_filters ) : ?>
-    <div class="sd-memorial-controls" role="search" aria-label="<?php esc_attr_e( 'Filter memorials', 'starter-shelter' ); ?>">
+    <div class="sd-memorial-controls" role="search" aria-label="<?php esc_attr_e( 'Filter memorials', 'starter-shelter' ); ?>" data-wp-class--sd-controls--busy="context.isLoading">
 
         <?php if ( $show_search ) : ?>
         <div class="sd-search-box">
@@ -251,11 +252,13 @@ $wrapper_attributes = get_block_wrapper_attributes( [
                 placeholder="<?php esc_attr_e( 'Search tributes…', 'starter-shelter' ); ?>"
                 value="<?php echo esc_attr( $search_term ); ?>"
                 data-wp-on--keydown="actions.handleSearchKeydown"
+                data-wp-bind--disabled="context.isLoading"
             >
             <button
                 type="button"
                 class="sd-search-button"
                 data-wp-on--click="actions.submitSearch"
+                data-wp-bind--disabled="context.isLoading"
                 aria-label="<?php esc_attr_e( 'Search', 'starter-shelter' ); ?>"
             >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -273,6 +276,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
                 class="sd-filter-select"
                 data-wp-bind--value="context.filters.type"
                 data-wp-on--change="actions.handleFilterChange"
+                data-wp-bind--disabled="context.isLoading"
             >
                 <option value="all" <?php selected( $type_filter, 'all' ); ?>><?php esc_html_e( 'All Types', 'starter-shelter' ); ?></option>
                 <option value="person" <?php selected( $type_filter, 'person' ); ?>><?php esc_html_e( 'People', 'starter-shelter' ); ?></option>
@@ -284,6 +288,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
                 class="sd-filter-select"
                 data-wp-bind--value="context.filters.dedication"
                 data-wp-on--change="actions.handleFilterChange"
+                data-wp-bind--disabled="context.isLoading"
                 aria-label="<?php esc_attr_e( 'Filter by dedication', 'starter-shelter' ); ?>"
             >
                 <option value="all" <?php selected( $dedication_filter, 'all' ); ?>><?php esc_html_e( 'All Dedications', 'starter-shelter' ); ?></option>
@@ -297,6 +302,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
                 class="sd-filter-select"
                 data-wp-bind--value="context.filters.year"
                 data-wp-on--change="actions.handleFilterChange"
+                data-wp-bind--disabled="context.isLoading"
             >
                 <option value=""><?php esc_html_e( 'All Years', 'starter-shelter' ); ?></option>
                 <?php foreach ( $years as $year ) : ?>
@@ -313,6 +319,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
                 data-wp-on--click="actions.clearFilters"
                 data-wp-class--sd-clear-filters--hidden="!state.hasActiveFilters"
                 data-wp-bind--aria-hidden="!state.hasActiveFilters"
+                data-wp-bind--disabled="context.isLoading"
             >
                 <?php esc_html_e( 'Clear', 'starter-shelter' ); ?>
             </button>
@@ -341,6 +348,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
         role="list"
         aria-label="<?php esc_attr_e( 'Memorials', 'starter-shelter' ); ?>"
         data-wp-class--is-loading="context.isLoading"
+        data-wp-bind--aria-busy="context.isLoading"
         data-wp-watch--highlight="callbacks.applyHighlights"
     >
         <?php // Loading overlay — hidden by default, shown when isLoading is true ?>

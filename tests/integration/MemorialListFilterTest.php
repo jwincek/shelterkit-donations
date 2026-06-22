@@ -70,6 +70,40 @@ final class MemorialListFilterTest extends WP_UnitTestCase {
         $this->assertSame( 'honor', $result['items'][0]['dedication_type'] );
     }
 
+    /**
+     * Legacy rows with no `_sd_dedication_type` meta display as "In Memory
+     * Of" (normalize default), so the memory filter must include them —
+     * otherwise the filter and the displayed label disagree. Guards the
+     * "memory filter returns nothing" regression.
+     */
+    public function test_memory_filter_includes_legacy_rows_without_meta(): void {
+        // Two real memory rows + one legacy row (meta stripped) + one honor.
+        $this->seed(); // 2 memory, 1 honor
+
+        $legacy = create( [
+            'donor_email'     => 'legacy@example.test',
+            'donor_name'      => 'Legacy Giver',
+            'honoree_name'    => 'Old Tribute',
+            'memorial_type'   => 'person',
+            'dedication_type' => 'memory',
+            'amount'          => 10,
+        ] );
+        // Simulate a pre-1.1.4 memorial: dedication meta never written.
+        delete_post_meta( $legacy['memorial_id'], '_sd_dedication_type' );
+
+        $memory = list_memorials( [ 'dedication' => 'memory', 'per_page' => 50 ] );
+        $honor  = list_memorials( [ 'dedication' => 'honor', 'per_page' => 50 ] );
+
+        // 2 explicit memory + 1 legacy = 3; honor unaffected.
+        $this->assertSame( 3, $memory['total'] );
+        $this->assertContains(
+            $legacy['memorial_id'],
+            array_column( $memory['items'], 'id' ),
+            'Legacy row (empty dedication meta) must match the memory filter.'
+        );
+        $this->assertSame( 1, $honor['total'] );
+    }
+
     public function test_filter_all_is_a_no_op(): void {
         $this->seed();
 

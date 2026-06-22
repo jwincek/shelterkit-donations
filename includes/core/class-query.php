@@ -156,6 +156,47 @@ class Query {
     }
 
     /**
+     * Filter by a field whose absence implies a default value.
+     *
+     * Mirrors normalize-on-read defaults: e.g. an empty or missing
+     * `_sd_dedication_type` reads as 'memory'. A plain equality
+     * (see {@see where()}) would then disagree with what's displayed —
+     * filtering by the default value must ALSO match rows where the meta
+     * is missing or empty. Filtering by a non-default value stays a plain
+     * equality.
+     *
+     * @since 2.1.0
+     *
+     * @param string $field   The field name (without prefix).
+     * @param mixed  $value   The value to match.
+     * @param mixed  $default The value an absent/empty meta normalizes to.
+     * @return self
+     */
+    public function whereDefaulted( string $field, $value, $default ): self {
+        if ( null === $value || '' === $value ) {
+            return $this;
+        }
+
+        $key = $this->meta_prefix . $field;
+
+        if ( $value === $default ) {
+            $this->meta_query[] = [
+                'relation' => 'OR',
+                [ 'key' => $key, 'value' => $value ],
+                [ 'key' => $key, 'compare' => 'NOT EXISTS' ],
+                [ 'key' => $key, 'value' => '', 'compare' => '=' ],
+            ];
+        } else {
+            $this->meta_query[] = [
+                'key'   => $key,
+                'value' => $value,
+            ];
+        }
+
+        return $this;
+    }
+
+    /**
      * Add a where clause with comparison operator.
      *
      * @since 1.0.0
