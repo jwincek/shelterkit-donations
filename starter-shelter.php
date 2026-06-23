@@ -134,6 +134,28 @@ function starter_shelter_register_abilities(): void {
 add_action( 'wp_abilities_api_init', 'starter_shelter_register_abilities' );
 
 /**
+ * Declare WooCommerce feature compatibility.
+ *
+ * The plugin reads and writes orders through the WC_Order API, and the one
+ * place with raw order queries (the legacy-order scanner) branches on
+ * OrderUtil::custom_orders_table_usage_is_enabled() to hit the wc_orders
+ * tables when HPOS is active. It is therefore compatible with High-Performance
+ * Order Storage (custom order tables). Declaring it stops WooCommerce flagging
+ * the plugin as incompatible and unblocks admins enabling HPOS.
+ *
+ * Runs on before_woocommerce_init — the hook WooCommerce documents for
+ * feature-compatibility declarations.
+ *
+ * @since 2.3.0
+ */
+function starter_shelter_declare_wc_compatibility(): void {
+    if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+    }
+}
+add_action( 'before_woocommerce_init', 'starter_shelter_declare_wc_compatibility' );
+
+/**
  * Initialize WooCommerce integration.
  *
  * @since 1.0.0

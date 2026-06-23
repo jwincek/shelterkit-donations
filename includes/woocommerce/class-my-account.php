@@ -37,11 +37,25 @@ class My_Account {
     ];
 
     /**
+     * Object-cache group for the per-request user → donor-id memoization.
+     *
+     * @since 2.3.0
+     * @var string
+     */
+    private const DONOR_CACHE_GROUP = 'sd_user_donor';
+
+    /**
      * Initialize My Account integration.
      *
      * @since 1.0.0
      */
     public static function init(): void {
+        // Request-scoped memoization for get_current_donor_id(): the
+        // user → donor mapping is stable within a request, so keep it
+        // non-persistent (no cross-request staleness when a donor is
+        // created/linked, and unit tests flush it automatically).
+        wp_cache_add_non_persistent_groups( [ self::DONOR_CACHE_GROUP ] );
+
         add_action( 'init', [ self::class, 'register_endpoints' ] );
         add_filter( 'query_vars', [ self::class, 'add_query_vars' ] );
         add_filter( 'woocommerce_account_menu_items', [ self::class, 'add_menu_items' ] );
@@ -611,17 +625,45 @@ class My_Account {
     /**
      * Get current user's donor ID.
      *
+     * Memoized per request (non-persistent cache): this runs on every account
+     * page — the menu filter, the sub-nav, and each rendered section — and the
+     * underlying meta_query is otherwise uncached.
+     *
      * @since 1.0.0
      *
      * @return int|null Donor ID or null.
      */
     public static function get_current_donor_id(): ?int {
         $user_id = get_current_user_id();
-        
+
         if ( ! $user_id ) {
             return null;
         }
 
+        $cached = wp_cache_get( $user_id, self::DONOR_CACHE_GROUP );
+        if ( false !== $cached ) {
+            return $cached ? (int) $cached : null;
+        }
+
+        $donor_id = self::lookup_donor_id( $user_id );
+        wp_cache_set( $user_id, $donor_id, self::DONOR_CACHE_GROUP );
+
+        return $donor_id ?: null;
+    }
+
+    /**
+     * Resolve a user's donor record id (0 when none).
+     *
+     * Prefers the explicit `_sd_user_id` link; falls back to matching the
+     * user's email against `_sd_email`, back-filling the link so later
+     * lookups are direct.
+     *
+     * @since 2.3.0
+     *
+     * @param int $user_id Current user id.
+     * @return int Donor post id, or 0 if the user has no donor record.
+     */
+    private static function lookup_donor_id( int $user_id ): int {
         $donors = get_posts( [
             'post_type'      => 'sd_donor',
             'post_status'    => 'publish',
@@ -636,11 +678,11 @@ class My_Account {
         ] );
 
         if ( ! empty( $donors ) ) {
-            return $donors[0];
+            return (int) $donors[0];
         }
 
         $user = get_user_by( 'id', $user_id );
-        
+
         if ( $user ) {
             $donors = get_posts( [
                 'post_type'      => 'sd_donor',
@@ -657,11 +699,11 @@ class My_Account {
 
             if ( ! empty( $donors ) ) {
                 update_post_meta( $donors[0], '_sd_user_id', $user_id );
-                return $donors[0];
+                return (int) $donors[0];
             }
         }
 
-        return null;
+        return 0;
     }
 
     /**

@@ -38,6 +38,30 @@ final class WcBootstrapTest extends WP_UnitTestCase {
         $this->assertTrue( class_exists( 'Starter_Shelter\\WooCommerce\\Product_Mapper' ) );
     }
 
+    public function test_declares_hpos_compatibility(): void {
+        // The declaration runs on the WC-documented hook, which fires during
+        // bootstrap. (Full FeaturesController reconciliation only surfaces for
+        // a plugin installed in the WP plugins dir — not the case for a plugin
+        // require()d into a throwaway test core — so assert the wiring + that
+        // we declare a real feature id, which is what guards against drift.)
+        $this->assertNotFalse(
+            has_action( 'before_woocommerce_init', 'starter_shelter_declare_wc_compatibility' ),
+            'Compatibility declaration is hooked on before_woocommerce_init.'
+        );
+        $this->assertGreaterThan(
+            0,
+            did_action( 'before_woocommerce_init' ),
+            'The declaration hook actually fires in this WC setup.'
+        );
+
+        $controller = wc_get_container()->get( \Automattic\WooCommerce\Internal\Features\FeaturesController::class );
+        $this->assertArrayHasKey(
+            'custom_order_tables',
+            $controller->get_features( true ),
+            'custom_order_tables (HPOS) is a real WC feature id.'
+        );
+    }
+
     public function test_can_create_product_and_order(): void {
         $product = new \WC_Product_Simple();
         $product->set_name( 'Smoke Test Product' );
