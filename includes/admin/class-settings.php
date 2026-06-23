@@ -218,7 +218,7 @@ class Settings {
         // Data management — destructive, so off by default.
         self::add_field( 'delete_data_on_uninstall', __( 'Delete all data on uninstall', 'starter-shelter' ), 'sd_data', 'checkbox', [
             'default'     => false,
-            'description' => __( 'When enabled, uninstalling the plugin permanently deletes all donations, memberships, memorials, donors, campaigns, and the activity log. Leave OFF to preserve your records — this cannot be undone. WooCommerce products and the media library are always kept.', 'starter-shelter' ),
+            'description' => __( 'When enabled, uninstalling the plugin permanently deletes all donations, memberships, memorials, donors, campaigns, and the activity log. Leave OFF to preserve your records — this cannot be undone. Before enabling, download a full backup from Import / Export. WooCommerce products and the media library are always kept.', 'starter-shelter' ),
         ], 'general' );
 
     }

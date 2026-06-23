@@ -54,22 +54,40 @@ class CSV_Exporter {
 			);
 		}
 
+		$filename = ( $type_config['export']['filename_prefix'] ?? $entity_type ) . '-' . wp_date( 'Y-m-d' ) . '.csv';
+		self::send_headers( $filename );
+		echo self::build_csv( $entity_type, $options ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CSV cells are neutralized by fputcsv_safe.
+		exit;
+	}
+
+	/**
+	 * Build an entity type's CSV as a string (UTF-8 BOM + header + rows).
+	 *
+	 * Shared by the single-file stream and the full-backup ZIP. Returns an
+	 * empty string for an unknown entity type.
+	 *
+	 * @since 2.3.0
+	 *
+	 * @param string $entity_type Key from import-export.json entity_types.
+	 * @param array  $options     Export options (see {@see export()}).
+	 * @return string CSV content.
+	 */
+	public static function build_csv( string $entity_type, array $options = [] ): string {
+		$type_config = Config::get_path( 'import-export', "entity_types.{$entity_type}" );
+		if ( ! $type_config ) {
+			return '';
+		}
+
 		$export_config = $type_config['export'] ?? [];
 		$post_type     = $type_config['post_type'] ?? '';
 
-		// Build query.
-		$args = self::build_query_args( $post_type, $export_config, $options );
+		$args  = self::build_query_args( $post_type, $export_config, $options );
 		$query = new \WP_Query( $args );
 
-		// Collect columns (base + optional groups).
 		$columns = $export_config['columns'] ?? [];
 		$columns = self::maybe_add_optional_columns( $columns, $export_config, $options );
 
-		// Stream CSV.
-		$filename = ( $export_config['filename_prefix'] ?? $entity_type ) . '-' . wp_date( 'Y-m-d' ) . '.csv';
-		self::send_headers( $filename );
-
-		$output = fopen( 'php://output', 'w' );
+		$output = fopen( 'php://temp', 'r+' );
 
 		// UTF-8 BOM for Excel compatibility.
 		fwrite( $output, "\xEF\xBB\xBF" );
@@ -82,20 +100,82 @@ class CSV_Exporter {
 			update_postmeta_cache( wp_list_pluck( $query->posts, 'ID' ) );
 		}
 
-		// Data rows.
 		foreach ( $query->posts as $post ) {
 			$entity = Entity_Hydrator::get( $post_type, $post->ID );
-
 			if ( ! $entity ) {
 				continue;
 			}
-
-			$row = self::build_row( $post, $entity, $columns, $post_type );
-			fputcsv_safe( $output, $row );
+			fputcsv_safe( $output, self::build_row( $post, $entity, $columns, $post_type ) );
 		}
 
+		rewind( $output );
+		$csv = (string) stream_get_contents( $output );
 		fclose( $output );
-		exit;
+
+		return $csv;
+	}
+
+	/**
+	 * Build a full-backup ZIP of every entity type's CSV plus a README that
+	 * documents what is and isn't covered.
+	 *
+	 * @since 2.3.0
+	 *
+	 * @param string[] $entity_types Entity types to include (default: all).
+	 * @param array    $options      Export options applied to each CSV.
+	 * @return string|\WP_Error Path to a temp ZIP file, or an error.
+	 */
+	public static function build_archive( array $entity_types = [], array $options = [] ) {
+		if ( ! class_exists( '\ZipArchive' ) ) {
+			return new \WP_Error( 'no_zip', __( 'The ZipArchive PHP extension is required to download a full backup.', 'starter-shelter' ) );
+		}
+
+		if ( empty( $entity_types ) ) {
+			$entity_types = array_keys( (array) Config::get_path( 'import-export', 'entity_types', [] ) );
+		}
+
+		$tmp = wp_tempnam( 'sd-backup.zip' );
+		$zip = new \ZipArchive();
+		if ( true !== $zip->open( $tmp, \ZipArchive::CREATE | \ZipArchive::OVERWRITE ) ) {
+			return new \WP_Error( 'zip_open', __( 'Could not create the backup archive.', 'starter-shelter' ) );
+		}
+
+		foreach ( $entity_types as $type ) {
+			$csv = self::build_csv( $type, $options );
+			if ( '' === $csv ) {
+				continue;
+			}
+			$config = Config::get_path( 'import-export', "entity_types.{$type}" );
+			$name   = ( $config['export']['filename_prefix'] ?? $type ) . '.csv';
+			$zip->addFromString( $name, $csv );
+		}
+
+		$zip->addFromString( 'README.txt', self::backup_readme() );
+		$zip->close();
+
+		return $tmp;
+	}
+
+	/**
+	 * README bundled in the backup ZIP — restore steps and coverage limits.
+	 *
+	 * @since 2.3.0
+	 *
+	 * @return string
+	 */
+	private static function backup_readme(): string {
+		$lines = [
+			sprintf( '%s data backup — %s', get_bloginfo( 'name' ), wp_date( 'Y-m-d H:i' ) ),
+			'',
+			'To restore: in WordPress, go to Shelter > Import / Export and import each',
+			'CSV. Import donors first, then donations, memberships, and memorials with',
+			'"create donors" enabled — records relink to donors by email address.',
+			'',
+			'Included: donors, donations, memberships, memorials.',
+			'NOT included (these do not round-trip via CSV): campaigns, uploaded logos',
+			'and photos, candle counts, the activity log, and plugin settings.',
+		];
+		return implode( "\n", $lines ) . "\n";
 	}
 
 	/**

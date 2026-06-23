@@ -56,6 +56,9 @@ class Import_Export_Page {
 		// Single generic export handler (replaces 4 separate admin_post actions).
 		add_action( 'admin_post_sd_export', [ self::class, 'handle_export' ] );
 
+		// Full-backup ZIP (all entities) — for pre-uninstall backups.
+		add_action( 'admin_post_sd_export_all', [ self::class, 'handle_export_all' ] );
+
 		// Register all AJAX handlers.
 		Import_Ajax_Handler::init();
 	}
@@ -154,9 +157,38 @@ class Import_Export_Page {
 	}
 
 	/**
+	 * Stream a full-backup ZIP of every entity type.
+	 *
+	 * @since 2.3.0
+	 */
+	public static function handle_export_all(): void {
+		check_admin_referer( self::EXPORT_NONCE );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Permission denied.', 'starter-shelter' ) );
+		}
+
+		$archive = CSV_Exporter::build_archive();
+		if ( is_wp_error( $archive ) ) {
+			wp_die( esc_html( $archive->get_error_message() ) );
+		}
+
+		$filename = 'shelter-data-backup-' . wp_date( 'Y-m-d' ) . '.zip';
+
+		nocache_headers();
+		header( 'Content-Type: application/zip' );
+		header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
+		header( 'Content-Length: ' . filesize( $archive ) );
+		readfile( $archive ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile
+		wp_delete_file( $archive );
+		exit;
+	}
+
+	/**
 	 * Render the admin page.
 	 *
-	 * Just the React mount point — all UI is rendered client-side.
+	 * A server-rendered full-backup card above the React mount point (all
+	 * other UI is client-side).
 	 *
 	 * @since 2.0.0
 	 */
@@ -167,9 +199,31 @@ class Import_Export_Page {
 
 		?>
 		<div class="wrap">
+			<?php self::render_backup_card(); ?>
 			<div id="sd-import-export-root">
 				<p><?php esc_html_e( 'Loading Import/Export interface...', 'starter-shelter' ); ?></p>
 			</div>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Server-rendered "full backup" card — a plain form download (no React),
+	 * with an explicit note on what does and doesn't round-trip.
+	 *
+	 * @since 2.3.0
+	 */
+	private static function render_backup_card(): void {
+		?>
+		<div class="sd-backup-card" style="background:#fff;border:1px solid #c3c4c7;border-left:4px solid #2271b1;border-radius:4px;padding:16px 20px;margin:0 0 20px;max-width:1200px;">
+			<h2 style="margin-top:0;"><?php esc_html_e( 'Full data backup', 'starter-shelter' ); ?></h2>
+			<p><?php esc_html_e( 'Download every donor, donation, membership, and memorial as a single CSV ZIP. Do this before uninstalling with "Delete all data on uninstall" enabled — deletion is permanent.', 'starter-shelter' ); ?></p>
+			<p class="description"><?php esc_html_e( 'Included: donors, donations, memberships, memorials (relinked by email on re-import). Not included: campaigns, uploaded logos/photos, candle counts, the activity log, and settings.', 'starter-shelter' ); ?></p>
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+				<input type="hidden" name="action" value="sd_export_all" />
+				<?php wp_nonce_field( self::EXPORT_NONCE ); ?>
+				<button type="submit" class="button button-secondary"><?php esc_html_e( 'Download full backup (CSV ZIP)', 'starter-shelter' ); ?></button>
+			</form>
 		</div>
 		<?php
 	}
