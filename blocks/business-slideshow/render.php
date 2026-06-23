@@ -154,7 +154,10 @@ $context = [
         </button>
     </div>
 
-    <div class="sd-bs-dots" role="tablist" aria-label="<?php esc_attr_e( 'Choose business member', 'starter-shelter' ); ?>">
+    <?php // Slide picker. A labeled group of buttons with aria-current marks the
+          // active slide — not a tablist: the slides are carousel groups, not
+          // tabpanels, and aria-selected is invalid on a plain button. ?>
+    <div class="sd-bs-dots" role="group" aria-label="<?php esc_attr_e( 'Choose business member', 'starter-shelter' ); ?>">
         <?php foreach ( $items as $i => $item ) : ?>
         <button
             type="button"
@@ -162,7 +165,8 @@ $context = [
             <?php echo wp_interactivity_data_wp_context( [ 'dot' => $i ] ); ?>
             data-wp-on--click="actions.goToDot"
             data-wp-class--is-active="state.isActiveDot"
-            data-wp-bind--aria-selected="state.isActiveDot"
+            data-wp-bind--aria-current="state.isActiveDot"
+            <?php echo 0 === $i ? 'aria-current="true"' : ''; ?>
             aria-label="<?php echo esc_attr( sprintf( /* translators: %d: slide number */ __( 'Go to slide %d', 'starter-shelter' ), $i + 1 ) ); ?>"
         ></button>
         <?php endforeach; ?>

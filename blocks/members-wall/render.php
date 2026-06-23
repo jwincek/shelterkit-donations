@@ -97,10 +97,13 @@ $render_tile = static function ( array $item ) use ( $show_logos ): void {
 ?>
 
 <div <?php echo $wrapper_attributes; ?>>
-    <?php foreach ( $groups as $label => $members ) : ?>
-    <section class="sd-mw-tier">
-        <?php if ( $group_by_tier && '' !== $label ) : ?>
-        <h3 class="sd-mw-tier-title"><?php echo esc_html( $label ); ?></h3>
+    <?php foreach ( $groups as $label => $members ) :
+        $has_title = $group_by_tier && '' !== $label;
+        $title_id  = $has_title ? 'sd-mw-tier-' . sanitize_title( (string) $label ) : '';
+    ?>
+    <section class="sd-mw-tier"<?php echo $title_id ? ' aria-labelledby="' . esc_attr( $title_id ) . '"' : ''; ?>>
+        <?php if ( $has_title ) : ?>
+        <h3 class="sd-mw-tier-title" id="<?php echo esc_attr( $title_id ); ?>"><?php echo esc_html( $label ); ?></h3>
         <?php endif; ?>
         <ul class="sd-mw-grid" role="list">
             <?php foreach ( $members as $item ) : ?>
