@@ -147,6 +147,10 @@ class Settings {
             echo '<p>' . esc_html__( 'Configure email notifications.', 'starter-shelter' ) . '</p>';
         }, self::PAGE_SLUG . '_emails' );
 
+        add_settings_section( 'sd_data', __( 'Data Management', 'starter-shelter' ), function() {
+            echo '<p>' . esc_html__( 'Control what happens to your data when the plugin is uninstalled.', 'starter-shelter' ) . '</p>';
+        }, self::PAGE_SLUG . '_general' );
+
     }
 
     private static function register_fields(): void {
@@ -210,6 +214,12 @@ class Settings {
             'default' => get_option( 'admin_email' ),
             'description' => __( 'Email address for business logo moderation notifications.', 'starter-shelter' ),
         ], 'emails' );
+
+        // Data management — destructive, so off by default.
+        self::add_field( 'delete_data_on_uninstall', __( 'Delete all data on uninstall', 'starter-shelter' ), 'sd_data', 'checkbox', [
+            'default'     => false,
+            'description' => __( 'When enabled, uninstalling the plugin permanently deletes all donations, memberships, memorials, donors, campaigns, and the activity log. Leave OFF to preserve your records — this cannot be undone. WooCommerce products and the media library are always kept.', 'starter-shelter' ),
+        ], 'general' );
 
     }
 
@@ -284,6 +294,7 @@ class Settings {
         foreach ( [ 'feature_anonymous_donations', 'feature_dedications', 'feature_family_notifications', 'feature_renewal_reminders', 'feature_annual_statements' ] as $f ) {
             $sanitized[ $f ] = ! empty( $input[ $f ] );
         }
+        $sanitized['delete_data_on_uninstall'] = ! empty( $input['delete_data_on_uninstall'] );
         return $sanitized;
     }
 
@@ -305,6 +316,7 @@ class Settings {
             'feature_family_notifications'  => true,
             'feature_renewal_reminders'     => true,
             'feature_annual_statements'     => true,
+            'delete_data_on_uninstall'      => false,
         ];
     }
 
