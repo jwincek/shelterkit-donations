@@ -145,4 +145,15 @@ final class BusinessDirectoryTest extends WP_UnitTestCase {
 
         $this->assertSame( [ 'Acme Pets', 'Marigold Vet', 'Zebra Supplies' ], $names );
     }
+
+    public function test_excludes_anonymous_optout_members(): void {
+        $this->make_member( [ 'name' => 'Listed Co' ] );
+        $optout = $this->make_member( [ 'name' => 'Private Co' ] );
+        update_post_meta( $optout, '_sd_is_anonymous', true ); // Unchecked "list me publicly".
+
+        $dir = business_directory();
+
+        $this->assertSame( 1, $dir['total'], 'Opted-out business is hidden from the public directory.' );
+        $this->assertSame( 'Listed Co', $dir['items'][0]['business_name'] );
+    }
 }

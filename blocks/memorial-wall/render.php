@@ -114,7 +114,9 @@ if ( $ability ) {
         $query->whereInTaxonomy( 'sd_memorial_year', $year_filter, 'slug' );
     }
     if ( $search_term ) {
-        $query->searchMultiple( [ 'honoree_name', 'donor_display_name' ], $search_term );
+        // Honoree only — searching donor_display_name would surface memorials
+        // shown as "Anonymous Donor" by the giver's real name (anonymity bypass).
+        $query->searchMultiple( [ 'honoree_name' ], $search_term );
     }
 
     $result = $query->paginate( $current_page, $per_page );

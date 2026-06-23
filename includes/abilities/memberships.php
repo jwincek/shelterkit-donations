@@ -297,7 +297,10 @@ function business_directory( array $input = [] ): array {
 
     $items = array_values( array_filter(
         $result['items'] ?? [],
-        static fn ( array $m ): bool => ! empty( $m['logo_url'] )
+        // Need a resolvable logo, and honor the member's public-recognition
+        // opt-out (is_anonymous) — same as recognition_wall(), so an opted-out
+        // business isn't exposed in the public directory.
+        static fn ( array $m ): bool => ! empty( $m['logo_url'] ) && empty( $m['is_anonymous'] )
     ) );
 
     usort(

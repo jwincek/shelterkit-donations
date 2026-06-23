@@ -122,7 +122,11 @@ function list_memorials( array $input = [] ): array {
         ->withPermalinks()                    // ← one-line addition
         ->where( 'donor_id', $input['donor_id'] ?? null )
         ->whereInTaxonomy( 'sd_campaign', $input['campaign_id'] ?? null )
-        ->searchMultiple( [ 'honoree_name', 'donor_display_name' ], $input['search'] ?? null )
+        // Public wall search targets the honoree only. Searching donor_display_name
+        // would match the real name even on memorials shown as "Anonymous Donor",
+        // letting a visitor confirm an anonymous gift — an anonymity bypass. Donors
+        // find their own (incl. anonymous) memorials privately via My Account.
+        ->searchMultiple( [ 'honoree_name' ], $input['search'] ?? null )
         ->orderBy( 'donation_date', 'DESC' );
 
     $type = $input['type'] ?? null;

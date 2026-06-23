@@ -136,4 +136,28 @@ final class MemorialListFilterTest extends WP_UnitTestCase {
         $this->assertSame( 'honor', $honor_pets['items'][0]['dedication_type'] );
         $this->assertSame( 'pet', $honor_pets['items'][0]['memorial_type'] );
     }
+
+    /**
+     * Public wall search must not match the donor's name — otherwise a visitor
+     * could surface a memorial shown as "Anonymous Donor" by searching the
+     * giver's real name, confirming an anonymous gift. Search targets the
+     * honoree (the public subject) only.
+     */
+    public function test_public_search_does_not_match_donor_name(): void {
+        $result = create( [
+            'donor_email'   => 'reginald@example.test',
+            'donor_name'    => 'Reginald Vanderbilt',
+            'honoree_name'  => 'Beloved Biscuit',
+            'memorial_type' => 'pet',
+            'amount'        => 10,
+        ] );
+        // Memorial the donor wanted kept anonymous on the public wall.
+        update_post_meta( $result['memorial_id'], '_sd_is_anonymous', true );
+
+        $by_donor   = list_memorials( [ 'search' => 'Reginald', 'per_page' => 50 ] );
+        $by_honoree = list_memorials( [ 'search' => 'Biscuit', 'per_page' => 50 ] );
+
+        $this->assertSame( 0, $by_donor['total'], 'Donor name is not searchable on the public wall.' );
+        $this->assertSame( 1, $by_honoree['total'], 'Honoree name remains searchable.' );
+    }
 }
