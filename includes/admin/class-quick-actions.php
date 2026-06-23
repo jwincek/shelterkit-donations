@@ -35,7 +35,6 @@ class Quick_Actions {
 
         // AJAX handlers.
         add_action( 'wp_ajax_sd_view_receipt', [ self::class, 'ajax_view_receipt' ] );
-        add_action( 'wp_ajax_sd_quick_stats', [ self::class, 'ajax_quick_stats' ] );
 
         // Bulk action handlers.
         add_filter( 'bulk_actions-edit-sd_membership', [ self::class, 'register_membership_bulk_actions' ] );
