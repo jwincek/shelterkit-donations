@@ -74,4 +74,41 @@ final class AnnualStatementPrintTest extends WP_UnitTestCase {
 
         $this->assertStringContainsString( 'No contributions recorded', $html );
     }
+
+    /**
+     * Invoke the private default-year resolver.
+     */
+    private function default_year( int $donor_id ): int {
+        $m = new \ReflectionMethod( My_Account::class, 'default_statement_year' );
+        $m->setAccessible( true );
+        return (int) $m->invoke( null, $donor_id );
+    }
+
+    public function test_default_year_falls_back_to_most_recent_gift_year(): void {
+        // All gifts are in the *current* year, so the prior-year default has
+        // no data and the dropdown would never offer it. The resolver should
+        // fall back to the most recent year that actually has contributions,
+        // so the selector and the statement stay in sync (the reported bug).
+        $current  = (int) wp_date( 'Y' );
+        $donor_id = get_or_create_donor( 'current@example.test', 'Current Giver' );
+        \Starter_Shelter\Abilities\Donations\create( [ 'donor_id' => $donor_id, 'amount' => 25, 'allocation' => 'general-fund', 'donation_date' => "{$current}-02-07" ] );
+
+        $this->assertSame( $current, $this->default_year( $donor_id ) );
+    }
+
+    public function test_default_year_prefers_prior_completed_year_when_it_has_gifts(): void {
+        $prior    = (int) wp_date( 'Y' ) - 1;
+        $current  = (int) wp_date( 'Y' );
+        $donor_id = get_or_create_donor( 'both@example.test', 'Both Years' );
+        \Starter_Shelter\Abilities\Donations\create( [ 'donor_id' => $donor_id, 'amount' => 25, 'allocation' => 'general-fund', 'donation_date' => "{$prior}-06-01" ] );
+        \Starter_Shelter\Abilities\Donations\create( [ 'donor_id' => $donor_id, 'amount' => 25, 'allocation' => 'general-fund', 'donation_date' => "{$current}-06-01" ] );
+
+        $this->assertSame( $prior, $this->default_year( $donor_id ) );
+    }
+
+    public function test_default_year_is_prior_year_when_no_gifts(): void {
+        $donor_id = get_or_create_donor( 'none@example.test', 'No Gifts At All' );
+
+        $this->assertSame( (int) wp_date( 'Y' ) - 1, $this->default_year( $donor_id ) );
+    }
 }

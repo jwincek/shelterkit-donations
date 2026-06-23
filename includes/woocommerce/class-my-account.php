@@ -81,7 +81,7 @@ class My_Account {
             return;
         }
 
-        $year    = isset( $_GET['year'] ) ? absint( wp_unslash( $_GET['year'] ) ) : (int) wp_date( 'Y' ) - 1;
+        $year    = isset( $_GET['year'] ) ? absint( wp_unslash( $_GET['year'] ) ) : self::default_statement_year( $donor_id );
         $summary = self::execute_ability(
             'shelter-reports/annual-summary',
             [ 'donor_id' => $donor_id, 'year' => $year ],
@@ -793,7 +793,7 @@ class My_Account {
             return;
         }
 
-        $year = isset( $_GET['year'] ) ? absint( $_GET['year'] ) : (int) wp_date( 'Y' ) - 1;
+        $year = isset( $_GET['year'] ) ? absint( $_GET['year'] ) : self::default_statement_year( $donor_id );
 
         $ability = wp_get_ability( 'shelter-reports/annual-summary' );
         
@@ -810,6 +810,13 @@ class My_Account {
         }
 
         $years = self::get_donation_years( $donor_id );
+
+        // Keep the selector and the rendered statement in sync: an explicit
+        // ?year for a year with no contributions still shows as selected.
+        if ( ! in_array( $year, $years, true ) ) {
+            $years[] = $year;
+            rsort( $years );
+        }
 
         self::render_template( 'annual-statement', [
             'summary'   => $summary,
@@ -842,6 +849,30 @@ class My_Account {
         ) );
 
         return array_map( 'intval', $years );
+    }
+
+    /**
+     * Resolve the default statement year for a donor.
+     *
+     * Prefers the prior, completed tax year (the usual target for a charitable
+     * contribution statement). If that year has no contributions, falls back to
+     * the most recent year that does, so the year selector and the rendered
+     * statement always agree instead of silently showing different years.
+     *
+     * @since 1.0.0
+     *
+     * @param int $donor_id The donor ID.
+     * @return int The default year.
+     */
+    private static function default_statement_year( int $donor_id ): int {
+        $prior_year = (int) wp_date( 'Y' ) - 1;
+        $years      = self::get_donation_years( $donor_id );
+
+        if ( empty( $years ) || in_array( $prior_year, $years, true ) ) {
+            return $prior_year;
+        }
+
+        return (int) $years[0]; // Most recent year with contributions (DESC).
     }
 
     /**
