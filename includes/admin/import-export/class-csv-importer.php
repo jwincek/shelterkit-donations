@@ -565,6 +565,16 @@ class CSV_Importer {
 		// 3. Pass donor_id directly so the ability skips its own donor lookup.
 		$input['donor_id'] = $donor['id'];
 
+		// Re-link the campaign by name (find-or-create the term): post IDs and
+		// term IDs change on restore, so the exported campaign *name* is the
+		// stable key. The create abilities assign the term from campaign_id.
+		if ( ! empty( $row['campaign'] ) ) {
+			$campaign_id = self::resolve_campaign_term( (string) $row['campaign'] );
+			if ( $campaign_id ) {
+				$input['campaign_id'] = $campaign_id;
+			}
+		}
+
 		// 4. Execute the ability.
 		$ability_name = $config['ability'];
 		$ability = wp_get_ability( $ability_name );
@@ -736,6 +746,33 @@ class CSV_Importer {
 	// -------------------------------------------------------------------------
 	// Helpers
 	// -------------------------------------------------------------------------
+
+	/**
+	 * Find (or create) an sd_campaign term by name and return its id.
+	 *
+	 * Used to re-link donations/memberships/memorials to their campaign on
+	 * import by the stable name rather than a post/term id that changes on
+	 * restore. Returns 0 when the name is empty or the term can't be created.
+	 *
+	 * @since 2.3.0
+	 *
+	 * @param string $name Campaign name.
+	 * @return int Term id, or 0.
+	 */
+	private static function resolve_campaign_term( string $name ): int {
+		$name = trim( $name );
+		if ( '' === $name ) {
+			return 0;
+		}
+
+		$existing = get_term_by( 'name', $name, 'sd_campaign' );
+		if ( $existing instanceof \WP_Term ) {
+			return (int) $existing->term_id;
+		}
+
+		$created = wp_insert_term( $name, 'sd_campaign' );
+		return is_wp_error( $created ) ? 0 : (int) $created['term_id'];
+	}
 
 	/**
 	 * Resolve export-to-import column name aliases.

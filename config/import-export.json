@@ -242,6 +242,15 @@
             "field": "business_name"
           },
           {
+            "header": "Campaign",
+            "source": "taxonomy",
+            "taxonomy": "sd_campaign"
+          },
+          {
+            "header": "Logo Attachment ID",
+            "field": "logo_attachment_id"
+          },
+          {
             "header": "Order ID",
             "field": "wc_order_id"
           }
@@ -352,6 +361,10 @@
           "business_description": {
             "target": "business_description",
             "validate": "text"
+          },
+          "logo_attachment_id": {
+            "target": "logo_attachment_id",
+            "validate": "positive_number"
           }
         },
         "ability": "shelter-memberships/create",
@@ -521,6 +534,15 @@
             "field": "address",
             "subfield": "postcode",
             "meta_fallback_prefix": "_sd_"
+          },
+          {
+            "header": "Campaign",
+            "source": "taxonomy",
+            "taxonomy": "sd_campaign"
+          },
+          {
+            "header": "Photo ID",
+            "field": "photo_id"
           }
         ],
         "filters": {}
@@ -608,6 +630,10 @@
           "notify_family_address": {
             "target": "notify_family_address",
             "validate": "text"
+          },
+          "photo_id": {
+            "target": "photo_id",
+            "validate": "positive_number"
           }
         },
         "ability": "shelter-memorials/create",

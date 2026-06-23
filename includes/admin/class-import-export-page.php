@@ -218,7 +218,7 @@ class Import_Export_Page {
 		<div class="sd-backup-card" style="background:#fff;border:1px solid #c3c4c7;border-left:4px solid #2271b1;border-radius:4px;padding:16px 20px;margin:0 0 20px;max-width:1200px;">
 			<h2 style="margin-top:0;"><?php esc_html_e( 'Full data backup', 'starter-shelter' ); ?></h2>
 			<p><?php esc_html_e( 'Download every donor, donation, membership, and memorial as a single CSV ZIP. Do this before uninstalling with "Delete all data on uninstall" enabled — deletion is permanent.', 'starter-shelter' ); ?></p>
-			<p class="description"><?php esc_html_e( 'Included: donors, donations, memberships, memorials (relinked by email on re-import). Not included: campaigns, uploaded logos/photos, candle counts, the activity log, and settings.', 'starter-shelter' ); ?></p>
+			<p class="description"><?php esc_html_e( 'Included: donors, donations, memberships, memorials — relinked by email, with their campaign association and logo/photo references restored on same-site re-import. Not restored automatically: campaign goals/end-dates, candle counts, the activity log, and settings.', 'starter-shelter' ); ?></p>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 				<input type="hidden" name="action" value="sd_export_all" />
 				<?php wp_nonce_field( self::EXPORT_NONCE ); ?>

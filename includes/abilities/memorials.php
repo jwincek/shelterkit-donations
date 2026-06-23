@@ -94,6 +94,13 @@ function create( array $input ): array|WP_Error {
         update_post_meta( $memorial_id, '_sd_photo_id', (int) $input['photo_id'] );
     }
 
+    // Assign the campaign term (if any) so the memorial counts toward a
+    // campaign and the association survives an export/import round trip.
+    // Mirrors the donation and membership create abilities.
+    if ( ! empty( $input['campaign_id'] ) ) {
+        wp_set_object_terms( $memorial_id, [ (int) $input['campaign_id'] ], 'sd_campaign' );
+    }
+
     // Run shared post-processing (year taxonomy, lifetime giving, emails).
     Helpers\process_memorial_save( $memorial_id, [
         'is_new'        => true,

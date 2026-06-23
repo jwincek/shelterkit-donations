@@ -171,9 +171,13 @@ class CSV_Exporter {
 			'CSV. Import donors first, then donations, memberships, and memorials with',
 			'"create donors" enabled — records relink to donors by email address.',
 			'',
-			'Included: donors, donations, memberships, memorials.',
-			'NOT included (these do not round-trip via CSV): campaigns, uploaded logos',
-			'and photos, candle counts, the activity log, and plugin settings.',
+			'Included: donors, donations, memberships, memorials — with their',
+			'campaign association (relinked by campaign name) and logo/photo',
+			'attachment references (same-site restore, since the media library is',
+			'preserved).',
+			'',
+			'NOT restored automatically: campaign goals / end-dates, candle counts,',
+			'the activity log, and plugin settings.',
 		];
 		return implode( "\n", $lines ) . "\n";
 	}
