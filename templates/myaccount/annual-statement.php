@@ -39,7 +39,7 @@ defined( 'ABSPATH' ) || exit;
         <h2><?php echo esc_html( get_bloginfo( 'name' ) ); ?></h2>
         <h3><?php esc_html_e( 'Charitable Contribution Statement', 'starter-shelter' ); ?></h3>
         <p><strong><?php echo esc_html( $summary['donor']['name'] ); ?></strong></p>
-        <p><?php echo esc_html( sprintf( __( 'Year: %d', 'starter-shelter' ), $year ) ); ?></p>
+        <p><?php echo esc_html( sprintf( /* translators: %d: year */ __( 'Year: %d', 'starter-shelter' ), $year ) ); ?></p>
 
         <table class="sd-statement-summary">
             <tr><td><?php esc_html_e( 'Donations', 'starter-shelter' ); ?></td><td><?php echo esc_html( $summary['donations']['formatted'] ); ?></td></tr>

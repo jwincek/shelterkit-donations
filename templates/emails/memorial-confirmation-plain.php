@@ -17,12 +17,14 @@ $donor = $data['donor'] ?? [];
 echo "= " . esc_html( $heading ) . " =\n\n";
 
 printf(
+    /* translators: %s: recipient name */
     esc_html__( 'Dear %s,', 'starter-shelter' ),
     esc_html( $donor['first_name'] ?? __( 'Friend', 'starter-shelter' ) )
 );
 echo "\n\n";
 
 printf(
+    /* translators: %s: honoree name */
     esc_html__( 'Thank you for your heartfelt memorial tribute in honor of %s.', 'starter-shelter' ),
     esc_html( $memorial['honoree_name'] ?? '' )
 );

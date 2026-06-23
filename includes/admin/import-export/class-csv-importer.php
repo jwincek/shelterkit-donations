@@ -580,7 +580,7 @@ class CSV_Importer {
 		$ability = wp_get_ability( $ability_name );
 		$result  = $ability ? $ability->execute( $input ) : new \WP_Error(
 			'ability_not_found',
-			sprintf( __( 'Ability "%s" could not be loaded.', 'starter-shelter' ), $ability_name )
+			sprintf( /* translators: %s: ability name. */ __( 'Ability "%s" could not be loaded.', 'starter-shelter' ), $ability_name )
 		);
 
 		if ( is_wp_error( $result ) ) {
@@ -874,6 +874,7 @@ class CSV_Importer {
 			return new \WP_Error(
 				'missing_columns',
 				sprintf(
+					/* translators: %s: comma-separated list of missing column names. */
 					__( 'Missing required columns: %s', 'starter-shelter' ),
 					implode( ', ', $missing )
 				)

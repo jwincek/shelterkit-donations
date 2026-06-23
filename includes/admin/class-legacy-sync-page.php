@@ -394,6 +394,7 @@ class Legacy_Sync_Page {
 			}
 			wp_send_json_success( [
 				'message' => sprintf(
+					/* translators: %d: number of orders. */
 					__( 'Sync status reset for %d order(s).', 'starter-shelter' ),
 					count( $order_ids )
 				),

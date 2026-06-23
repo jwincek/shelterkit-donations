@@ -58,7 +58,7 @@ defined( 'ABSPATH' ) || exit;
         <?php if ( $mem_current_page > 1 ) : ?>
             <a href="<?php echo esc_url( add_query_arg( 'memorial-page', $mem_current_page - 1 ) ); ?>" class="sd-page-link">← <?php esc_html_e( 'Previous', 'starter-shelter' ); ?></a>
         <?php endif; ?>
-        <span class="sd-page-info"><?php printf( esc_html__( 'Page %1$d of %2$d', 'starter-shelter' ), $mem_current_page, $mem_total_pages ); ?></span>
+        <span class="sd-page-info"><?php printf( /* translators: 1: current page number, 2: total pages */ esc_html__( 'Page %1$d of %2$d', 'starter-shelter' ), $mem_current_page, $mem_total_pages ); ?></span>
         <?php if ( $mem_current_page < $mem_total_pages ) : ?>
             <a href="<?php echo esc_url( add_query_arg( 'memorial-page', $mem_current_page + 1 ) ); ?>" class="sd-page-link"><?php esc_html_e( 'Next', 'starter-shelter' ); ?> →</a>
         <?php endif; ?>

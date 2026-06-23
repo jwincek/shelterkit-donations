@@ -17,12 +17,14 @@ $donor = $data['donor'] ?? [];
 echo "= " . esc_html( $heading ) . " =\n\n";
 
 printf(
+    /* translators: %s: recipient name */
     esc_html__( 'Dear %s,', 'starter-shelter' ),
     esc_html( $donor['first_name'] ?? __( 'Friend', 'starter-shelter' ) )
 );
 echo "\n\n";
 
 printf(
+    /* translators: 1: site name, 2: tier label */
     esc_html__( 'Welcome to the %1$s family! Thank you for becoming a %2$s member.', 'starter-shelter' ),
     esc_html( get_bloginfo( 'name' ) ),
     esc_html( $membership['tier_label'] ?? $membership['tier'] ?? '' )
@@ -51,6 +53,7 @@ if ( ! empty( $membership['benefits'] ) ) {
 }
 
 printf(
+    /* translators: %s: donor dashboard URL */
     esc_html__( 'Visit your Donor Dashboard to view your membership status: %s', 'starter-shelter' ),
     esc_url( wc_get_account_endpoint_url( 'donor-dashboard' ) )
 );

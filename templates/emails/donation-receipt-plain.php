@@ -15,6 +15,7 @@ $donor = $data['donor'] ?? [];
 echo "= " . esc_html( $heading ) . " =\n\n";
 
 printf(
+    /* translators: %s: recipient name */
     esc_html__( 'Dear %s,', 'starter-shelter' ),
     esc_html( $donor['first_name'] ?? __( 'Friend', 'starter-shelter' ) )
 );

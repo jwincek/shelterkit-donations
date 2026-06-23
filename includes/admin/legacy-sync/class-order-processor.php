@@ -132,7 +132,8 @@ class Order_Processor {
 
 				if ( ! $ability_name || ! function_exists( 'wp_has_ability' ) || ! wp_has_ability( $ability_name ) ) {
 					$errors[] = sprintf(
-						__( 'Ability "%s" not found for item "%s"', 'starter-shelter' ),
+						/* translators: 1: ability name; 2: order item name. */
+						__( 'Ability "%1$s" not found for item "%2$s"', 'starter-shelter' ),
 						$ability_name,
 						$item_data['name']
 					);
@@ -200,7 +201,7 @@ class Order_Processor {
 					$ability     = wp_get_ability( $ability_name );
 					$result      = $ability ? $ability->execute( $input ) : new WP_Error(
 						'ability_not_found',
-						sprintf( __( 'Ability "%s" could not be loaded.', 'starter-shelter' ), $ability_name )
+						sprintf( /* translators: %s: ability name. */ __( 'Ability "%s" could not be loaded.', 'starter-shelter' ), $ability_name )
 					);
 					$action_type = 'created';
 				}
@@ -208,7 +209,8 @@ class Order_Processor {
 				if ( is_wp_error( $result ) ) {
 					$item_results[ $item_id ] = [ 'error' => $result->get_error_message() ];
 					$errors[] = sprintf(
-						__( 'Error processing "%s": %s', 'starter-shelter' ),
+						/* translators: 1: order item name; 2: error message. */
+						__( 'Error processing "%1$s": %2$s', 'starter-shelter' ),
 						$item_data['name'],
 						$result->get_error_message()
 					);

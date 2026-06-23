@@ -200,7 +200,8 @@ class Activity_Log {
         self::log(
             'donation_created',
             'donation',
-            sprintf( __( '%s donated %s', 'starter-shelter' ), $donor_name, $amount ),
+            /* translators: 1: donor's display name; 2: formatted donation amount. */
+            sprintf( __( '%1$s donated %2$s', 'starter-shelter' ), $donor_name, $amount ),
             'sd_donation',
             $donation_id,
             [
@@ -222,7 +223,8 @@ class Activity_Log {
         self::log(
             'membership_created',
             'membership',
-            sprintf( __( '%s joined as %s %s member', 'starter-shelter' ), $donor_name, ucfirst( $tier ), $type ),
+            /* translators: 1: donor's display name; 2: membership tier name; 3: membership type (e.g. individual, business). */
+            sprintf( __( '%1$s joined as %2$s %3$s member', 'starter-shelter' ), $donor_name, ucfirst( $tier ), $type ),
             'sd_membership',
             $membership_id,
             [
@@ -244,7 +246,8 @@ class Activity_Log {
         self::log(
             'memorial_created',
             'donation',
-            sprintf( __( '%s created memorial for %s', 'starter-shelter' ), $donor_name, $honoree ),
+            /* translators: 1: donor's display name; 2: honoree's name the memorial is for. */
+            sprintf( __( '%1$s created memorial for %2$s', 'starter-shelter' ), $donor_name, $honoree ),
             'sd_memorial',
             $memorial_id,
             [
@@ -265,6 +268,7 @@ class Activity_Log {
         self::log(
             'membership_renewed',
             'membership',
+            /* translators: %s: donor's display name. */
             sprintf( __( '%s renewed membership', 'starter-shelter' ), $donor_name ),
             'sd_membership',
             $membership_id,
@@ -285,7 +289,8 @@ class Activity_Log {
         self::log(
             'logo_approved',
             'admin',
-            sprintf( __( 'Logo approved for %s by %s', 'starter-shelter' ), $business_name, $admin_user->display_name ),
+            /* translators: 1: business name whose logo was approved; 2: display name of the admin who approved it. */
+            sprintf( __( 'Logo approved for %1$s by %2$s', 'starter-shelter' ), $business_name, $admin_user->display_name ),
             'sd_membership',
             $membership_id,
             [
@@ -306,7 +311,8 @@ class Activity_Log {
         self::log(
             'logo_rejected',
             'admin',
-            sprintf( __( 'Logo rejected for %s by %s: %s', 'starter-shelter' ), $business_name, $admin_user->display_name, $reason ),
+            /* translators: 1: business name whose logo was rejected; 2: display name of the admin who rejected it; 3: rejection reason. */
+            sprintf( __( 'Logo rejected for %1$s by %2$s: %3$s', 'starter-shelter' ), $business_name, $admin_user->display_name, $reason ),
             'sd_membership',
             $membership_id,
             [
@@ -326,7 +332,8 @@ class Activity_Log {
         self::log(
             'order_processed',
             'system',
-            sprintf( __( 'Order #%d processed %s', 'starter-shelter' ), $order_id, $status ),
+            /* translators: 1: WooCommerce order ID; 2: processing outcome (e.g. successfully, with errors). */
+            sprintf( __( 'Order #%1$d processed %2$s', 'starter-shelter' ), $order_id, $status ),
             'shop_order',
             $order_id,
             [
@@ -343,7 +350,8 @@ class Activity_Log {
         self::log(
             'email_sent',
             'email',
-            sprintf( __( '%s email sent to %s', 'starter-shelter' ), ucfirst( str_replace( '_', ' ', $email_type ) ), $recipient ),
+            /* translators: 1: email type label (e.g. Receipt, Renewal Reminder); 2: recipient email address. */
+            sprintf( __( '%1$s email sent to %2$s', 'starter-shelter' ), ucfirst( str_replace( '_', ' ', $email_type ) ), $recipient ),
             $data['object_type'] ?? null,
             $object_id,
             [
@@ -380,7 +388,8 @@ class Activity_Log {
             self::log(
                 'settings_changed',
                 'admin',
-                sprintf( __( 'Settings updated by %s: %s', 'starter-shelter' ), $admin_user->display_name, implode( ', ', $changed ) ),
+                /* translators: 1: display name of the admin who changed settings; 2: comma-separated list of changed setting keys. */
+            sprintf( __( 'Settings updated by %1$s: %2$s', 'starter-shelter' ), $admin_user->display_name, implode( ', ', $changed ) ),
                 null,
                 null,
                 [
@@ -402,7 +411,8 @@ class Activity_Log {
         self::log(
             'membership_extended',
             'admin',
-            sprintf( __( 'Membership for %s extended to %s by %s', 'starter-shelter' ), $donor_name, $new_end_date, $admin_user->display_name ),
+            /* translators: 1: donor's display name; 2: new membership end date; 3: display name of the admin who extended it. */
+            sprintf( __( 'Membership for %1$s extended to %2$s by %3$s', 'starter-shelter' ), $donor_name, $new_end_date, $admin_user->display_name ),
             'sd_membership',
             $membership_id,
             [
@@ -423,7 +433,9 @@ class Activity_Log {
             'membership_cancelled',
             'membership',
             $reason
+                /* translators: 1: donor's display name; 2: cancellation reason. */
                 ? sprintf( __( '%1$s cancelled membership: %2$s', 'starter-shelter' ), $donor_name, $reason )
+                /* translators: %s: donor's display name. */
                 : sprintf( __( '%s cancelled membership', 'starter-shelter' ), $donor_name ),
             'sd_membership',
             $membership_id,
@@ -445,7 +457,8 @@ class Activity_Log {
         self::log(
             'family_notified',
             'email',
-            sprintf( __( 'Family notification sent for memorial of %s to %s', 'starter-shelter' ), $honoree, $family_email ),
+            /* translators: 1: honoree's name the memorial is for; 2: family member's email address notified. */
+            sprintf( __( 'Family notification sent for memorial of %1$s to %2$s', 'starter-shelter' ), $honoree, $family_email ),
             'sd_memorial',
             $memorial_id,
             [

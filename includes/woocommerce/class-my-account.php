@@ -173,7 +173,7 @@ class My_Account {
 <head>
     <meta charset="<?php bloginfo( 'charset' ); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?php echo esc_html( sprintf( __( '%1$s Contribution Statement %2$d', 'starter-shelter' ), $org_name, $year ) ); ?></title>
+    <title><?php echo esc_html( sprintf( /* translators: %1$s: organization name; %2$d: tax year. */ __( '%1$s Contribution Statement %2$d', 'starter-shelter' ), $org_name, $year ) ); ?></title>
     <style>
         body { font-family: Georgia, "Times New Roman", serif; color: #222; max-width: 720px; margin: 32px auto; padding: 0 24px; line-height: 1.5; }
         .receipt-org { font-size: 1.4rem; font-weight: bold; margin: 0; }
@@ -196,7 +196,7 @@ class My_Account {
     <p class="receipt-org-address"><?php echo esc_html( $org_address ); ?></p>
     <?php endif; ?>
 
-    <h1><?php echo esc_html( sprintf( __( 'Charitable Contribution Statement — %d', 'starter-shelter' ), $year ) ); ?></h1>
+    <h1><?php echo esc_html( sprintf( /* translators: %d: tax year. */ __( 'Charitable Contribution Statement — %d', 'starter-shelter' ), $year ) ); ?></h1>
 
     <div class="receipt-meta">
         <strong><?php echo esc_html( (string) ( $summary['donor']['name'] ?? '' ) ); ?></strong><br>
@@ -238,7 +238,7 @@ class My_Account {
     </table>
 
     <p class="tax-note"><?php echo esc_html( $tax_note ); ?></p>
-    <p class="generated"><?php echo esc_html( sprintf( __( 'Issued %s', 'starter-shelter' ), Helpers\format_date( (string) ( $summary['generated_date'] ?? wp_date( 'Y-m-d' ) ) ) ) ); ?></p>
+    <p class="generated"><?php echo esc_html( sprintf( /* translators: %s: date the statement was issued. */ __( 'Issued %s', 'starter-shelter' ), Helpers\format_date( (string) ( $summary['generated_date'] ?? wp_date( 'Y-m-d' ) ) ) ) ); ?></p>
 
     <p class="no-print"><button type="button" onclick="window.print()"><?php esc_html_e( 'Print / Save as PDF', 'starter-shelter' ); ?></button></p>
 </body>

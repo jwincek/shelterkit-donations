@@ -99,7 +99,7 @@ $partials = dirname( __DIR__ ) . '/shared/partials';
         <?php if ( $title ) : ?><h2 class="sd-form-title"><?php echo esc_html( $title ); ?></h2><?php endif; ?>
         <?php if ( $subtitle ) : ?><p class="sd-form-subtitle"><?php echo esc_html( $subtitle ); ?></p><?php endif; ?>
         <?php if ( $campaign && ! is_wp_error( $campaign ) ) : ?>
-            <div class="sd-campaign-badge"><?php printf( esc_html__( 'Supporting: %s', 'starter-shelter' ), '<strong>' . esc_html( $campaign->name ) . '</strong>' ); ?></div>
+            <div class="sd-campaign-badge"><?php printf( /* translators: %s: campaign name. */ esc_html__( 'Supporting: %s', 'starter-shelter' ), '<strong>' . esc_html( $campaign->name ) . '</strong>' ); ?></div>
         <?php endif; ?>
         <?php if ( ! $product_ok ) : ?>
             <div class="sd-config-warning" role="alert"><p><?php esc_html_e( 'Donation form not configured.', 'starter-shelter' ); ?></p></div>

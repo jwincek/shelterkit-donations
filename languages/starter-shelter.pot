@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-06-23T19:45:24+00:00\n"
+"POT-Creation-Date: 2026-06-23T20:51:49+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: starter-shelter\n"
@@ -88,12 +88,12 @@ msgid "Ended"
 msgstr ""
 
 #: blocks/campaign-card/render.php:220
-#: includes/admin/class-reports.php:1315
+#: includes/admin/class-reports.php:1316
 msgid "Joined"
 msgstr ""
 
 #: blocks/campaign-card/render.php:225
-#: includes/admin/class-reports.php:1313
+#: includes/admin/class-reports.php:1314
 msgid "Raised"
 msgstr ""
 
@@ -101,13 +101,13 @@ msgstr ""
 #: includes/admin/class-campaign-admin.php:176
 #: includes/admin/class-campaign-admin.php:218
 #: includes/admin/class-reports.php:766
-#: includes/admin/class-reports.php:1310
+#: includes/admin/class-reports.php:1311
 msgid "Goal"
 msgstr ""
 
 #: blocks/campaign-card/render.php:244
 #: includes/admin/class-dashboard-widget.php:437
-#: assets/js/admin-import-export.js:915
+#: assets/js/admin-import-export.js:937
 msgid "Donors"
 msgstr ""
 
@@ -188,6 +188,7 @@ msgstr ""
 msgid "Medical Care"
 msgstr ""
 
+#. translators: %s: campaign name.
 #: blocks/donation-form/render.php:102
 #: blocks/membership-form/render.php:95
 #, php-format
@@ -243,51 +244,52 @@ msgstr ""
 msgid "Welcome back, %s!"
 msgstr ""
 
+#. translators: %s: donor first name
 #: blocks/donor-dashboard/render.php:159
-#: templates/emails/donation-receipt-plain.php:19
+#: templates/emails/donation-receipt-plain.php:20
 #: templates/emails/donation-receipt.php:31
-#: templates/emails/donor-annual-summary-plain.php:22
+#: templates/emails/donor-annual-summary-plain.php:23
 #: templates/emails/donor-annual-summary.php:34
-#: templates/emails/membership-renewal-plain.php:21
+#: templates/emails/membership-renewal-plain.php:22
 #: templates/emails/membership-renewal.php:33
-#: templates/emails/membership-welcome-plain.php:21
+#: templates/emails/membership-welcome-plain.php:22
 #: templates/emails/membership-welcome.php:33
-#: templates/emails/memorial-confirmation-plain.php:21
+#: templates/emails/memorial-confirmation-plain.php:22
 #: templates/emails/memorial-confirmation.php:33
 #: templates/myaccount/donor-dashboard.php:40
 msgid "Friend"
 msgstr ""
 
 #: blocks/donor-dashboard/render.php:168
-#: includes/blocks/register-stores.php:107
+#: includes/blocks/register-stores.php:109
 msgid "New Donor"
 msgstr ""
 
 #: blocks/donor-dashboard/render.php:169
 #: includes/admin/class-list-columns.php:513
-#: includes/admin/class-quick-actions.php:623
-#: includes/blocks/register-stores.php:108
+#: includes/admin/class-quick-actions.php:629
+#: includes/blocks/register-stores.php:110
 msgid "Bronze"
 msgstr ""
 
 #: blocks/donor-dashboard/render.php:170
 #: includes/admin/class-list-columns.php:514
-#: includes/admin/class-quick-actions.php:624
-#: includes/blocks/register-stores.php:109
+#: includes/admin/class-quick-actions.php:630
+#: includes/blocks/register-stores.php:111
 msgid "Silver"
 msgstr ""
 
 #: blocks/donor-dashboard/render.php:171
 #: includes/admin/class-list-columns.php:515
-#: includes/admin/class-quick-actions.php:625
-#: includes/blocks/register-stores.php:110
+#: includes/admin/class-quick-actions.php:631
+#: includes/blocks/register-stores.php:112
 msgid "Gold"
 msgstr ""
 
 #: blocks/donor-dashboard/render.php:172
 #: includes/admin/class-list-columns.php:516
-#: includes/admin/class-quick-actions.php:626
-#: includes/blocks/register-stores.php:111
+#: includes/admin/class-quick-actions.php:632
+#: includes/blocks/register-stores.php:113
 msgid "Platinum"
 msgstr ""
 
@@ -297,11 +299,11 @@ msgstr ""
 #: includes/admin/class-quick-actions.php:321
 #: includes/admin/class-reports.php:401
 #: includes/admin/class-reports.php:683
-#: includes/admin/class-reports.php:1081
-#: includes/admin/class-reports.php:1227
-#: includes/admin/class-reports.php:1326
+#: includes/admin/class-reports.php:1082
+#: includes/admin/class-reports.php:1228
+#: includes/admin/class-reports.php:1327
 #: includes/admin/class-settings.php:401
-#: includes/blocks/register-stores.php:106
+#: includes/blocks/register-stores.php:108
 #: assets/js/admin-legacy-sync.js:301
 msgid "Donor"
 msgstr ""
@@ -347,7 +349,7 @@ msgstr ""
 
 #: blocks/donor-dashboard/render.php:245
 #: blocks/membership-form/render.php:22
-#: templates/myaccount/my-memberships.php:121
+#: templates/myaccount/my-memberships.php:123
 msgid "Become a Member"
 msgstr ""
 
@@ -399,7 +401,7 @@ msgstr ""
 
 #: blocks/membership-form/render.php:111
 #: includes/admin/class-list-columns.php:325
-#: includes/admin/class-quick-actions.php:562
+#: includes/admin/class-quick-actions.php:568
 #: includes/admin/legacy-sync/class-order-scanner.php:384
 #: blocks/membership-form/edit.js:38
 msgid "Individual"
@@ -407,7 +409,7 @@ msgstr ""
 
 #: blocks/membership-form/render.php:117
 #: includes/admin/class-list-columns.php:327
-#: includes/admin/class-quick-actions.php:564
+#: includes/admin/class-quick-actions.php:570
 #: includes/admin/legacy-sync/class-order-scanner.php:383
 msgid "Business"
 msgstr ""
@@ -426,7 +428,7 @@ msgstr ""
 
 #: blocks/membership-form/render.php:188
 #: blocks/membership-form/render.php:270
-#: templates/myaccount/my-memberships.php:61
+#: templates/myaccount/my-memberships.php:62
 msgid "year"
 msgstr ""
 
@@ -484,7 +486,7 @@ msgid "Keep my membership anonymous"
 msgstr ""
 
 #: blocks/membership-form/render.php:278
-#: includes/blocks/register-stores.php:103
+#: includes/blocks/register-stores.php:105
 #: includes/woocommerce/class-order-handler.php:565
 msgid "Processing..."
 msgstr ""
@@ -516,11 +518,11 @@ msgstr ""
 
 #: blocks/memorial-form/render.php:79
 #: blocks/memorial-wall/render.php:296
-#: includes/blocks/register-stores.php:97
+#: includes/blocks/register-stores.php:99
 #: includes/core/helpers.php:461
 #: includes/woocommerce/class-cart-handler.php:476
 #: templates/emails/memorial-confirmation.php:53
-#: assets/js/admin-import-export.js:755
+#: assets/js/admin-import-export.js:765
 #: assets/js/memorial-panel.js:131
 #: blocks/memorial-form/edit.js:62
 msgid "In Memory Of"
@@ -528,8 +530,8 @@ msgstr ""
 
 #: blocks/memorial-form/render.php:87
 #: blocks/memorial-wall/render.php:297
-#: includes/admin/class-quick-actions.php:581
-#: includes/blocks/register-stores.php:96
+#: includes/admin/class-quick-actions.php:587
+#: includes/blocks/register-stores.php:98
 #: includes/core/helpers.php:460
 #: includes/woocommerce/class-cart-handler.php:475
 #: assets/js/memorial-panel.js:132
@@ -545,8 +547,8 @@ msgstr ""
 #: blocks/memorial-wall/render.php:478
 #: blocks/memorial-wall/render.php:492
 #: includes/admin/class-list-columns.php:420
-#: includes/admin/class-quick-actions.php:579
-#: includes/blocks/register-stores.php:101
+#: includes/admin/class-quick-actions.php:585
+#: includes/blocks/register-stores.php:103
 #: includes/core/helpers.php:405
 #: includes/woocommerce/class-cart-handler.php:488
 #: assets/js/memorial-panel.js:141
@@ -558,9 +560,9 @@ msgstr ""
 #: blocks/memorial-wall/render.php:478
 #: blocks/memorial-wall/render.php:492
 #: includes/admin/class-list-columns.php:421
-#: includes/admin/class-quick-actions.php:580
-#: includes/blocks/register-stores.php:100
+#: includes/admin/class-quick-actions.php:586
 #: includes/blocks/register-stores.php:102
+#: includes/blocks/register-stores.php:104
 #: includes/core/helpers.php:404
 #: includes/woocommerce/class-cart-handler.php:489
 #: assets/js/memorial-panel.js:142
@@ -569,7 +571,7 @@ msgid "Pet"
 msgstr ""
 
 #: blocks/memorial-form/render.php:119
-#: includes/blocks/register-stores.php:98
+#: includes/blocks/register-stores.php:100
 msgid "Person's Name"
 msgstr ""
 
@@ -645,8 +647,8 @@ msgid "Search"
 msgstr ""
 
 #: blocks/memorial-wall/render.php:282
-#: includes/admin/class-quick-actions.php:561
-#: includes/admin/class-quick-actions.php:578
+#: includes/admin/class-quick-actions.php:567
+#: includes/admin/class-quick-actions.php:584
 #: assets/js/admin-legacy-sync.js:101
 msgid "All Types"
 msgstr ""
@@ -695,7 +697,7 @@ msgstr[1] ""
 #: includes/woocommerce/class-my-account.php:999
 #: templates/myaccount/annual-statement.php:46
 #: templates/myaccount/donor-dashboard.php:55
-#: assets/js/admin-import-export.js:924
+#: assets/js/admin-import-export.js:946
 #: assets/js/admin-legacy-sync.js:104
 #: assets/js/admin-legacy-sync.js:370
 msgid "Memorials"
@@ -719,6 +721,7 @@ msgstr ""
 msgid "1 candle"
 msgstr ""
 
+#. translators: %d: number of candles lit.
 #: blocks/memorial-wall/render.php:546
 #, php-format
 msgid "%d candles"
@@ -742,7 +745,7 @@ msgstr ""
 msgid "Previous"
 msgstr ""
 
-#. translators: 1: current page, 2: total pages
+#. translators: 1: current page number, 2: total pages
 #: blocks/memorial-wall/render.php:622
 #: templates/myaccount/my-memorials.php:61
 #, php-format
@@ -750,7 +753,7 @@ msgid "Page %1$d of %2$d"
 msgstr ""
 
 #: blocks/memorial-wall/render.php:637
-#: templates/myaccount/giving-history.php:91
+#: templates/myaccount/giving-history.php:92
 #: templates/myaccount/my-memorials.php:63
 msgid "Next"
 msgstr ""
@@ -759,6 +762,7 @@ msgstr ""
 msgid "Or enter custom amount:"
 msgstr ""
 
+#. translators: %s: minimum donation amount.
 #: blocks/shared/partials/amount-selector.php:43
 #, php-format
 msgid "$%s minimum"
@@ -839,41 +843,44 @@ msgstr ""
 msgid "membership expiring in %d days"
 msgstr ""
 
-#: includes/abilities/reports.php:613
+#. translators: %d: number of days
+#: includes/abilities/reports.php:614
 #, php-format
 msgid "memberships expiring in %d days"
 msgstr ""
 
-#: includes/abilities/reports.php:627
+#: includes/abilities/reports.php:628
 msgid "family notification pending"
 msgstr ""
 
-#: includes/abilities/reports.php:628
+#: includes/abilities/reports.php:629
 msgid "family notifications pending"
 msgstr ""
 
-#: includes/abilities/reports.php:751
-#: includes/abilities/reports.php:1002
+#: includes/abilities/reports.php:752
+#: includes/abilities/reports.php:1007
 msgid "Valid campaign ID is required."
 msgstr ""
 
-#: includes/abilities/reports.php:760
-#: includes/abilities/reports.php:1011
+#: includes/abilities/reports.php:761
+#: includes/abilities/reports.php:1016
 #: includes/rest/class-rest-controller.php:265
 msgid "Campaign not found."
 msgstr ""
 
-#: includes/abilities/reports.php:805
-#: includes/abilities/reports.php:970
-#: includes/abilities/reports.php:1036
+#. translators: %d: number of members goal.
+#: includes/abilities/reports.php:807
+#: includes/abilities/reports.php:974
+#: includes/abilities/reports.php:1042
 #, php-format
 msgid "%d member"
 msgid_plural "%d members"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/abilities/reports.php:815
-#: includes/abilities/reports.php:980
+#. translators: %d: number of members remaining to reach the goal.
+#: includes/abilities/reports.php:818
+#: includes/abilities/reports.php:985
 #, php-format
 msgid "%d to go"
 msgid_plural "%d to go"
@@ -882,25 +889,27 @@ msgstr[1] ""
 
 #: includes/admin/class-activity-log.php:135
 #: includes/admin/class-activity-log.php:136
-#: includes/admin/class-activity-log.php:528
+#: includes/admin/class-activity-log.php:541
 msgid "Activity Log"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:203
+#. translators: 1: donor's display name; 2: formatted donation amount.
+#: includes/admin/class-activity-log.php:204
 #, php-format
-msgid "%s donated %s"
+msgid "%1$s donated %2$s"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:225
+#. translators: 1: donor's display name; 2: membership tier name; 3: membership type (e.g. individual, business).
+#: includes/admin/class-activity-log.php:227
 #, php-format
-msgid "%s joined as %s %s member"
+msgid "%1$s joined as %2$s %3$s member"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:242
-#: includes/admin/class-activity-log.php:400
-#: includes/admin/class-activity-log.php:420
-#: includes/admin/class-activity-log.php:443
-#: includes/admin/class-activity-log.php:618
+#: includes/admin/class-activity-log.php:244
+#: includes/admin/class-activity-log.php:409
+#: includes/admin/class-activity-log.php:430
+#: includes/admin/class-activity-log.php:455
+#: includes/admin/class-activity-log.php:631
 #: includes/admin/class-list-columns.php:444
 #: includes/admin/class-reports.php:414
 #: includes/admin/class-reports.php:574
@@ -909,146 +918,157 @@ msgstr ""
 msgid "Unknown"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:247
+#. translators: 1: donor's display name; 2: honoree's name the memorial is for.
+#: includes/admin/class-activity-log.php:250
 #, php-format
-msgid "%s created memorial for %s"
+msgid "%1$s created memorial for %2$s"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:268
+#. translators: %s: donor's display name.
+#: includes/admin/class-activity-log.php:272
 #, php-format
 msgid "%s renewed membership"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:282
-#: includes/admin/class-activity-log.php:302
+#: includes/admin/class-activity-log.php:286
+#: includes/admin/class-activity-log.php:307
 msgid "Unknown Business"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:288
+#. translators: 1: business name whose logo was approved; 2: display name of the admin who approved it.
+#: includes/admin/class-activity-log.php:293
 #, php-format
-msgid "Logo approved for %s by %s"
+msgid "Logo approved for %1$s by %2$s"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:309
+#. translators: 1: business name whose logo was rejected; 2: display name of the admin who rejected it; 3: rejection reason.
+#: includes/admin/class-activity-log.php:315
 #, php-format
-msgid "Logo rejected for %s by %s: %s"
+msgid "Logo rejected for %1$s by %2$s: %3$s"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:324
+#: includes/admin/class-activity-log.php:330
 msgid "with errors"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:324
+#: includes/admin/class-activity-log.php:330
 msgid "successfully"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:329
+#. translators: 1: WooCommerce order ID; 2: processing outcome (e.g. successfully, with errors).
+#: includes/admin/class-activity-log.php:336
 #, php-format
-msgid "Order #%d processed %s"
+msgid "Order #%1$d processed %2$s"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:346
+#. translators: 1: email type label (e.g. Receipt, Renewal Reminder); 2: recipient email address.
+#: includes/admin/class-activity-log.php:354
 #, php-format
-msgid "%s email sent to %s"
+msgid "%1$s email sent to %2$s"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:383
+#. translators: 1: display name of the admin who changed settings; 2: comma-separated list of changed setting keys.
+#: includes/admin/class-activity-log.php:392
 #, php-format
-msgid "Settings updated by %s: %s"
+msgid "Settings updated by %1$s: %2$s"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:405
+#. translators: 1: donor's display name; 2: new membership end date; 3: display name of the admin who extended it.
+#: includes/admin/class-activity-log.php:415
 #, php-format
-msgid "Membership for %s extended to %s by %s"
+msgid "Membership for %1$s extended to %2$s by %3$s"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:426
+#. translators: 1: donor's display name; 2: cancellation reason.
+#: includes/admin/class-activity-log.php:437
 #, php-format
 msgid "%1$s cancelled membership: %2$s"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:427
+#. translators: %s: donor's display name.
+#: includes/admin/class-activity-log.php:439
 #, php-format
 msgid "%s cancelled membership"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:448
+#. translators: 1: honoree's name the memorial is for; 2: family member's email address notified.
+#: includes/admin/class-activity-log.php:461
 #, php-format
-msgid "Family notification sent for memorial of %s to %s"
+msgid "Family notification sent for memorial of %1$s to %2$s"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:536
+#: includes/admin/class-activity-log.php:549
 msgid "All Categories"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:545
+#: includes/admin/class-activity-log.php:558
 #: includes/admin/class-reports.php:193
-#: assets/js/admin-import-export.js:893
+#: assets/js/admin-import-export.js:915
 msgid "All Time"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:546
+#: includes/admin/class-activity-log.php:559
 #: includes/admin/class-dashboard-widget.php:131
 #: includes/admin/class-dashboard-widget.php:253
 #: includes/admin/class-reports.php:175
 msgid "Today"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:547
+#: includes/admin/class-activity-log.php:560
 msgid "Last 7 Days"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:548
+#: includes/admin/class-activity-log.php:561
 msgid "Last 30 Days"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:551
+#: includes/admin/class-activity-log.php:564
 msgid "Search..."
 msgstr ""
 
-#: includes/admin/class-activity-log.php:553
+#: includes/admin/class-activity-log.php:566
 #: includes/admin/class-reports.php:218
 msgid "Filter"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:563
+#: includes/admin/class-activity-log.php:576
 msgid "today"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:564
+#: includes/admin/class-activity-log.php:577
 msgid "this week"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:565
+#: includes/admin/class-activity-log.php:578
 msgid "total"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:572
+#: includes/admin/class-activity-log.php:585
 msgid "No activity logged yet."
 msgstr ""
 
-#: includes/admin/class-activity-log.php:578
+#: includes/admin/class-activity-log.php:591
 msgid "Time"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:579
+#: includes/admin/class-activity-log.php:592
 msgid "Category"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:580
+#: includes/admin/class-activity-log.php:593
 msgid "Activity"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:581
+#: includes/admin/class-activity-log.php:594
 msgid "User"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:620
+#: includes/admin/class-activity-log.php:633
 msgid "System"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:675
-#: includes/admin/class-activity-log.php:678
+#: includes/admin/class-activity-log.php:688
+#: includes/admin/class-activity-log.php:691
 msgid "Unknown Donor"
 msgstr ""
 
@@ -1083,8 +1103,8 @@ msgstr ""
 
 #: includes/admin/class-campaign-admin.php:186
 #: includes/admin/class-campaign-admin.php:232
-#: includes/admin/class-reports.php:1173
-#: includes/admin/class-reports.php:1357
+#: includes/admin/class-reports.php:1174
+#: includes/admin/class-reports.php:1358
 msgid "End Date"
 msgstr ""
 
@@ -1114,12 +1134,12 @@ msgid "Week"
 msgstr ""
 
 #: includes/admin/class-dashboard-widget.php:133
-#: assets/js/admin-import-export.js:758
+#: assets/js/admin-import-export.js:768
 msgid "Month"
 msgstr ""
 
 #: includes/admin/class-dashboard-widget.php:134
-#: assets/js/admin-import-export.js:694
+#: assets/js/admin-import-export.js:702
 msgid "Year"
 msgstr ""
 
@@ -1160,7 +1180,7 @@ msgstr ""
 
 #: includes/admin/class-dashboard-widget.php:256
 #: includes/admin/class-reports.php:187
-#: assets/js/admin-import-export.js:894
+#: assets/js/admin-import-export.js:916
 msgid "This Year"
 msgstr ""
 
@@ -1173,7 +1193,7 @@ msgstr ""
 #: includes/admin/class-quick-actions.php:325
 #: includes/admin/class-reports.php:413
 #: includes/admin/class-reports.php:695
-#: includes/admin/class-reports.php:1086
+#: includes/admin/class-reports.php:1087
 #: includes/woocommerce/class-cart-handler.php:516
 #: assets/js/memorial-panel.js:395
 msgid "Anonymous"
@@ -1208,7 +1228,7 @@ msgstr ""
 #: templates/emails/donor-annual-summary.php:58
 #: templates/myaccount/annual-statement.php:45
 #: templates/myaccount/donor-dashboard.php:51
-#: assets/js/admin-import-export.js:889
+#: assets/js/admin-import-export.js:911
 #: assets/js/admin-legacy-sync.js:102
 #: assets/js/admin-legacy-sync.js:360
 msgid "Donations"
@@ -1224,7 +1244,7 @@ msgstr ""
 
 #: includes/admin/class-data-integrity.php:74
 #: includes/admin/class-data-integrity.php:75
-#: includes/admin/class-data-integrity.php:124
+#: includes/admin/class-data-integrity.php:125
 msgid "Data Tools"
 msgstr ""
 
@@ -1252,99 +1272,100 @@ msgstr ""
 msgid "Type the post type slug to confirm:"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:108
+#. translators: %s: record type label.
+#: includes/admin/class-data-integrity.php:109
 #, php-format
 msgid "This will permanently delete ALL %s records. This cannot be undone."
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:109
+#: includes/admin/class-data-integrity.php:110
 msgid "All records look good — no missing fields found."
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:127
+#: includes/admin/class-data-integrity.php:128
 msgid "Backfill &amp; Repair"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:128
-#: includes/admin/class-data-integrity.php:201
+#: includes/admin/class-data-integrity.php:129
+#: includes/admin/class-data-integrity.php:202
 msgid "Purge Records"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:129
+#: includes/admin/class-data-integrity.php:130
 msgid "Recalculate"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:166
+#: includes/admin/class-data-integrity.php:167
 msgid "Backfill Missing Fields"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:168
+#: includes/admin/class-data-integrity.php:169
 msgid "Scans all records and reports missing or empty meta fields based on the entity schema. You can then backfill defaults, denormalized fields, and taxonomy terms in batches."
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:177
+#: includes/admin/class-data-integrity.php:178
 msgid "Scan All Records"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:185
+#: includes/admin/class-data-integrity.php:186
 msgid "Backfill All Issues"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:188
+#: includes/admin/class-data-integrity.php:189
 msgid "Fills in missing defaults, display names, and taxonomy terms. Does not overwrite existing values."
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:205
+#: includes/admin/class-data-integrity.php:206
 msgid "Warning:"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:206
+#: includes/admin/class-data-integrity.php:207
 msgid "This permanently deletes posts and their meta. Use this to start fresh before re-running Legacy Order Sync or CSV imports. WooCommerce orders and donor records are not affected unless you explicitly choose them."
 msgstr ""
 
 #. translators: %s: post type slug
-#: includes/admin/class-data-integrity.php:228
+#: includes/admin/class-data-integrity.php:229
 #, php-format
 msgid "Post type: %s"
 msgstr ""
 
 #. translators: %s: record type label
-#: includes/admin/class-data-integrity.php:242
+#: includes/admin/class-data-integrity.php:243
 #, php-format
 msgid "Delete All %s"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:252
+#: includes/admin/class-data-integrity.php:253
 msgid "Reset Legacy Sync Flags"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:254
+#: includes/admin/class-data-integrity.php:255
 msgid "Clears the \"_sd_legacy_synced\" flag on all WooCommerce orders so they can be re-processed by the Legacy Order Sync tool. Does NOT delete any records."
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:261
+#: includes/admin/class-data-integrity.php:262
 msgid "Reset Sync Flags"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:276
+#: includes/admin/class-data-integrity.php:277
 msgid "Recalculate Donor Stats"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:278
+#: includes/admin/class-data-integrity.php:279
 msgid "Recalculates lifetime_giving for every donor by summing their donations, memorials, and memberships. Use this after bulk imports or if stats look incorrect."
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:286
+#: includes/admin/class-data-integrity.php:287
 msgid "Recalculate All Donors"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:931
+#: includes/admin/class-data-integrity.php:932
 msgid "Confirmation does not match. Type the exact post type slug."
 msgstr ""
 
 #: includes/admin/class-import-export-page.php:74
 #: includes/admin/class-import-export-page.php:75
-#: assets/js/admin-import-export.js:867
+#: assets/js/admin-import-export.js:889
 msgid "Import / Export"
 msgstr ""
 
@@ -1357,11 +1378,11 @@ msgstr ""
 #: includes/admin/class-legacy-sync-page.php:274
 #: includes/admin/class-legacy-sync-page.php:352
 #: includes/admin/class-legacy-sync-page.php:363
-#: includes/admin/class-legacy-sync-page.php:412
+#: includes/admin/class-legacy-sync-page.php:413
 #: includes/admin/class-logo-moderation.php:485
 #: includes/admin/class-logo-moderation.php:519
 #: includes/admin/class-logo-moderation.php:578
-#: includes/admin/class-reports.php:985
+#: includes/admin/class-reports.php:986
 #: includes/admin/import-export/class-import-ajax-handler.php:78
 #: includes/admin/import-export/class-import-ajax-handler.php:119
 #: includes/admin/import-export/class-import-ajax-handler.php:159
@@ -1433,7 +1454,7 @@ msgid "Sync past WooCommerce orders to create donation, membership, and memorial
 msgstr ""
 
 #: includes/admin/class-legacy-sync-page.php:195
-#: includes/admin/class-legacy-sync-page.php:419
+#: includes/admin/class-legacy-sync-page.php:420
 #: includes/admin/legacy-sync/class-order-processor.php:54
 #: includes/woocommerce/class-order-handler.php:608
 msgid "Order not found."
@@ -1455,12 +1476,13 @@ msgstr ""
 msgid "All sync status has been reset."
 msgstr ""
 
-#: includes/admin/class-legacy-sync-page.php:397
+#. translators: %d: number of orders.
+#: includes/admin/class-legacy-sync-page.php:398
 #, php-format
 msgid "Sync status reset for %d order(s)."
 msgstr ""
 
-#: includes/admin/class-legacy-sync-page.php:402
+#: includes/admin/class-legacy-sync-page.php:403
 msgid "No orders specified."
 msgstr ""
 
@@ -1472,11 +1494,11 @@ msgstr ""
 #: includes/admin/class-list-columns.php:114
 #: includes/admin/class-reports.php:402
 #: includes/admin/class-reports.php:685
-#: includes/admin/class-reports.php:1083
-#: includes/admin/class-reports.php:1175
-#: includes/admin/class-reports.php:1230
-#: includes/admin/class-reports.php:1328
-#: includes/admin/class-reports.php:1359
+#: includes/admin/class-reports.php:1084
+#: includes/admin/class-reports.php:1176
+#: includes/admin/class-reports.php:1231
+#: includes/admin/class-reports.php:1329
+#: includes/admin/class-reports.php:1360
 #: includes/woocommerce/class-my-account.php:216
 #: templates/emails/donation-receipt.php:45
 #: templates/emails/donor-annual-summary.php:94
@@ -1489,8 +1511,8 @@ msgstr ""
 #: includes/admin/class-quick-actions.php:333
 #: includes/admin/class-reports.php:343
 #: includes/admin/class-reports.php:403
-#: includes/admin/class-reports.php:1084
-#: includes/admin/class-reports.php:1329
+#: includes/admin/class-reports.php:1085
+#: includes/admin/class-reports.php:1330
 #: includes/woocommerce/class-cart-handler.php:455
 #: templates/emails/donation-receipt.php:53
 #: templates/myaccount/giving-history.php:53
@@ -1500,7 +1522,7 @@ msgstr ""
 #: includes/admin/class-list-columns.php:117
 #: includes/admin/class-reports.php:404
 #: includes/admin/class-reports.php:764
-#: includes/admin/class-reports.php:1085
+#: includes/admin/class-reports.php:1086
 #: includes/woocommerce/class-cart-handler.php:465
 #: assets/js/block-editor.js:114
 #: assets/js/block-editor.js:312
@@ -1516,9 +1538,9 @@ msgstr ""
 #: includes/admin/class-quick-actions.php:317
 #: includes/admin/class-reports.php:400
 #: includes/admin/class-reports.php:684
-#: includes/admin/class-reports.php:1080
-#: includes/admin/class-reports.php:1229
-#: includes/admin/class-reports.php:1325
+#: includes/admin/class-reports.php:1081
+#: includes/admin/class-reports.php:1230
+#: includes/admin/class-reports.php:1326
 #: includes/woocommerce/class-my-account.php:214
 #: templates/emails/donation-receipt.php:49
 #: templates/emails/memorial-confirmation.php:71
@@ -1530,16 +1552,16 @@ msgstr ""
 
 #: includes/admin/class-list-columns.php:127
 #: includes/admin/class-reports.php:558
-#: includes/admin/class-reports.php:1168
-#: includes/admin/class-reports.php:1352
+#: includes/admin/class-reports.php:1169
+#: includes/admin/class-reports.php:1353
 msgid "Member"
 msgstr ""
 
 #: includes/admin/class-list-columns.php:128
 #: includes/admin/class-reports.php:503
 #: includes/admin/class-reports.php:559
-#: includes/admin/class-reports.php:1170
-#: includes/admin/class-reports.php:1354
+#: includes/admin/class-reports.php:1171
+#: includes/admin/class-reports.php:1355
 msgid "Tier"
 msgstr ""
 
@@ -1548,20 +1570,20 @@ msgstr ""
 #: includes/admin/class-reports.php:560
 #: includes/admin/class-reports.php:682
 #: includes/admin/class-reports.php:765
-#: includes/admin/class-reports.php:1171
-#: includes/admin/class-reports.php:1226
-#: includes/admin/class-reports.php:1306
-#: includes/admin/class-reports.php:1355
+#: includes/admin/class-reports.php:1172
+#: includes/admin/class-reports.php:1227
+#: includes/admin/class-reports.php:1307
+#: includes/admin/class-reports.php:1356
 #: templates/emails/membership-welcome.php:58
-#: assets/js/admin-import-export.js:757
+#: assets/js/admin-import-export.js:767
 msgid "Type"
 msgstr ""
 
 #: includes/admin/class-list-columns.php:130
 #: includes/admin/class-reports.php:563
 #: includes/admin/class-reports.php:769
-#: includes/admin/class-reports.php:1174
-#: includes/admin/class-reports.php:1358
+#: includes/admin/class-reports.php:1175
+#: includes/admin/class-reports.php:1359
 #: includes/admin/class-settings.php:794
 #: assets/js/admin-import-export.js:194
 #: assets/js/admin-legacy-sync.js:199
@@ -1582,7 +1604,7 @@ msgstr ""
 
 #: includes/admin/class-list-columns.php:141
 #: includes/admin/class-reports.php:681
-#: includes/admin/class-reports.php:1225
+#: includes/admin/class-reports.php:1226
 msgid "Honoree"
 msgstr ""
 
@@ -1592,16 +1614,16 @@ msgstr ""
 
 #: includes/admin/class-list-columns.php:144
 #: includes/admin/class-reports.php:686
-#: includes/admin/class-reports.php:1231
+#: includes/admin/class-reports.php:1232
 msgid "Family Notified"
 msgstr ""
 
 #: includes/admin/class-list-columns.php:154
-#: includes/admin/class-reports.php:1082
-#: includes/admin/class-reports.php:1169
-#: includes/admin/class-reports.php:1228
-#: includes/admin/class-reports.php:1327
-#: includes/admin/class-reports.php:1353
+#: includes/admin/class-reports.php:1083
+#: includes/admin/class-reports.php:1170
+#: includes/admin/class-reports.php:1229
+#: includes/admin/class-reports.php:1328
+#: includes/admin/class-reports.php:1354
 #: includes/admin/class-settings.php:415
 msgid "Email"
 msgstr ""
@@ -1611,7 +1633,7 @@ msgid "Level"
 msgstr ""
 
 #: includes/admin/class-list-columns.php:326
-#: includes/admin/class-quick-actions.php:563
+#: includes/admin/class-quick-actions.php:569
 msgid "Family"
 msgstr ""
 
@@ -1622,22 +1644,22 @@ msgid "Expiring Soon"
 msgstr ""
 
 #: includes/admin/class-list-columns.php:342
-#: includes/admin/class-quick-actions.php:555
+#: includes/admin/class-quick-actions.php:561
 #: includes/admin/class-reports.php:504
 #: includes/admin/class-reports.php:579
 #: includes/admin/class-reports.php:824
-#: includes/admin/class-reports.php:1209
-#: includes/admin/class-reports.php:1373
-#: assets/js/admin-import-export.js:907
+#: includes/admin/class-reports.php:1210
+#: includes/admin/class-reports.php:1374
+#: assets/js/admin-import-export.js:929
 msgid "Active"
 msgstr ""
 
 #: includes/admin/class-list-columns.php:345
-#: includes/admin/class-quick-actions.php:557
+#: includes/admin/class-quick-actions.php:563
 #: includes/admin/class-reports.php:579
-#: includes/admin/class-reports.php:1209
-#: includes/admin/class-reports.php:1374
-#: assets/js/admin-import-export.js:908
+#: includes/admin/class-reports.php:1210
+#: includes/admin/class-reports.php:1375
+#: assets/js/admin-import-export.js:930
 msgid "Expired"
 msgstr ""
 
@@ -1667,24 +1689,24 @@ msgid "Review"
 msgstr ""
 
 #: includes/admin/class-list-columns.php:476
-#: includes/admin/class-quick-actions.php:588
+#: includes/admin/class-quick-actions.php:594
 msgid "Not Requested"
 msgstr ""
 
 #: includes/admin/class-list-columns.php:478
-#: includes/admin/class-quick-actions.php:587
+#: includes/admin/class-quick-actions.php:593
 msgid "Sent"
 msgstr ""
 
 #: includes/admin/class-list-columns.php:481
 #: includes/admin/class-logo-moderation.php:195
-#: includes/admin/class-quick-actions.php:586
+#: includes/admin/class-quick-actions.php:592
 #: includes/admin/class-reports.php:701
 msgid "Pending"
 msgstr ""
 
 #: includes/admin/class-list-columns.php:512
-#: includes/admin/class-quick-actions.php:622
+#: includes/admin/class-quick-actions.php:628
 msgid "New"
 msgstr ""
 
@@ -1843,7 +1865,7 @@ msgid "Additional notes (optional)..."
 msgstr ""
 
 #: includes/admin/class-logo-moderation.php:351
-#: assets/js/admin-import-export.js:816
+#: assets/js/admin-import-export.js:834
 #: assets/js/memorial-panel.js:323
 msgid "Cancel"
 msgstr ""
@@ -1905,8 +1927,7 @@ msgstr ""
 msgid "%d donations"
 msgstr ""
 
-#. translators: %d: new members count
-#. translators: %d: new donors count
+#. translators: %d: number of new records this month
 #: includes/admin/class-menu.php:127
 #: includes/admin/class-menu.php:157
 #, php-format
@@ -1983,6 +2004,7 @@ msgstr ""
 msgid "Starter Shelter — Product Sync:"
 msgstr ""
 
+#. translators: %d: number of issues.
 #: includes/admin/class-product-sync-checker.php:701
 #, php-format
 msgid "View %d issue(s)"
@@ -2004,12 +2026,13 @@ msgstr ""
 msgid "Starter Shelter — Repair Complete:"
 msgstr ""
 
-#: includes/admin/class-product-sync-checker.php:777
+#. translators: 1: number of products repaired; 2: number of products skipped.
+#: includes/admin/class-product-sync-checker.php:778
 #, php-format
-msgid "%d product(s) repaired, %d skipped."
+msgid "%1$d product(s) repaired, %2$d skipped."
 msgstr ""
 
-#: includes/admin/class-product-sync-checker.php:784
+#: includes/admin/class-product-sync-checker.php:785
 msgid "View details"
 msgstr ""
 
@@ -2080,87 +2103,88 @@ msgstr ""
 msgid "Resend Receipts"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:504
-msgid "Renewal reminder sent."
-msgid_plural "%d renewal reminders sent."
-msgstr[0] ""
-msgstr[1] ""
-
+#. translators: %d: number of renewal reminders sent.
 #: includes/admin/class-quick-actions.php:505
+#: includes/admin/class-quick-actions.php:507
 #, php-format
 msgid "%d renewal reminder sent."
 msgid_plural "%d renewal reminders sent."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/admin/class-quick-actions.php:506
-msgid "Membership extended by 30 days."
+#. translators: %d: number of memberships extended.
+#: includes/admin/class-quick-actions.php:509
+#, php-format
+msgid "%d membership extended by 30 days."
 msgid_plural "%d memberships extended by 30 days."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/admin/class-quick-actions.php:507
+#. translators: %d: number of memberships extended.
+#: includes/admin/class-quick-actions.php:511
 #, php-format
 msgid "%d membership extended."
 msgid_plural "%d memberships extended."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/admin/class-quick-actions.php:508
+#: includes/admin/class-quick-actions.php:512
 msgid "Family notification sent."
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:509
+#. translators: %d: number of family notifications sent.
+#: includes/admin/class-quick-actions.php:514
 #, php-format
 msgid "%d family notification sent."
 msgid_plural "%d family notifications sent."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/admin/class-quick-actions.php:510
+#: includes/admin/class-quick-actions.php:515
 msgid "Annual statement sent."
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:511
+#: includes/admin/class-quick-actions.php:516
 msgid "Donation receipt sent."
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:512
+#. translators: %d: number of receipts sent.
+#: includes/admin/class-quick-actions.php:518
 #, php-format
 msgid "%d receipt sent."
 msgid_plural "%d receipts sent."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/admin/class-quick-actions.php:554
+#: includes/admin/class-quick-actions.php:560
 msgid "All Statuses"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:556
+#: includes/admin/class-quick-actions.php:562
 msgid "Expiring Soon (30 days)"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:585
+#: includes/admin/class-quick-actions.php:591
 msgid "All Notifications"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:602
+#: includes/admin/class-quick-actions.php:608
 msgid "All Allocations"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:621
+#: includes/admin/class-quick-actions.php:627
 msgid "All Levels"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:630
+#: includes/admin/class-quick-actions.php:636
 msgid "All Donors"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:631
+#: includes/admin/class-quick-actions.php:637
 msgid "With Membership"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:632
+#: includes/admin/class-quick-actions.php:638
 msgid "Without Membership"
 msgstr ""
 
@@ -2177,7 +2201,7 @@ msgstr ""
 #: includes/woocommerce/class-my-account.php:998
 #: templates/emails/donor-annual-summary.php:72
 #: templates/myaccount/annual-statement.php:47
-#: assets/js/admin-import-export.js:902
+#: assets/js/admin-import-export.js:924
 #: assets/js/admin-legacy-sync.js:103
 #: assets/js/admin-legacy-sync.js:365
 msgid "Memberships"
@@ -2245,7 +2269,7 @@ msgid "Unable to load recent donations."
 msgstr ""
 
 #: includes/admin/class-reports.php:396
-#: templates/myaccount/donor-dashboard.php:85
+#: templates/myaccount/donor-dashboard.php:86
 msgid "Recent Donations"
 msgstr ""
 
@@ -2348,7 +2372,7 @@ msgid "Campaigns show lifetime progress — the period selector above does not a
 msgstr ""
 
 #: includes/admin/class-reports.php:767
-#: includes/admin/class-reports.php:1317
+#: includes/admin/class-reports.php:1318
 msgid "Progress"
 msgstr ""
 
@@ -2387,39 +2411,40 @@ msgstr ""
 msgid "Renewal Rate"
 msgstr ""
 
-#: includes/admin/class-reports.php:967
+#. translators: 1: number of renewed memberships; 2: number of expired memberships.
+#: includes/admin/class-reports.php:968
 #, php-format
 msgid "%1$d of %2$d expired memberships renewed in the last 12 months."
 msgstr ""
 
-#: includes/admin/class-reports.php:1153
+#: includes/admin/class-reports.php:1154
 #: includes/emails/class-config-email.php:337
 #: includes/woocommerce/class-cart-handler.php:517
 #: includes/woocommerce/class-checkout-fields.php:556
 msgid "Yes"
 msgstr ""
 
-#: includes/admin/class-reports.php:1153
+#: includes/admin/class-reports.php:1154
 #: includes/emails/class-config-email.php:337
 #: includes/woocommerce/class-checkout-fields.php:556
 msgid "No"
 msgstr ""
 
-#: includes/admin/class-reports.php:1172
-#: includes/admin/class-reports.php:1356
+#: includes/admin/class-reports.php:1173
+#: includes/admin/class-reports.php:1357
 #: templates/emails/membership-welcome.php:68
 msgid "Start Date"
 msgstr ""
 
-#: includes/admin/class-reports.php:1305
+#: includes/admin/class-reports.php:1306
 msgid "Campaign Report"
 msgstr ""
 
-#: includes/admin/class-reports.php:1307
+#: includes/admin/class-reports.php:1308
 msgid "Donation Drive"
 msgstr ""
 
-#: includes/admin/class-reports.php:1308
+#: includes/admin/class-reports.php:1309
 msgid "Membership Drive"
 msgstr ""
 
@@ -2835,8 +2860,9 @@ msgstr ""
 msgid "Import session expired. Please start again."
 msgstr ""
 
+#. translators: %s: ability name.
 #: includes/admin/import-export/class-csv-importer.php:583
-#: includes/admin/legacy-sync/class-order-processor.php:203
+#: includes/admin/legacy-sync/class-order-processor.php:204
 #, php-format
 msgid "Ability \"%s\" could not be loaded."
 msgstr ""
@@ -2850,7 +2876,8 @@ msgstr ""
 msgid "Empty file or invalid CSV."
 msgstr ""
 
-#: includes/admin/import-export/class-csv-importer.php:877
+#. translators: %s: comma-separated list of missing column names.
+#: includes/admin/import-export/class-csv-importer.php:878
 #, php-format
 msgid "Missing required columns: %s"
 msgstr ""
@@ -2936,23 +2963,25 @@ msgstr ""
 msgid "Already processed by order handler."
 msgstr ""
 
-#: includes/admin/legacy-sync/class-order-processor.php:135
+#. translators: 1: ability name; 2: order item name.
+#: includes/admin/legacy-sync/class-order-processor.php:136
 #, php-format
-msgid "Ability \"%s\" not found for item \"%s\""
+msgid "Ability \"%1$s\" not found for item \"%2$s\""
 msgstr ""
 
-#: includes/admin/legacy-sync/class-order-processor.php:211
+#. translators: 1: order item name; 2: error message.
+#: includes/admin/legacy-sync/class-order-processor.php:213
 #, php-format
-msgid "Error processing \"%s\": %s"
+msgid "Error processing \"%1$s\": %2$s"
 msgstr ""
 
 #. translators: 1: donations, 2: memberships, 3: memorials, 4: updated
-#: includes/admin/legacy-sync/class-order-processor.php:459
+#: includes/admin/legacy-sync/class-order-processor.php:461
 #, php-format
 msgid "Shelter Donations legacy sync completed: %1$d donation(s), %2$d membership(s), %3$d memorial(s), %4$d updated"
 msgstr ""
 
-#: includes/admin/legacy-sync/class-order-processor.php:467
+#: includes/admin/legacy-sync/class-order-processor.php:469
 msgid "Errors:"
 msgstr ""
 
@@ -2978,8 +3007,7 @@ msgstr ""
 msgid "Unknown record type"
 msgstr ""
 
-#. translators: %s: email address
-#. translators: %s: donor name
+#. translators: %s: email address or name searched for
 #: includes/admin/shared/class-donor-lookup.php:200
 #: includes/admin/shared/class-donor-lookup.php:223
 #, php-format
@@ -3056,71 +3084,73 @@ msgstr ""
 msgid "Showing 1 item"
 msgstr ""
 
-#: includes/blocks/register-stores.php:83
+#. translators: %d: number of items shown.
+#: includes/blocks/register-stores.php:84
 #, php-format
 msgid "Showing %d items"
 msgstr ""
 
-#: includes/blocks/register-stores.php:84
+#. translators: %1$d: number of items shown; %2$d: total number of items.
+#: includes/blocks/register-stores.php:86
 #, php-format
 msgid "Showing %1$d of %2$d items"
 msgstr ""
 
-#: includes/blocks/register-stores.php:85
+#: includes/blocks/register-stores.php:87
 msgid "Something went wrong. Please try again."
 msgstr ""
 
-#: includes/blocks/register-stores.php:86
+#: includes/blocks/register-stores.php:88
 msgid "Added to cart successfully!"
 msgstr ""
 
-#: includes/blocks/register-stores.php:87
+#: includes/blocks/register-stores.php:89
 #: includes/woocommerce/class-cart-handler.php:712
 msgid "Please enter a valid donation amount."
 msgstr ""
 
-#: includes/blocks/register-stores.php:88
+#: includes/blocks/register-stores.php:90
 msgid "Amount exceeds the maximum allowed."
 msgstr ""
 
-#: includes/blocks/register-stores.php:89
+#: includes/blocks/register-stores.php:91
 msgid "Please enter the honoree name."
 msgstr ""
 
-#: includes/blocks/register-stores.php:90
+#: includes/blocks/register-stores.php:92
 msgid "Please enter the family contact name."
 msgstr ""
 
-#: includes/blocks/register-stores.php:91
+#: includes/blocks/register-stores.php:93
 msgid "Please enter a valid email address."
 msgstr ""
 
-#: includes/blocks/register-stores.php:92
+#: includes/blocks/register-stores.php:94
 msgid "Please select a membership level."
 msgstr ""
 
-#: includes/blocks/register-stores.php:93
+#: includes/blocks/register-stores.php:95
 msgid "Please enter your business name."
 msgstr ""
 
-#: includes/blocks/register-stores.php:94
+#: includes/blocks/register-stores.php:96
 #: includes/woocommerce/class-cart-handler.php:143
 msgid "Could not add to cart. Please try again."
 msgstr ""
 
-#: includes/blocks/register-stores.php:95
+#: includes/blocks/register-stores.php:97
 msgid "Network error. Please check your connection."
 msgstr ""
 
-#: includes/blocks/register-stores.php:99
+#: includes/blocks/register-stores.php:101
 msgid "Pet's Name"
 msgstr ""
 
-#: includes/blocks/register-stores.php:104
+#: includes/blocks/register-stores.php:106
 msgid "Individual Membership"
 msgstr ""
 
-#: includes/blocks/register-stores.php:105
+#: includes/blocks/register-stores.php:107
 msgid "Business Membership"
 msgstr ""
 
@@ -3294,7 +3324,7 @@ msgid "Shelter Donation Details"
 msgstr ""
 
 #: includes/woocommerce/class-checkout-fields.php:538
-#: templates/emails/donation-receipt-plain.php:26
+#: templates/emails/donation-receipt-plain.php:27
 #: templates/emails/donation-receipt.php:40
 msgid "Donation Details"
 msgstr ""
@@ -3315,11 +3345,13 @@ msgstr ""
 msgid "Membership — %s"
 msgstr ""
 
+#. translators: %1$s: organization name; %2$d: tax year.
 #: includes/woocommerce/class-my-account.php:176
 #, php-format
 msgid "%1$s Contribution Statement %2$d"
 msgstr ""
 
+#. translators: %d: tax year.
 #: includes/woocommerce/class-my-account.php:199
 #, php-format
 msgid "Charitable Contribution Statement — %d"
@@ -3337,6 +3369,7 @@ msgstr ""
 msgid "Total contributions"
 msgstr ""
 
+#. translators: %s: date the statement was issued.
 #: includes/woocommerce/class-my-account.php:241
 #, php-format
 msgid "Issued %s"
@@ -3422,7 +3455,7 @@ msgid "Statement generation is temporarily unavailable."
 msgstr ""
 
 #: includes/woocommerce/class-my-account.php:996
-#: assets/js/admin-legacy-sync.js:727
+#: assets/js/admin-legacy-sync.js:732
 msgid "Overview"
 msgstr ""
 
@@ -3572,69 +3605,68 @@ msgstr ""
 msgid "Set up products"
 msgstr ""
 
-#. translators: %s: donor name
-#. translators: %s: family member name
-#: templates/emails/donation-receipt-plain.php:18
+#. translators: %s: recipient name
+#: templates/emails/donation-receipt-plain.php:19
 #: templates/emails/donation-receipt.php:30
-#: templates/emails/donor-annual-summary-plain.php:21
+#: templates/emails/donor-annual-summary-plain.php:22
 #: templates/emails/donor-annual-summary.php:33
-#: templates/emails/logo-approved-plain.php:18
+#: templates/emails/logo-approved-plain.php:19
 #: templates/emails/logo-approved.php:29
-#: templates/emails/logo-rejected-plain.php:19
+#: templates/emails/logo-rejected-plain.php:20
 #: templates/emails/logo-rejected.php:30
-#: templates/emails/membership-renewal-plain.php:20
+#: templates/emails/membership-renewal-plain.php:21
 #: templates/emails/membership-renewal.php:32
-#: templates/emails/membership-welcome-plain.php:20
+#: templates/emails/membership-welcome-plain.php:21
 #: templates/emails/membership-welcome.php:32
-#: templates/emails/memorial-confirmation-plain.php:20
+#: templates/emails/memorial-confirmation-plain.php:21
 #: templates/emails/memorial-confirmation.php:32
-#: templates/emails/memorial-family-notification-plain.php:26
+#: templates/emails/memorial-family-notification-plain.php:27
 #: templates/emails/memorial-family-notification.php:39
 #, php-format
 msgid "Dear %s,"
 msgstr ""
 
-#: templates/emails/donation-receipt-plain.php:23
+#: templates/emails/donation-receipt-plain.php:24
 #: templates/emails/donation-receipt.php:37
 msgid "Thank you for your generous donation to support our animal shelter. Your contribution makes a real difference in the lives of the animals in our care."
 msgstr ""
 
-#: templates/emails/donation-receipt-plain.php:28
+#: templates/emails/donation-receipt-plain.php:29
 msgid "Amount:"
 msgstr ""
 
-#: templates/emails/donation-receipt-plain.php:29
-#: templates/emails/memorial-confirmation-plain.php:41
+#: templates/emails/donation-receipt-plain.php:30
+#: templates/emails/memorial-confirmation-plain.php:43
 msgid "Date:"
 msgstr ""
 
-#: templates/emails/donation-receipt-plain.php:30
+#: templates/emails/donation-receipt-plain.php:31
 msgid "Allocation:"
 msgstr ""
 
-#: templates/emails/donation-receipt-plain.php:33
+#: templates/emails/donation-receipt-plain.php:34
 msgid "Dedication:"
 msgstr ""
 
-#: templates/emails/donation-receipt-plain.php:36
+#: templates/emails/donation-receipt-plain.php:37
 msgid "Reference:"
 msgstr ""
 
-#: templates/emails/donation-receipt-plain.php:38
+#: templates/emails/donation-receipt-plain.php:39
 #: templates/emails/donation-receipt.php:70
 msgid "This donation is tax-deductible to the extent allowed by law. No goods or services were provided in exchange for this contribution."
 msgstr ""
 
-#: templates/emails/donation-receipt-plain.php:41
+#: templates/emails/donation-receipt-plain.php:42
 #: templates/emails/donation-receipt.php:74
 msgid "Please keep this email as your receipt for tax purposes."
 msgstr ""
 
-#: templates/emails/donation-receipt-plain.php:44
+#: templates/emails/donation-receipt-plain.php:45
 #: templates/emails/donation-receipt.php:78
-#: templates/emails/logo-approved-plain.php:38
+#: templates/emails/logo-approved-plain.php:40
 #: templates/emails/logo-approved.php:64
-#: templates/emails/membership-welcome-plain.php:62
+#: templates/emails/membership-welcome-plain.php:65
 #: templates/emails/membership-welcome.php:107
 msgid "With gratitude,"
 msgstr ""
@@ -3644,85 +3676,89 @@ msgid "Reference"
 msgstr ""
 
 #. translators: 1: year, 2: site name
-#: templates/emails/donor-annual-summary-plain.php:27
+#: templates/emails/donor-annual-summary-plain.php:29
 #: templates/emails/donor-annual-summary.php:43
 #, php-format
 msgid "Thank you for your generous support of %2$s throughout %1$d. Below is a summary of your charitable contributions for your tax records."
 msgstr ""
 
-#: templates/emails/donor-annual-summary-plain.php:34
+#. translators: %d: year
+#: templates/emails/donor-annual-summary-plain.php:36
 #, php-format
 msgid "%d ANNUAL GIVING SUMMARY"
 msgstr ""
 
-#: templates/emails/donor-annual-summary-plain.php:37
+#: templates/emails/donor-annual-summary-plain.php:39
 msgid "Donations:"
 msgstr ""
 
-#: templates/emails/donor-annual-summary-plain.php:38
+#: templates/emails/donor-annual-summary-plain.php:40
 #: templates/emails/donor-annual-summary.php:61
 msgid "gifts"
 msgstr ""
 
-#: templates/emails/donor-annual-summary-plain.php:40
+#: templates/emails/donor-annual-summary-plain.php:42
 msgid "Memorial Tributes:"
 msgstr ""
 
-#: templates/emails/donor-annual-summary-plain.php:41
+#: templates/emails/donor-annual-summary-plain.php:43
 #: templates/emails/donor-annual-summary.php:68
 msgid "tributes"
 msgstr ""
 
-#: templates/emails/donor-annual-summary-plain.php:43
+#: templates/emails/donor-annual-summary-plain.php:45
 msgid "Memberships:"
 msgstr ""
 
-#: templates/emails/donor-annual-summary-plain.php:46
+#: templates/emails/donor-annual-summary-plain.php:48
 msgid "TOTAL TAX-DEDUCTIBLE AMOUNT:"
 msgstr ""
 
-#: templates/emails/donor-annual-summary-plain.php:50
+#: templates/emails/donor-annual-summary-plain.php:52
 #: templates/emails/donor-annual-summary.php:88
 msgid "Donations by Purpose"
 msgstr ""
 
-#: templates/emails/donor-annual-summary-plain.php:57
+#: templates/emails/donor-annual-summary-plain.php:59
 msgid "TAX INFORMATION:"
 msgstr ""
 
-#: templates/emails/donor-annual-summary-plain.php:58
+#: templates/emails/donor-annual-summary-plain.php:60
 #: templates/emails/donor-annual-summary.php:111
 msgid "No goods or services were provided in exchange for these contributions. Your donations are tax-deductible to the extent allowed by law."
 msgstr ""
 
-#. translators: %s: EIN number placeholder
-#: templates/emails/donor-annual-summary-plain.php:60
+#. translators: %s: EIN number
+#: templates/emails/donor-annual-summary-plain.php:63
 #: templates/emails/donor-annual-summary.php:117
 #, php-format
 msgid "Our Tax ID (EIN): %s"
 msgstr ""
 
-#: templates/emails/donor-annual-summary-plain.php:66
+#. translators: %s: giving history URL
+#: templates/emails/donor-annual-summary-plain.php:70
 #, php-format
 msgid "View your complete giving history: %s"
 msgstr ""
 
-#: templates/emails/donor-annual-summary-plain.php:71
-#: templates/emails/membership-renewal-plain.php:53
+#: templates/emails/donor-annual-summary-plain.php:75
+#: templates/emails/membership-renewal-plain.php:56
 #: templates/emails/membership-renewal.php:100
 msgid "Thank you for your continued support!"
 msgstr ""
 
-#: templates/emails/donor-annual-summary-plain.php:74
+#: templates/emails/donor-annual-summary-plain.php:78
 #: templates/emails/donor-annual-summary.php:139
 msgid "With sincere gratitude,"
 msgstr ""
 
-#: templates/emails/donor-annual-summary-plain.php:78
+#. translators: %s: generation date
+#: templates/emails/donor-annual-summary-plain.php:83
 #, php-format
 msgid "This statement was generated on %s."
 msgstr ""
 
+#. translators: %d: year
 #: templates/emails/donor-annual-summary.php:52
 #, php-format
 msgid "%d Annual Giving Summary"
@@ -3767,46 +3803,46 @@ msgstr ""
 msgid "Your business"
 msgstr ""
 
-#: templates/emails/logo-approved-plain.php:19
+#: templates/emails/logo-approved-plain.php:20
 #: templates/emails/logo-approved.php:30
-#: templates/emails/logo-rejected-plain.php:20
+#: templates/emails/logo-rejected-plain.php:21
 #: templates/emails/logo-rejected.php:31
 msgid "Valued Member"
 msgstr ""
 
 #. translators: %s: business name
-#: templates/emails/logo-approved-plain.php:24
+#: templates/emails/logo-approved-plain.php:26
 #: templates/emails/logo-approved.php:39
 #, php-format
 msgid "Great news! The logo for %s has been approved and is now visible on our website."
 msgstr ""
 
-#: templates/emails/logo-approved-plain.php:29
+#: templates/emails/logo-approved-plain.php:31
 #: templates/emails/logo-approved.php:46
 msgid "Your business logo will appear on:"
 msgstr ""
 
-#: templates/emails/logo-approved-plain.php:30
+#: templates/emails/logo-approved-plain.php:32
 #: templates/emails/logo-approved.php:50
 msgid "Our Business Sponsors page"
 msgstr ""
 
-#: templates/emails/logo-approved-plain.php:31
+#: templates/emails/logo-approved-plain.php:33
 #: templates/emails/logo-approved.php:51
 msgid "The Donor Wall (if applicable to your membership tier)"
 msgstr ""
 
-#: templates/emails/logo-approved-plain.php:32
+#: templates/emails/logo-approved-plain.php:34
 #: templates/emails/logo-approved.php:52
 msgid "Our annual report and promotional materials"
 msgstr ""
 
-#: templates/emails/logo-approved-plain.php:34
+#: templates/emails/logo-approved-plain.php:36
 #: templates/emails/logo-approved.php:56
 msgid "Thank you for your generous support of our shelter and the animals in our care. Your business partnership makes a real difference!"
 msgstr ""
 
-#: templates/emails/logo-approved-plain.php:36
+#: templates/emails/logo-approved-plain.php:38
 #: templates/emails/logo-approved.php:60
 msgid "If you have any questions about your business membership benefits, please don't hesitate to contact us."
 msgstr ""
@@ -3817,111 +3853,112 @@ msgid "The logo did not meet our display requirements."
 msgstr ""
 
 #. translators: %s: business name
-#: templates/emails/logo-rejected-plain.php:25
+#: templates/emails/logo-rejected-plain.php:27
 #: templates/emails/logo-rejected.php:40
 #, php-format
 msgid "Thank you for submitting your logo for %s. Unfortunately, we were unable to approve the logo in its current form."
 msgstr ""
 
-#: templates/emails/logo-rejected-plain.php:30
+#: templates/emails/logo-rejected-plain.php:32
 msgid "REASON:"
 msgstr ""
 
-#: templates/emails/logo-rejected-plain.php:33
+#: templates/emails/logo-rejected-plain.php:35
 #: templates/emails/logo-rejected.php:52
 msgid "To update your logo, please ensure it meets the following requirements:"
 msgstr ""
 
-#: templates/emails/logo-rejected-plain.php:34
+#: templates/emails/logo-rejected-plain.php:36
 #: templates/emails/logo-rejected.php:56
 msgid "High resolution (minimum 300x300 pixels)"
 msgstr ""
 
-#: templates/emails/logo-rejected-plain.php:35
+#: templates/emails/logo-rejected-plain.php:37
 #: templates/emails/logo-rejected.php:57
 msgid "PNG or JPG format with transparent or white background preferred"
 msgstr ""
 
-#: templates/emails/logo-rejected-plain.php:36
+#: templates/emails/logo-rejected-plain.php:38
 #: templates/emails/logo-rejected.php:58
 msgid "Clear, legible design without offensive content"
 msgstr ""
 
-#: templates/emails/logo-rejected-plain.php:37
+#: templates/emails/logo-rejected-plain.php:39
 #: templates/emails/logo-rejected.php:59
 msgid "You must have rights to use the logo"
 msgstr ""
 
-#: templates/emails/logo-rejected-plain.php:39
+#: templates/emails/logo-rejected-plain.php:41
 #: templates/emails/logo-rejected.php:63
 msgid "You can upload a new logo through your My Account page, or reply to this email with an updated version attached."
 msgstr ""
 
-#: templates/emails/logo-rejected-plain.php:41
+#: templates/emails/logo-rejected-plain.php:43
 #: templates/emails/logo-rejected.php:67
 msgid "If you have any questions or need assistance, please don't hesitate to contact us."
 msgstr ""
 
-#: templates/emails/logo-rejected-plain.php:43
+#: templates/emails/logo-rejected-plain.php:45
 #: templates/emails/logo-rejected.php:71
 msgid "Best regards,"
 msgstr ""
 
 #. translators: 1: tier label, 2: expiration date
-#: templates/emails/membership-renewal-plain.php:26
+#: templates/emails/membership-renewal-plain.php:28
 #: templates/emails/membership-renewal.php:42
 #, php-format
 msgid "Your %1$s membership will expire on %2$s."
 msgstr ""
 
-#: templates/emails/membership-renewal-plain.php:32
+#: templates/emails/membership-renewal-plain.php:34
 msgid "Your membership has helped us:"
 msgstr ""
 
-#: templates/emails/membership-renewal-plain.php:33
+#: templates/emails/membership-renewal-plain.php:35
 #: templates/emails/membership-renewal.php:54
 msgid "Provide food and shelter for animals in need"
 msgstr ""
 
-#: templates/emails/membership-renewal-plain.php:34
+#: templates/emails/membership-renewal-plain.php:36
 #: templates/emails/membership-renewal.php:55
 msgid "Offer veterinary care and medical treatments"
 msgstr ""
 
-#: templates/emails/membership-renewal-plain.php:35
+#: templates/emails/membership-renewal-plain.php:37
 #: templates/emails/membership-renewal.php:56
 msgid "Find forever homes for our furry friends"
 msgstr ""
 
-#: templates/emails/membership-renewal-plain.php:36
+#: templates/emails/membership-renewal-plain.php:38
 #: templates/emails/membership-renewal.php:57
 msgid "Support community education and outreach programs"
 msgstr ""
 
-#: templates/emails/membership-renewal-plain.php:38
+#: templates/emails/membership-renewal-plain.php:40
 #: templates/emails/membership-renewal.php:60
 msgid "Renew Your Membership"
 msgstr ""
 
-#: templates/emails/membership-renewal-plain.php:41
+#. translators: %s: renewal URL
+#: templates/emails/membership-renewal-plain.php:44
 #, php-format
 msgid "Renew here: %s"
 msgstr ""
 
-#: templates/emails/membership-renewal-plain.php:46
+#: templates/emails/membership-renewal-plain.php:49
 msgid "Current Membership:"
 msgstr ""
 
-#: templates/emails/membership-renewal-plain.php:47
-#: templates/emails/membership-welcome-plain.php:42
+#: templates/emails/membership-renewal-plain.php:50
+#: templates/emails/membership-welcome-plain.php:44
 msgid "Expiration Date:"
 msgstr ""
 
-#: templates/emails/membership-renewal-plain.php:50
+#: templates/emails/membership-renewal-plain.php:53
 msgid "Days Remaining:"
 msgstr ""
 
-#: templates/emails/membership-renewal-plain.php:56
+#: templates/emails/membership-renewal-plain.php:59
 #: templates/emails/membership-renewal.php:104
 msgid "Warm regards,"
 msgstr ""
@@ -3959,49 +3996,50 @@ msgstr ""
 msgid "If you have any questions about your membership or would like to upgrade to a higher level, please don't hesitate to contact us."
 msgstr ""
 
-#. translators: 1: tier label, 2: site name
-#: templates/emails/membership-welcome-plain.php:26
+#. translators: 1: site name, 2: tier label
+#: templates/emails/membership-welcome-plain.php:28
 #: templates/emails/membership-welcome.php:42
 #, php-format
 msgid "Welcome to the %1$s family! Thank you for becoming a %2$s member."
 msgstr ""
 
-#: templates/emails/membership-welcome-plain.php:32
+#: templates/emails/membership-welcome-plain.php:34
 #: templates/emails/membership-welcome.php:49
 msgid "Membership Details"
 msgstr ""
 
-#: templates/emails/membership-welcome-plain.php:34
+#: templates/emails/membership-welcome-plain.php:36
 msgid "Membership Level:"
 msgstr ""
 
-#: templates/emails/membership-welcome-plain.php:35
+#: templates/emails/membership-welcome-plain.php:37
 msgid "Type:"
 msgstr ""
 
-#: templates/emails/membership-welcome-plain.php:38
+#: templates/emails/membership-welcome-plain.php:40
 msgid "Business Name:"
 msgstr ""
 
-#: templates/emails/membership-welcome-plain.php:41
+#: templates/emails/membership-welcome-plain.php:43
 msgid "Start Date:"
 msgstr ""
 
-#: templates/emails/membership-welcome-plain.php:43
+#: templates/emails/membership-welcome-plain.php:45
 msgid "Member ID:"
 msgstr ""
 
-#: templates/emails/membership-welcome-plain.php:46
+#: templates/emails/membership-welcome-plain.php:48
 #: templates/emails/membership-welcome.php:83
 msgid "Your Member Benefits"
 msgstr ""
 
-#: templates/emails/membership-welcome-plain.php:54
+#. translators: %s: donor dashboard URL
+#: templates/emails/membership-welcome-plain.php:57
 #, php-format
 msgid "Visit your Donor Dashboard to view your membership status: %s"
 msgstr ""
 
-#: templates/emails/membership-welcome-plain.php:59
+#: templates/emails/membership-welcome-plain.php:62
 msgid "Thank you for supporting our mission!"
 msgstr ""
 
@@ -4019,52 +4057,53 @@ msgstr ""
 msgid "Thank you for supporting our mission to help animals in need!"
 msgstr ""
 
-#: templates/emails/memorial-confirmation-plain.php:26
+#. translators: %s: honoree name
+#: templates/emails/memorial-confirmation-plain.php:28
 #, php-format
 msgid "Thank you for your heartfelt memorial tribute in honor of %s."
 msgstr ""
 
-#: templates/emails/memorial-confirmation-plain.php:31
+#: templates/emails/memorial-confirmation-plain.php:33
 #: templates/emails/memorial-confirmation.php:48
 #: assets/js/memorial-panel.js:115
 msgid "Memorial Details"
 msgstr ""
 
-#: templates/emails/memorial-confirmation-plain.php:33
+#: templates/emails/memorial-confirmation-plain.php:35
 msgid "In Memory Of:"
 msgstr ""
 
-#: templates/emails/memorial-confirmation-plain.php:34
+#: templates/emails/memorial-confirmation-plain.php:36
 msgid "Memorial Type:"
 msgstr ""
 
-#: templates/emails/memorial-confirmation-plain.php:37
+#: templates/emails/memorial-confirmation-plain.php:39
 msgid "Species:"
 msgstr ""
 
-#: templates/emails/memorial-confirmation-plain.php:40
+#: templates/emails/memorial-confirmation-plain.php:42
 msgid "Donation Amount:"
 msgstr ""
 
-#: templates/emails/memorial-confirmation-plain.php:44
+#: templates/emails/memorial-confirmation-plain.php:46
 #: templates/emails/memorial-confirmation.php:78
 msgid "Your Tribute Message"
 msgstr ""
 
-#: templates/emails/memorial-confirmation-plain.php:49
+#: templates/emails/memorial-confirmation-plain.php:51
 msgid "View your memorial page:"
 msgstr ""
 
-#: templates/emails/memorial-confirmation-plain.php:57
+#: templates/emails/memorial-confirmation-plain.php:59
 #: templates/emails/memorial-confirmation.php:99
 msgid "We will notify the family of your thoughtful tribute as you requested."
 msgstr ""
 
-#: templates/emails/memorial-confirmation-plain.php:60
+#: templates/emails/memorial-confirmation-plain.php:62
 msgid "This donation is tax-deductible. Please keep this email for your records."
 msgstr ""
 
-#: templates/emails/memorial-confirmation-plain.php:63
+#: templates/emails/memorial-confirmation-plain.php:65
 #: templates/emails/memorial-confirmation.php:108
 msgid "With deepest gratitude,"
 msgstr ""
@@ -4100,41 +4139,42 @@ msgstr ""
 msgid "Dear Friend"
 msgstr ""
 
-#: templates/emails/memorial-family-notification-plain.php:33
+#. translators: 1: honoree name, 2: site name
+#: templates/emails/memorial-family-notification-plain.php:35
 #, php-format
 msgid "A generous donor has made a memorial donation to %2$s in loving memory of %1$s."
 msgstr ""
 
 #. translators: 1: donor name, 2: site name, 3: honoree name
-#: templates/emails/memorial-family-notification-plain.php:39
+#: templates/emails/memorial-family-notification-plain.php:42
 #: templates/emails/memorial-family-notification.php:57
 #, php-format
 msgid "%1$s has made a memorial donation to %2$s in loving memory of %3$s."
 msgstr ""
 
-#: templates/emails/memorial-family-notification-plain.php:48
+#: templates/emails/memorial-family-notification-plain.php:51
 #: templates/emails/memorial-family-notification.php:68
 msgid "In Loving Memory Of"
 msgstr ""
 
-#: templates/emails/memorial-family-notification-plain.php:56
+#: templates/emails/memorial-family-notification-plain.php:59
 #: templates/emails/memorial-family-notification.php:81
 msgid "A Message from the Donor"
 msgstr ""
 
-#: templates/emails/memorial-family-notification-plain.php:60
+#: templates/emails/memorial-family-notification-plain.php:63
 msgid "This thoughtful gift will help us provide care and comfort to animals in need."
 msgstr ""
 
-#: templates/emails/memorial-family-notification-plain.php:64
+#: templates/emails/memorial-family-notification-plain.php:67
 msgid "View the memorial tribute page:"
 msgstr ""
 
-#: templates/emails/memorial-family-notification-plain.php:68
+#: templates/emails/memorial-family-notification-plain.php:71
 msgid "We send our sincere condolences to you and your family."
 msgstr ""
 
-#: templates/emails/memorial-family-notification-plain.php:71
+#: templates/emails/memorial-family-notification-plain.php:74
 #: templates/emails/memorial-family-notification.php:104
 msgid "With heartfelt sympathy,"
 msgstr ""
@@ -4165,16 +4205,19 @@ msgstr ""
 msgid "Charitable Contribution Statement"
 msgstr ""
 
+#. translators: %d: year
 #: templates/myaccount/annual-statement.php:42
 #, php-format
 msgid "Year: %d"
 msgstr ""
 
+#. translators: %s: donor first name
 #: templates/myaccount/donor-dashboard.php:40
 #, php-format
 msgid "Welcome, %s!"
 msgstr ""
 
+#. translators: %s: donor level label
 #: templates/myaccount/donor-dashboard.php:41
 #, php-format
 msgid "Donor Level: %s"
@@ -4184,75 +4227,77 @@ msgstr ""
 msgid "Membership Status"
 msgstr ""
 
-#: templates/myaccount/donor-dashboard.php:67
+#. translators: %d: number of days remaining
+#: templates/myaccount/donor-dashboard.php:68
 #, php-format
 msgid "Expires in %d day!"
 msgid_plural "Expires in %d days!"
 msgstr[0] ""
 msgstr[1] ""
 
-#: templates/myaccount/donor-dashboard.php:72
+#. translators: %s: expiration date
+#: templates/myaccount/donor-dashboard.php:73
 #, php-format
 msgid "Expires: %s"
 msgstr ""
 
-#: templates/myaccount/donor-dashboard.php:77
+#: templates/myaccount/donor-dashboard.php:78
 msgid "Renew Membership"
 msgstr ""
 
-#: templates/myaccount/donor-dashboard.php:91
+#: templates/myaccount/donor-dashboard.php:92
 msgid "View All →"
 msgstr ""
 
-#: templates/myaccount/donor-dashboard.php:102
+#: templates/myaccount/donor-dashboard.php:103
 msgid "Contact Details"
 msgstr ""
 
-#: templates/myaccount/donor-dashboard.php:107
+#: templates/myaccount/donor-dashboard.php:108
 msgid "First name"
 msgstr ""
 
-#: templates/myaccount/donor-dashboard.php:111
+#: templates/myaccount/donor-dashboard.php:112
 msgid "Last name"
 msgstr ""
 
-#: templates/myaccount/donor-dashboard.php:115
+#: templates/myaccount/donor-dashboard.php:116
 msgid "Phone"
 msgstr ""
 
-#: templates/myaccount/donor-dashboard.php:119
+#: templates/myaccount/donor-dashboard.php:120
 msgid "Address"
 msgstr ""
 
-#: templates/myaccount/donor-dashboard.php:120
+#: templates/myaccount/donor-dashboard.php:121
 msgid "Street address"
 msgstr ""
 
-#: templates/myaccount/donor-dashboard.php:123
+#: templates/myaccount/donor-dashboard.php:124
 msgid "Address line 2"
 msgstr ""
 
-#: templates/myaccount/donor-dashboard.php:124
+#: templates/myaccount/donor-dashboard.php:125
 msgid "Apt, suite, etc. (optional)"
 msgstr ""
 
-#: templates/myaccount/donor-dashboard.php:127
+#: templates/myaccount/donor-dashboard.php:128
 msgid "City"
 msgstr ""
 
-#: templates/myaccount/donor-dashboard.php:131
+#: templates/myaccount/donor-dashboard.php:132
 msgid "State"
 msgstr ""
 
-#: templates/myaccount/donor-dashboard.php:135
+#: templates/myaccount/donor-dashboard.php:136
 msgid "ZIP / Postal code"
 msgstr ""
 
-#: templates/myaccount/donor-dashboard.php:139
+#: templates/myaccount/donor-dashboard.php:140
 msgid "Country"
 msgstr ""
 
-#: templates/myaccount/donor-dashboard.php:143
+#: templates/myaccount/donor-dashboard.php:144
 msgid "Save details"
 msgstr ""
 
@@ -4268,7 +4313,8 @@ msgstr ""
 msgid "Page Total"
 msgstr ""
 
-#: templates/myaccount/giving-history.php:82
+#. translators: 1: current page number, 2: total pages, 3: total item count
+#: templates/myaccount/giving-history.php:83
 #, php-format
 msgid "Page %1$d of %2$d (%3$d total)"
 msgstr ""
@@ -4281,6 +4327,7 @@ msgstr ""
 msgid "Light a candle on a memorial to remember a beloved companion."
 msgstr ""
 
+#. translators: %d: number of candles lit
 #: templates/myaccount/my-candles.php:56
 #, php-format
 msgid "%d candle lit"
@@ -4304,52 +4351,55 @@ msgstr ""
 msgid "Save preference"
 msgstr ""
 
-#: templates/myaccount/my-memberships.php:52
+#. translators: %d: number of days remaining
+#: templates/myaccount/my-memberships.php:53
 #, php-format
 msgid "Expires in %d day"
 msgid_plural "Expires in %d days"
 msgstr[0] ""
 msgstr[1] ""
 
-#: templates/myaccount/my-memberships.php:57
+#. translators: %s: expiration date
+#: templates/myaccount/my-memberships.php:58
 #, php-format
 msgid "Valid until: %s"
 msgstr ""
 
-#: templates/myaccount/my-memberships.php:69
+#: templates/myaccount/my-memberships.php:70
 msgid "Renew"
 msgstr ""
 
-#: templates/myaccount/my-memberships.php:78
+#: templates/myaccount/my-memberships.php:79
 msgid "Automatic renewal"
 msgstr ""
 
-#: templates/myaccount/my-memberships.php:80
+#: templates/myaccount/my-memberships.php:81
 msgid "Save"
 msgstr ""
 
-#: templates/myaccount/my-memberships.php:83
+#: templates/myaccount/my-memberships.php:84
 msgid "Cancel this membership? This cannot be undone."
 msgstr ""
 
-#: templates/myaccount/my-memberships.php:87
+#: templates/myaccount/my-memberships.php:88
 msgid "Cancel membership"
 msgstr ""
 
-#: templates/myaccount/my-memberships.php:95
+#: templates/myaccount/my-memberships.php:96
 msgid "Past Memberships"
 msgstr ""
 
-#: templates/myaccount/my-memberships.php:101
+#. translators: 1: membership start date, 2: membership end date
+#: templates/myaccount/my-memberships.php:103
 #, php-format
-msgid "%s — %s"
+msgid "%1$s — %2$s"
 msgstr ""
 
-#: templates/myaccount/my-memberships.php:109
+#: templates/myaccount/my-memberships.php:111
 msgid "Rejoin"
 msgstr ""
 
-#: templates/myaccount/my-memberships.php:119
+#: templates/myaccount/my-memberships.php:121
 msgid "You don't have any memberships yet."
 msgstr ""
 
@@ -4373,218 +4423,231 @@ msgstr ""
 msgid "Select File"
 msgstr ""
 
-#: assets/js/admin-import-export.js:220
+#. translators: %d: number of additional rows not shown.
+#: assets/js/admin-import-export.js:221
 #, js-format
 msgid "... and %d more rows"
 msgstr ""
 
-#: assets/js/admin-import-export.js:419
+#. translators: %1$d: current row number being processed; %2$d: total number of rows.
+#: assets/js/admin-import-export.js:421
 #, js-format
-msgid "Processing row %d of %d..."
+msgid "Processing row %1$d of %2$d..."
 msgstr ""
 
-#: assets/js/admin-import-export.js:440
-#: assets/js/admin-import-export.js:794
+#: assets/js/admin-import-export.js:442
+#: assets/js/admin-import-export.js:808
 msgid "Import Complete!"
 msgstr ""
 
-#: assets/js/admin-import-export.js:450
+#: assets/js/admin-import-export.js:452
 msgid "Download Error Report (CSV)"
 msgstr ""
 
-#: assets/js/admin-import-export.js:468
+#: assets/js/admin-import-export.js:470
 msgid "Required: "
 msgstr ""
 
-#: assets/js/admin-import-export.js:472
+#: assets/js/admin-import-export.js:474
 msgid "Optional: "
 msgstr ""
 
-#: assets/js/admin-import-export.js:486
+#: assets/js/admin-import-export.js:488
 msgid "Analyzing file..."
 msgstr ""
 
-#: assets/js/admin-import-export.js:493
+#. translators: %1$d: total number of rows found; %2$d: number of valid rows.
+#: assets/js/admin-import-export.js:496
 #, js-format
-msgid "Preview: %d rows found, %d valid"
+msgid "Preview: %1$d rows found, %2$d valid"
 msgstr ""
 
-#: assets/js/admin-import-export.js:522
+#: assets/js/admin-import-export.js:525
 msgid "Download Template"
 msgstr ""
 
-#: assets/js/admin-import-export.js:529
-#: assets/js/admin-import-export.js:823
+#: assets/js/admin-import-export.js:532
+#: assets/js/admin-import-export.js:841
 msgid "Importing..."
 msgstr ""
 
-#: assets/js/admin-import-export.js:530
+#. translators: %d: number of rows to import.
+#: assets/js/admin-import-export.js:535
 #, js-format
 msgid "Import %d Rows"
 msgstr ""
 
-#: assets/js/admin-import-export.js:618
+#. translators: %1$d: number of memorials to import; %2$d: target year.
+#: assets/js/admin-import-export.js:626
 #, js-format
-msgid "Import %d memorials for year %d?"
+msgid "Import %1$d memorials for year %2$d?"
 msgstr ""
 
-#: assets/js/admin-import-export.js:670
+#: assets/js/admin-import-export.js:678
 msgid "Legacy Memorial Import"
 msgstr ""
 
-#: assets/js/admin-import-export.js:682
+#: assets/js/admin-import-export.js:690
 msgid "Shelter Format"
 msgstr ""
 
-#: assets/js/admin-import-export.js:688
+#: assets/js/admin-import-export.js:696
 msgid "Import memorials from the shelter's legacy CSV format (In Memory Of, By, pet columns with month headers)."
 msgstr ""
 
-#: assets/js/admin-import-export.js:703
+#: assets/js/admin-import-export.js:711
 msgid "Default Amount ($)"
 msgstr ""
 
-#: assets/js/admin-import-export.js:716
+#: assets/js/admin-import-export.js:724
 msgid "Skip duplicate honoree/donor combinations"
 msgstr ""
 
-#: assets/js/admin-import-export.js:730
+#: assets/js/admin-import-export.js:738
 msgid "Parsing file..."
 msgstr ""
 
-#: assets/js/admin-import-export.js:736
+#. translators: %d: number of memorials found in the file.
+#: assets/js/admin-import-export.js:745
 #, js-format
 msgid "Found %d memorials"
 msgstr ""
 
-#: assets/js/admin-import-export.js:739
+#. translators: %1$d: number of people; %2$d: number of pets; %3$s: comma-separated list of months found.
+#: assets/js/admin-import-export.js:749
 #, js-format
-msgid "%d people, %d pets • Months: %s"
+msgid "%1$d people, %2$d pets • Months: %3$s"
 msgstr ""
 
-#: assets/js/admin-import-export.js:756
+#: assets/js/admin-import-export.js:766
 msgid "By"
 msgstr ""
 
-#: assets/js/admin-import-export.js:784
+#. translators: %d: number of additional rows not shown.
+#: assets/js/admin-import-export.js:796
 #, js-format
 msgid "... and %d more"
 msgstr ""
 
-#: assets/js/admin-import-export.js:796
+#. translators: %d: number of memorials created.
+#: assets/js/admin-import-export.js:811
 #, js-format
 msgid "Created: %d memorials"
 msgstr ""
 
-#: assets/js/admin-import-export.js:797
+#. translators: %d: number of duplicate memorials skipped.
+#: assets/js/admin-import-export.js:813
 #, js-format
 msgid "Skipped: %d duplicates"
 msgstr ""
 
-#: assets/js/admin-import-export.js:798
+#. translators: %d: number of new donor records created.
+#: assets/js/admin-import-export.js:815
 #, js-format
 msgid "New donors created: %d"
 msgstr ""
 
-#: assets/js/admin-import-export.js:800
+#. translators: %d: number of errors encountered during import.
+#: assets/js/admin-import-export.js:818
 #, js-format
 msgid "Errors: %d"
 msgstr ""
 
-#: assets/js/admin-import-export.js:824
+#. translators: %d: number of memorials to import.
+#: assets/js/admin-import-export.js:844
 #, js-format
 msgid "Import %d Memorials"
 msgstr ""
 
-#: assets/js/admin-import-export.js:862
+#: assets/js/admin-import-export.js:884
 msgid "Export Data"
 msgstr ""
 
-#: assets/js/admin-import-export.js:863
+#: assets/js/admin-import-export.js:885
 msgid "Import Data"
 msgstr ""
 
-#: assets/js/admin-import-export.js:878
+#: assets/js/admin-import-export.js:900
 msgid "Export your shelter data to CSV files."
 msgstr ""
 
-#: assets/js/admin-import-export.js:890
+#: assets/js/admin-import-export.js:912
 msgid "All donation records."
 msgstr ""
 
-#: assets/js/admin-import-export.js:895
+#: assets/js/admin-import-export.js:917
 msgid "Last Year"
 msgstr ""
 
-#: assets/js/admin-import-export.js:903
+#: assets/js/admin-import-export.js:925
 msgid "Membership records."
 msgstr ""
 
-#: assets/js/admin-import-export.js:906
+#: assets/js/admin-import-export.js:928
 #: assets/js/admin-legacy-sync.js:88
 #: assets/js/block-editor.js:206
 #: blocks/memorial-wall/edit.js:150
 msgid "All"
 msgstr ""
 
-#: assets/js/admin-import-export.js:916
+#: assets/js/admin-import-export.js:938
 msgid "Donor profiles."
 msgstr ""
 
-#: assets/js/admin-import-export.js:925
+#: assets/js/admin-import-export.js:947
 msgid "Memorial tributes."
 msgstr ""
 
-#: assets/js/admin-import-export.js:936
+#: assets/js/admin-import-export.js:958
 msgid "Import data from CSV files."
 msgstr ""
 
-#: assets/js/admin-import-export.js:947
+#: assets/js/admin-import-export.js:969
 msgid "Import Donors"
 msgstr ""
 
-#: assets/js/admin-import-export.js:948
+#: assets/js/admin-import-export.js:970
 msgid "Import donor records."
 msgstr ""
 
-#: assets/js/admin-import-export.js:954
+#: assets/js/admin-import-export.js:976
 msgid "Update existing donors"
 msgstr ""
 
-#: assets/js/admin-import-export.js:955
-#: assets/js/admin-import-export.js:968
-#: assets/js/admin-import-export.js:981
-#: assets/js/admin-import-export.js:994
+#: assets/js/admin-import-export.js:977
+#: assets/js/admin-import-export.js:990
+#: assets/js/admin-import-export.js:1003
+#: assets/js/admin-import-export.js:1016
 msgid "Skip rows with errors"
 msgstr ""
 
-#: assets/js/admin-import-export.js:960
+#: assets/js/admin-import-export.js:982
 msgid "Import Donations"
 msgstr ""
 
-#: assets/js/admin-import-export.js:961
+#: assets/js/admin-import-export.js:983
 msgid "Import donation records."
 msgstr ""
 
-#: assets/js/admin-import-export.js:967
-#: assets/js/admin-import-export.js:980
-#: assets/js/admin-import-export.js:993
+#: assets/js/admin-import-export.js:989
+#: assets/js/admin-import-export.js:1002
+#: assets/js/admin-import-export.js:1015
 msgid "Create donors if not found"
 msgstr ""
 
-#: assets/js/admin-import-export.js:973
+#: assets/js/admin-import-export.js:995
 msgid "Import Memorials"
 msgstr ""
 
-#: assets/js/admin-import-export.js:974
+#: assets/js/admin-import-export.js:996
 msgid "Import memorial donations (in memory/honor)."
 msgstr ""
 
-#: assets/js/admin-import-export.js:986
+#: assets/js/admin-import-export.js:1008
 msgid "Import Memberships"
 msgstr ""
 
-#: assets/js/admin-import-export.js:987
+#: assets/js/admin-import-export.js:1009
 msgid "Import membership records (individual, family, business)."
 msgstr ""
 
@@ -4634,7 +4697,7 @@ msgid "Scanning..."
 msgstr ""
 
 #: assets/js/admin-legacy-sync.js:143
-#: assets/js/admin-legacy-sync.js:753
+#: assets/js/admin-legacy-sync.js:759
 msgid "Scan Orders"
 msgstr ""
 
@@ -4687,108 +4750,117 @@ msgstr ""
 msgid "Updated"
 msgstr ""
 
-#: assets/js/admin-legacy-sync.js:384
+#. translators: %d: number of orders skipped because they were already synced.
+#: assets/js/admin-legacy-sync.js:385
 #, js-format
 msgid "%d order(s) skipped (already synced)."
 msgstr ""
 
-#: assets/js/admin-legacy-sync.js:393
+#. translators: %d: number of errors that occurred during sync.
+#: assets/js/admin-legacy-sync.js:395
 #, js-format
 msgid "%d error(s) occurred during sync."
 msgstr ""
 
-#: assets/js/admin-legacy-sync.js:476
+#. translators: %d: number of orders found containing shelter products.
+#: assets/js/admin-legacy-sync.js:479
 #, js-format
 msgid "Found %d order(s) with shelter products."
 msgstr ""
 
-#: assets/js/admin-legacy-sync.js:483
-#: assets/js/admin-legacy-sync.js:490
+#: assets/js/admin-legacy-sync.js:486
+#: assets/js/admin-legacy-sync.js:493
 msgid "Scan failed."
 msgstr ""
 
-#: assets/js/admin-legacy-sync.js:513
+#: assets/js/admin-legacy-sync.js:516
 msgid "Please select orders to sync."
 msgstr ""
 
-#: assets/js/admin-legacy-sync.js:519
+#: assets/js/admin-legacy-sync.js:522
 msgid "Are you sure you want to re-sync these orders? This may create DUPLICATE records if the orders were previously synced."
 msgstr ""
 
-#: assets/js/admin-legacy-sync.js:558
+#. translators: %d: number of orders successfully synced.
+#: assets/js/admin-legacy-sync.js:562
 #, js-format
 msgid "Synced %d order(s) successfully."
 msgstr ""
 
-#: assets/js/admin-legacy-sync.js:565
-#: assets/js/admin-legacy-sync.js:572
-#: assets/js/admin-legacy-sync.js:665
-#: assets/js/admin-legacy-sync.js:673
+#: assets/js/admin-legacy-sync.js:569
+#: assets/js/admin-legacy-sync.js:576
+#: assets/js/admin-legacy-sync.js:670
+#: assets/js/admin-legacy-sync.js:678
 msgid "Sync failed."
 msgstr ""
 
-#: assets/js/admin-legacy-sync.js:583
+#: assets/js/admin-legacy-sync.js:587
 msgid "Are you sure you want to re-sync ALL matching orders? This may create DUPLICATE records."
 msgstr ""
 
-#: assets/js/admin-legacy-sync.js:584
+#: assets/js/admin-legacy-sync.js:588
 msgid "Are you sure you want to sync ALL matching orders? This may take a while for large datasets."
 msgstr ""
 
-#: assets/js/admin-legacy-sync.js:653
+#. translators: %d: total number of orders processed.
+#: assets/js/admin-legacy-sync.js:658
 #, js-format
 msgid "Sync complete! Processed %d order(s)."
 msgstr ""
 
-#: assets/js/admin-legacy-sync.js:709
+#: assets/js/admin-legacy-sync.js:714
 msgid "Reset failed."
 msgstr ""
 
-#: assets/js/admin-legacy-sync.js:733
+#: assets/js/admin-legacy-sync.js:738
 msgid "Refresh"
 msgstr ""
 
-#: assets/js/admin-legacy-sync.js:746
+#. translators: %s: date/time of the last scan.
+#: assets/js/admin-legacy-sync.js:752
 #, js-format
 msgid "Last scan: %s"
 msgstr ""
 
-#: assets/js/admin-legacy-sync.js:785
+#. translators: %d: number of orders found.
+#: assets/js/admin-legacy-sync.js:792
 #, js-format
 msgid "%d Order(s) Found (showing first 50)"
 msgstr ""
 
-#: assets/js/admin-legacy-sync.js:792
+#: assets/js/admin-legacy-sync.js:799
 msgid "Force re-sync (creates duplicates!)"
 msgstr ""
 
-#: assets/js/admin-legacy-sync.js:807
+#: assets/js/admin-legacy-sync.js:814
 msgid "Re-Sync All Matching"
 msgstr ""
 
-#: assets/js/admin-legacy-sync.js:808
+#: assets/js/admin-legacy-sync.js:815
 msgid "Sync All Matching"
 msgstr ""
 
-#: assets/js/admin-legacy-sync.js:816
+#. translators: %d: number of selected orders.
+#: assets/js/admin-legacy-sync.js:824
 #, js-format
 msgid "Sync Selected (%d)"
 msgstr ""
 
-#: assets/js/admin-legacy-sync.js:823
+#: assets/js/admin-legacy-sync.js:831
 msgid "Reset All"
 msgstr ""
 
-#: assets/js/admin-legacy-sync.js:852
+#. translators: %d: percent of the sync completed (0-100).
+#: assets/js/admin-legacy-sync.js:862
 #, js-format
 msgid "%d%% complete"
 msgstr ""
 
-#: assets/js/admin-legacy-sync.js:858
+#: assets/js/admin-legacy-sync.js:868
 msgid "Warning: Force re-sync is enabled. This will create new records even for already-synced orders, potentially creating duplicates. Use with caution!"
 msgstr ""
 
-#: assets/js/admin-legacy-sync.js:875
+#: assets/js/admin-legacy-sync.js:885
 msgid "Click \"Scan Orders\" to find orders with shelter products."
 msgstr ""
 

@@ -18,12 +18,14 @@ $year = $args['year'] ?? date( 'Y' );
 echo "= " . esc_html( $heading ) . " =\n\n";
 
 printf(
+    /* translators: %s: recipient name */
     esc_html__( 'Dear %s,', 'starter-shelter' ),
     esc_html( $donor['first_name'] ?? __( 'Friend', 'starter-shelter' ) )
 );
 echo "\n\n";
 
 printf(
+    /* translators: 1: year, 2: site name */
     esc_html__( 'Thank you for your generous support of %2$s throughout %1$d. Below is a summary of your charitable contributions for your tax records.', 'starter-shelter' ),
     (int) $year,
     esc_html( get_bloginfo( 'name' ) )
@@ -31,7 +33,7 @@ printf(
 echo "\n\n";
 
 echo "════════════════════════════════════════\n";
-printf( esc_html__( '%d ANNUAL GIVING SUMMARY', 'starter-shelter' ), (int) $year );
+printf( /* translators: %d: year */ esc_html__( '%d ANNUAL GIVING SUMMARY', 'starter-shelter' ), (int) $year );
 echo "\n════════════════════════════════════════\n\n";
 
 echo esc_html__( 'Donations:', 'starter-shelter' ) . ' ' . esc_html( $summary['donations']['formatted'] ?? '$0.00' );
@@ -57,12 +59,14 @@ if ( ! empty( $summary['donations']['by_allocation'] ) ) {
 echo esc_html__( 'TAX INFORMATION:', 'starter-shelter' ) . "\n";
 echo esc_html__( 'No goods or services were provided in exchange for these contributions. Your donations are tax-deductible to the extent allowed by law.', 'starter-shelter' ) . "\n";
 printf(
+    /* translators: %s: EIN number */
     esc_html__( 'Our Tax ID (EIN): %s', 'starter-shelter' ),
     esc_html( get_option( 'starter_shelter_ein', '[EIN Number]' ) )
 );
 echo "\n\n";
 
 printf(
+    /* translators: %s: giving history URL */
     esc_html__( 'View your complete giving history: %s', 'starter-shelter' ),
     esc_url( wc_get_account_endpoint_url( 'annual-statement' ) )
 );
@@ -75,6 +79,7 @@ echo esc_html__( 'With sincere gratitude,', 'starter-shelter' ) . "\n";
 echo esc_html( get_bloginfo( 'name' ) ) . "\n\n";
 
 printf(
+    /* translators: %s: generation date */
     esc_html__( 'This statement was generated on %s.', 'starter-shelter' ),
     esc_html( wp_date( get_option( 'date_format' ) ) )
 );

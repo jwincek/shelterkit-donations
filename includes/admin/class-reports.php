@@ -964,6 +964,7 @@ class Reports {
             </div>
             <div style="font-size: 13px; color: #50575e;">
                 <?php printf(
+                    /* translators: 1: number of renewed memberships; 2: number of expired memberships. */
                     esc_html__( '%1$d of %2$d expired memberships renewed in the last 12 months.', 'starter-shelter' ),
                     $renewed_count,
                     $expired_count

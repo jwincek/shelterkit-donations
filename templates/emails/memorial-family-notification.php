@@ -35,7 +35,7 @@ do_action( 'woocommerce_email_header', $heading, $email );
 <p>
     <?php
     printf(
-        /* translators: %s: family member name */
+        /* translators: %s: recipient name */
         esc_html__( 'Dear %s,', 'starter-shelter' ),
         esc_html( $family_name )
     );

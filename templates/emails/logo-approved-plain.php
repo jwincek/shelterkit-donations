@@ -15,12 +15,14 @@ $business_name = $membership['business_name'] ?? __( 'Your business', 'starter-s
 echo "= " . $heading . " =\n\n";
 
 printf(
+    /* translators: %s: recipient name */
     esc_html__( 'Dear %s,', 'starter-shelter' ),
     esc_html( $donor['first_name'] ?? $donor['full_name'] ?? __( 'Valued Member', 'starter-shelter' ) )
 );
 echo "\n\n";
 
 printf(
+    /* translators: %s: business name */
     esc_html__( 'Great news! The logo for %s has been approved and is now visible on our website.', 'starter-shelter' ),
     esc_html( $business_name )
 );

@@ -23,6 +23,7 @@ $is_anonymous = $memorial['is_anonymous'] ?? false;
 echo "= " . esc_html( $heading ) . " =\n\n";
 
 printf(
+    /* translators: %s: recipient name */
     esc_html__( 'Dear %s,', 'starter-shelter' ),
     esc_html( $family_name )
 );
@@ -30,12 +31,14 @@ echo "\n\n";
 
 if ( $is_anonymous ) {
     printf(
+        /* translators: 1: honoree name, 2: site name */
         esc_html__( 'A generous donor has made a memorial donation to %2$s in loving memory of %1$s.', 'starter-shelter' ),
         esc_html( $memorial['honoree_name'] ?? '' ),
         esc_html( get_bloginfo( 'name' ) )
     );
 } else {
     printf(
+        /* translators: 1: donor name, 2: site name, 3: honoree name */
         esc_html__( '%1$s has made a memorial donation to %2$s in loving memory of %3$s.', 'starter-shelter' ),
         esc_html( Helpers\get_donor_display_name( $donor['first_name'] ?? '', $donor['last_name'] ?? '' ) ),
         esc_html( get_bloginfo( 'name' ) ),

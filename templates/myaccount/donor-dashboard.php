@@ -37,8 +37,8 @@ if ( $membership && ! empty( $membership['end_date'] ) ) {
 ?>
 <div class="sd-donor-dashboard">
     <div class="sd-dashboard-header">
-        <h2><?php echo esc_html( sprintf( __( 'Welcome, %s!', 'starter-shelter' ), $donor['first_name'] ?? __( 'Friend', 'starter-shelter' ) ) ); ?></h2>
-        <p class="sd-donor-level"><?php echo esc_html( sprintf( __( 'Donor Level: %s', 'starter-shelter' ), Helpers\get_donor_level_label( $stats['donor_level'] ) ) ); ?></p>
+        <h2><?php echo esc_html( sprintf( /* translators: %s: donor first name */ __( 'Welcome, %s!', 'starter-shelter' ), $donor['first_name'] ?? __( 'Friend', 'starter-shelter' ) ) ); ?></h2>
+        <p class="sd-donor-level"><?php echo esc_html( sprintf( /* translators: %s: donor level label */ __( 'Donor Level: %s', 'starter-shelter' ), Helpers\get_donor_level_label( $stats['donor_level'] ) ) ); ?></p>
     </div>
 
     <div class="sd-dashboard-stats">
@@ -64,12 +64,13 @@ if ( $membership && ! empty( $membership['end_date'] ) ) {
             <?php if ( $is_expiring ) : ?>
                 <span class="sd-expiry-warning">
                     <?php echo esc_html( sprintf(
+                        /* translators: %d: number of days remaining */
                         _n( 'Expires in %d day!', 'Expires in %d days!', $days_remaining, 'starter-shelter' ),
                         $days_remaining
                     ) ); ?>
                 </span>
             <?php else : ?>
-                <?php echo esc_html( sprintf( __( 'Expires: %s', 'starter-shelter' ), Helpers\format_date( $membership['end_date'] ) ) ); ?>
+                <?php echo esc_html( sprintf( /* translators: %s: expiration date */ __( 'Expires: %s', 'starter-shelter' ), Helpers\format_date( $membership['end_date'] ) ) ); ?>
             <?php endif; ?>
         </p>
         <?php if ( $is_expiring ) : ?>

@@ -380,18 +380,20 @@
                     status: 'warning', 
                     isDismissible: false 
                 }, 
-                    sprintf( 
-                        __( '%d order(s) skipped (already synced).', 'starter-shelter' ), 
-                        results.skipped 
+                    sprintf(
+                        // translators: %d: number of orders skipped because they were already synced.
+                        __( '%d order(s) skipped (already synced).', 'starter-shelter' ),
+                        results.skipped
                     )
                 ),
                 results.errors > 0 && el( Notice, { 
                     status: 'error', 
                     isDismissible: false 
                 },
-                    sprintf( 
-                        __( '%d error(s) occurred during sync.', 'starter-shelter' ), 
-                        results.errors 
+                    sprintf(
+                        // translators: %d: number of errors that occurred during sync.
+                        __( '%d error(s) occurred during sync.', 'starter-shelter' ),
+                        results.errors
                     )
                 )
             )
@@ -473,6 +475,7 @@
                     setNotice({
                         status: 'success',
                         message: sprintf(
+                            // translators: %d: number of orders found containing shelter products.
                             __( 'Found %d order(s) with shelter products.', 'starter-shelter' ),
                             data.data.summary.total
                         ),
@@ -555,6 +558,7 @@
                     setNotice({
                         status: 'success',
                         message: sprintf(
+                            // translators: %d: number of orders successfully synced.
                             __( 'Synced %d order(s) successfully.', 'starter-shelter' ),
                             data.data.processed
                         ),
@@ -650,6 +654,7 @@
                             setNotice({
                                 status: 'success',
                                 message: sprintf(
+                                    // translators: %d: total number of orders processed.
                                     __( 'Sync complete! Processed %d order(s).', 'starter-shelter' ),
                                     cumulativeResults.processed
                                 ),
@@ -743,6 +748,7 @@
                             color: '#646970' 
                         } 
                     }, 
+                        // translators: %s: date/time of the last scan.
                         sprintf( __( 'Last scan: %s', 'starter-shelter' ), stats.last_scan )
                     )
                 )
@@ -781,9 +787,10 @@
                 el( CardHeader, null,
                     el( Flex, { justify: 'space-between', align: 'center' },
                         el( FlexItem, null,
-                            sprintf( 
-                                __( '%d Order(s) Found (showing first 50)', 'starter-shelter' ), 
-                                orders.length 
+                            sprintf(
+                                // translators: %d: number of orders found.
+                                __( '%d Order(s) Found (showing first 50)', 'starter-shelter' ),
+                                orders.length
                             )
                         ),
                         el( FlexItem, null,
@@ -813,6 +820,7 @@
                                     disabled: selectedOrders.length === 0 || isSyncing,
                                     isBusy: isSyncing,
                                 },
+                                    // translators: %d: number of selected orders.
                                     sprintf( __( 'Sync Selected (%d)', 'starter-shelter' ), selectedOrders.length )
                                 ),
                                 el( Button, {
@@ -849,7 +857,9 @@
                             padding: '4px',
                             color: '#646970'
                         } 
-                    }, sprintf( __( '%d%% complete', 'starter-shelter' ), syncProgress ) )
+                    },
+                    // translators: %d: percent of the sync completed (0-100).
+                    sprintf( __( '%d%% complete', 'starter-shelter' ), syncProgress ) )
                 ),
                 forceResync && el( Notice, {
                     status: 'warning',

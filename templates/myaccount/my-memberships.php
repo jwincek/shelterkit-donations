@@ -49,12 +49,13 @@ defined( 'ABSPATH' ) || exit;
                 <?php if ( $m_expiring ) : ?>
                     <span class="sd-expiry-warning">
                         <?php echo esc_html( sprintf(
+                            /* translators: %d: number of days remaining */
                             _n( 'Expires in %d day', 'Expires in %d days', $m_days, 'starter-shelter' ),
                             $m_days
                         ) ); ?>
                     </span>
                 <?php else : ?>
-                    <?php echo esc_html( sprintf( __( 'Valid until: %s', 'starter-shelter' ), Helpers\format_date( $m['end_date'] ) ) ); ?>
+                    <?php echo esc_html( sprintf( /* translators: %s: expiration date */ __( 'Valid until: %s', 'starter-shelter' ), Helpers\format_date( $m['end_date'] ) ) ); ?>
                 <?php endif; ?>
             </p>
             <?php if ( ! empty( $m['amount'] ) ) : ?>
@@ -98,7 +99,8 @@ defined( 'ABSPATH' ) || exit;
         <div class="sd-membership-info">
             <h4><?php echo esc_html( $m['tier_label'] ?? $m['tier'] ); ?></h4>
             <p><?php echo esc_html( sprintf(
-                __( '%s — %s', 'starter-shelter' ),
+                /* translators: 1: membership start date, 2: membership end date */
+                __( '%1$s — %2$s', 'starter-shelter' ),
                 Helpers\format_date( $m['start_date'] ?? '' ),
                 Helpers\format_date( $m['end_date'] ?? '' )
             ) ); ?></p>

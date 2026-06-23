@@ -28,7 +28,7 @@ do_action( 'woocommerce_email_header', $heading, $email );
 <p>
     <?php
     printf(
-        /* translators: %s: donor name */
+        /* translators: %s: recipient name */
         esc_html__( 'Dear %s,', 'starter-shelter' ),
         esc_html( $donor['first_name'] ?? __( 'Friend', 'starter-shelter' ) )
     );
@@ -38,7 +38,7 @@ do_action( 'woocommerce_email_header', $heading, $email );
 <p>
     <?php
     printf(
-        /* translators: 1: tier label, 2: site name */
+        /* translators: 1: site name, 2: tier label */
         esc_html__( 'Welcome to the %1$s family! Thank you for becoming a %2$s member.', 'starter-shelter' ),
         esc_html( get_bloginfo( 'name' ) ),
         '<strong>' . esc_html( $membership['tier_label'] ?? $membership['tier'] ?? '' ) . '</strong>'

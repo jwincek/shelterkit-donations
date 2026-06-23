@@ -501,14 +501,20 @@ class Quick_Actions {
         }
 
         $messages = [
-            'reminder_sent'       => _n( 'Renewal reminder sent.', '%d renewal reminders sent.', $count, 'starter-shelter' ),
+            /* translators: %d: number of renewal reminders sent. */
+            'reminder_sent'       => _n( '%d renewal reminder sent.', '%d renewal reminders sent.', $count, 'starter-shelter' ),
+            /* translators: %d: number of renewal reminders sent. */
             'reminders_sent'      => _n( '%d renewal reminder sent.', '%d renewal reminders sent.', $count, 'starter-shelter' ),
-            'extended'            => _n( 'Membership extended by 30 days.', '%d memberships extended by 30 days.', $count, 'starter-shelter' ),
+            /* translators: %d: number of memberships extended. */
+            'extended'            => _n( '%d membership extended by 30 days.', '%d memberships extended by 30 days.', $count, 'starter-shelter' ),
+            /* translators: %d: number of memberships extended. */
             'memberships_extended'=> _n( '%d membership extended.', '%d memberships extended.', $count, 'starter-shelter' ),
             'family_notified'     => __( 'Family notification sent.', 'starter-shelter' ),
+            /* translators: %d: number of family notifications sent. */
             'families_notified'   => _n( '%d family notification sent.', '%d family notifications sent.', $count, 'starter-shelter' ),
             'statement_sent'      => __( 'Annual statement sent.', 'starter-shelter' ),
             'receipt_sent'        => __( 'Donation receipt sent.', 'starter-shelter' ),
+            /* translators: %d: number of receipts sent. */
             'receipts_sent'       => _n( '%d receipt sent.', '%d receipts sent.', $count, 'starter-shelter' ),
         ];
 

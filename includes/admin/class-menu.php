@@ -123,7 +123,7 @@ class Menu {
                         <p style="margin: 5px 0 0; color: #646970;">
                             <?php 
                             printf(
-                                /* translators: %d: new members count */
+                                /* translators: %d: number of new records this month */
                                 esc_html__( '%d new this month', 'starter-shelter' ),
                                 $stats['memberships']['new'] ?? 0
                             );
@@ -153,7 +153,7 @@ class Menu {
                         <p style="margin: 5px 0 0; color: #646970;">
                             <?php 
                             printf(
-                                /* translators: %d: new donors count */
+                                /* translators: %d: number of new records this month */
                                 esc_html__( '%d new this month', 'starter-shelter' ),
                                 $stats['donors']['new'] ?? 0
                             );

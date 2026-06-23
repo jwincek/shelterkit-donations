@@ -17,12 +17,14 @@ $donor = $data['donor'] ?? [];
 echo "= " . esc_html( $heading ) . " =\n\n";
 
 printf(
+    /* translators: %s: recipient name */
     esc_html__( 'Dear %s,', 'starter-shelter' ),
     esc_html( $donor['first_name'] ?? __( 'Friend', 'starter-shelter' ) )
 );
 echo "\n\n";
 
 printf(
+    /* translators: 1: tier label, 2: expiration date */
     esc_html__( 'Your %1$s membership will expire on %2$s.', 'starter-shelter' ),
     esc_html( $membership['tier_label'] ?? $membership['tier'] ?? '' ),
     esc_html( Helpers\format_date( $membership['end_date'] ?? '' ) )
@@ -38,6 +40,7 @@ echo "* " . esc_html__( 'Support community education and outreach programs', 'st
 echo "= " . esc_html__( 'Renew Your Membership', 'starter-shelter' ) . " =\n\n";
 
 printf(
+    /* translators: %s: renewal URL */
     esc_html__( 'Renew here: %s', 'starter-shelter' ),
     esc_url( home_url( '/membership/' ) )
 );

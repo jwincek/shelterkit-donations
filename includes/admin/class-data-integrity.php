@@ -105,6 +105,7 @@ class Data_Integrity {
 				'recalculating'   => __( 'Recalculating…', 'starter-shelter' ),
 				'complete'        => __( 'Complete!', 'starter-shelter' ),
 				'confirmPurge'    => __( 'Type the post type slug to confirm:', 'starter-shelter' ),
+				/* translators: %s: record type label. */
 				'purgeWarning'    => __( 'This will permanently delete ALL %s records. This cannot be undone.', 'starter-shelter' ),
 				'noIssues'        => __( 'All records look good — no missing fields found.', 'starter-shelter' ),
 			],

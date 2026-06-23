@@ -29,7 +29,7 @@ do_action( 'woocommerce_email_header', $heading, $email );
 <p>
     <?php
     printf(
-        /* translators: %s: donor name */
+        /* translators: %s: recipient name */
         esc_html__( 'Dear %s,', 'starter-shelter' ),
         esc_html( $donor['first_name'] ?? __( 'Friend', 'starter-shelter' ) )
     );
@@ -49,7 +49,7 @@ do_action( 'woocommerce_email_header', $heading, $email );
 
 <div style="background-color: #f0f7f0; padding: 20px; border: 2px solid #28a745; margin: 25px 0;">
     <h2 style="margin-top: 0; text-align: center; color: #155724;">
-        <?php printf( esc_html__( '%d Annual Giving Summary', 'starter-shelter' ), (int) $year ); ?>
+        <?php printf( /* translators: %d: year */ esc_html__( '%d Annual Giving Summary', 'starter-shelter' ), (int) $year ); ?>
     </h2>
 
     <table style="width: 100%; border-collapse: collapse;">
@@ -113,7 +113,7 @@ do_action( 'woocommerce_email_header', $heading, $email );
     <p style="margin: 10px 0 0; font-size: 0.9em; color: #666;">
         <?php
         printf(
-            /* translators: %s: EIN number placeholder */
+            /* translators: %s: EIN number */
             esc_html__( 'Our Tax ID (EIN): %s', 'starter-shelter' ),
             esc_html( get_option( 'starter_shelter_ein', '[EIN Number]' ) )
         );

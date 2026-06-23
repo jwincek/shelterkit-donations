@@ -80,7 +80,9 @@ function register_interactivity_config(): void {
             'loading'          => __( 'Loading...', 'starter-shelter' ),
             'noResults'        => __( 'No results found', 'starter-shelter' ),
             'showingOne'       => __( 'Showing 1 item', 'starter-shelter' ),
+            /* translators: %d: number of items shown. */
             'showingMany'      => __( 'Showing %d items', 'starter-shelter' ),
+            /* translators: %1$d: number of items shown; %2$d: total number of items. */
             'paginationInfo'   => __( 'Showing %1$d of %2$d items', 'starter-shelter' ),
             'error'            => __( 'Something went wrong. Please try again.', 'starter-shelter' ),
             'addedToCart'      => __( 'Added to cart successfully!', 'starter-shelter' ),

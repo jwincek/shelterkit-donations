@@ -217,6 +217,7 @@
                 )
             ),
             rows.length > 5 ? el( 'p', { style: { color: '#757575', marginTop: '8px', fontSize: '13px' } },
+                // translators: %d: number of additional rows not shown.
                 sprintf( __( '... and %d more rows', 'starter-shelter' ), rows.length - 5 )
             ) : null
         );
@@ -416,7 +417,8 @@
                 // Progress bar (during import)
                 progress && isImporting ? el( 'div', { style: { marginBottom: '16px' } },
                     el( 'div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: '4px', fontSize: '13px' } },
-                        el( 'span', {}, sprintf( __( 'Processing row %d of %d...', 'starter-shelter' ), progress.processed, progress.total ) ),
+                        // translators: %1$d: current row number being processed; %2$d: total number of rows.
+                        el( 'span', {}, sprintf( __( 'Processing row %1$d of %2$d...', 'starter-shelter' ), progress.processed, progress.total ) ),
                         el( 'span', { style: { fontWeight: '600' } }, progress.percent + '%' )
                     ),
                     el( 'div', { style: { background: '#e0e0e0', borderRadius: '4px', height: '8px', overflow: 'hidden' } },
@@ -489,9 +491,10 @@
                 // Preview
                 preview ? el( 'div', { style: { marginTop: '16px' } },
                     el( 'p', { style: { fontWeight: '500', marginBottom: '8px' } }, 
-                        sprintf( 
-                            __( 'Preview: %d rows found, %d valid', 'starter-shelter' ), 
-                            preview.totalRows || 0, 
+                        sprintf(
+                            // translators: %1$d: total number of rows found; %2$d: number of valid rows.
+                            __( 'Preview: %1$d rows found, %2$d valid', 'starter-shelter' ),
+                            preview.totalRows || 0,
                             validRows
                         )
                     ),
@@ -525,9 +528,13 @@
                         disabled: validRows === 0 || isImporting,
                         isBusy: isImporting,
                         onClick: handleImport
-                    }, isImporting 
+                    }, isImporting
                         ? __( 'Importing...', 'starter-shelter' )
-                        : sprintf( __( 'Import %d Rows', 'starter-shelter' ), validRows )
+                        : sprintf(
+                            // translators: %d: number of rows to import.
+                            __( 'Import %d Rows', 'starter-shelter' ),
+                            validRows
+                        )
                     )
                 )
             )
@@ -614,10 +621,11 @@
         function handleImport() {
             if ( ! file ) return;
 
-            if ( ! confirm( sprintf( 
-                __( 'Import %d memorials for year %d?', 'starter-shelter' ), 
-                preview.total_rows, 
-                year 
+            if ( ! confirm( sprintf(
+                // translators: %1$d: number of memorials to import; %2$d: target year.
+                __( 'Import %1$d memorials for year %2$d?', 'starter-shelter' ),
+                preview.total_rows,
+                year
             ) ) ) {
                 return;
             }
@@ -733,11 +741,13 @@
                 preview && el( 'div', { style: { marginTop: '16px' } },
                     el( Notice, { status: 'info', isDismissible: false },
                         el( 'div', {},
+                            // translators: %d: number of memorials found in the file.
                             el( 'strong', {}, sprintf( __( 'Found %d memorials', 'starter-shelter' ), preview.total_rows ) ),
                             el( 'div', { style: { fontSize: '13px', marginTop: '4px' } },
-                                sprintf( 
-                                    __( '%d people, %d pets • Months: %s', 'starter-shelter' ), 
-                                    preview.person_count, 
+                                sprintf(
+                                    // translators: %1$d: number of people; %2$d: number of pets; %3$s: comma-separated list of months found.
+                                    __( '%1$d people, %2$d pets • Months: %3$s', 'starter-shelter' ),
+                                    preview.person_count,
                                     preview.pet_count,
                                     preview.months_found.join( ', ' )
                                 )
@@ -779,9 +789,13 @@
                                 })
                             )
                         ),
-                        preview.total_rows > 20 && el( 'p', { 
-                            style: { textAlign: 'center', color: '#757575', marginTop: '8px' } 
-                        }, sprintf( __( '... and %d more', 'starter-shelter' ), preview.total_rows - 20 ) )
+                        preview.total_rows > 20 && el( 'p', {
+                            style: { textAlign: 'center', color: '#757575', marginTop: '8px' }
+                        }, sprintf(
+                            // translators: %d: number of additional rows not shown.
+                            __( '... and %d more', 'starter-shelter' ),
+                            preview.total_rows - 20
+                        ) )
                     )
                 ),
 
@@ -793,11 +807,15 @@
                         el( 'div', {},
                             el( 'strong', {}, __( 'Import Complete!', 'starter-shelter' ) ),
                             el( 'div', { style: { marginTop: '8px' } },
+                                // translators: %d: number of memorials created.
                                 el( 'div', {}, sprintf( __( 'Created: %d memorials', 'starter-shelter' ), results.created ) ),
+                                // translators: %d: number of duplicate memorials skipped.
                                 el( 'div', {}, sprintf( __( 'Skipped: %d duplicates', 'starter-shelter' ), results.skipped ) ),
+                                // translators: %d: number of new donor records created.
                                 el( 'div', {}, sprintf( __( 'New donors created: %d', 'starter-shelter' ), results.donors_created ) ),
-                                results.errors > 0 && el( 'div', { style: { color: '#d63638' } }, 
-                                    sprintf( __( 'Errors: %d', 'starter-shelter' ), results.errors ) 
+                                results.errors > 0 && el( 'div', { style: { color: '#d63638' } },
+                                    // translators: %d: number of errors encountered during import.
+                                    sprintf( __( 'Errors: %d', 'starter-shelter' ), results.errors )
                                 )
                             )
                         )
@@ -819,9 +837,13 @@
                         onClick: handleImport,
                         isBusy: isImporting,
                         disabled: isImporting
-                    }, isImporting 
-                        ? __( 'Importing...', 'starter-shelter' ) 
-                        : sprintf( __( 'Import %d Memorials', 'starter-shelter' ), preview.total_rows )
+                    }, isImporting
+                        ? __( 'Importing...', 'starter-shelter' )
+                        : sprintf(
+                            // translators: %d: number of memorials to import.
+                            __( 'Import %d Memorials', 'starter-shelter' ),
+                            preview.total_rows
+                        )
                     )
                 )
             )

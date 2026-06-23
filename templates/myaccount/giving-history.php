@@ -79,6 +79,7 @@ $current_page = isset( $_GET['history-page'] ) ? absint( $_GET['history-page'] )
 
         <span class="sd-page-info">
             <?php printf(
+                /* translators: 1: current page number, 2: total pages, 3: total item count */
                 esc_html__( 'Page %1$d of %2$d (%3$d total)', 'starter-shelter' ),
                 $current_page,
                 $total_pages,

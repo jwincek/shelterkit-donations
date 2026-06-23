@@ -53,7 +53,7 @@ defined( 'ABSPATH' ) || exit;
             <span class="sd-candle-count">
                 <?php
                 printf(
-                    esc_html( _n( '%d candle lit', '%d candles lit', $count, 'starter-shelter' ) ),
+                    esc_html( /* translators: %d: number of candles lit */ _n( '%d candle lit', '%d candles lit', $count, 'starter-shelter' ) ),
                     $count
                 );
                 ?>

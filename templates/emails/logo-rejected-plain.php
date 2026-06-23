@@ -16,12 +16,14 @@ $rejection_reason = $args['reason'] ?? __( 'The logo did not meet our display re
 echo "= " . $heading . " =\n\n";
 
 printf(
+    /* translators: %s: recipient name */
     esc_html__( 'Dear %s,', 'starter-shelter' ),
     esc_html( $donor['first_name'] ?? $donor['full_name'] ?? __( 'Valued Member', 'starter-shelter' ) )
 );
 echo "\n\n";
 
 printf(
+    /* translators: %s: business name */
     esc_html__( 'Thank you for submitting your logo for %s. Unfortunately, we were unable to approve the logo in its current form.', 'starter-shelter' ),
     esc_html( $business_name )
 );

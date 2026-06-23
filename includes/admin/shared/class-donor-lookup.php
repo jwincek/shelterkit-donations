@@ -196,7 +196,7 @@ class Donor_Lookup {
 				return new \WP_Error(
 					'donor_not_found',
 					sprintf(
-						/* translators: %s: email address */
+						/* translators: %s: email address or name searched for */
 						__( 'Donor not found: %s', 'starter-shelter' ),
 						$email
 					)
@@ -219,7 +219,7 @@ class Donor_Lookup {
 				return new \WP_Error(
 					'donor_not_found',
 					sprintf(
-						/* translators: %s: donor name */
+						/* translators: %s: email address or name searched for */
 						__( 'Donor not found: %s', 'starter-shelter' ),
 						$display_name
 					)

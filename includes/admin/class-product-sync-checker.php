@@ -698,7 +698,7 @@ class Product_Sync_Checker {
 				<?php echo esc_html( $results['summary'] ); ?>
 			</p>
 			<details>
-				<summary><?php printf( esc_html__( 'View %d issue(s)', 'starter-shelter' ), $count ); ?></summary>
+				<summary><?php printf( /* translators: %d: number of issues. */ esc_html__( 'View %d issue(s)', 'starter-shelter' ), $count ); ?></summary>
 				<ul style="margin-left: 1.5em;">
 					<?php foreach ( $results['issues'] as $issue ) : ?>
 						<li>
@@ -774,7 +774,8 @@ class Product_Sync_Checker {
 			<p>
 				<strong><?php esc_html_e( 'Starter Shelter — Repair Complete:', 'starter-shelter' ); ?></strong>
 				<?php printf(
-					esc_html__( '%d product(s) repaired, %d skipped.', 'starter-shelter' ),
+					/* translators: 1: number of products repaired; 2: number of products skipped. */
+					esc_html__( '%1$d product(s) repaired, %2$d skipped.', 'starter-shelter' ),
 					$result['repaired'],
 					$result['skipped']
 				); ?>

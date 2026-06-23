@@ -543,7 +543,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
                         } elseif ( $candle_count === 1 ) {
                             esc_html_e( '1 candle', 'starter-shelter' );
                         } else {
-                            printf( esc_html__( '%d candles', 'starter-shelter' ), $candle_count );
+                            printf( /* translators: %d: number of candles lit. */ esc_html__( '%d candles', 'starter-shelter' ), $candle_count );
                         }
                     ?></span>
                 </button>
@@ -618,7 +618,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
         <span class="sd-pagination-info" data-wp-text="state.pagedInfo">
             <?php
             printf(
-                /* translators: 1: current page, 2: total pages */
+                /* translators: 1: current page number, 2: total pages */
                 esc_html__( 'Page %1$d of %2$d', 'starter-shelter' ),
                 $current_page,
                 $total_pages

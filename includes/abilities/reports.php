@@ -610,6 +610,7 @@ function action_items( array $input = [] ): array {
             'count'        => $expiring,
             /* translators: %d: number of days */
             'label'        => sprintf( __( 'membership expiring in %d days', 'starter-shelter' ), $expiring_window ),
+            /* translators: %d: number of days */
             'label_plural' => sprintf( __( 'memberships expiring in %d days', 'starter-shelter' ), $expiring_window ),
             'url'          => admin_url( 'edit.php?post_type=sd_membership&expiring=' . $expiring_window ),
         ];
@@ -802,6 +803,7 @@ function campaign_progress( array $input ): array|WP_Error {
         'goal_unit'           => 'donation_drive' === $type ? 'currency' : 'members',
         'goal_formatted'      => 'donation_drive' === $type
             ? Helpers\format_currency( $goal )
+            /* translators: %d: number of members goal. */
             : sprintf( _n( '%d member', '%d members', (int) $goal, 'starter-shelter' ), (int) $goal ),
         'end_date'            => $end_date,
         'tier_filter'         => $tier,
@@ -812,6 +814,7 @@ function campaign_progress( array $input ): array|WP_Error {
         'remaining'           => $remaining,
         'remaining_formatted' => 'donation_drive' === $type
             ? Helpers\format_currency( $remaining )
+            /* translators: %d: number of members remaining to reach the goal. */
             : sprintf( _n( '%d to go', '%d to go', (int) $remaining, 'starter-shelter' ), (int) $remaining ),
         'is_active'           => ! $end_date || strtotime( $end_date ) >= time(),
     ];
@@ -967,6 +970,7 @@ function campaigns_progress( array $input = [] ): array {
             'goal_unit'           => 'donation_drive' === $type ? 'currency' : 'members',
             'goal_formatted'      => 'donation_drive' === $type
                 ? Helpers\format_currency( $goal )
+                /* translators: %d: number of members goal. */
                 : sprintf( _n( '%d member', '%d members', (int) $goal, 'starter-shelter' ), (int) $goal ),
             'end_date'            => $end_date,
             'tier_filter'         => $tier,
@@ -977,6 +981,7 @@ function campaigns_progress( array $input = [] ): array {
             'remaining'           => $remaining,
             'remaining_formatted' => 'donation_drive' === $type
                 ? Helpers\format_currency( $remaining )
+                /* translators: %d: number of members remaining to reach the goal. */
                 : sprintf( _n( '%d to go', '%d to go', (int) $remaining, 'starter-shelter' ), (int) $remaining ),
             'is_active'           => $is_active,
         ];
@@ -1033,6 +1038,7 @@ function campaign_report( array $input ): array|WP_Error {
             ? null
             : ( 'donation_drive' === $type
                 ? Helpers\format_currency( $goal )
+                /* translators: %d: number of members goal. */
                 : sprintf( _n( '%d member', '%d members', (int) $goal, 'starter-shelter' ), (int) $goal ) ),
         'tier_filter'    => $tier,
     ];
