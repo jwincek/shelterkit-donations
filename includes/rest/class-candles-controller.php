@@ -83,22 +83,33 @@ function toggle_candle( WP_REST_Request $request ): WP_REST_Response {
 	}
 	set_transient( 'sd_candle_rate_' . $rate_key, time(), CANDLE_RATE_LIMIT_SECONDS );
 
+	$user_id = get_current_user_id();
 	$candles = get_user_candles();
-	$was_lit = in_array( $memorial_id, $candles, true );
+
+	// Determine the current lit state. For anonymous users the server-side
+	// IP transient is authoritative — the `sd_candles` cookie is forgeable
+	// and trusting it would let a visitor inflate the count by clearing the
+	// cookie between toggles (the rate limit only throttles to 1 per 2s).
+	$was_lit = $user_id
+		? in_array( $memorial_id, $candles, true )
+		: has_anonymous_candle( $memorial_id );
 
 	if ( $was_lit ) {
 		$candles = array_values( array_diff( $candles, [ $memorial_id ] ) );
 		$delta   = -1;
 	} else {
-		$candles[] = $memorial_id;
-		$delta     = 1;
+		if ( ! in_array( $memorial_id, $candles, true ) ) {
+			$candles[] = $memorial_id;
+		}
+		$delta = 1;
 	}
 
-	// Save user candles.
+	// Save user candles (cookie + user_meta) as a display hint.
 	save_user_candles( $candles );
 
-	// For anonymous users, also track by IP hash to prevent cookie manipulation.
-	if ( ! get_current_user_id() ) {
+	// For anonymous users, the IP-hash transient is the source of truth that
+	// prevents cookie manipulation from inflating counts.
+	if ( ! $user_id ) {
 		track_anonymous_candle( $memorial_id, ! $was_lit );
 	}
 
@@ -173,7 +184,13 @@ function save_user_candles( array $candles ): void {
 		update_user_meta( $user_id, '_sd_candles', $candles );
 	}
 
-	// Set HttpOnly cookie (prevents client-side JS manipulation).
+	// Set HttpOnly cookie (prevents client-side JS manipulation). Skip if
+	// headers are already sent — in the normal REST flow they are not, but
+	// this keeps the helper safe to call from other contexts (e.g. tests).
+	if ( headers_sent() ) {
+		return;
+	}
+
 	$expires = time() + ( 30 * DAY_IN_SECONDS );
 	setcookie(
 		'sd_candles',
