@@ -38,6 +38,15 @@ if ( ! defined( 'WP_TESTS_PHPUNIT_POLYFILLS_PATH' ) ) {
 
 require_once $_tests_dir . '/includes/functions.php';
 
+// WooCommerce is absent in this suite, but the donor-area sub-nav uses one WC
+// helper to build endpoint URLs. Stub just that so render-path tests work; the
+// plugin's WC integration otherwise self-guards on class_exists( 'WooCommerce' ).
+if ( ! function_exists( 'wc_get_account_endpoint_url' ) ) {
+    function wc_get_account_endpoint_url( $endpoint ) {
+        return home_url( '/my-account/' . $endpoint . '/' );
+    }
+}
+
 // Load the plugin into the test WordPress instance.
 tests_add_filter( 'muplugins_loaded', static function (): void {
     require dirname( __DIR__, 2 ) . '/starter-shelter.php';

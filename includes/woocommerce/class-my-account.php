@@ -32,6 +32,7 @@ class My_Account {
         'giving-history'   => 'giving-history',
         'my-memberships'   => 'my-memberships',
         'my-memorials'     => 'my-memorials',
+        'my-candles'       => 'my-candles',
         'annual-statement' => 'annual-statement',
     ];
 
@@ -594,6 +595,7 @@ class My_Account {
             'giving-history'   => __( 'Giving History', 'starter-shelter' ),
             'my-memberships'   => __( 'My Memberships', 'starter-shelter' ),
             'my-memorials'     => __( 'My Memorials', 'starter-shelter' ),
+            'my-candles'       => __( 'My Candles', 'starter-shelter' ),
             'annual-statement' => __( 'Annual Statement', 'starter-shelter' ),
         ];
 
@@ -781,6 +783,43 @@ class My_Account {
     }
 
     /**
+     * Render the "My Candles" endpoint — the memorials this member has lit a
+     * candle for.
+     *
+     * Candles are stored per *user* (user_meta `_sd_candles`), not per donor,
+     * so this resolves from the current user and works even for a logged-in
+     * visitor without a donor profile. Memorials are permanent tributes, so
+     * there is no expiry to reconcile here; entries whose memorial has been
+     * removed are simply skipped.
+     *
+     * @since 2.3.0
+     */
+    public static function render_my_candles(): void {
+        $candle_ids = function_exists( 'Starter_Shelter\\REST\\get_user_candles' )
+            ? \Starter_Shelter\REST\get_user_candles()
+            : [];
+
+        $memorials = [];
+        foreach ( $candle_ids as $memorial_id ) {
+            $memorial_id = (int) $memorial_id;
+
+            if ( 'publish' !== get_post_status( $memorial_id ) ) {
+                continue; // Candle for a memorial that no longer exists / isn't public.
+            }
+
+            $memorial = Entity_Hydrator::get( 'sd_memorial', $memorial_id );
+            if ( null === $memorial ) {
+                continue;
+            }
+
+            $memorial['permalink'] = (string) ( get_permalink( $memorial_id ) ?: '' );
+            $memorials[]           = $memorial;
+        }
+
+        self::render_template( 'my-candles', [ 'memorials' => $memorials ] );
+    }
+
+    /**
      * Render annual statement endpoint.
      *
      * @since 1.0.0
@@ -916,6 +955,7 @@ class My_Account {
             'giving-history'   => __( 'Giving History', 'starter-shelter' ),
             'my-memberships'   => __( 'Memberships', 'starter-shelter' ),
             'my-memorials'     => __( 'Memorials', 'starter-shelter' ),
+            'my-candles'       => __( 'Candles', 'starter-shelter' ),
             'annual-statement' => __( 'Annual Statement', 'starter-shelter' ),
         ];
 
@@ -949,7 +989,7 @@ class My_Account {
         }
 
         global $wp_query;
-        foreach ( [ 'giving-history', 'my-memberships', 'my-memorials', 'annual-statement' ] as $slug ) {
+        foreach ( [ 'giving-history', 'my-memberships', 'my-memorials', 'my-candles', 'annual-statement' ] as $slug ) {
             if ( isset( $wp_query->query_vars[ $slug ] ) ) {
                 $classes[] = 'is-active';
                 break;
@@ -1079,6 +1119,17 @@ class My_Account {
 
 /* No donor */
 .sd-no-donor { text-align: center; padding: 40px; background: #f8f8f8; border-radius: 4px; }
+
+/* My Candles */
+.sd-candles-list { list-style: none; margin: 0; padding: 0; }
+.sd-candle-row { display: flex; align-items: center; gap: 14px; background: #f8f8f8; padding: 14px 18px; margin: 0 0 10px; border-radius: 6px; border-left: 4px solid #dba617; }
+.sd-candle-flame { font-size: 1.6em; line-height: 1; }
+.sd-candle-body { flex: 1; min-width: 0; }
+.sd-candle-dedication { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: #8b5a5a; }
+.sd-candle-name { margin: 2px 0 0; font-size: 1.05em; }
+.sd-candle-name a { text-decoration: none; }
+.sd-candle-count { color: #666; font-size: 0.85em; white-space: nowrap; }
+.sd-candles-empty { text-align: center; padding: 40px; background: #f8f8f8; border-radius: 4px; }
 ';
     }
 

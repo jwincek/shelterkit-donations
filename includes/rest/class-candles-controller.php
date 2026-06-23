@@ -257,3 +257,41 @@ function get_rate_limit_key(): string {
 	}
 	return 'ip_' . wp_hash( $_SERVER['REMOTE_ADDR'] ?? 'unknown' );
 }
+
+/**
+ * Merge candles a visitor lit while logged out (cookie) into their account on
+ * login, so they appear in the "My Candles" area and are managed against the
+ * permanent user_meta store going forward.
+ *
+ * Adding the cookie's memorial IDs to the user list does not change any
+ * memorial's candle count — the count was already incremented when each candle
+ * was lit anonymously; this only gives the now-logged-in member ownership of
+ * those candles.
+ *
+ * @since 2.3.0
+ *
+ * @param string   $user_login The user's login name.
+ * @param \WP_User $user       The logged-in user.
+ */
+function merge_anonymous_candles_on_login( string $user_login, $user ): void {
+	if ( ! $user instanceof \WP_User || empty( $_COOKIE['sd_candles'] ) ) {
+		return;
+	}
+
+	$decoded = json_decode( wp_unslash( $_COOKIE['sd_candles'] ), true );
+	if ( ! is_array( $decoded ) || empty( $decoded ) ) {
+		return;
+	}
+
+	$cookie_ids = array_map( 'intval', array_slice( $decoded, 0, 100 ) );
+
+	$existing = get_user_meta( $user->ID, '_sd_candles', true );
+	$existing = is_array( $existing ) ? array_map( 'intval', $existing ) : [];
+
+	$merged = array_values( array_unique( array_merge( $existing, $cookie_ids ) ) );
+
+	if ( $merged !== $existing ) {
+		update_user_meta( $user->ID, '_sd_candles', $merged );
+	}
+}
+add_action( 'wp_login', __NAMESPACE__ . '\\merge_anonymous_candles_on_login', 10, 2 );
