@@ -268,7 +268,7 @@ function get_rate_limit_key(): string {
  * was lit anonymously; this only gives the now-logged-in member ownership of
  * those candles.
  *
- * @since 2.3.0
+ * @since 1.2.0
  *
  * @param string   $user_login The user's login name.
  * @param \WP_User $user       The logged-in user.

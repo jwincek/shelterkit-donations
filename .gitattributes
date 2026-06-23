@@ -1,0 +1,16 @@
+# Keep development, test, and CI files out of `git archive` exports — i.e. the
+# "Source code (zip)" asset GitHub attaches to a release. The plugin loads its
+# own classes (spl_autoload_register) and helpers (direct require), so it has
+# no runtime Composer dependency; none of the below ship in a usable plugin.
+/.github            export-ignore
+/.gitattributes     export-ignore
+/.gitignore         export-ignore
+/.distignore        export-ignore
+/tests              export-ignore
+/bin                export-ignore
+/phpunit.xml.dist             export-ignore
+/phpunit-integration.xml.dist export-ignore
+/phpunit-wc.xml.dist          export-ignore
+/phpcs.xml          export-ignore
+/composer.json      export-ignore
+/composer.lock      export-ignore

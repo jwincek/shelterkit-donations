@@ -159,7 +159,7 @@ class Import_Export_Page {
 	/**
 	 * Stream a full-backup ZIP of every entity type.
 	 *
-	 * @since 2.3.0
+	 * @since 1.2.0
 	 */
 	public static function handle_export_all(): void {
 		check_admin_referer( self::EXPORT_NONCE );
@@ -211,7 +211,7 @@ class Import_Export_Page {
 	 * Server-rendered "full backup" card — a plain form download (no React),
 	 * with an explicit note on what does and doesn't round-trip.
 	 *
-	 * @since 2.3.0
+	 * @since 1.2.0
 	 */
 	private static function render_backup_card(): void {
 		?>

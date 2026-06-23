@@ -1,0 +1,19 @@
+# Files excluded from the distributed plugin build (`wp dist-archive`, and the
+# WordPress.org deploy). Mirrors .gitattributes export-ignore. Runtime needs
+# none of these — the plugin autoloads its own classes and requires helpers
+# directly, so there is no Composer dependency to ship.
+/.git
+/.github
+/.gitignore
+/.gitattributes
+/.distignore
+/tests
+/bin
+/node_modules
+/vendor
+/composer.json
+/composer.lock
+/phpunit.xml.dist
+/phpunit-integration.xml.dist
+/phpunit-wc.xml.dist
+/phpcs.xml

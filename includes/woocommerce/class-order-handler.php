@@ -144,7 +144,7 @@ class Order_Handler {
      * collisions across sites sharing a MySQL server, and keep within
      * MySQL's 64-char limit. Auto-released if the connection drops.
      *
-     * @since 2.3.0
+     * @since 1.2.0
      *
      * @param int $order_id The order ID.
      * @return bool True if the lock was acquired.
@@ -159,7 +159,7 @@ class Order_Handler {
     /**
      * Release the per-order lock.
      *
-     * @since 2.3.0
+     * @since 1.2.0
      *
      * @param int $order_id The order ID.
      */
@@ -173,7 +173,7 @@ class Order_Handler {
     /**
      * Build the advisory-lock name for an order.
      *
-     * @since 2.3.0
+     * @since 1.2.0
      *
      * @param int $order_id The order ID.
      * @return string
@@ -188,7 +188,7 @@ class Order_Handler {
      * object cache), HPOS-aware. Used for the in-lock re-check so a value just
      * written by a concurrent run is seen.
      *
-     * @since 2.3.0
+     * @since 1.2.0
      *
      * @param int $order_id The order ID.
      * @return bool True if the order is already marked processed.

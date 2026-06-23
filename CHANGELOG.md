@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-06-23
+
 ### Added
 - **My Account → Annual Statement** now produces a real, printable tax receipt. The "Print / Save as PDF" button opens a standalone, print-optimized contribution statement (no theme/account chrome) that auto-opens the browser print dialog — so members get a PDF via their browser with no server-side PDF dependency. It itemizes the year's donations, memorials, and memberships with a grand total, includes the organization details (from the WooCommerce store settings) and the donor's name/address, and carries a deductibility note that's filterable (`starter_shelter_receipt_tax_note`) so a site can add its EIN / 501(c)(3) language. The donor is resolved from the session, so a member only ever prints their own statement. (Previously the Print button just reloaded the full account page.)
 - **My Account → Donor Dashboard** now has an editable **Contact Details** form (name, phone, mailing address), pre-filled from the donor record. Saving posts through the nonce-verified PRG handler and the owner-scoped `shelter-donors/update-profile` + `shelter-donors/update-address` abilities — completing the self-service set (previously the account area was entirely read-only).

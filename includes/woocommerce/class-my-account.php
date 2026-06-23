@@ -39,7 +39,7 @@ class My_Account {
     /**
      * Object-cache group for the per-request user → donor-id memoization.
      *
-     * @since 2.3.0
+     * @since 1.2.0
      * @var string
      */
     private const DONOR_CACHE_GROUP = 'sd_user_donor';
@@ -658,7 +658,7 @@ class My_Account {
      * user's email against `_sd_email`, back-filling the link so later
      * lookups are direct.
      *
-     * @since 2.3.0
+     * @since 1.2.0
      *
      * @param int $user_id Current user id.
      * @return int Donor post id, or 0 if the user has no donor record.
@@ -834,7 +834,7 @@ class My_Account {
      * there is no expiry to reconcile here; entries whose memorial has been
      * removed are simply skipped.
      *
-     * @since 2.3.0
+     * @since 1.2.0
      */
     public static function render_my_candles(): void {
         $candle_ids = function_exists( 'Starter_Shelter\\REST\\get_user_candles' )

@@ -763,7 +763,7 @@ class CSV_Importer {
 	 * first-class (taxonomy-aware) export/import entity. See CHANGELOG and the
 	 * backup README ("NOT restored automatically: campaign goals/end-dates").
 	 *
-	 * @since 2.3.0
+	 * @since 1.2.0
 	 *
 	 * @param string $name Campaign name.
 	 * @return int Term id, or 0.

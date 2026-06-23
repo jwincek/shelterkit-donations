@@ -66,7 +66,7 @@ class CSV_Exporter {
 	 * Shared by the single-file stream and the full-backup ZIP. Returns an
 	 * empty string for an unknown entity type.
 	 *
-	 * @since 2.3.0
+	 * @since 1.2.0
 	 *
 	 * @param string $entity_type Key from import-export.json entity_types.
 	 * @param array  $options     Export options (see {@see export()}).
@@ -119,7 +119,7 @@ class CSV_Exporter {
 	 * Build a full-backup ZIP of every entity type's CSV plus a README that
 	 * documents what is and isn't covered.
 	 *
-	 * @since 2.3.0
+	 * @since 1.2.0
 	 *
 	 * @param string[] $entity_types Entity types to include (default: all).
 	 * @param array    $options      Export options applied to each CSV.
@@ -159,7 +159,7 @@ class CSV_Exporter {
 	/**
 	 * README bundled in the backup ZIP — restore steps and coverage limits.
 	 *
-	 * @since 2.3.0
+	 * @since 1.2.0
 	 *
 	 * @return string
 	 */
