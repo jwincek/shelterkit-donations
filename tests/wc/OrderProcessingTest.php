@@ -19,6 +19,7 @@ declare( strict_types = 1 );
 namespace Starter_Shelter\Tests\WC;
 
 use WP_UnitTestCase;
+use Starter_Shelter\WooCommerce\Order_Handler;
 
 final class OrderProcessingTest extends WP_UnitTestCase {
 
@@ -120,6 +121,34 @@ final class OrderProcessingTest extends WP_UnitTestCase {
         $this->assertCount( 1, $memorials, 'One memorial created from the order.' );
         $this->assertSame( 'Biscuit', get_post_meta( $memorials[0], '_sd_honoree_name', true ) );
         $this->assertSame( 'pet', get_post_meta( $memorials[0], '_sd_memorial_type', true ), 'memorial_type resolved from the attribute (lowercased).' );
+    }
+
+    public function test_duplicate_trigger_after_completion_is_a_noop(): void {
+        // A late/duplicate trigger (e.g. a repeated gateway webhook) after the
+        // order already processed must not create a second donation.
+        $order = $this->make_shelter_order( 'shelter-donations', 20.00 );
+        $order->update_status( 'completed' );
+        $this->assertCount( 1, $this->entities_for_order( $order->get_id(), 'sd_donation' ) );
+
+        Order_Handler::process_order( $order->get_id() );
+
+        $this->assertCount( 1, $this->entities_for_order( $order->get_id(), 'sd_donation' ), 'No duplicate from a repeat trigger.' );
+    }
+
+    public function test_processed_flag_is_read_fresh_from_the_database(): void {
+        // The in-lock re-check reads the flag straight from the DB (HPOS-aware),
+        // so a value written by a concurrent run is seen even if the order
+        // object cache is stale. Exercise that reader directly.
+        $order  = $this->make_shelter_order( 'shelter-donations', 5.00 );
+        $method = new \ReflectionMethod( Order_Handler::class, 'is_processed_in_db' );
+        $method->setAccessible( true );
+
+        $this->assertFalse( $method->invoke( null, $order->get_id() ), 'Not processed yet.' );
+
+        $order->update_meta_data( '_sd_processed', current_time( 'mysql' ) );
+        $order->save();
+
+        $this->assertTrue( $method->invoke( null, $order->get_id() ), 'Reads the just-written flag from the DB.' );
     }
 
     public function test_memorial_without_honoree_is_rejected_and_creates_no_record(): void {

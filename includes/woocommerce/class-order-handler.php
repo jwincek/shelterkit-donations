@@ -69,7 +69,7 @@ class Order_Handler {
             return;
         }
 
-        // Check if already processed.
+        // Fast path: already processed (avoids taking the lock).
         if ( $order->get_meta( self::PROCESSED_META_KEY ) ) {
             return;
         }
@@ -79,42 +79,139 @@ class Order_Handler {
             return;
         }
 
-        $results = [];
-        $has_errors = false;
-
-        foreach ( $order->get_items() as $item_id => $item ) {
-            $result = self::process_item( $order, $item );
-            
-            if ( null !== $result ) {
-                $results[ $item_id ] = $result;
-                
-                if ( is_wp_error( $result ) ) {
-                    $has_errors = true;
-                }
-            }
+        // Acquire a per-order lock so concurrent triggers (duplicate gateway
+        // webhooks, or a webhook racing an admin status change in a separate
+        // request) can't each create a set of entities. Whoever holds the
+        // lock processes; others skip — the line items are the same regardless
+        // of which paid-status hook fired, so processing once is correct.
+        if ( ! self::acquire_lock( $order_id ) ) {
+            return;
         }
 
-        // Store results.
-        $order->update_meta_data( self::RESULTS_META_KEY, $results );
+        try {
+            // Re-check fresh from the database now that we hold the lock: a
+            // concurrent run may have finished (and set the flag) between our
+            // fast-path check above and acquiring the lock.
+            if ( self::is_processed_in_db( $order_id ) ) {
+                return;
+            }
 
-        // Mark as processed (even with errors, to prevent duplicate processing).
-        $order->update_meta_data( self::PROCESSED_META_KEY, current_time( 'mysql' ) );
-        
-        $order->save();
+            $results = [];
+            $has_errors = false;
 
-        // Add order note with summary.
-        self::add_processing_note( $order, $results, $has_errors );
+            foreach ( $order->get_items() as $item_id => $item ) {
+                $result = self::process_item( $order, $item );
 
-        /**
-         * Fires after an order has been processed by the shelter donations plugin.
-         *
-         * @since 1.0.0
-         *
-         * @param int   $order_id   The order ID.
-         * @param array $results    Processing results for each item.
-         * @param bool  $has_errors Whether any errors occurred.
-         */
-        do_action( 'starter_shelter_order_processed', $order_id, $results, $has_errors );
+                if ( null !== $result ) {
+                    $results[ $item_id ] = $result;
+
+                    if ( is_wp_error( $result ) ) {
+                        $has_errors = true;
+                    }
+                }
+            }
+
+            // Store results.
+            $order->update_meta_data( self::RESULTS_META_KEY, $results );
+
+            // Mark as processed (even with errors, to prevent duplicate processing).
+            $order->update_meta_data( self::PROCESSED_META_KEY, current_time( 'mysql' ) );
+
+            $order->save();
+
+            // Add order note with summary.
+            self::add_processing_note( $order, $results, $has_errors );
+
+            /**
+             * Fires after an order has been processed by the shelter donations plugin.
+             *
+             * @since 1.0.0
+             *
+             * @param int   $order_id   The order ID.
+             * @param array $results    Processing results for each item.
+             * @param bool  $has_errors Whether any errors occurred.
+             */
+            do_action( 'starter_shelter_order_processed', $order_id, $results, $has_errors );
+        } finally {
+            self::release_lock( $order_id );
+        }
+    }
+
+    /**
+     * Acquire a per-order MySQL advisory lock (non-blocking).
+     *
+     * Lock names are server-global, so namespace by DB name to avoid
+     * collisions across sites sharing a MySQL server, and keep within
+     * MySQL's 64-char limit. Auto-released if the connection drops.
+     *
+     * @since 2.3.0
+     *
+     * @param int $order_id The order ID.
+     * @return bool True if the lock was acquired.
+     */
+    private static function acquire_lock( int $order_id ): bool {
+        global $wpdb;
+        return (bool) $wpdb->get_var(
+            $wpdb->prepare( 'SELECT GET_LOCK(%s, %d)', self::lock_name( $order_id ), 0 )
+        );
+    }
+
+    /**
+     * Release the per-order lock.
+     *
+     * @since 2.3.0
+     *
+     * @param int $order_id The order ID.
+     */
+    private static function release_lock( int $order_id ): void {
+        global $wpdb;
+        $wpdb->query(
+            $wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', self::lock_name( $order_id ) )
+        );
+    }
+
+    /**
+     * Build the advisory-lock name for an order.
+     *
+     * @since 2.3.0
+     *
+     * @param int $order_id The order ID.
+     * @return string
+     */
+    private static function lock_name( int $order_id ): string {
+        $db = defined( 'DB_NAME' ) ? DB_NAME : 'wp';
+        return substr( $db . '_sd_proc_order_' . $order_id, 0, 64 );
+    }
+
+    /**
+     * Read the processed flag straight from the database (bypassing any order
+     * object cache), HPOS-aware. Used for the in-lock re-check so a value just
+     * written by a concurrent run is seen.
+     *
+     * @since 2.3.0
+     *
+     * @param int $order_id The order ID.
+     * @return bool True if the order is already marked processed.
+     */
+    private static function is_processed_in_db( int $order_id ): bool {
+        global $wpdb;
+
+        if ( class_exists( '\Automattic\WooCommerce\Utilities\OrderUtil' )
+            && \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
+            $value = $wpdb->get_var( $wpdb->prepare(
+                "SELECT meta_value FROM {$wpdb->prefix}wc_orders_meta WHERE order_id = %d AND meta_key = %s LIMIT 1",
+                $order_id,
+                self::PROCESSED_META_KEY
+            ) );
+        } else {
+            $value = $wpdb->get_var( $wpdb->prepare(
+                "SELECT meta_value FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = %s LIMIT 1",
+                $order_id,
+                self::PROCESSED_META_KEY
+            ) );
+        }
+
+        return ! empty( $value );
     }
 
     /**
