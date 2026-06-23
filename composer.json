@@ -42,6 +42,7 @@
 		"lint:fix": "phpcbf",
 		"test": "phpunit",
 		"test:unit": "phpunit --testsuite unit",
-		"test:integration": "phpunit -c phpunit-integration.xml.dist"
+		"test:integration": "phpunit -c phpunit-integration.xml.dist",
+		"test:wc": "phpunit -c phpunit-wc.xml.dist"
 	}
 }

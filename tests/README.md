@@ -1,6 +1,6 @@
 # Tests
 
-Two PHPUnit suites, both run under PHPUnit 9.6 (the version the WordPress
+Three PHPUnit suites, all run under PHPUnit 9.6 (the version the WordPress
 core test framework supports — it still uses PHPUnit ≤9 APIs).
 
 ## Unit suite (`tests/Unit/`)
@@ -58,3 +58,37 @@ Run on PHP 8.2 or 8.3 — PHPUnit 9.6 predates PHP 8.4.
 
 CI (`.github/workflows/ci.yml`, `integration-tests` job) runs the same
 script against a MySQL service container.
+
+## WooCommerce suite (`tests/wc/`)
+
+Same WP + MySQL foundation as the integration suite, but **WooCommerce is
+loaded and installed** (`WC_Install::install()`), so the plugin's WC
+integration runs against the real WC runtime — order → entity mapping
+(`Order_Handler` / `Product_Mapper`), the cart-item-vs-order-meta channel,
+and the create abilities' `internal` permission. Tests drive the *real*
+flow (`$order->update_status( 'completed' )`) rather than calling the
+processor directly, which also exercises the hook wiring.
+
+```bash
+composer test:wc        # phpunit -c phpunit-wc.xml.dist
+```
+
+### Where WooCommerce comes from
+
+`tests/wc/bootstrap.php` resolves WC from, in order:
+
+1. `WC_PLUGIN_DIR` env var, if set;
+2. `$WP_CORE_DIR/wp-content/plugins/woocommerce` (CI installs it there);
+3. the sibling `woocommerce/` plugin next to this one.
+
+So on **Local by Flywheel** nothing extra is needed — the sibling plugin
+is found automatically (run with the same `PATH`/socket setup as the
+integration suite, then `composer test:wc`). For **CI** (or any bare WP
+core), install it first:
+
+```bash
+bin/install-woocommerce.sh [version]   # default: latest; CI pins WC_VERSION
+```
+
+CI runs this in the `wc-tests` job (single PHP 8.3 — the WC seam doesn't
+vary by PHP minor; entity logic is matrix-tested in the integration job).

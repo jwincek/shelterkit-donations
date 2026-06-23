@@ -157,3 +157,61 @@ jobs:
 
       - name: Run integration tests
         run: composer test:integration
+
+  wc-tests:
+    name: WooCommerce Integration Tests
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      WP_TESTS_DIR: /tmp/wordpress-tests-lib
+      WP_CORE_DIR: /tmp/wordpress
+      # Pinned for reproducibility; bump alongside the local dev environment.
+      WC_VERSION: "10.8.1"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          tools: composer
+          extensions: mysqli, mbstring, bcmath, intl, gd
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-8.3-${{ hashFiles('composer.lock', 'composer.json') }}
+          restore-keys: composer-8.3-
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Ensure MySQL client is available
+        run: which mysqladmin || sudo apt-get update && sudo apt-get install -y mysql-client
+
+      - name: Install WP test suite
+        run: bash bin/install-wp-tests.sh wordpress_test root root "127.0.0.1:3306" 7.0
+
+      # WooCommerce is installed into the test core's plugins dir; the WC
+      # bootstrap (tests/wc/bootstrap.php) auto-discovers it there.
+      - name: Install WooCommerce
+        run: bash bin/install-woocommerce.sh "$WC_VERSION"
+
+      - name: Run WooCommerce integration tests
+        run: composer test:wc
