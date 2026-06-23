@@ -1039,3 +1039,52 @@ function get_membership_page_url(): string {
     }
     return (string) ( get_permalink( $page_id ) ?: '' );
 }
+
+/**
+ * Neutralize a value for safe inclusion in a CSV cell (formula-injection
+ * defense).
+ *
+ * Spreadsheet apps (Excel, Google Sheets, LibreOffice) execute a cell whose
+ * text begins with `=`, `+`, `-`, `@`, tab, or carriage return as a formula.
+ * A user-controlled value like `=HYPERLINK("//evil","x")` or `=WEBSERVICE(...)`
+ * would therefore run when an admin opens an exported report. Prefixing such a
+ * value with a single quote makes the spreadsheet treat the whole cell as
+ * literal text. Genuine numbers (incl. signed/decimal) are left untouched so
+ * numeric columns still import as numbers.
+ *
+ * @since 1.1.3
+ *
+ * @param mixed $value Cell value.
+ * @return string Sanitized cell value.
+ */
+function esc_csv_field( $value ): string {
+    $value = (string) $value;
+
+    if ( '' === $value || is_numeric( $value ) ) {
+        return $value;
+    }
+
+    if ( in_array( $value[0], [ '=', '+', '-', '@', "\t", "\r" ], true ) ) {
+        return "'" . $value;
+    }
+
+    return $value;
+}
+
+/**
+ * Write one CSV row with every cell neutralized via {@see esc_csv_field()}.
+ *
+ * Drop-in replacement for fputcsv() on any export of user-influenced data.
+ *
+ * @since 1.1.3
+ *
+ * @param resource $handle Open file pointer (e.g. php://output).
+ * @param array    $row    Row cells.
+ * @return void
+ */
+function fputcsv_safe( $handle, array $row ): void {
+    // Pass the field separator/enclosure/escape explicitly: PHP 8.4 deprecates
+    // relying on fputcsv()'s default $escape, and routing every export through
+    // this wrapper fixes that everywhere at once. "\\" preserves prior output.
+    \fputcsv( $handle, array_map( __NAMESPACE__ . '\\esc_csv_field', $row ), ',', '"', '\\' );
+}

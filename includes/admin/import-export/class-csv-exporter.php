@@ -15,6 +15,8 @@ declare( strict_types = 1 );
 
 namespace Starter_Shelter\Admin\Import_Export;
 
+use function Starter_Shelter\Helpers\fputcsv_safe;
+
 use Starter_Shelter\Core\{ Config, Entity_Hydrator };
 use Starter_Shelter\Helpers;
 
@@ -73,7 +75,7 @@ class CSV_Exporter {
 		fwrite( $output, "\xEF\xBB\xBF" );
 
 		// Header row.
-		fputcsv( $output, array_column( $columns, 'header' ) );
+		fputcsv_safe( $output, array_column( $columns, 'header' ) );
 
 		// Pre-cache post meta for all results to avoid N+1 queries.
 		if ( ! empty( $query->posts ) ) {
@@ -89,7 +91,7 @@ class CSV_Exporter {
 			}
 
 			$row = self::build_row( $post, $entity, $columns, $post_type );
-			fputcsv( $output, $row );
+			fputcsv_safe( $output, $row );
 		}
 
 		fclose( $output );

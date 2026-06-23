@@ -26,6 +26,8 @@ declare( strict_types = 1 );
 
 namespace Starter_Shelter\Admin\Import_Export;
 
+use function Starter_Shelter\Helpers\fputcsv_safe;
+
 use Starter_Shelter\Core\Config;
 
 /**
@@ -345,16 +347,16 @@ class Import_Ajax_Handler {
 		fwrite( $output, "\xEF\xBB\xBF" );
 
 		// Row 1: Column headers.
-		fputcsv( $output, $headers );
+		fputcsv_safe( $output, $headers );
 
 		// Row 2: Instructions row — describes what each column expects.
 		$instructions = self::build_instructions_row( $type, $headers, $import_config );
-		fputcsv( $output, $instructions );
+		fputcsv_safe( $output, $instructions );
 
 		// Rows 3+: Realistic example data from live config.
 		$examples = self::build_example_rows( $type, $headers );
 		foreach ( $examples as $example ) {
-			fputcsv( $output, $example );
+			fputcsv_safe( $output, $example );
 		}
 
 		fclose( $output );

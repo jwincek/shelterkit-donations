@@ -11,6 +11,8 @@ declare( strict_types = 1 );
 
 namespace Starter_Shelter\Admin;
 
+use function Starter_Shelter\Helpers\fputcsv_safe;
+
 use Starter_Shelter\Core\Config;
 
 /**
@@ -1074,7 +1076,7 @@ class Reports {
      */
     private static function export_donations_report( $output, string $period, int $campaign_id = 0 ): void {
         // CSV headers.
-        fputcsv( $output, [
+        fputcsv_safe( $output, [
             __( 'Date', 'starter-shelter' ),
             __( 'Donor', 'starter-shelter' ),
             __( 'Email', 'starter-shelter' ),
@@ -1141,7 +1143,7 @@ class Reports {
                 );
             }
 
-            fputcsv( $output, [
+            fputcsv_safe( $output, [
                 $donation['date_formatted'] ?? '',
                 $donation['donor_name'] ?? $donor['name'],
                 $donor['email'],
@@ -1162,7 +1164,7 @@ class Reports {
      * @param string   $period Report period.
      */
     private static function export_memberships_report( $output, string $period, int $campaign_id = 0 ): void {
-        fputcsv( $output, [
+        fputcsv_safe( $output, [
             __( 'Member', 'starter-shelter' ),
             __( 'Email', 'starter-shelter' ),
             __( 'Tier', 'starter-shelter' ),
@@ -1197,7 +1199,7 @@ class Reports {
         foreach ( $items as $membership ) {
             $donor_id = (int) ( $membership['donor_id'] ?? 0 );
             $donor    = $donor_map[ $donor_id ] ?? [ 'name' => '', 'email' => '' ];
-            fputcsv( $output, [
+            fputcsv_safe( $output, [
                 $donor['name'],
                 $donor['email'],
                 $membership['tier_label'] ?? '',
@@ -1219,7 +1221,7 @@ class Reports {
      * @param string   $period Report period.
      */
     private static function export_memorials_report( $output, string $period, int $campaign_id = 0 ): void {
-        fputcsv( $output, [
+        fputcsv_safe( $output, [
             __( 'Honoree', 'starter-shelter' ),
             __( 'Type', 'starter-shelter' ),
             __( 'Donor', 'starter-shelter' ),
@@ -1257,7 +1259,7 @@ class Reports {
         foreach ( $items as $memorial ) {
             $donor_id = (int) ( $memorial['donor_id'] ?? 0 );
             $donor    = $donor_map[ $donor_id ] ?? [ 'name' => '', 'email' => '' ];
-            fputcsv( $output, [
+            fputcsv_safe( $output, [
                 $memorial['honoree_name'] ?? '',
                 $memorial['memorial_type'] ?? '',
                 $memorial['donor_display_name'] ?? $memorial['donor_name'] ?? $donor['name'],
@@ -1300,26 +1302,26 @@ class Reports {
 
         // Summary block — header rows shared between types, then a type-
         // specific "Raised" or "Joined" line.
-        fputcsv( $output, [ __( 'Campaign Report', 'starter-shelter' ), $campaign['name'] ?? '' ] );
-        fputcsv( $output, [ __( 'Type', 'starter-shelter' ), 'donation_drive' === $type
+        fputcsv_safe( $output, [ __( 'Campaign Report', 'starter-shelter' ), $campaign['name'] ?? '' ] );
+        fputcsv_safe( $output, [ __( 'Type', 'starter-shelter' ), 'donation_drive' === $type
             ? __( 'Donation Drive', 'starter-shelter' )
             : __( 'Membership Drive', 'starter-shelter' )
         ] );
-        fputcsv( $output, [ __( 'Goal', 'starter-shelter' ), $campaign['goal_formatted'] ?? '' ] );
+        fputcsv_safe( $output, [ __( 'Goal', 'starter-shelter' ), $campaign['goal_formatted'] ?? '' ] );
 
         if ( 'donation_drive' === $type ) {
-            fputcsv( $output, [ __( 'Raised', 'starter-shelter' ), $progress['total_formatted'] ?? '' ] );
+            fputcsv_safe( $output, [ __( 'Raised', 'starter-shelter' ), $progress['total_formatted'] ?? '' ] );
         } else {
-            fputcsv( $output, [ __( 'Joined', 'starter-shelter' ), $progress['member_count'] ?? 0 ] );
+            fputcsv_safe( $output, [ __( 'Joined', 'starter-shelter' ), $progress['member_count'] ?? 0 ] );
         }
-        fputcsv( $output, [ __( 'Progress', 'starter-shelter' ), ( $progress['percent_of_goal'] ?? 0 ) . '%' ] );
-        fputcsv( $output, [] );
+        fputcsv_safe( $output, [ __( 'Progress', 'starter-shelter' ), ( $progress['percent_of_goal'] ?? 0 ) . '%' ] );
+        fputcsv_safe( $output, [] );
 
         if ( 'donation_drive' === $type ) {
             $donations = $result['donations'] ?? [];
             $donor_map = self::batch_donor_info( array_column( $donations, 'donor_id' ) );
 
-            fputcsv( $output, [
+            fputcsv_safe( $output, [
                 __( 'Date', 'starter-shelter' ),
                 __( 'Donor', 'starter-shelter' ),
                 __( 'Email', 'starter-shelter' ),
@@ -1330,7 +1332,7 @@ class Reports {
             foreach ( $donations as $donation ) {
                 $donor_id = (int) ( $donation['donor_id'] ?? 0 );
                 $donor    = $donor_map[ $donor_id ] ?? [ 'name' => '', 'email' => '' ];
-                fputcsv( $output, [
+                fputcsv_safe( $output, [
                     $donation['date_formatted']    ?? '',
                     $donation['donor_name']        ?? $donor['name'],
                     $donor['email'],
@@ -1346,7 +1348,7 @@ class Reports {
         $memberships = $result['memberships'] ?? [];
         $donor_map   = self::batch_donor_info( array_column( $memberships, 'donor_id' ) );
 
-        fputcsv( $output, [
+        fputcsv_safe( $output, [
             __( 'Member', 'starter-shelter' ),
             __( 'Email', 'starter-shelter' ),
             __( 'Tier', 'starter-shelter' ),
@@ -1360,7 +1362,7 @@ class Reports {
         foreach ( $memberships as $membership ) {
             $donor_id = (int) ( $membership['donor_id'] ?? 0 );
             $donor    = $donor_map[ $donor_id ] ?? [ 'name' => '', 'email' => '' ];
-            fputcsv( $output, [
+            fputcsv_safe( $output, [
                 $donor['name'],
                 $donor['email'],
                 $membership['tier_label']      ?? '',

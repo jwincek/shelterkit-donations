@@ -26,6 +26,8 @@ declare( strict_types = 1 );
 
 namespace Starter_Shelter\Admin\Import_Export;
 
+use function Starter_Shelter\Helpers\fputcsv_safe;
+
 use Starter_Shelter\Core\Config;
 use Starter_Shelter\Admin\Shared\Donor_Lookup;
 use Starter_Shelter\Helpers;
@@ -488,18 +490,18 @@ class CSV_Importer {
 		$header[] = 'row_number';
 
 		if ( ! empty( $first_row ) ) {
-			fputcsv( $output, [ 'Row', 'Error', ...array_map( fn( $i ) => "Column " . ( $i + 1 ), range( 0, count( $first_row ) - 1 ) ) ] );
+			fputcsv_safe( $output, [ 'Row', 'Error', ...array_map( fn( $i ) => "Column " . ( $i + 1 ), range( 0, count( $first_row ) - 1 ) ) ] );
 		}
 
 		foreach ( $errors as $error ) {
 			$row_data = $error['row_data'] ?? [];
 			if ( ! empty( $row_data ) ) {
-				fputcsv( $output, array_merge(
+				fputcsv_safe( $output, array_merge(
 					[ $error['row'] ?? '', $error['message'] ?? '' ],
 					$row_data
 				) );
 			} else {
-				fputcsv( $output, [ $error['row'] ?? '', $error['message'] ?? '' ] );
+				fputcsv_safe( $output, [ $error['row'] ?? '', $error['message'] ?? '' ] );
 			}
 		}
 
