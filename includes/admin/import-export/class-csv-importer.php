@@ -754,6 +754,15 @@ class CSV_Importer {
 	 * import by the stable name rather than a post/term id that changes on
 	 * restore. Returns 0 when the name is empty or the term can't be created.
 	 *
+	 * KNOWN GAP: this recreates the campaign term by NAME only — it does not
+	 * restore the campaign's `_sd_goal`, `_sd_campaign_type`, or `_sd_end_date`
+	 * term meta, because the CSV backup has no campaigns entity that carries
+	 * them. So on a full restore, campaign *associations* come back but a
+	 * recreated campaign reads as a goal-less donation_drive until an admin
+	 * re-enters its goal/type. Closing this fully means adding `campaigns` as a
+	 * first-class (taxonomy-aware) export/import entity. See CHANGELOG and the
+	 * backup README ("NOT restored automatically: campaign goals/end-dates").
+	 *
 	 * @since 2.3.0
 	 *
 	 * @param string $name Campaign name.
