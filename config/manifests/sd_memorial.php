@@ -662,6 +662,8 @@ return [
 				'notify_family_enabled',
 				'notify_family_name',
 				'notify_family_email',
+				'notify_family_address',
+				'notify_family_send_card',
 				'family_notified_date',
 			],
 		],
