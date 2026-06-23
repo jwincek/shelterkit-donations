@@ -215,3 +215,35 @@ jobs:
 
       - name: Run WooCommerce integration tests
         run: composer test:wc
+
+  i18n:
+    name: Translation template up to date
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          tools: wp-cli
+
+      # Regenerate the POT and compare against the committed one. make-pot only
+      # scans source (no WordPress/DB needed). Volatile header lines
+      # (timestamp, generator version, version-derived Project-Id-Version) are
+      # ignored — everything else, including string source references, must
+      # match, so a code change that adds/moves a translatable string fails the
+      # job until languages/starter-shelter.pot is regenerated and committed.
+      - name: Regenerate POT
+        run: wp i18n make-pot . /tmp/expected.pot --domain=starter-shelter --exclude=tests,vendor,node_modules
+
+      - name: Compare with committed POT
+        run: |
+          strip() { grep -vE '^"(POT-Creation-Date|X-Generator|Project-Id-Version):' "$1"; }
+          if ! diff <( strip languages/starter-shelter.pot ) <( strip /tmp/expected.pot ); then
+            echo "::error file=languages/starter-shelter.pot::POT is out of date. Run: wp i18n make-pot . languages/starter-shelter.pot --domain=starter-shelter --exclude=tests,vendor,node_modules — then commit."
+            exit 1
+          fi
+          echo "POT is up to date."
