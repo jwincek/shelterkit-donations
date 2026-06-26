@@ -13,7 +13,7 @@ use Starter_Shelter\Helpers;
 
 $donor = $data['donor'] ?? [];
 $summary = $args['summary'] ?? [];
-$year = $args['year'] ?? date( 'Y' );
+$year = $args['year'] ?? gmdate( 'Y' );
 
 echo "= " . esc_html( $heading ) . " =\n\n";
 
@@ -87,4 +87,5 @@ echo "\n";
 
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- admin-set footer text emitted in a text/plain email, mirroring WooCommerce's own plain email footer; same filtered value WC core prints.
 echo apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) );

@@ -15,6 +15,11 @@
 
 declare( strict_types = 1 );
 
+// Source files carry a `defined( 'ABSPATH' ) || exit;` direct-access guard.
+// This no-WordPress suite loads them directly, so define ABSPATH to satisfy
+// the guard (WordPress itself defines it in the integration/wc suites).
+defined( 'ABSPATH' ) || define( 'ABSPATH', dirname( __DIR__ ) . '/' );
+
 // ─── Minimal WP function stubs ───────────────────────────────────────
 // Unqualified calls inside the plugin's namespaces fall back to these
 // global definitions when WordPress isn't loaded.
@@ -50,4 +55,7 @@ if ( ! function_exists( 'wp_strip_all_tags' ) ) {
 // not PSR-4, so load the ones we test explicitly.
 
 require_once __DIR__ . '/../vendor/autoload.php';
+// Loaded explicitly (ABSPATH is now defined above) rather than via composer
+// "files" autoload, which runs at PHPUnit startup before any constant is set.
+require_once __DIR__ . '/../includes/core/helpers.php';
 require_once __DIR__ . '/../includes/admin/shared/class-donor-lookup.php';

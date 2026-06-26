@@ -19,6 +19,8 @@ declare( strict_types = 1 );
 
 namespace Starter_Shelter\Blocks\DonorStats;
 
+defined( 'ABSPATH' ) || exit;
+
 use Starter_Shelter\Helpers;
 
 // Block settings.
@@ -93,7 +95,7 @@ if ( $animate_numbers ) {
 }
 ?>
 
-<div <?php echo $wrapper_attributes; ?> <?php echo $interactive_attrs; ?>>
+<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped markup from get_block_wrapper_attributes(). ?> <?php echo $interactive_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $interactive_attrs assembled from a literal plus wp_interactivity_data_wp_context(), which returns an escaped attribute. ?>>
     
     <?php if ( $show_total ) : ?>
     <div class="sd-stat-card sd-stat-total">

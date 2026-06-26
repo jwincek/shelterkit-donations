@@ -80,7 +80,7 @@ class Legacy_Memorial_Parser {
 	 * }|\WP_Error Parsed data or error.
 	 */
 	public static function parse( string $filepath, int $year ): array|\WP_Error {
-		$handle = fopen( $filepath, 'r' );
+		$handle = fopen( $filepath, 'r' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- reading an uploaded CSV for import.
 
 		if ( ! $handle ) {
 			return new \WP_Error(
@@ -154,14 +154,14 @@ class Legacy_Memorial_Parser {
 				'donor_name'    => $donor_name,
 				'memorial_type' => $is_pet ? 'pet' : 'person',
 				'month'         => $current_month
-					? date( 'F', mktime( 0, 0, 0, $current_month, 1 ) )
+					? gmdate( 'F', mktime( 0, 0, 0, $current_month, 1 ) )
 					: 'Unknown',
 				'date'          => $date,
 				'is_anonymous'  => $is_anonymous,
 			];
 		}
 
-		fclose( $handle );
+		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- reading an uploaded CSV for import.
 
 		return [
 			'rows'         => $rows,
@@ -377,7 +377,7 @@ class Legacy_Memorial_Parser {
 		}
 
 		// Assign to memorial year taxonomy.
-		$year = date( 'Y', strtotime( $memorial_date ) );
+		$year = gmdate( 'Y', strtotime( $memorial_date ) );
 		wp_set_object_terms( $memorial_id, [ $year ], 'sd_memorial_year' );
 
 		// Update donor stats if amount > 0.

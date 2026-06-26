@@ -21,7 +21,7 @@ use Starter_Shelter\Helpers;
 
 $donor = $data['donor'] ?? [];
 $summary = $args['summary'] ?? [];
-$year = $args['year'] ?? date( 'Y' );
+$year = $args['year'] ?? gmdate( 'Y' );
 
 do_action( 'woocommerce_email_header', $heading, $email );
 ?>

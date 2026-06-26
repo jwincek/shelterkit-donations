@@ -21,6 +21,8 @@
 
 declare( strict_types = 1 );
 
+defined( 'ABSPATH' ) || exit;
+
 // Map old memorial-archive attributes → memorial-wall attributes.
 $attributes = [
     'archiveId'       => $attributes['archiveId'] ?? '',

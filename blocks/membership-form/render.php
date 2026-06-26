@@ -8,6 +8,8 @@
 
 declare( strict_types = 1 );
 
+defined( 'ABSPATH' ) || exit;
+
 use Starter_Shelter\Core\Config;
 use Starter_Shelter\Helpers;
 
@@ -87,12 +89,15 @@ $wrapper = get_block_wrapper_attributes( [
 // Get the tiers for current type.
 $current_tiers = ( $membership_type === 'business' ) ? $business_tiers : $individual_tiers;
 ?>
-<div <?php echo $wrapper; ?>>
+<div <?php echo $wrapper; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped markup from get_block_wrapper_attributes(). ?>>
     <div class="sd-form-header">
         <?php if ( $title ) : ?><h2 class="sd-form-title"><?php echo esc_html( $title ); ?></h2><?php endif; ?>
         <?php if ( $subtitle ) : ?><p class="sd-form-subtitle"><?php echo esc_html( $subtitle ); ?></p><?php endif; ?>
         <?php if ( $campaign && ! is_wp_error( $campaign ) ) : ?>
-            <div class="sd-campaign-badge"><?php printf( esc_html__( 'Supporting: %s', 'starter-shelter' ), '<strong>' . esc_html( $campaign->name ) . '</strong>' ); ?></div>
+            <div class="sd-campaign-badge"><?php
+                /* translators: %s: campaign name. */
+                printf( esc_html__( 'Supporting: %s', 'starter-shelter' ), '<strong>' . esc_html( $campaign->name ) . '</strong>' );
+            ?></div>
         <?php endif; ?>
         <?php if ( ! $product_ok ) : ?>
             <div class="sd-config-warning" role="alert"><p><?php esc_html_e( 'Membership form not configured.', 'starter-shelter' ); ?></p></div>

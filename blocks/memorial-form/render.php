@@ -8,6 +8,8 @@
 
 declare( strict_types = 1 );
 
+defined( 'ABSPATH' ) || exit;
+
 $form_id = $attributes['formId'] ?: wp_unique_id( 'sd-memorial-' );
 
 $preset_amounts        = $attributes['presetAmounts'] ?? [ 25, 50, 100, 250 ];
@@ -57,7 +59,7 @@ $wrapper = get_block_wrapper_attributes( [
     'data-wp-context' => $context, 'data-wp-init' => 'actions.initForm',
 ] );
 ?>
-<div <?php echo $wrapper; ?>>
+<div <?php echo $wrapper; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped markup from get_block_wrapper_attributes(). ?>>
     <div class="sd-form-header">
         <?php if ( $title ) : ?><h2 class="sd-form-title"><?php echo esc_html( $title ); ?></h2><?php endif; ?>
         <?php if ( $subtitle ) : ?><p class="sd-form-subtitle"><?php echo esc_html( $subtitle ); ?></p><?php endif; ?>

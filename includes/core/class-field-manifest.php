@@ -558,7 +558,7 @@ class Field_Manifest {
 	 * @return string
 	 */
 	private static function translate( string $text ): string {
-		return function_exists( '__' ) ? __( $text, 'starter-shelter' ) : $text;
+		return function_exists( '__' ) ? __( $text, 'starter-shelter' ) : $text; // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- label string sourced from the field manifest config, not a literal.
 	}
 
 	/**

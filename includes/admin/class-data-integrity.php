@@ -167,8 +167,7 @@ class Data_Integrity {
 			<h2><?php esc_html_e( 'Backfill Missing Fields', 'starter-shelter' ); ?></h2>
 			<p class="description">
 				<?php esc_html_e(
-					'Scans all records and reports missing or empty meta fields based on the entity schema. '
-					. 'You can then backfill defaults, denormalized fields, and taxonomy terms in batches.',
+					'Scans all records and reports missing or empty meta fields based on the entity schema. You can then backfill defaults, denormalized fields, and taxonomy terms in batches.',
 					'starter-shelter'
 				); ?>
 			</p>
@@ -205,9 +204,7 @@ class Data_Integrity {
 				<p>
 					<strong><?php esc_html_e( 'Warning:', 'starter-shelter' ); ?></strong>
 					<?php esc_html_e(
-						'This permanently deletes posts and their meta. '
-						. 'Use this to start fresh before re-running Legacy Order Sync or CSV imports. '
-						. 'WooCommerce orders and donor records are not affected unless you explicitly choose them.',
+						'This permanently deletes posts and their meta. Use this to start fresh before re-running Legacy Order Sync or CSV imports. WooCommerce orders and donor records are not affected unless you explicitly choose them.',
 						'starter-shelter'
 					); ?>
 				</p>
@@ -277,8 +274,7 @@ class Data_Integrity {
 			<h2><?php esc_html_e( 'Recalculate Donor Stats', 'starter-shelter' ); ?></h2>
 			<p class="description">
 				<?php esc_html_e(
-					'Recalculates lifetime_giving for every donor by summing their donations, memorials, and memberships. '
-					. 'Use this after bulk imports or if stats look incorrect.',
+					'Recalculates lifetime_giving for every donor by summing their donations, memorials, and memberships. Use this after bulk imports or if stats look incorrect.',
 					'starter-shelter'
 				); ?>
 			</p>

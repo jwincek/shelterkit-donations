@@ -439,7 +439,7 @@ class Reports {
                 printf(
                     /* translators: %d: total donation count */
                     esc_html__( 'View all %d donations in the admin list', 'starter-shelter' ),
-                    $total
+                    (int) $total
                 );
                 ?>
             </a>
@@ -593,7 +593,7 @@ class Reports {
                 printf(
                     /* translators: %d: total membership count */
                     esc_html__( 'View all %d memberships in the admin list', 'starter-shelter' ),
-                    $total
+                    (int) $total
                 );
                 ?>
             </a>
@@ -724,7 +724,7 @@ class Reports {
                 printf(
                     /* translators: %d: total memorial count */
                     esc_html__( 'View all %d memorials in the admin list', 'starter-shelter' ),
-                    $total
+                    (int) $total
                 );
                 ?>
             </a>
@@ -891,12 +891,12 @@ class Reports {
         <div class="sd-trend-chart" style="margin: 20px 0;">
             <h3><?php esc_html_e( 'Donation Trend', 'starter-shelter' ); ?></h3>
             <div style="overflow-x: auto;">
-                <svg viewBox="0 0 <?php echo $total_w; ?> <?php echo $chart_h + 30; ?>" width="<?php echo min( $total_w, $chart_w ); ?>" style="font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+                <svg viewBox="0 0 <?php echo (int) $total_w; ?> <?php echo (int) ( $chart_h + 30 ); ?>" width="<?php echo (int) min( $total_w, $chart_w ); ?>" style="font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
                     <!-- Grid lines -->
                     <?php for ( $i = 0; $i <= 4; $i++ ) :
                         $y = $chart_h - ( $chart_h * $i / 4 );
                     ?>
-                    <line x1="0" y1="<?php echo $y; ?>" x2="<?php echo $total_w; ?>" y2="<?php echo $y; ?>" stroke="#e0e0e0" stroke-width="0.5" />
+                    <line x1="0" y1="<?php echo (float) $y; ?>" x2="<?php echo (int) $total_w; ?>" y2="<?php echo (float) $y; ?>" stroke="#e0e0e0" stroke-width="0.5" />
                     <?php endfor; ?>
 
                     <!-- Bars -->
@@ -907,16 +907,16 @@ class Reports {
                         $label = wp_date( $label_format, strtotime( $bucket['period_start'] ) );
                     ?>
                     <g>
-                        <rect x="<?php echo $x; ?>" y="<?php echo $y; ?>" width="<?php echo $bar_w; ?>" height="<?php echo $bar_h; ?>"
+                        <rect x="<?php echo (int) $x; ?>" y="<?php echo (float) $y; ?>" width="<?php echo (int) $bar_w; ?>" height="<?php echo (float) $bar_h; ?>"
                             fill="#059669" rx="2" opacity="0.85">
                             <title><?php echo esc_attr( $label . ': $' . number_format( (float) $bucket['total'], 2 ) . ' (' . $bucket['count'] . ' donations)' ); ?></title>
                         </rect>
                         <?php if ( $bar_count <= 15 ) : ?>
-                        <text x="<?php echo $x + $bar_w / 2; ?>" y="<?php echo $chart_h + 14; ?>" text-anchor="middle" fill="#666" font-size="9">
+                        <text x="<?php echo (float) ( $x + $bar_w / 2 ); ?>" y="<?php echo (int) ( $chart_h + 14 ); ?>" text-anchor="middle" fill="#666" font-size="9">
                             <?php echo esc_html( $label ); ?>
                         </text>
                         <?php elseif ( $i % 3 === 0 ) : ?>
-                        <text x="<?php echo $x + $bar_w / 2; ?>" y="<?php echo $chart_h + 14; ?>" text-anchor="middle" fill="#666" font-size="8">
+                        <text x="<?php echo (float) ( $x + $bar_w / 2 ); ?>" y="<?php echo (int) ( $chart_h + 14 ); ?>" text-anchor="middle" fill="#666" font-size="8">
                             <?php echo esc_html( $label ); ?>
                         </text>
                         <?php endif; ?>
@@ -966,8 +966,8 @@ class Reports {
                 <?php printf(
                     /* translators: 1: number of renewed memberships; 2: number of expired memberships. */
                     esc_html__( '%1$d of %2$d expired memberships renewed in the last 12 months.', 'starter-shelter' ),
-                    $renewed_count,
-                    $expired_count
+                    (int) $renewed_count,
+                    (int) $expired_count
                 ); ?>
             </div>
         </div>
@@ -983,7 +983,7 @@ class Reports {
         check_ajax_referer( 'sd_export_report', '_wpnonce' );
 
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( __( 'Permission denied.', 'starter-shelter' ) );
+            wp_die( esc_html__( 'Permission denied.', 'starter-shelter' ) );
         }
 
         $report      = sanitize_key( $_GET['report'] ?? 'donations' );
@@ -1026,7 +1026,7 @@ class Reports {
                 break;
         }
 
-        fclose( $output );
+        fclose( $output ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- streaming CSV to php://output; WP_Filesystem cannot stream output.
         exit;
     }
 

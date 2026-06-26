@@ -524,13 +524,15 @@ class Activity_Log {
 
         // Get total count.
         $count_query = "SELECT COUNT(*) FROM $table_name WHERE $where";
+        // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.NotPrepared -- $table_name is $wpdb->prefix . self::TABLE_NAME (constant); $where is a static SQL skeleton whose only dynamic values use %s placeholders bound via $wpdb->prepare( $count_query, $params ). The no-filter branch passes a fully literal query.
         $total_items = $params ? $wpdb->get_var( $wpdb->prepare( $count_query, $params ) ) : $wpdb->get_var( $count_query );
 
         // Get logs.
         $query = "SELECT * FROM $table_name WHERE $where ORDER BY created_at DESC LIMIT %d OFFSET %d";
         $params[] = $per_page;
         $params[] = $offset;
-        
+
+        // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.NotPrepared -- $table_name is $wpdb->prefix . self::TABLE_NAME (constant); $where is a static SQL skeleton whose only dynamic values use %s/%d placeholders bound via $wpdb->prepare( $query, $params ).
         $logs = $wpdb->get_results( $wpdb->prepare( $query, $params ) );
 
         // Filter dropdown uses the closed enumeration — no scan needed.
@@ -654,7 +656,7 @@ class Activity_Log {
             ?>
             <div class="tablenav bottom">
                 <div class="tablenav-pages">
-                    <?php echo $page_links; ?>
+                    <?php echo $page_links; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- paginate_links() returns pre-escaped anchor markup. ?>
                 </div>
             </div>
             <?php endif; ?>

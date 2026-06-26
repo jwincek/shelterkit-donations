@@ -10,6 +10,8 @@ declare( strict_types = 1 );
 
 namespace Starter_Shelter\Abilities\Reports;
 
+defined( 'ABSPATH' ) || exit;
+
 use Starter_Shelter\Core\{ Query, Entity_Hydrator, Config };
 use Starter_Shelter\Helpers;
 use WP_Error;
@@ -235,6 +237,7 @@ function dashboard_stats( array $input = [] ): array {
     }
 
     // Donations: count, sum, unique donors in period.
+    // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- $campaign_join is built only from $wpdb->term_relationships/$wpdb->term_taxonomy table names and a hardcoded taxonomy; all user values are prepared with %d/%s.
     $donation_stats = $wpdb->get_row( $wpdb->prepare(
         "SELECT
             COUNT(*) as count,
@@ -256,6 +259,7 @@ function dashboard_stats( array $input = [] ): array {
 
     // Memberships: active (currently valid), new (started in period), expiring_soon
     // (next 30 days), revenue (sum amount of starts in period).
+    // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- $campaign_join is built only from $wpdb->term_relationships/$wpdb->term_taxonomy table names and a hardcoded taxonomy; all user values are prepared with %d/%s.
     $membership_stats = $wpdb->get_row( $wpdb->prepare(
         "SELECT
             SUM(CASE WHEN pe.meta_value >= %s THEN 1 ELSE 0 END) as active_count,
@@ -281,6 +285,7 @@ function dashboard_stats( array $input = [] ): array {
     ) );
 
     // Memberships by tier (count + revenue per tier, scoped to period).
+    // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- $campaign_join is built only from $wpdb->term_relationships/$wpdb->term_taxonomy table names and a hardcoded taxonomy; all user values are prepared with %d/%s.
     $by_tier_rows = $wpdb->get_results( $wpdb->prepare(
         "SELECT
             pt.meta_value as tier,
@@ -317,6 +322,7 @@ function dashboard_stats( array $input = [] ): array {
     // (matching donations) so back-dated memorial entries land in the
     // intended reporting period rather than the period in which the post
     // happens to be saved.
+    // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- $campaign_join is built only from $wpdb->term_relationships/$wpdb->term_taxonomy table names and a hardcoded taxonomy; all user values are prepared with %d/%s.
     $memorial_stats = $wpdb->get_row( $wpdb->prepare(
         "SELECT
             COUNT(*) as count,
@@ -451,6 +457,7 @@ function donation_trend( array $input = [] ): array {
         $campaign_args  = [ $campaign_id ];
     }
 
+    // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- $campaign_join is built only from $wpdb->term_relationships/$wpdb->term_taxonomy table names and a hardcoded taxonomy; all user values are prepared with %d/%s.
     $rows = $wpdb->get_results( $wpdb->prepare(
         "SELECT
             DATE_FORMAT( pm_date.meta_value, %s ) as period_key,

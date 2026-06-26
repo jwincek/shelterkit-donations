@@ -8,6 +8,8 @@
 
 declare( strict_types = 1 );
 
+defined( 'ABSPATH' ) || exit;
+
 $tab_labels  = $attributes['tabLabels'] ?? [ 'Give a Gift', 'Become a Member', 'Honor a Loved One' ];
 $tab_icons   = $attributes['tabIcons'] ?? [ 'heart', 'groups', 'format-quote' ];
 $default_tab = $attributes['defaultTab'] ?? 0;
@@ -41,20 +43,20 @@ $wrapper = get_block_wrapper_attributes( [
 ] );
 
 ?>
-<div <?php echo $wrapper; ?>>
+<div <?php echo $wrapper; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped markup from get_block_wrapper_attributes(). ?>>
 	<div class="sd-tabs-nav" role="tablist" aria-label="<?php esc_attr_e( 'Contribution type', 'starter-shelter' ); ?>">
 		<?php foreach ( $tab_labels as $i => $label ) :
 			$is_active = ( $i === $default_tab );
 			$icon_path = $icon_svgs[ $tab_icons[ $i ] ?? '' ] ?? '';
 		?>
 		<button type="button" role="tab" class="sd-tab-button <?php echo $is_active ? 'sd-tab-active' : ''; ?>"
-			id="<?php echo esc_attr( $block_id ); ?>-tab-<?php echo $i; ?>"
+			id="<?php echo esc_attr( $block_id ); ?>-tab-<?php echo (int) $i; ?>"
 			aria-selected="<?php echo $is_active ? 'true' : 'false'; ?>"
-			aria-controls="<?php echo esc_attr( $block_id ); ?>-panel-<?php echo $i; ?>"
+			aria-controls="<?php echo esc_attr( $block_id ); ?>-panel-<?php echo (int) $i; ?>"
 			data-wp-on--click="actions.selectTab"
 			data-wp-class--sd-tab-active="callbacks.isActiveTab"
 			data-wp-bind--aria-selected="callbacks.isActiveTab"
-			data-wp-context='{"tabIndex":<?php echo $i; ?>}'>
+			data-wp-context='{"tabIndex":<?php echo (int) $i; ?>}'>
 			<?php if ( $icon_path ) : ?>
 			<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="sd-tab-icon"><path d="<?php echo esc_attr( $icon_path ); ?>" fill="currentColor"/></svg>
 			<?php endif; ?>
@@ -68,10 +70,10 @@ $wrapper = get_block_wrapper_attributes( [
 		$panel_content = $inner_block->render();
 	?>
 	<div role="tabpanel" class="sd-tab-panel <?php echo $is_active ? 'sd-tab-panel-active' : ''; ?>"
-		id="<?php echo esc_attr( $block_id ); ?>-panel-<?php echo $i; ?>"
-		aria-labelledby="<?php echo esc_attr( $block_id ); ?>-tab-<?php echo $i; ?>"
+		id="<?php echo esc_attr( $block_id ); ?>-panel-<?php echo (int) $i; ?>"
+		aria-labelledby="<?php echo esc_attr( $block_id ); ?>-tab-<?php echo (int) $i; ?>"
 		data-wp-class--sd-tab-panel-active="callbacks.isActiveTab"
-		data-wp-context='{"tabIndex":<?php echo $i; ?>}'>
+		data-wp-context='{"tabIndex":<?php echo (int) $i; ?>}'>
 		<?php echo $panel_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 	</div>
 	<?php endforeach; ?>

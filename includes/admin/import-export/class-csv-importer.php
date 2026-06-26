@@ -187,7 +187,7 @@ class CSV_Importer {
 			Helpers\set_internal_processing( false );
 		}
 
-		fclose( $handle );
+		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- reading an uploaded CSV for import.
 		return $results;
 	}
 
@@ -251,7 +251,7 @@ class CSV_Importer {
 			}
 		}
 
-		fclose( $handle );
+		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- reading an uploaded CSV for import.
 
 		return [
 			'headers'   => $headers,
@@ -291,13 +291,13 @@ class CSV_Importer {
 		}
 
 		// Count total data rows.
-		$handle = fopen( $dest, 'r' );
+		$handle = fopen( $dest, 'r' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- reading an uploaded CSV for import.
 		fgetcsv( $handle ); // Skip header.
 		$total_rows = 0;
 		while ( fgetcsv( $handle ) !== false ) {
 			$total_rows++;
 		}
-		fclose( $handle );
+		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- reading an uploaded CSV for import.
 
 		// Store import session in a transient.
 		$session = [
@@ -436,7 +436,7 @@ class CSV_Importer {
 			Helpers\set_internal_processing( false );
 		}
 
-		fclose( $handle );
+		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- reading an uploaded CSV for import.
 
 		// Update session.
 		$session['processed'] = $offset + $batch_processed;
@@ -445,7 +445,7 @@ class CSV_Importer {
 
 		if ( $done ) {
 			// Clean up the temp file.
-			@unlink( $filepath );
+			wp_delete_file( $filepath );
 
 			// Store error details for download if there are any.
 			if ( ! empty( $results['error_details'] ) ) {
@@ -480,8 +480,8 @@ class CSV_Importer {
 			return null;
 		}
 
-		$output = fopen( 'php://temp', 'r+' );
-		fwrite( $output, "\xEF\xBB\xBF" ); // UTF-8 BOM.
+		$output = fopen( 'php://temp', 'r+' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- streaming CSV to php://temp; WP_Filesystem cannot stream.
+		fwrite( $output, "\xEF\xBB\xBF" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- streaming CSV to php://temp; WP_Filesystem cannot stream.
 
 		// Header: original columns + error column.
 		$first_row = $errors[0]['row_data'] ?? [];
@@ -507,7 +507,7 @@ class CSV_Importer {
 
 		rewind( $output );
 		$csv = stream_get_contents( $output );
-		fclose( $output );
+		fclose( $output ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- closing php://temp stream; WP_Filesystem cannot stream.
 
 		delete_transient( $import_key . '_errors' );
 
@@ -840,14 +840,14 @@ class CSV_Importer {
 	 * @return array{ handle: resource, headers: string[] }|\WP_Error
 	 */
 	private static function open_csv( string $filepath, CSV_Validator $validator, string $entity_type = '' ): array|\WP_Error {
-		$handle = fopen( $filepath, 'r' );
+		$handle = fopen( $filepath, 'r' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- reading an uploaded CSV for import.
 		if ( ! $handle ) {
 			return new \WP_Error( 'file_error', __( 'Could not open file.', 'starter-shelter' ) );
 		}
 
 		$raw_headers = fgetcsv( $handle );
 		if ( ! $raw_headers ) {
-			fclose( $handle );
+			fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- reading an uploaded CSV for import.
 			return new \WP_Error( 'empty_file', __( 'Empty file or invalid CSV.', 'starter-shelter' ) );
 		}
 
@@ -870,7 +870,7 @@ class CSV_Importer {
 
 		$missing = $validator->validate_headers( $headers );
 		if ( ! empty( $missing ) ) {
-			fclose( $handle );
+			fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- closing a handle to a locally-read uploaded CSV.
 			return new \WP_Error(
 				'missing_columns',
 				sprintf(

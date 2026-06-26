@@ -83,8 +83,8 @@ class Provider {
         $permission_callback = self::resolve_permission_callback( $config['permission'] ?? $config['permission_callback'] ?? 'logged_in' );
 
         $args = [
-            'label'               => __( $config['label'] ?? $name, 'starter-shelter' ),
-            'description'         => __( $config['description'] ?? '', 'starter-shelter' ),
+            'label'               => __( $config['label'] ?? $name, 'starter-shelter' ), // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- ability label sourced from the ability config registry, not a literal.
+            'description'         => __( $config['description'] ?? '', 'starter-shelter' ), // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- ability description sourced from the ability config registry, not a literal.
             'category'            => $config['category'] ?? 'shelter-donations',
             'execute_callback'    => $execute_callback,
             'permission_callback' => $permission_callback,

@@ -19,6 +19,8 @@
 
 declare( strict_types = 1 );
 
+defined( 'ABSPATH' ) || exit;
+
 // ─── Enqueue the interactivity store module ──────────────────────────
 // Filtering/pagination fetch results from the Abilities REST endpoint and
 // update context client-side (see memorials.js), so the Interactivity
@@ -233,9 +235,9 @@ $wrapper_attributes = get_block_wrapper_attributes( [
 ?>
 
 <div
-    <?php echo $wrapper_attributes; ?>
+    <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped markup from get_block_wrapper_attributes(). ?>
     data-wp-interactive="starter-shelter/memorials"
-    <?php echo wp_interactivity_data_wp_context( $context ); ?>
+    <?php echo wp_interactivity_data_wp_context( $context ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_interactivity_data_wp_context() returns an escaped data-wp-context attribute. ?>
     data-wp-router-region="<?php echo esc_attr( $archive_id ); ?>"
     data-wp-key="<?php echo esc_attr( $archive_id ); ?>"
 >
@@ -336,8 +338,8 @@ $wrapper_attributes = get_block_wrapper_attributes( [
             <?php
             printf(
                 /* translators: %d: number of memorials */
-                _n( '%d memorial', '%d memorials', $total, 'starter-shelter' ),
-                $total
+                esc_html( _n( '%d memorial', '%d memorials', $total, 'starter-shelter' ) ),
+                (int) $total
             );
             ?>
         </span>
@@ -543,7 +545,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
                         } elseif ( $candle_count === 1 ) {
                             esc_html_e( '1 candle', 'starter-shelter' );
                         } else {
-                            printf( /* translators: %d: number of candles lit. */ esc_html__( '%d candles', 'starter-shelter' ), $candle_count );
+                            printf( /* translators: %d: number of candles lit. */ esc_html__( '%d candles', 'starter-shelter' ), (int) $candle_count );
                         }
                     ?></span>
                 </button>
@@ -620,8 +622,8 @@ $wrapper_attributes = get_block_wrapper_attributes( [
             printf(
                 /* translators: 1: current page number, 2: total pages */
                 esc_html__( 'Page %1$d of %2$d', 'starter-shelter' ),
-                $current_page,
-                $total_pages
+                (int) $current_page,
+                (int) $total_pages
             );
             ?>
         </span>
@@ -645,6 +647,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
     <noscript>
         <nav class="sd-noscript-pagination">
             <?php
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- paginate_links() returns ready-to-print, internally-escaped anchor markup.
             echo paginate_links( [
                 'total'   => $total_pages,
                 'current' => $current_page,

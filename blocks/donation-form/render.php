@@ -11,6 +11,8 @@
 
 declare( strict_types = 1 );
 
+defined( 'ABSPATH' ) || exit;
+
 use Starter_Shelter\Core\Config;
 use Starter_Shelter\Helpers;
 
@@ -94,7 +96,7 @@ $wrapper = get_block_wrapper_attributes( [
 
 $partials = dirname( __DIR__ ) . '/shared/partials';
 ?>
-<div <?php echo $wrapper; ?>>
+<div <?php echo $wrapper; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped markup from get_block_wrapper_attributes(). ?>>
     <div class="sd-form-header">
         <?php if ( $title ) : ?><h2 class="sd-form-title"><?php echo esc_html( $title ); ?></h2><?php endif; ?>
         <?php if ( $subtitle ) : ?><p class="sd-form-subtitle"><?php echo esc_html( $subtitle ); ?></p><?php endif; ?>

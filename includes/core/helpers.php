@@ -10,6 +10,8 @@ declare( strict_types = 1 );
 
 namespace Starter_Shelter\Helpers;
 
+defined( 'ABSPATH' ) || exit;
+
 use Starter_Shelter\Core\Config;
 use Starter_Shelter\Admin\Settings;
 
@@ -924,7 +926,7 @@ function process_memorial_save( int $memorial_id, array $context = [] ): void {
 
     // 3. Assign sd_memorial_year taxonomy from donation date.
     if ( ! empty( $donation_date ) ) {
-        $year = date( 'Y', strtotime( $donation_date ) );
+        $year = gmdate( 'Y', strtotime( $donation_date ) );
         wp_set_object_terms( $memorial_id, [ $year ], 'sd_memorial_year' );
     }
 

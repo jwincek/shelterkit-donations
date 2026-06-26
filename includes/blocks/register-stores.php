@@ -18,6 +18,8 @@ declare( strict_types = 1 );
 
 namespace Starter_Shelter\Blocks;
 
+defined( 'ABSPATH' ) || exit;
+
 use Starter_Shelter\Core\Config;
 
 /* =========================================================================

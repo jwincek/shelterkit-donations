@@ -10,6 +10,8 @@
  * @since 2.2.0
  */
 
+defined( 'ABSPATH' ) || exit;
+
 get_header();
 
 $template_file = dirname( __FILE__ ) . '/single-sd_memorial.html';
@@ -25,7 +27,7 @@ if ( file_exists( $template_file ) ) {
     );
 
     // Render block markup.
-    echo do_blocks( $content ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped — Block output is escaped by individual block render callbacks.
+    echo do_blocks( $content ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Block output is escaped by individual block render callbacks.
 }
 
 get_footer();

@@ -63,12 +63,12 @@ class Quick_Actions {
         check_admin_referer( 'sd_send_reminder_' . $membership_id );
 
         if ( ! current_user_can( 'manage_options' ) || ! $membership_id ) {
-            wp_die( __( 'Invalid request.', 'starter-shelter' ) );
+            wp_die( esc_html__( 'Invalid request.', 'starter-shelter' ) );
         }
 
         $membership = Entity_Hydrator::get( 'sd_membership', $membership_id );
         if ( ! $membership ) {
-            wp_die( __( 'Membership not found.', 'starter-shelter' ) );
+            wp_die( esc_html__( 'Membership not found.', 'starter-shelter' ) );
         }
 
         $donor_id = $membership['donor_id'] ?? 0;
@@ -101,7 +101,7 @@ class Quick_Actions {
         check_admin_referer( 'sd_extend_' . $membership_id );
 
         if ( ! current_user_can( 'manage_options' ) || ! $membership_id ) {
-            wp_die( __( 'Invalid request.', 'starter-shelter' ) );
+            wp_die( esc_html__( 'Invalid request.', 'starter-shelter' ) );
         }
 
         $end_date = get_post_meta( $membership_id, '_sd_end_date', true );
@@ -148,18 +148,18 @@ class Quick_Actions {
         check_admin_referer( 'sd_notify_family_' . $memorial_id );
 
         if ( ! current_user_can( 'manage_options' ) || ! $memorial_id ) {
-            wp_die( __( 'Invalid request.', 'starter-shelter' ) );
+            wp_die( esc_html__( 'Invalid request.', 'starter-shelter' ) );
         }
 
         $memorial = Entity_Hydrator::get( 'sd_memorial', $memorial_id );
         if ( ! $memorial ) {
-            wp_die( __( 'Memorial not found.', 'starter-shelter' ) );
+            wp_die( esc_html__( 'Memorial not found.', 'starter-shelter' ) );
         }
 
         // Check if notification is enabled.
         $notify_family = Helpers\get_memorial_notify_family( $memorial_id );
         if ( ! $notify_family['enabled'] || '' === $notify_family['email'] ) {
-            wp_die( __( 'Family notification not configured for this memorial.', 'starter-shelter' ) );
+            wp_die( esc_html__( 'Family notification not configured for this memorial.', 'starter-shelter' ) );
         }
 
         $donor_id = $memorial['donor_id'] ?? 0;
@@ -189,12 +189,12 @@ class Quick_Actions {
         check_admin_referer( 'sd_send_statement_' . $donor_id );
 
         if ( ! current_user_can( 'manage_options' ) || ! $donor_id ) {
-            wp_die( __( 'Invalid request.', 'starter-shelter' ) );
+            wp_die( esc_html__( 'Invalid request.', 'starter-shelter' ) );
         }
 
         $donor = Entity_Hydrator::get( 'sd_donor', $donor_id );
         if ( ! $donor ) {
-            wp_die( __( 'Donor not found.', 'starter-shelter' ) );
+            wp_die( esc_html__( 'Donor not found.', 'starter-shelter' ) );
         }
 
         // Compute the annual giving summary via the shelter-reports ability.
@@ -234,12 +234,12 @@ class Quick_Actions {
         check_admin_referer( 'sd_resend_receipt_' . $donation_id );
 
         if ( ! current_user_can( 'manage_options' ) || ! $donation_id ) {
-            wp_die( __( 'Invalid request.', 'starter-shelter' ) );
+            wp_die( esc_html__( 'Invalid request.', 'starter-shelter' ) );
         }
 
         $donation = Entity_Hydrator::get( 'sd_donation', $donation_id );
         if ( ! $donation ) {
-            wp_die( __( 'Donation not found.', 'starter-shelter' ) );
+            wp_die( esc_html__( 'Donation not found.', 'starter-shelter' ) );
         }
 
         $donor_id = $donation['donor_id'] ?? 0;
@@ -270,12 +270,12 @@ class Quick_Actions {
         check_ajax_referer( 'sd_view_receipt_' . $donation_id, '_wpnonce' );
 
         if ( ! current_user_can( 'manage_options' ) || ! $donation_id ) {
-            wp_die( __( 'Invalid request.', 'starter-shelter' ) );
+            wp_die( esc_html__( 'Invalid request.', 'starter-shelter' ) );
         }
 
         $donation = Entity_Hydrator::get( 'sd_donation', $donation_id );
         if ( ! $donation ) {
-            wp_die( __( 'Donation not found.', 'starter-shelter' ) );
+            wp_die( esc_html__( 'Donation not found.', 'starter-shelter' ) );
         }
 
         $donor = $donation['donor_id'] ? Entity_Hydrator::get( 'sd_donor', $donation['donor_id'] ) : null;

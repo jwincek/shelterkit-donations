@@ -164,7 +164,7 @@ class Import_Ajax_Handler {
 			wp_send_json_error( __( 'File upload failed.', 'starter-shelter' ) );
 		}
 
-		$year = absint( $_POST['year'] ?? date( 'Y' ) );
+		$year = absint( $_POST['year'] ?? gmdate( 'Y' ) );
 
 		$preview = Legacy_Memorial_Parser::preview( $file['tmp_name'], $year );
 
@@ -192,7 +192,7 @@ class Import_Ajax_Handler {
 			wp_send_json_error( __( 'File upload failed.', 'starter-shelter' ) );
 		}
 
-		$year            = absint( $_POST['year'] ?? date( 'Y' ) );
+		$year            = absint( $_POST['year'] ?? gmdate( 'Y' ) );
 		$skip_duplicates = ! empty( $_POST['skip_duplicates'] );
 		$default_amount  = (float) ( $_POST['default_amount'] ?? 0 );
 
@@ -284,17 +284,17 @@ class Import_Ajax_Handler {
 		check_ajax_referer( 'sd_download_error_csv', '_wpnonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( __( 'Permission denied.', 'starter-shelter' ) );
+			wp_die( esc_html__( 'Permission denied.', 'starter-shelter' ) );
 		}
 
 		$import_key = sanitize_key( $_GET['import_key'] ?? '' );
 		if ( ! $import_key ) {
-			wp_die( __( 'Missing import key.', 'starter-shelter' ) );
+			wp_die( esc_html__( 'Missing import key.', 'starter-shelter' ) );
 		}
 
 		$csv = CSV_Importer::get_error_csv( $import_key );
 		if ( ! $csv ) {
-			wp_die( __( 'No error data found or session expired.', 'starter-shelter' ) );
+			wp_die( esc_html__( 'No error data found or session expired.', 'starter-shelter' ) );
 		}
 
 		header( 'Content-Type: text/csv; charset=utf-8' );
@@ -343,8 +343,8 @@ class Import_Ajax_Handler {
 		header( 'Pragma: no-cache' );
 		header( 'Expires: 0' );
 
-		$output = fopen( 'php://output', 'w' );
-		fwrite( $output, "\xEF\xBB\xBF" );
+		$output = fopen( 'php://output', 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- streaming CSV to php://output; WP_Filesystem cannot stream.
+		fwrite( $output, "\xEF\xBB\xBF" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- streaming CSV to php://output; WP_Filesystem cannot stream.
 
 		// Row 1: Column headers.
 		fputcsv_safe( $output, $headers );
@@ -359,7 +359,7 @@ class Import_Ajax_Handler {
 			fputcsv_safe( $output, $example );
 		}
 
-		fclose( $output );
+		fclose( $output ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- closing php://output stream; WP_Filesystem cannot stream.
 		exit;
 	}
 

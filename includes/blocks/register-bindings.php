@@ -11,6 +11,8 @@ declare( strict_types = 1 );
 
 namespace Starter_Shelter\Blocks;
 
+defined( 'ABSPATH' ) || exit;
+
 use Starter_Shelter\Core\{ Config, Entity_Hydrator, Query };
 use Starter_Shelter\Helpers;
 
@@ -383,6 +385,7 @@ function calculate_stat( string $stat, string $period ) {
     switch ( $stat ) {
         case 'total_donations':
         case 'total_donations_formatted':
+            // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- table names are $wpdb->posts/$wpdb->postmeta; $date_clause is either empty or already prepared via $wpdb->prepare() above (the wp_date() value is bound with %s).
             $total = (float) $wpdb->get_var( "
                 SELECT COALESCE(SUM(pm.meta_value), 0)
                 FROM {$wpdb->posts} p
@@ -395,6 +398,7 @@ function calculate_stat( string $stat, string $period ) {
             return 'total_donations_formatted' === $stat ? Helpers\format_currency( $total ) : $total;
 
         case 'donation_count':
+            // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- table names are $wpdb->posts/$wpdb->postmeta; $date_clause is either empty or already prepared via $wpdb->prepare() above (the wp_date() value is bound with %s).
             return (int) $wpdb->get_var( "
                 SELECT COUNT(*)
                 FROM {$wpdb->posts} p
@@ -405,6 +409,7 @@ function calculate_stat( string $stat, string $period ) {
             " );
 
         case 'donor_count':
+            // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- table names are $wpdb->posts/$wpdb->postmeta; $date_clause is either empty or already prepared via $wpdb->prepare() above (the wp_date() value is bound with %s).
             return (int) $wpdb->get_var( "
                 SELECT COUNT(DISTINCT pm.meta_value)
                 FROM {$wpdb->posts} p
@@ -427,6 +432,7 @@ function calculate_stat( string $stat, string $period ) {
             ", $today ) );
 
         case 'memorial_count':
+            // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- table names are $wpdb->posts/$wpdb->postmeta; $date_clause is either empty or already prepared via $wpdb->prepare() above (the wp_date() value is bound with %s).
             return (int) $wpdb->get_var( "
                 SELECT COUNT(*)
                 FROM {$wpdb->posts} p

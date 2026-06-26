@@ -24,6 +24,8 @@ declare( strict_types = 1 );
 
 namespace Starter_Shelter\Helpers;
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Enable or disable internal processing mode.
  *

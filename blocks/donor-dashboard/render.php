@@ -9,6 +9,8 @@
 
 declare( strict_types = 1 );
 
+defined( 'ABSPATH' ) || exit;
+
 use Starter_Shelter\Core\Entity_Hydrator;
 use Starter_Shelter\Helpers;
 use Starter_Shelter\Blocks;
@@ -124,7 +126,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
 ] );
 ?>
 
-<div <?php echo $wrapper_attributes; ?>>
+<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped markup from get_block_wrapper_attributes(). ?>>
 
     <?php if ( ! $is_logged_in ) : ?>
     <!-- Guest State -->

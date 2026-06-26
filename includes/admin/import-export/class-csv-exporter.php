@@ -87,10 +87,10 @@ class CSV_Exporter {
 		$columns = $export_config['columns'] ?? [];
 		$columns = self::maybe_add_optional_columns( $columns, $export_config, $options );
 
-		$output = fopen( 'php://temp', 'r+' );
+		$output = fopen( 'php://temp', 'r+' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- streaming CSV to php://temp; WP_Filesystem cannot stream.
 
 		// UTF-8 BOM for Excel compatibility.
-		fwrite( $output, "\xEF\xBB\xBF" );
+		fwrite( $output, "\xEF\xBB\xBF" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- streaming CSV to php://temp; WP_Filesystem cannot stream.
 
 		// Header row.
 		fputcsv_safe( $output, array_column( $columns, 'header' ) );
@@ -110,7 +110,7 @@ class CSV_Exporter {
 
 		rewind( $output );
 		$csv = (string) stream_get_contents( $output );
-		fclose( $output );
+		fclose( $output ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- closing php://temp stream; WP_Filesystem cannot stream.
 
 		return $csv;
 	}

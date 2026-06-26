@@ -108,7 +108,7 @@ class Meta_Boxes {
 
         $wrapper_attrs = $args['show_when'] ? ' data-show-when="' . esc_attr( wp_json_encode( $args['show_when'] ) ) . '"' : '';
 
-        echo '<div class="sd-meta-box"' . $wrapper_attrs . '><table class="form-table sd-meta-fields">';
+        echo '<div class="sd-meta-box"' . $wrapper_attrs . '><table class="form-table sd-meta-fields">'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $wrapper_attrs built from esc_attr() above; rest is static markup.
         foreach ( $args['fields'] as $field_id => $field ) {
             self::render_field( $field_id, $field, $entity, $post );
         }
@@ -129,7 +129,7 @@ class Meta_Boxes {
 
         $row_attrs = $show_when ? ' data-show-when="' . esc_attr( wp_json_encode( $show_when ) ) . '" style="display:none;"' : '';
 
-        echo '<tr' . $row_attrs . '><th scope="row"><label for="sd_' . esc_attr( $field_id ) . '">' . esc_html( $label );
+        echo '<tr' . $row_attrs . '><th scope="row"><label for="sd_' . esc_attr( $field_id ) . '">' . esc_html( $label ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $row_attrs built from esc_attr() above; other interpolations escaped inline.
         if ( $required ) echo ' <span class="required">*</span>';
         echo '</label></th><td>';
 
@@ -171,7 +171,7 @@ class Meta_Boxes {
                     foreach ( $tiers as $slug => $data ) {
                         $hidden = $tier_type !== $type_val ? ' style="display:none;"' : '';
                         $price = $data['amount'] ?? $data['price'] ?? 0;
-                        printf( '<option value="%s" data-type="%s" %s%s>%s (%s)</option>', esc_attr( $slug ), esc_attr( $tier_type ), selected( $value, $slug, false ), $hidden, esc_html( $data['label'] ?? ucfirst( $slug ) ), esc_html( Helpers\format_currency( $price ) ) );
+                        printf( '<option value="%s" data-type="%s" %s%s>%s (%s)</option>', esc_attr( $slug ), esc_attr( $tier_type ), selected( $value, $slug, false ), $hidden, esc_html( $data['label'] ?? ucfirst( $slug ) ), esc_html( Helpers\format_currency( $price ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $hidden is a static literal style attribute; all dynamic args escaped.
                     }
                 }
                 echo '</select>';
@@ -344,10 +344,21 @@ class Meta_Boxes {
         if ( ! $screen || ! isset( self::$meta_boxes[ $screen->post_type ] ) ) return;
 
         wp_enqueue_media();
-        wp_enqueue_script( 'select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', [ 'jquery' ], '4.1.0', true );
-        wp_enqueue_style( 'select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0' );
 
-        wp_enqueue_script( 'sd-meta-boxes', STARTER_SHELTER_URL . 'assets/js/admin-meta-boxes.js', [ 'jquery', 'select2' ], STARTER_SHELTER_VERSION, true );
+        // Use WooCommerce's bundled select2 (the plugin requires WC) instead of
+        // a CDN — loading scripts/styles from external services is disallowed.
+        // selectWoo is WC's select2 fork and still exposes $.fn.select2().
+        $select2_handle = wp_script_is( 'selectWoo', 'registered' ) ? 'selectWoo'
+            : ( wp_script_is( 'select2', 'registered' ) ? 'select2' : '' );
+        if ( $select2_handle ) {
+            wp_enqueue_script( $select2_handle );
+            if ( wp_style_is( 'select2', 'registered' ) ) {
+                wp_enqueue_style( 'select2' );
+            }
+        }
+
+        $deps = array_values( array_filter( [ 'jquery', $select2_handle ] ) );
+        wp_enqueue_script( 'sd-meta-boxes', STARTER_SHELTER_URL . 'assets/js/admin-meta-boxes.js', $deps, STARTER_SHELTER_VERSION, true );
         wp_localize_script( 'sd-meta-boxes', 'sdMetaBoxes', [ 'restUrl' => rest_url( 'wp/v2/' ), 'nonce' => wp_create_nonce( 'wp_rest' ), 'selectImage' => __( 'Select Image', 'starter-shelter' ), 'useImage' => __( 'Use this image', 'starter-shelter' ) ] );
 
         wp_add_inline_style( 'wp-admin', '

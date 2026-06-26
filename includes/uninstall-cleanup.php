@@ -16,6 +16,8 @@
 
 declare( strict_types = 1 );
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Run uninstall cleanup across the install (network-aware), honoring each
  * site's own opt-in.

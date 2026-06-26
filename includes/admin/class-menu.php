@@ -107,7 +107,7 @@ class Menu {
                             printf(
                                 /* translators: %d: donation count */
                                 esc_html__( '%d donations', 'starter-shelter' ),
-                                $stats['donations']['count'] ?? 0
+                                (int) ( $stats['donations']['count'] ?? 0 )
                             );
                             ?>
                         </p>
@@ -125,7 +125,7 @@ class Menu {
                             printf(
                                 /* translators: %d: number of new records this month */
                                 esc_html__( '%d new this month', 'starter-shelter' ),
-                                $stats['memberships']['new'] ?? 0
+                                (int) ( $stats['memberships']['new'] ?? 0 )
                             );
                             ?>
                         </p>
@@ -155,7 +155,7 @@ class Menu {
                             printf(
                                 /* translators: %d: number of new records this month */
                                 esc_html__( '%d new this month', 'starter-shelter' ),
-                                $stats['donors']['new'] ?? 0
+                                (int) ( $stats['donors']['new'] ?? 0 )
                             );
                             ?>
                         </p>

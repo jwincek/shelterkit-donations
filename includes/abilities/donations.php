@@ -10,6 +10,8 @@ declare( strict_types = 1 );
 
 namespace Starter_Shelter\Abilities\Donations;
 
+defined( 'ABSPATH' ) || exit;
+
 use Starter_Shelter\Core\{ Query, Entity_Hydrator };
 use Starter_Shelter\Helpers;
 use WP_Error;
@@ -160,6 +162,7 @@ function get_stats( array $input = [] ): array {
         $campaign_args  = [ $campaign_id ];
     }
 
+    // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- $campaign_join is built only from $wpdb->term_relationships/$wpdb->term_taxonomy table names and a hardcoded taxonomy; all user values are prepared with %d/%s.
     $stats = $wpdb->get_row( $wpdb->prepare(
         "SELECT
             COUNT(*) as donation_count,
@@ -180,6 +183,7 @@ function get_stats( array $input = [] ): array {
     ) );
 
     // Per-allocation breakdown for the "By Allocation" report table.
+    // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- $campaign_join is built only from $wpdb->term_relationships/$wpdb->term_taxonomy table names and a hardcoded taxonomy; all user values are prepared with %d/%s.
     $allocation_rows = $wpdb->get_results( $wpdb->prepare(
         "SELECT
             COALESCE(pm_alloc.meta_value, 'general-fund') as allocation,

@@ -25,6 +25,11 @@
          * Initialize Select2 for searchable post selects.
          */
         initSelect2: function() {
+            // select2 is provided by WooCommerce (bundled). If it isn't present
+            // on this screen, leave the native selects rather than erroring.
+            if ( typeof $.fn.select2 !== 'function' ) {
+                return;
+            }
             $( '.sd-post-select' ).each( function() {
                 const $select = $( this );
                 const postType = $select.data( 'post-type' );

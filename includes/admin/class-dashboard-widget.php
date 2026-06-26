@@ -216,7 +216,7 @@ class Dashboard_Widget {
                 $.post(ajaxurl, {
                     action: 'sd_dashboard_refresh',
                     period: period,
-                    nonce: '<?php echo wp_create_nonce( 'sd_dashboard_refresh' ); ?>'
+                    nonce: '<?php echo esc_js( wp_create_nonce( 'sd_dashboard_refresh' ) ); ?>'
                 }, function(response) {
                     if (response.success) {
                         $stats.html(response.data.html).css('opacity', '1');

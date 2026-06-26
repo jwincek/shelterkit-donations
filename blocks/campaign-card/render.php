@@ -19,6 +19,8 @@ declare( strict_types = 1 );
 
 namespace Starter_Shelter\Blocks\CampaignCard;
 
+defined( 'ABSPATH' ) || exit;
+
 use Starter_Shelter\Helpers;
 
 // Get campaign ID from attributes or context.
@@ -60,6 +62,7 @@ if ( ! $campaign_id ) {
         'class' => 'sd-campaign-card sd-campaign-card--empty',
     ] );
     
+    // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $wrapper_attributes is escaped markup from get_block_wrapper_attributes().
     echo '<div ' . $wrapper_attributes . '>';
     echo '<p>' . esc_html__( 'No active campaign found.', 'starter-shelter' ) . '</p>';
     echo '</div>';
@@ -173,7 +176,7 @@ $interactive_attrs = sprintf(
 );
 ?>
 
-<div <?php echo $wrapper_attributes; ?> <?php echo $interactive_attrs; ?>>
+<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped markup from get_block_wrapper_attributes(). ?> <?php echo $interactive_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $interactive_attrs assembled from a literal plus wp_interactivity_data_wp_context(), which returns an escaped attribute. ?>>
     
     <div class="sd-campaign-header">
         <h3 class="sd-campaign-name"><?php echo esc_html( $campaign_data['name'] ); ?></h3>

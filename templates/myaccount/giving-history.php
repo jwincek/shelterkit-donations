@@ -81,9 +81,9 @@ $current_page = isset( $_GET['history-page'] ) ? absint( $_GET['history-page'] )
             <?php printf(
                 /* translators: 1: current page number, 2: total pages, 3: total item count */
                 esc_html__( 'Page %1$d of %2$d (%3$d total)', 'starter-shelter' ),
-                $current_page,
-                $total_pages,
-                $donations['total'] ?? 0
+                (int) $current_page,
+                (int) $total_pages,
+                (int) ( $donations['total'] ?? 0 )
             ); ?>
         </span>
 

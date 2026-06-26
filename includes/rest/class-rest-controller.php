@@ -13,6 +13,8 @@ declare( strict_types = 1 );
 
 namespace Starter_Shelter\REST;
 
+defined( 'ABSPATH' ) || exit;
+
 use Starter_Shelter\Core\{ Config, Entity_Hydrator, Query };
 use Starter_Shelter\Helpers;
 use WP_REST_Server;

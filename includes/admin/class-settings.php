@@ -198,7 +198,7 @@ class Settings {
             'feature_renewal_reminders'    => 'Send Membership Renewal Reminders',
             'feature_annual_statements'    => 'Send Annual Giving Statements',
         ] as $id => $label ) {
-            self::add_field( $id, __( $label, 'starter-shelter' ), 'sd_features', 'checkbox', [ 'default' => true ], 'general' );
+            self::add_field( $id, __( $label, 'starter-shelter' ), 'sd_features', 'checkbox', [ 'default' => true ], 'general' ); // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- feature toggle label sourced from the settings config map, not a literal.
         }
 
         // Email tab fields
@@ -267,7 +267,7 @@ class Settings {
                 break;
 
             case 'page':
-                wp_dropdown_pages( [ 'name' => $name, 'id' => $id, 'selected' => $value, 'show_option_none' => '— Select —', 'option_none_value' => 0 ] );
+                wp_dropdown_pages( [ 'name' => $name, 'id' => $id, 'selected' => $value, 'show_option_none' => '— Select —', 'option_none_value' => 0 ] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_dropdown_pages() escapes its own output; args are internal field identifiers.
                 break;
         }
 
@@ -343,7 +343,7 @@ class Settings {
                 <?php foreach ( self::$tabs as $tab_slug => $tab_label ) : ?>
                     <a href="<?php echo esc_url( add_query_arg( 'tab', $tab_slug, admin_url( 'admin.php?page=' . self::PAGE_SLUG ) ) ); ?>" 
                        class="nav-tab <?php echo $current_tab === $tab_slug ? 'nav-tab-active' : ''; ?>">
-                        <?php echo esc_html( __( $tab_label, 'starter-shelter' ) ); ?>
+                        <?php echo esc_html( __( $tab_label, 'starter-shelter' ) ); // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- tab label sourced from the self::$tabs config map, not a literal. ?>
                     </a>
                 <?php endforeach; ?>
             </nav>

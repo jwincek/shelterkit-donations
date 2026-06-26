@@ -267,7 +267,7 @@ class List_Columns {
                             esc_html( $term->name )
                         );
                     }, $terms );
-                    echo implode( ', ', $links );
+                    echo implode( ', ', $links ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $links elements built from esc_url()/esc_html() above.
                 } else {
                     echo '—';
                 }
@@ -565,7 +565,7 @@ class List_Columns {
                     printf(
                         '<a href="%s">%d</a>',
                         esc_url( admin_url( 'edit.php?post_type=sd_donation&donor_id=' . $post_id ) ),
-                        $count
+                        (int) $count
                     );
                 } else {
                     echo '0';

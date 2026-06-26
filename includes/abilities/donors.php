@@ -10,6 +10,8 @@ declare( strict_types = 1 );
 
 namespace Starter_Shelter\Abilities\Donors;
 
+defined( 'ABSPATH' ) || exit;
+
 use Starter_Shelter\Core\{ Query, Entity_Hydrator };
 use Starter_Shelter\Helpers;
 use WP_Error;

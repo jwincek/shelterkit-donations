@@ -585,29 +585,31 @@ class Checkout_Fields {
      * @return string JavaScript code.
      */
     private static function get_conditional_fields_script(): string {
-        return <<<JS
-jQuery(function($) {
-    function toggleConditionalFields() {
-        $('.sd-conditional-field').each(function() {
-            var conditional = $(this).data('conditional');
-            if (conditional) {
-                var \$parent = $('#' + conditional);
-                if (\$parent.is(':checkbox')) {
-                    $(this).closest('.form-row').toggle(\$parent.is(':checked'));
-                } else {
-                    $(this).closest('.form-row').toggle(\$parent.val() !== '');
-                }
-            }
-        });
-    }
-    
-    // Initial state.
-    toggleConditionalFields();
-    
-    // On change.
-    $(document.body).on('change', '[id^="sd_"]', toggleConditionalFields);
-});
-JS;
+        // Built via implode so the intentional 4-space blank lines survive
+        // editor trailing-whitespace trimming; output matches the prior heredoc.
+        return implode( "\n", [
+            'jQuery(function($) {',
+            '    function toggleConditionalFields() {',
+            '        $(\'.sd-conditional-field\').each(function() {',
+            '            var conditional = $(this).data(\'conditional\');',
+            '            if (conditional) {',
+            '                var $parent = $(\'#\' + conditional);',
+            '                if ($parent.is(\':checkbox\')) {',
+            '                    $(this).closest(\'.form-row\').toggle($parent.is(\':checked\'));',
+            '                } else {',
+            '                    $(this).closest(\'.form-row\').toggle($parent.val() !== \'\');',
+            '                }',
+            '            }',
+            '        });',
+            '    }',
+            '    ',
+            '    // Initial state.',
+            '    toggleConditionalFields();',
+            '    ',
+            '    // On change.',
+            '    $(document.body).on(\'change\', \'[id^="sd_"]\', toggleConditionalFields);',
+            '});',
+        ] );
     }
 
     /**
@@ -618,8 +620,7 @@ JS;
      * @return string CSS code.
      */
     private static function get_checkout_styles(): string {
-        return <<<CSS
-.sd-checkout-section {
+        return '.sd-checkout-section {
     background: #f8f8f8;
     padding: 20px;
     margin: 20px 0;
@@ -637,7 +638,6 @@ JS;
 }
 .sd-conditional-field {
     transition: opacity 0.3s ease;
-}
-CSS;
+}';
     }
 }

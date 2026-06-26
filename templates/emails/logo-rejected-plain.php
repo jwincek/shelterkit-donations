@@ -13,7 +13,7 @@ $donor            = $data['donor'] ?? [];
 $business_name    = $membership['business_name'] ?? __( 'Your business', 'starter-shelter' );
 $rejection_reason = $args['reason'] ?? __( 'The logo did not meet our display requirements.', 'starter-shelter' );
 
-echo "= " . $heading . " =\n\n";
+echo "= " . esc_html( $heading ) . " =\n\n";
 
 printf(
     /* translators: %s: recipient name */
@@ -30,6 +30,7 @@ printf(
 echo "\n\n";
 
 echo esc_html__( 'REASON:', 'starter-shelter' ) . "\n";
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- text/plain email body; wp_strip_all_tags() removes markup and esc_html() would wrongly entity-encode plain text.
 echo wp_strip_all_tags( $rejection_reason ) . "\n\n";
 
 echo esc_html__( 'To update your logo, please ensure it meets the following requirements:', 'starter-shelter' ) . "\n";
@@ -47,4 +48,5 @@ echo esc_html( get_bloginfo( 'name' ) ) . "\n";
 
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- admin-set footer text emitted in a text/plain email, mirroring WooCommerce's own plain email footer; same filtered value WC core prints.
 echo apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) );

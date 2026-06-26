@@ -380,8 +380,9 @@ class Logo_Moderation {
             $status_condition = $wpdb->prepare( "AND pm_status.meta_value = %s", $status );
         }
 
+        // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- table names are $wpdb->posts/$wpdb->postmeta; $status_condition is either a hardcoded literal or already prepared via $wpdb->prepare() above (the $status value is bound with %s).
         $results = $wpdb->get_results( "
-            SELECT 
+            SELECT
                 p.ID as membership_id,
                 pm_logo.meta_value as logo_id,
                 pm_business.meta_value as business_name,
@@ -575,7 +576,7 @@ class Logo_Moderation {
         check_admin_referer( self::NONCE_ACTION );
 
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( __( 'Permission denied.', 'starter-shelter' ) );
+            wp_die( esc_html__( 'Permission denied.', 'starter-shelter' ) );
         }
 
         $action = sanitize_key( $_POST['bulk_action'] ?? '' );

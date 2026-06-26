@@ -27,6 +27,8 @@ declare( strict_types = 1 );
 
 namespace Starter_Shelter\Templates;
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Plugin templates and their metadata.
  *

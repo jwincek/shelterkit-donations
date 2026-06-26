@@ -11,6 +11,8 @@ declare( strict_types = 1 );
 
 namespace Starter_Shelter\Blocks;
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Register editor assets and localize data for all shelter blocks.
  *

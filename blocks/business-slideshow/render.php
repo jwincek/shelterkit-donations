@@ -21,6 +21,8 @@ declare( strict_types = 1 );
 
 namespace Starter_Shelter\Blocks\BusinessSlideshow;
 
+defined( 'ABSPATH' ) || exit;
+
 $show_name = $attributes['showName'] ?? true;
 $autoplay  = $attributes['autoplay'] ?? true;
 $interval  = max( 1500, (int) ( $attributes['intervalMs'] ?? 5000 ) );
@@ -48,6 +50,7 @@ if ( 0 === $count ) {
     // Render nothing on the front end; show a hint in the editor so the
     // block isn't invisible while authoring.
     if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $wrapper_attributes is escaped markup from get_block_wrapper_attributes().
         echo '<div ' . $wrapper_attributes . '><p class="sd-bs-empty">'
             . esc_html__( 'No business members with an approved logo yet.', 'starter-shelter' )
             . '</p></div>';
@@ -72,9 +75,9 @@ $context = [
 ?>
 
 <div
-    <?php echo $wrapper_attributes; ?>
+    <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped markup from get_block_wrapper_attributes(). ?>
     data-wp-interactive="starter-shelter/business-slideshow"
-    <?php echo wp_interactivity_data_wp_context( $context ); ?>
+    <?php echo wp_interactivity_data_wp_context( $context ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_interactivity_data_wp_context() returns an escaped data-wp-context attribute. ?>
     <?php if ( $has_controls ) : ?>
     data-wp-watch--autoplay="callbacks.autoplay"
     data-wp-on--mouseenter="actions.pause"
@@ -95,7 +98,7 @@ $context = [
                 ?>
             <div
                 class="sd-bs-slide"
-                <?php echo wp_interactivity_data_wp_context( [ 'slide' => $i ] ); ?>
+                <?php echo wp_interactivity_data_wp_context( [ 'slide' => $i ] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_interactivity_data_wp_context() returns an escaped data-wp-context attribute. ?>
                 role="group"
                 aria-roledescription="<?php esc_attr_e( 'slide', 'starter-shelter' ); ?>"
                 aria-label="<?php echo esc_attr( sprintf( /* translators: 1: slide number, 2: total slides */ __( '%1$d of %2$d', 'starter-shelter' ), $i + 1, $count ) ); ?>"
@@ -162,7 +165,7 @@ $context = [
         <button
             type="button"
             class="sd-bs-dot<?php echo 0 === $i ? ' is-active' : ''; ?>"
-            <?php echo wp_interactivity_data_wp_context( [ 'dot' => $i ] ); ?>
+            <?php echo wp_interactivity_data_wp_context( [ 'dot' => $i ] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_interactivity_data_wp_context() returns an escaped data-wp-context attribute. ?>
             data-wp-on--click="actions.goToDot"
             data-wp-class--is-active="state.isActiveDot"
             data-wp-bind--aria-current="state.isActiveDot"

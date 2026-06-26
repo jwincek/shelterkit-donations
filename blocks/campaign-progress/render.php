@@ -9,6 +9,8 @@
 
 declare( strict_types = 1 );
 
+defined( 'ABSPATH' ) || exit;
+
 use Starter_Shelter\Helpers;
 use Starter_Shelter\Blocks;
 
@@ -104,7 +106,7 @@ if ( $refresh_interval > 0 ) {
 $wrapper_attributes = get_block_wrapper_attributes( $wrapper_attrs );
 ?>
 
-<div <?php echo $wrapper_attributes; ?>>
+<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped markup from get_block_wrapper_attributes(); JSON attrs are escaped by that function. ?>>
     
     <?php if ( $show_title ) : ?>
     <h3 class="sd-campaign-title"><?php echo esc_html( $campaign->name ); ?></h3>

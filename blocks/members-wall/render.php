@@ -20,6 +20,8 @@ declare( strict_types = 1 );
 
 namespace Starter_Shelter\Blocks\MembersWall;
 
+defined( 'ABSPATH' ) || exit;
+
 $group_by_tier = $attributes['groupByTier'] ?? true;
 $show_logos    = $attributes['showLogos'] ?? true;
 $columns       = max( 1, min( 8, (int) ( $attributes['columns'] ?? 4 ) ) );
@@ -46,6 +48,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
 // ─── Empty state ─────────────────────────────────────────────────────
 if ( empty( $items ) ) {
     if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $wrapper_attributes is escaped markup from get_block_wrapper_attributes().
         echo '<div ' . $wrapper_attributes . '><p class="sd-mw-empty">'
             . esc_html__( 'No members to recognize yet (active members who haven\'t opted out will appear here).', 'starter-shelter' )
             . '</p></div>';
@@ -96,7 +99,7 @@ $render_tile = static function ( array $item ) use ( $show_logos ): void {
 };
 ?>
 
-<div <?php echo $wrapper_attributes; ?>>
+<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped markup from get_block_wrapper_attributes(). ?>>
     <?php foreach ( $groups as $label => $members ) :
         $has_title = $group_by_tier && '' !== $label;
         $title_id  = $has_title ? 'sd-mw-tier-' . sanitize_title( (string) $label ) : '';
