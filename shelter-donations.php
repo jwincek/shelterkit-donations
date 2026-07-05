@@ -6,6 +6,7 @@
  * Version: 2.0.0
  * Requires at least: 6.9
  * Requires PHP: 8.1
+ * Requires Plugins: woocommerce
  * Author: VCPA Humane Society
  * Author URI: https://vcpahumane.org
  * License: GPL-2.0+

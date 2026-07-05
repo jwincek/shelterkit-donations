@@ -18,10 +18,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     translation template renamed to `languages/shelter-donations.pot`).
   - Main plugin file: `starter-shelter.php` → `shelter-donations.php` (existing installs must
     reactivate; the plugin directory must be renamed to `shelter-donations/` to match the slug).
-  - Block namespace: `starter-shelter/*` → `shelter-donations/*` (14 blocks), including the
+  - Block namespace: `starter-shelter/*` → `shelter-donations/*` (12 blocks), including the
     Interactivity API store namespaces and block-binding sources. **Stored content that uses
     these blocks must be migrated** with `wp search-replace` — see the migration guide.
   - Editor bootstrap global: `window.starterShelterBlocks` → `window.shelterDonationsBlocks`.
+  - WP-CLI command: `wp starter-shelter validate` → `wp shelter-donations validate`.
   - Display name, log prefixes, and metadata (composer, PHPCS ruleset, Plugin/Author URI)
     updated to the new identity; Author is now "VCPA Humane Society", crediting the
     organization the plugin was originally built for.
