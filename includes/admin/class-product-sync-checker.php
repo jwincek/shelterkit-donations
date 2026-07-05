@@ -101,7 +101,7 @@ class Product_Sync_Checker {
 
 		$results['summary'] = sprintf(
 			/* translators: 1: error count, 2: warning count, 3: info count */
-			__( '%1$d errors, %2$d warnings, %3$d info', 'starter-shelter' ),
+			__( '%1$d errors, %2$d warnings, %3$d info', 'shelter-donations' ),
 			$error_count,
 			$warning_count,
 			$info_count
@@ -671,7 +671,7 @@ class Product_Sync_Checker {
 
 		// Only run on shelter admin pages.
 		$screen = get_current_screen();
-		if ( ! $screen || strpos( $screen->id, 'starter-shelter' ) === false ) {
+		if ( ! $screen || strpos( $screen->id, 'shelter-donations' ) === false ) {
 			return;
 		}
 
@@ -694,11 +694,11 @@ class Product_Sync_Checker {
 		?>
 		<div class="notice <?php echo esc_attr( $class ); ?> is-dismissible">
 			<p>
-				<strong><?php esc_html_e( 'Starter Shelter — Product Sync:', 'starter-shelter' ); ?></strong>
+				<strong><?php esc_html_e( 'Shelter Donations — Product Sync:', 'shelter-donations' ); ?></strong>
 				<?php echo esc_html( $results['summary'] ); ?>
 			</p>
 			<details>
-				<summary><?php printf( /* translators: %d: number of issues. */ esc_html__( 'View %d issue(s)', 'starter-shelter' ), (int) $count ); ?></summary>
+				<summary><?php printf( /* translators: %d: number of issues. */ esc_html__( 'View %d issue(s)', 'shelter-donations' ), (int) $count ); ?></summary>
 				<ul style="margin-left: 1.5em;">
 					<?php foreach ( $results['issues'] as $issue ) : ?>
 						<li>
@@ -710,11 +710,11 @@ class Product_Sync_Checker {
 				</ul>
 			</details>
 			<p>
-				<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=starter-shelter-settings&action=recheck-sync' ), 'sd_recheck_sync' ) ); ?>" class="button button-small">
-					<?php esc_html_e( 'Re-check Now', 'starter-shelter' ); ?>
+				<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=shelter-donations-settings&action=recheck-sync' ), 'sd_recheck_sync' ) ); ?>" class="button button-small">
+					<?php esc_html_e( 'Re-check Now', 'shelter-donations' ); ?>
 				</a>
-				<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=starter-shelter-settings&action=repair-sync' ), 'sd_repair_sync' ) ); ?>" class="button button-small button-primary" onclick="return confirm('<?php echo esc_js( __( 'This will create missing variations, set products to virtual, fix tax status, and assign default images. Continue?', 'starter-shelter' ) ); ?>');">
-					<?php esc_html_e( 'Repair Issues', 'starter-shelter' ); ?>
+				<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=shelter-donations-settings&action=repair-sync' ), 'sd_repair_sync' ) ); ?>" class="button button-small button-primary" onclick="return confirm('<?php echo esc_js( __( 'This will create missing variations, set products to virtual, fix tax status, and assign default images. Continue?', 'shelter-donations' ) ); ?>');">
+					<?php esc_html_e( 'Repair Issues', 'shelter-donations' ); ?>
 				</a>
 			</p>
 		</div>
@@ -772,17 +772,17 @@ class Product_Sync_Checker {
 		?>
 		<div class="notice notice-success is-dismissible">
 			<p>
-				<strong><?php esc_html_e( 'Starter Shelter — Repair Complete:', 'starter-shelter' ); ?></strong>
+				<strong><?php esc_html_e( 'Shelter Donations — Repair Complete:', 'shelter-donations' ); ?></strong>
 				<?php printf(
 					/* translators: 1: number of products repaired; 2: number of products skipped. */
-					esc_html__( '%1$d product(s) repaired, %2$d skipped.', 'starter-shelter' ),
+					esc_html__( '%1$d product(s) repaired, %2$d skipped.', 'shelter-donations' ),
 					(int) $result['repaired'],
 					(int) $result['skipped']
 				); ?>
 			</p>
 			<?php if ( ! empty( $result['details'] ) ) : ?>
 			<details>
-				<summary><?php esc_html_e( 'View details', 'starter-shelter' ); ?></summary>
+				<summary><?php esc_html_e( 'View details', 'shelter-donations' ); ?></summary>
 				<ul style="margin-left: 1.5em;">
 					<?php foreach ( $result['details'] as $detail ) : ?>
 						<li><?php echo esc_html( $detail ); ?></li>

@@ -30,7 +30,7 @@ class Legacy_Sync_Page {
 	/**
 	 * Page slug.
 	 */
-	private const PAGE_SLUG = 'starter-shelter-legacy-sync';
+	private const PAGE_SLUG = 'shelter-donations-legacy-sync';
 
 	/**
 	 * Nonce action.
@@ -69,8 +69,8 @@ class Legacy_Sync_Page {
 	public static function add_menu_page(): void {
 		add_submenu_page(
 			Menu::MENU_SLUG,
-			__( 'Legacy Order Sync', 'starter-shelter' ),
-			__( 'Legacy Sync', 'starter-shelter' ),
+			__( 'Legacy Order Sync', 'shelter-donations' ),
+			__( 'Legacy Sync', 'shelter-donations' ),
 			'manage_woocommerce',
 			self::PAGE_SLUG,
 			[ self::class, 'render_page' ]
@@ -123,12 +123,12 @@ class Legacy_Sync_Page {
 			'stats'           => Order_Scanner::get_stats(),
 			'productMappings' => $mappings,
 			'strings'         => [
-				'scanning'     => __( 'Scanning orders...', 'starter-shelter' ),
-				'syncing'      => __( 'Syncing orders...', 'starter-shelter' ),
-				'complete'     => __( 'Sync complete!', 'starter-shelter' ),
-				'error'        => __( 'An error occurred.', 'starter-shelter' ),
-				'confirmSync'  => __( 'Are you sure you want to sync these orders? This will create donation records.', 'starter-shelter' ),
-				'confirmReset' => __( 'Are you sure you want to reset sync status? This will allow orders to be synced again.', 'starter-shelter' ),
+				'scanning'     => __( 'Scanning orders...', 'shelter-donations' ),
+				'syncing'      => __( 'Syncing orders...', 'shelter-donations' ),
+				'complete'     => __( 'Sync complete!', 'shelter-donations' ),
+				'error'        => __( 'An error occurred.', 'shelter-donations' ),
+				'confirmSync'  => __( 'Are you sure you want to sync these orders? This will create donation records.', 'shelter-donations' ),
+				'confirmReset' => __( 'Are you sure you want to reset sync status? This will allow orders to be synced again.', 'shelter-donations' ),
 			],
 		] );
 
@@ -142,13 +142,13 @@ class Legacy_Sync_Page {
 	 */
 	public static function render_page(): void {
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			wp_die( esc_html__( 'Permission denied.', 'starter-shelter' ) );
+			wp_die( esc_html__( 'Permission denied.', 'shelter-donations' ) );
 		}
 		?>
 		<div class="wrap sd-legacy-sync">
-			<h1><?php esc_html_e( 'Legacy Order Sync', 'starter-shelter' ); ?></h1>
+			<h1><?php esc_html_e( 'Legacy Order Sync', 'shelter-donations' ); ?></h1>
 			<p class="description">
-				<?php esc_html_e( 'Sync past WooCommerce orders to create donation, membership, and memorial records.', 'starter-shelter' ); ?>
+				<?php esc_html_e( 'Sync past WooCommerce orders to create donation, membership, and memorial records.', 'shelter-donations' ); ?>
 			</p>
 			<div id="sd-legacy-sync-app"></div>
 		</div>
@@ -165,7 +165,7 @@ class Legacy_Sync_Page {
 	public static function ajax_scan(): void {
 		check_ajax_referer( self::NONCE_ACTION, 'nonce' );
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			wp_send_json_error( __( 'Permission denied.', 'starter-shelter' ) );
+			wp_send_json_error( __( 'Permission denied.', 'shelter-donations' ) );
 		}
 
 		$filters = self::extract_filters();
@@ -185,14 +185,14 @@ class Legacy_Sync_Page {
 	public static function ajax_preview(): void {
 		check_ajax_referer( self::NONCE_ACTION, 'nonce' );
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			wp_send_json_error( __( 'Permission denied.', 'starter-shelter' ) );
+			wp_send_json_error( __( 'Permission denied.', 'shelter-donations' ) );
 		}
 
 		$order_id = absint( $_POST['order_id'] ?? 0 );
 		$order    = wc_get_order( $order_id );
 
 		if ( ! $order ) {
-			wp_send_json_error( __( 'Order not found.', 'starter-shelter' ) );
+			wp_send_json_error( __( 'Order not found.', 'shelter-donations' ) );
 		}
 
 		wp_send_json_success( Order_Scanner::build_preview( $order ) );
@@ -204,7 +204,7 @@ class Legacy_Sync_Page {
 	public static function ajax_sync(): void {
 		check_ajax_referer( self::NONCE_ACTION, 'nonce' );
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			wp_send_json_error( __( 'Permission denied.', 'starter-shelter' ) );
+			wp_send_json_error( __( 'Permission denied.', 'shelter-donations' ) );
 		}
 
 		$order_ids    = isset( $_POST['order_ids'] ) ? array_map( 'absint', (array) $_POST['order_ids'] ) : [];
@@ -213,7 +213,7 @@ class Legacy_Sync_Page {
 		$force_resync = ! empty( $_POST['force_resync'] );
 
 		if ( empty( $order_ids ) ) {
-			wp_send_json_error( __( 'No orders selected.', 'starter-shelter' ) );
+			wp_send_json_error( __( 'No orders selected.', 'shelter-donations' ) );
 		}
 
 		$results = [
@@ -271,7 +271,7 @@ class Legacy_Sync_Page {
 	public static function ajax_sync_all(): void {
 		check_ajax_referer( self::NONCE_ACTION, 'nonce' );
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			wp_send_json_error( __( 'Permission denied.', 'starter-shelter' ) );
+			wp_send_json_error( __( 'Permission denied.', 'shelter-donations' ) );
 		}
 
 		$filters      = self::extract_filters();
@@ -287,7 +287,7 @@ class Legacy_Sync_Page {
 				'complete'  => true,
 				'processed' => 0,
 				'total'     => 0,
-				'message'   => __( 'No orders to sync.', 'starter-shelter' ),
+				'message'   => __( 'No orders to sync.', 'shelter-donations' ),
 			] );
 		}
 
@@ -298,7 +298,7 @@ class Legacy_Sync_Page {
 				'complete'  => true,
 				'processed' => $offset,
 				'total'     => $total,
-				'message'   => __( 'Sync complete.', 'starter-shelter' ),
+				'message'   => __( 'Sync complete.', 'shelter-donations' ),
 			] );
 		}
 
@@ -349,7 +349,7 @@ class Legacy_Sync_Page {
 	public static function ajax_get_stats(): void {
 		check_ajax_referer( self::NONCE_ACTION, 'nonce' );
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			wp_send_json_error( __( 'Permission denied.', 'starter-shelter' ) );
+			wp_send_json_error( __( 'Permission denied.', 'shelter-donations' ) );
 		}
 		wp_send_json_success( Order_Scanner::get_stats() );
 	}
@@ -360,7 +360,7 @@ class Legacy_Sync_Page {
 	public static function ajax_reset(): void {
 		check_ajax_referer( self::NONCE_ACTION, 'nonce' );
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			wp_send_json_error( __( 'Permission denied.', 'starter-shelter' ) );
+			wp_send_json_error( __( 'Permission denied.', 'shelter-donations' ) );
 		}
 
 		$order_ids = isset( $_POST['order_ids'] ) ? array_map( 'absint', (array) $_POST['order_ids'] ) : [];
@@ -382,7 +382,7 @@ class Legacy_Sync_Page {
 				}
 			}
 
-			wp_send_json_success( [ 'message' => __( 'All sync status has been reset.', 'starter-shelter' ) ] );
+			wp_send_json_success( [ 'message' => __( 'All sync status has been reset.', 'shelter-donations' ) ] );
 		} elseif ( ! empty( $order_ids ) ) {
 			foreach ( $order_ids as $order_id ) {
 				$order = wc_get_order( $order_id );
@@ -395,12 +395,12 @@ class Legacy_Sync_Page {
 			wp_send_json_success( [
 				'message' => sprintf(
 					/* translators: %d: number of orders. */
-					__( 'Sync status reset for %d order(s).', 'starter-shelter' ),
+					__( 'Sync status reset for %d order(s).', 'shelter-donations' ),
 					count( $order_ids )
 				),
 			] );
 		} else {
-			wp_send_json_error( __( 'No orders specified.', 'starter-shelter' ) );
+			wp_send_json_error( __( 'No orders specified.', 'shelter-donations' ) );
 		}
 	}
 
@@ -410,14 +410,14 @@ class Legacy_Sync_Page {
 	public static function ajax_debug(): void {
 		check_ajax_referer( self::NONCE_ACTION, 'nonce' );
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			wp_send_json_error( __( 'Permission denied.', 'starter-shelter' ) );
+			wp_send_json_error( __( 'Permission denied.', 'shelter-donations' ) );
 		}
 
 		$order_id = absint( $_POST['order_id'] ?? 0 );
 		$order    = wc_get_order( $order_id );
 
 		if ( ! $order ) {
-			wp_send_json_error( __( 'Order not found.', 'starter-shelter' ) );
+			wp_send_json_error( __( 'Order not found.', 'shelter-donations' ) );
 		}
 
 		$debug = [

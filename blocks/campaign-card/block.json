@@ -1,14 +1,14 @@
 {
     "$schema": "https://schemas.wp.org/trunk/block.json",
     "apiVersion": 3,
-    "name": "starter-shelter/campaign-card",
+    "name": "shelter-donations/campaign-card",
     "version": "1.0.0",
     "title": "Campaign Card",
-    "category": "starter-shelter",
+    "category": "shelter-donations",
     "icon": "megaphone",
     "description": "Display a fundraising campaign with progress bar. Can be used as a standalone block or within Query Loop.",
     "keywords": [ "campaign", "fundraiser", "goal", "progress", "donation" ],
-    "textdomain": "starter-shelter",
+    "textdomain": "shelter-donations",
     "usesContext": [ "postId", "postType" ],
     "supports": {
         "html": false,

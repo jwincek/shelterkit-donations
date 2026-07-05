@@ -1,11 +1,35 @@
 # Changelog
 
-All notable changes to Starter Shelter Donations will be documented in this file.
+All notable changes to Shelter Donations (formerly Starter Shelter Donations) will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [2.0.0] - 2026-07-05
+
+### Changed
+- **Renamed the plugin's public identity to `shelter-donations`** ("Shelter Donations") in
+  preparation for the first WordPress.org release, joining the `shelter-*` plugin family
+  (shelter-pet-sync, shelter-events-wrapper). This is a **breaking release** for existing
+  installs — follow `migration-scripts/MIGRATION-2.0.0.md` when upgrading a live site.
+  - Text domain: `starter-shelter` → `shelter-donations` (plugin header, all gettext calls,
+    translation template renamed to `languages/shelter-donations.pot`).
+  - Main plugin file: `starter-shelter.php` → `shelter-donations.php` (existing installs must
+    reactivate; the plugin directory must be renamed to `shelter-donations/` to match the slug).
+  - Block namespace: `starter-shelter/*` → `shelter-donations/*` (14 blocks), including the
+    Interactivity API store namespaces and block-binding sources. **Stored content that uses
+    these blocks must be migrated** with `wp search-replace` — see the migration guide.
+  - Editor bootstrap global: `window.starterShelterBlocks` → `window.shelterDonationsBlocks`.
+  - Display name, log prefixes, and metadata (composer, PHPCS ruleset, Plugin/Author URI)
+    updated to the new identity; Author is now "VCPA Humane Society", crediting the
+    organization the plugin was originally built for.
+- **Unchanged on purpose** (no data migration needed): the `Starter_Shelter\` PHP namespace and
+  `STARTER_SHELTER_*` constants (internal-only), all `starter_shelter_*` hook/filter/cron names,
+  all `sd_*` option/meta keys and post types, and WooCommerce product/order data.
+- Dist packaging: `.distignore` now also excludes dev artifacts (`phpcs.xml.dist`,
+  `.editorconfig`, `.wp-env.json`, PHPUnit caches, `AUDIT-*.md`, `migration-scripts/`).
 
 ## [1.2.0] - 2026-06-23
 

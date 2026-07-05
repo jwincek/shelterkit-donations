@@ -1,14 +1,14 @@
 {
     "$schema": "https://schemas.wp.org/trunk/block.json",
     "apiVersion": 3,
-    "name": "starter-shelter/contribution-tabs",
+    "name": "shelter-donations/contribution-tabs",
     "version": "2.1.0",
     "title": "Contribution Tabs",
-    "category": "starter-shelter",
+    "category": "shelter-donations",
     "icon": "layout",
     "description": "Tabbed container for donation, membership, and memorial form blocks. Presents multiple giving options in a single, compact interface.",
     "keywords": ["tabs", "contribute", "support", "giving", "donate", "membership", "memorial"],
-    "textdomain": "starter-shelter",
+    "textdomain": "shelter-donations",
     "supports": {
         "html": false,
         "align": ["wide", "full"],
@@ -65,18 +65,18 @@
         }
     },
     "allowedBlocks": [
-        "starter-shelter/donation-form",
-        "starter-shelter/membership-form",
-        "starter-shelter/memorial-form"
+        "shelter-donations/donation-form",
+        "shelter-donations/membership-form",
+        "shelter-donations/memorial-form"
     ],
     "example": {
         "attributes": {
             "tabLabels": ["Give a Gift", "Become a Member", "Honor a Loved One"]
         },
         "innerBlocks": [
-            { "name": "starter-shelter/donation-form" },
-            { "name": "starter-shelter/membership-form" },
-            { "name": "starter-shelter/memorial-form" }
+            { "name": "shelter-donations/donation-form" },
+            { "name": "shelter-donations/membership-form" },
+            { "name": "shelter-donations/memorial-form" }
         ]
     },
     "viewScriptModule": "file:./view.js",

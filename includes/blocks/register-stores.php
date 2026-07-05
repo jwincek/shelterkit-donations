@@ -29,7 +29,7 @@ use Starter_Shelter\Core\Config;
 /**
  * Register Interactivity API configuration.
  *
- * Shared across every store namespace via getConfig( 'starter-shelter' ).
+ * Shared across every store namespace via getConfig( 'shelter-donations' ).
  *
  * @since 2.0.0
  */
@@ -43,9 +43,9 @@ function register_interactivity_config(): void {
     $currency_pos      = get_option( 'woocommerce_currency_pos', 'left' );
     $currency_decimals = (int) get_option( 'woocommerce_price_num_decimals', 2 );
 
-    wp_interactivity_config( 'starter-shelter', [
+    wp_interactivity_config( 'shelter-donations', [
         // API.
-        'restUrl'   => rest_url( 'starter-shelter/v1/' ),
+        'restUrl'   => rest_url( 'shelter-donations/v1/' ),
         'nonce'     => wp_create_nonce( 'wp_rest' ),
         'ajaxUrl'   => admin_url( 'admin-ajax.php' ),
         'cartNonce' => wp_create_nonce( 'sd_add_to_cart' ),
@@ -79,40 +79,40 @@ function register_interactivity_config(): void {
 
         // i18n strings shared by all stores.
         'i18n' => [
-            'loading'          => __( 'Loading...', 'starter-shelter' ),
-            'noResults'        => __( 'No results found', 'starter-shelter' ),
-            'showingOne'       => __( 'Showing 1 item', 'starter-shelter' ),
+            'loading'          => __( 'Loading...', 'shelter-donations' ),
+            'noResults'        => __( 'No results found', 'shelter-donations' ),
+            'showingOne'       => __( 'Showing 1 item', 'shelter-donations' ),
             /* translators: %d: number of items shown. */
-            'showingMany'      => __( 'Showing %d items', 'starter-shelter' ),
+            'showingMany'      => __( 'Showing %d items', 'shelter-donations' ),
             /* translators: %1$d: number of items shown; %2$d: total number of items. */
-            'paginationInfo'   => __( 'Showing %1$d of %2$d items', 'starter-shelter' ),
-            'error'            => __( 'Something went wrong. Please try again.', 'starter-shelter' ),
-            'addedToCart'      => __( 'Added to cart successfully!', 'starter-shelter' ),
-            'errorMinAmount'   => __( 'Please enter a valid donation amount.', 'starter-shelter' ),
-            'errorMaxAmount'   => __( 'Amount exceeds the maximum allowed.', 'starter-shelter' ),
-            'errorHonoreeName' => __( 'Please enter the honoree name.', 'starter-shelter' ),
-            'errorFamilyName'  => __( 'Please enter the family contact name.', 'starter-shelter' ),
-            'errorInvalidEmail'=> __( 'Please enter a valid email address.', 'starter-shelter' ),
-            'errorSelectTier'  => __( 'Please select a membership level.', 'starter-shelter' ),
-            'errorBusinessName'=> __( 'Please enter your business name.', 'starter-shelter' ),
-            'errorGeneric'     => __( 'Could not add to cart. Please try again.', 'starter-shelter' ),
-            'errorNetwork'     => __( 'Network error. Please check your connection.', 'starter-shelter' ),
-            'inHonorOf'        => __( 'In Honor Of', 'starter-shelter' ),
-            'inMemoryOf'       => __( 'In Memory Of', 'starter-shelter' ),
-            'personName'       => __( "Person's Name", 'starter-shelter' ),
-            'petName'          => __( "Pet's Name", 'starter-shelter' ),
-            'pet'              => __( 'Pet', 'starter-shelter' ),
-            'typeHuman'        => __( 'Person', 'starter-shelter' ),
-            'typePet'          => __( 'Pet', 'starter-shelter' ),
-            'processing'       => __( 'Processing...', 'starter-shelter' ),
-            'individualMembership' => __( 'Individual Membership', 'starter-shelter' ),
-            'businessMembership'   => __( 'Business Membership', 'starter-shelter' ),
-            'donor'            => __( 'Donor', 'starter-shelter' ),
-            'donorLevelNew'    => __( 'New Donor', 'starter-shelter' ),
-            'donorLevelBronze' => __( 'Bronze', 'starter-shelter' ),
-            'donorLevelSilver' => __( 'Silver', 'starter-shelter' ),
-            'donorLevelGold'   => __( 'Gold', 'starter-shelter' ),
-            'donorLevelPlatinum' => __( 'Platinum', 'starter-shelter' ),
+            'paginationInfo'   => __( 'Showing %1$d of %2$d items', 'shelter-donations' ),
+            'error'            => __( 'Something went wrong. Please try again.', 'shelter-donations' ),
+            'addedToCart'      => __( 'Added to cart successfully!', 'shelter-donations' ),
+            'errorMinAmount'   => __( 'Please enter a valid donation amount.', 'shelter-donations' ),
+            'errorMaxAmount'   => __( 'Amount exceeds the maximum allowed.', 'shelter-donations' ),
+            'errorHonoreeName' => __( 'Please enter the honoree name.', 'shelter-donations' ),
+            'errorFamilyName'  => __( 'Please enter the family contact name.', 'shelter-donations' ),
+            'errorInvalidEmail'=> __( 'Please enter a valid email address.', 'shelter-donations' ),
+            'errorSelectTier'  => __( 'Please select a membership level.', 'shelter-donations' ),
+            'errorBusinessName'=> __( 'Please enter your business name.', 'shelter-donations' ),
+            'errorGeneric'     => __( 'Could not add to cart. Please try again.', 'shelter-donations' ),
+            'errorNetwork'     => __( 'Network error. Please check your connection.', 'shelter-donations' ),
+            'inHonorOf'        => __( 'In Honor Of', 'shelter-donations' ),
+            'inMemoryOf'       => __( 'In Memory Of', 'shelter-donations' ),
+            'personName'       => __( "Person's Name", 'shelter-donations' ),
+            'petName'          => __( "Pet's Name", 'shelter-donations' ),
+            'pet'              => __( 'Pet', 'shelter-donations' ),
+            'typeHuman'        => __( 'Person', 'shelter-donations' ),
+            'typePet'          => __( 'Pet', 'shelter-donations' ),
+            'processing'       => __( 'Processing...', 'shelter-donations' ),
+            'individualMembership' => __( 'Individual Membership', 'shelter-donations' ),
+            'businessMembership'   => __( 'Business Membership', 'shelter-donations' ),
+            'donor'            => __( 'Donor', 'shelter-donations' ),
+            'donorLevelNew'    => __( 'New Donor', 'shelter-donations' ),
+            'donorLevelBronze' => __( 'Bronze', 'shelter-donations' ),
+            'donorLevelSilver' => __( 'Silver', 'shelter-donations' ),
+            'donorLevelGold'   => __( 'Gold', 'shelter-donations' ),
+            'donorLevelPlatinum' => __( 'Platinum', 'shelter-donations' ),
         ],
 
         // Feature flags.
@@ -138,38 +138,38 @@ function register_interactivity_config(): void {
  */
 function register_interactivity_stores(): void {
     // --- Shared root namespace -----------------------------------------------
-    wp_interactivity_state( 'starter-shelter', [
+    wp_interactivity_state( 'shelter-donations', [
         'isInitialized' => true,
     ] );
 
     // --- Donation form -------------------------------------------------------
-    wp_interactivity_state( 'starter-shelter/donation-form', [
+    wp_interactivity_state( 'shelter-donations/donation-form', [
         'forms' => [],
     ] );
 
     // --- Memorial form -------------------------------------------------------
-    wp_interactivity_state( 'starter-shelter/memorial-form', [
+    wp_interactivity_state( 'shelter-donations/memorial-form', [
         'forms' => [],
     ] );
 
     // --- Membership form -----------------------------------------------------
-    wp_interactivity_state( 'starter-shelter/membership-form', [
+    wp_interactivity_state( 'shelter-donations/membership-form', [
         'forms' => [],
     ] );
 
     // --- Memorial wall archive -----------------------------------------------
     // All instance state lives in data-wp-context set by render.php.
     // We seed an empty namespace so wp_interactivity_state() is initialized.
-    wp_interactivity_state( 'starter-shelter/memorials', [] );
+    wp_interactivity_state( 'shelter-donations/memorials', [] );
 
     // --- Candles (light a candle for a memorial) ----------------------------
     // Seed the user's candle list so the UI knows which are already lit.
-    wp_interactivity_state( 'starter-shelter/candles', [
+    wp_interactivity_state( 'shelter-donations/candles', [
         'candles' => \Starter_Shelter\REST\get_user_candles(),
     ] );
 
     // --- Donation listings ---------------------------------------------------
-    wp_interactivity_state( 'starter-shelter/donations', [
+    wp_interactivity_state( 'shelter-donations/donations', [
         'isLoading'  => false,
         'donations'  => [],
         'total'      => 0,
@@ -185,13 +185,13 @@ function register_interactivity_stores(): void {
     ] );
 
     // --- Campaign progress ---------------------------------------------------
-    wp_interactivity_state( 'starter-shelter/campaign', [
+    wp_interactivity_state( 'shelter-donations/campaign', [
         'campaigns' => [],
         'isLoading' => false,
     ] );
 
     // --- Donor dashboard -----------------------------------------------------
-    wp_interactivity_state( 'starter-shelter/donor', [
+    wp_interactivity_state( 'shelter-donations/donor', [
         'isLoading'   => true,
         'isLoggedIn'  => is_user_logged_in(),
         'donor'       => null,
@@ -220,7 +220,7 @@ function register_script_modules(): void {
     // Shared utility module — imported by every store via relative path,
     // but we register it explicitly so WordPress can resolve it.
     wp_register_script_module(
-        'starter-shelter/utils',
+        'shelter-donations/utils',
         STARTER_SHELTER_URL . 'assets/js/stores/utils.js',
         [ '@wordpress/interactivity' ],
         STARTER_SHELTER_VERSION
@@ -229,7 +229,7 @@ function register_script_modules(): void {
     // Shared form base — provides composable submit handler, amount actions,
     // and callbacks used by donation, memorial, and membership form stores.
     wp_register_script_module(
-        'starter-shelter/form-base',
+        'shelter-donations/form-base',
         STARTER_SHELTER_URL . 'assets/js/stores/form-base.js',
         [ '@wordpress/interactivity' ],
         STARTER_SHELTER_VERSION
@@ -237,7 +237,7 @@ function register_script_modules(): void {
 
     // Contribution tabs — lightweight tab switcher for giving forms.
     wp_register_script_module(
-        'starter-shelter/contribution-tabs',
+        'shelter-donations/contribution-tabs',
         STARTER_SHELTER_URL . 'blocks/contribution-tabs/view.js',
         [ '@wordpress/interactivity' ],
         STARTER_SHELTER_VERSION
@@ -245,7 +245,7 @@ function register_script_modules(): void {
 
     // Candles — light a candle for a memorial.
     wp_register_script_module(
-        'starter-shelter/candles',
+        'shelter-donations/candles',
         STARTER_SHELTER_URL . 'assets/js/stores/candles.js',
         [ '@wordpress/interactivity' ],
         STARTER_SHELTER_VERSION
@@ -265,7 +265,7 @@ function register_script_modules(): void {
     // NOTE: The router must be enqueued where the block is rendered (render.php)
     // to ensure it appears in the import map for dynamic imports to work.
     wp_register_script_module(
-        'starter-shelter/memorials',
+        'shelter-donations/memorials',
         STARTER_SHELTER_URL . 'assets/js/stores/memorials.js',
         [
             '@wordpress/interactivity',
@@ -283,7 +283,7 @@ function register_script_modules(): void {
 
     // Legacy shim — only loaded when a page needs every store at once.
     wp_register_script_module(
-        'starter-shelter/stores',
+        'shelter-donations/stores',
         STARTER_SHELTER_URL . 'assets/js/stores.js',
         [ '@wordpress/interactivity' ],
         STARTER_SHELTER_VERSION
@@ -323,7 +323,7 @@ function should_enqueue_interactivity(): bool {
 
     // Check for any shelter block in content.
     global $post;
-    if ( $post && has_block( 'starter-shelter/', $post ) ) {
+    if ( $post && has_block( 'shelter-donations/', $post ) ) {
         return true;
     }
 

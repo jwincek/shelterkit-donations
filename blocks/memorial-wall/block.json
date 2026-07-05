@@ -1,14 +1,14 @@
 {
     "$schema": "https://schemas.wp.org/trunk/block.json",
     "apiVersion": 3,
-    "name": "starter-shelter/memorial-wall",
+    "name": "shelter-donations/memorial-wall",
     "version": "2.1.0",
     "title": "Memorial Wall",
-    "category": "starter-shelter",
+    "category": "shelter-donations",
     "icon": "heart",
     "description": "Display a searchable, filterable grid of memorial tributes with client-side navigation.",
     "keywords": [ "memorial", "tribute", "honor", "memory", "donation", "wall", "gallery" ],
-    "textdomain": "starter-shelter",
+    "textdomain": "shelter-donations",
     "supports": {
         "html": false,
         "align": [ "wide", "full" ],

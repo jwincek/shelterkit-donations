@@ -29,7 +29,7 @@
  * Meta_Boxes::register_meta_boxes(), and restore the REST_REQUEST
  * deferral + rest_after_insert_sd_memorial handler in
  * class-rest-controller.php. Also migrate the hardcoded option lists
- * below to read from window.starterShelterBlocks before shipping.
+ * below to read from window.shelterDonationsBlocks before shipping.
  *
  * No build step required — uses wp.createElement via IIFE.
  *
@@ -112,55 +112,55 @@
 
 		return el( PluginDocumentSettingPanel, {
 			name:  'sd-memorial-details',
-			title: __( 'Memorial Details', 'starter-shelter' ),
+			title: __( 'Memorial Details', 'shelter-donations' ),
 		},
 			el( TextControl, {
-				label:    __( 'Honoree Name', 'starter-shelter' ),
+				label:    __( 'Honoree Name', 'shelter-donations' ),
 				value:    m.meta._sd_honoree_name || '',
 				onChange: function( v ) { m.set( '_sd_honoree_name', v ); },
-				help:     __( 'Also used as the post title.', 'starter-shelter' ),
+				help:     __( 'Also used as the post title.', 'shelter-donations' ),
 				__nextHasNoMarginBottom: true,
 			} ),
 			// Two orthogonal axes, mirroring the customer-facing
 			// memorial-form: dedication (the occasion) + honoree type
 			// (the subject). The old single "Type" select conflated them.
 			el( SelectControl, {
-				label:   __( 'Dedication', 'starter-shelter' ),
+				label:   __( 'Dedication', 'shelter-donations' ),
 				value:   m.meta._sd_dedication_type || 'memory',
 				options: [
-					{ value: 'memory', label: __( 'In Memory Of', 'starter-shelter' ) },
-					{ value: 'honor',  label: __( 'In Honor Of', 'starter-shelter' ) },
+					{ value: 'memory', label: __( 'In Memory Of', 'shelter-donations' ) },
+					{ value: 'honor',  label: __( 'In Honor Of', 'shelter-donations' ) },
 				],
 				onChange: function( v ) { m.set( '_sd_dedication_type', v ); },
 				__nextHasNoMarginBottom: true,
 			} ),
 			el( SelectControl, {
-				label:   __( 'Honoree Type', 'starter-shelter' ),
+				label:   __( 'Honoree Type', 'shelter-donations' ),
 				value:   m.meta._sd_memorial_type || 'person',
 				options: [
-					{ value: 'person', label: __( 'Person', 'starter-shelter' ) },
-					{ value: 'pet',    label: __( 'Pet', 'starter-shelter' ) },
+					{ value: 'person', label: __( 'Person', 'shelter-donations' ) },
+					{ value: 'pet',    label: __( 'Pet', 'shelter-donations' ) },
 				],
 				onChange: function( v ) { m.set( '_sd_memorial_type', v ); },
 				__nextHasNoMarginBottom: true,
 			} ),
 			m.meta._sd_memorial_type === 'pet' && el( SelectControl, {
-				label:   __( 'Pet Species', 'starter-shelter' ),
+				label:   __( 'Pet Species', 'shelter-donations' ),
 				value:   m.meta._sd_pet_species || '',
 				options: [
-					{ value: '',       label: __( '— Select —', 'starter-shelter' ) },
-					{ value: 'dog',    label: __( 'Dog', 'starter-shelter' ) },
-					{ value: 'cat',    label: __( 'Cat', 'starter-shelter' ) },
-					{ value: 'bird',   label: __( 'Bird', 'starter-shelter' ) },
-					{ value: 'horse',  label: __( 'Horse', 'starter-shelter' ) },
-					{ value: 'rabbit', label: __( 'Rabbit', 'starter-shelter' ) },
-					{ value: 'other',  label: __( 'Other', 'starter-shelter' ) },
+					{ value: '',       label: __( '— Select —', 'shelter-donations' ) },
+					{ value: 'dog',    label: __( 'Dog', 'shelter-donations' ) },
+					{ value: 'cat',    label: __( 'Cat', 'shelter-donations' ) },
+					{ value: 'bird',   label: __( 'Bird', 'shelter-donations' ) },
+					{ value: 'horse',  label: __( 'Horse', 'shelter-donations' ) },
+					{ value: 'rabbit', label: __( 'Rabbit', 'shelter-donations' ) },
+					{ value: 'other',  label: __( 'Other', 'shelter-donations' ) },
 				],
 				onChange: function( v ) { m.set( '_sd_pet_species', v ); },
 				__nextHasNoMarginBottom: true,
 			} ),
 			el( TextareaControl, {
-				label:    __( 'Tribute Message', 'starter-shelter' ),
+				label:    __( 'Tribute Message', 'shelter-donations' ),
 				value:    m.meta._sd_tribute_message || '',
 				onChange: function( v ) { m.set( '_sd_tribute_message', v ); },
 				rows:     6,
@@ -210,7 +210,7 @@
 					setDonorOptions( [ { value: String( donorId ), label: name } ] );
 				} ).catch( function() {
 					// Donor may have been deleted.
-					setSelectedLabel( __( '(unknown donor)', 'starter-shelter' ) );
+					setSelectedLabel( __( '(unknown donor)', 'shelter-donations' ) );
 				} );
 			}
 		}, [] );
@@ -256,7 +256,7 @@
 			setQcNotice( null );
 
 			apiFetch( {
-				path:   '/starter-shelter/v1/donors/find-or-create',
+				path:   '/shelter-donations/v1/donors/find-or-create',
 				method: 'POST',
 				data:   { display_name: qcName.trim() },
 			} ).then( function( result ) {
@@ -277,8 +277,8 @@
 				setQcNotice( {
 					status:  'success',
 					message: isNew
-						? __( 'New donor created.', 'starter-shelter' )
-						: __( 'Linked to existing donor.', 'starter-shelter' ),
+						? __( 'New donor created.', 'shelter-donations' )
+						: __( 'Linked to existing donor.', 'shelter-donations' ),
 				} );
 				setQcName( '' );
 				setQcSaving( false );
@@ -291,7 +291,7 @@
 			} ).catch( function( error ) {
 				setQcNotice( {
 					status:  'error',
-					message: error.message || __( 'Failed to create donor.', 'starter-shelter' ),
+					message: error.message || __( 'Failed to create donor.', 'shelter-donations' ),
 				} );
 				setQcSaving( false );
 			} );
@@ -299,11 +299,11 @@
 
 		return el( PluginDocumentSettingPanel, {
 			name:  'sd-donation-info',
-			title: __( 'Donation Info', 'starter-shelter' ),
+			title: __( 'Donation Info', 'shelter-donations' ),
 		},
 			// Donor combobox.
 			el( ComboboxControl, {
-				label:               __( 'Donated By', 'starter-shelter' ),
+				label:               __( 'Donated By', 'shelter-donations' ),
 				value:               m.meta._sd_donor_id ? String( m.meta._sd_donor_id ) : null,
 				options:             donorOptions,
 				onFilterValueChange: onDonorFilter,
@@ -320,8 +320,8 @@
 						setQcNotice( null );
 					},
 				}, showQC
-					? __( 'Cancel', 'starter-shelter' )
-					: __( '+ New Donor', 'starter-shelter' )
+					? __( 'Cancel', 'shelter-donations' )
+					: __( '+ New Donor', 'shelter-donations' )
 				)
 			),
 
@@ -335,10 +335,10 @@
 				},
 			},
 				el( TextControl, {
-					label:       __( 'Donor Name', 'starter-shelter' ),
+					label:       __( 'Donor Name', 'shelter-donations' ),
 					value:       qcName,
 					onChange:     setQcName,
-					placeholder: __( 'e.g. John & Mary Smith', 'starter-shelter' ),
+					placeholder: __( 'e.g. John & Mary Smith', 'shelter-donations' ),
 					onKeyDown:   function( e ) {
 						if ( e.key === 'Enter' ) {
 							e.preventDefault();
@@ -353,7 +353,7 @@
 					isBusy:   qcSaving,
 					disabled: ! qcName.trim() || qcSaving,
 					style:    { marginTop: '8px' },
-				}, __( 'Create Donor', 'starter-shelter' ) ),
+				}, __( 'Create Donor', 'shelter-donations' ) ),
 				qcNotice && el( Notice, {
 					status:      qcNotice.status,
 					isDismissible: false,
@@ -363,16 +363,16 @@
 
 			// Display name override.
 			el( TextControl, {
-				label:    __( 'Display Name', 'starter-shelter' ),
+				label:    __( 'Display Name', 'shelter-donations' ),
 				value:    m.meta._sd_donor_display_name || '',
 				onChange: function( v ) { m.set( '_sd_donor_display_name', v ); },
-				help:     __( 'Name shown on the memorial wall. Leave empty to pull from donor record.', 'starter-shelter' ),
+				help:     __( 'Name shown on the memorial wall. Leave empty to pull from donor record.', 'shelter-donations' ),
 				__nextHasNoMarginBottom: true,
 			} ),
 
 			// Amount.
 			el( TextControl, {
-				label:    __( 'Amount', 'starter-shelter' ),
+				label:    __( 'Amount', 'shelter-donations' ),
 				value:    m.meta._sd_amount ? String( m.meta._sd_amount ) : '',
 				onChange: function( v ) { m.set( '_sd_amount', parseFloat( v ) || 0 ); },
 				type:     'number',
@@ -383,7 +383,7 @@
 
 			// Date.
 			el( TextControl, {
-				label:    __( 'Date', 'starter-shelter' ),
+				label:    __( 'Date', 'shelter-donations' ),
 				value:    ( m.meta._sd_donation_date || '' ).substring( 0, 10 ),
 				onChange: function( v ) { m.set( '_sd_donation_date', v ); },
 				type:     'date',
@@ -392,7 +392,7 @@
 
 			// Anonymous toggle.
 			el( ToggleControl, {
-				label:    __( 'Anonymous', 'starter-shelter' ),
+				label:    __( 'Anonymous', 'shelter-donations' ),
 				checked:  !! m.meta._sd_is_anonymous,
 				onChange: function( v ) { m.set( '_sd_is_anonymous', v ); },
 				__nextHasNoMarginBottom: true,
@@ -408,23 +408,23 @@
 
 		return el( PluginDocumentSettingPanel, {
 			name:  'sd-family-notification',
-			title: __( 'Family Notification', 'starter-shelter' ),
+			title: __( 'Family Notification', 'shelter-donations' ),
 		},
 			el( ToggleControl, {
-				label:    __( 'Notify Family', 'starter-shelter' ),
+				label:    __( 'Notify Family', 'shelter-donations' ),
 				checked:  enabled,
 				onChange: function( v ) { m.set( '_sd_notify_family_enabled', v ); },
 				__nextHasNoMarginBottom: true,
 			} ),
 			enabled && el( Fragment, {},
 				el( TextControl, {
-					label:    __( 'Family Name', 'starter-shelter' ),
+					label:    __( 'Family Name', 'shelter-donations' ),
 					value:    m.meta._sd_notify_family_name || '',
 					onChange: function( v ) { m.set( '_sd_notify_family_name', v ); },
 					__nextHasNoMarginBottom: true,
 				} ),
 				el( TextControl, {
-					label:    __( 'Family Email', 'starter-shelter' ),
+					label:    __( 'Family Email', 'shelter-donations' ),
 					value:    m.meta._sd_notify_family_email || '',
 					onChange: function( v ) { m.set( '_sd_notify_family_email', v ); },
 					type:     'email',
@@ -434,7 +434,7 @@
 			m.meta._sd_family_notified_date && el( 'p', {
 				style: { color: '#757575', fontSize: '12px', marginTop: '12px' },
 			},
-				__( 'Notification sent: ', 'starter-shelter' ),
+				__( 'Notification sent: ', 'shelter-donations' ),
 				el( 'strong', {}, m.meta._sd_family_notified_date )
 			)
 		);
@@ -448,10 +448,10 @@
 		var errors = [];
 
 		if ( ! m.meta._sd_honoree_name || ! m.meta._sd_honoree_name.trim() ) {
-			errors.push( __( 'Honoree Name is required.', 'starter-shelter' ) );
+			errors.push( __( 'Honoree Name is required.', 'shelter-donations' ) );
 		}
 		if ( ! m.meta._sd_memorial_type ) {
-			errors.push( __( 'Memorial Type is required.', 'starter-shelter' ) );
+			errors.push( __( 'Memorial Type is required.', 'shelter-donations' ) );
 		}
 
 		if ( errors.length === 0 ) {
@@ -459,7 +459,7 @@
 		}
 
 		return el( PluginPrePublishPanel, {
-			title:          __( 'Memorial: Missing Fields', 'starter-shelter' ),
+			title:          __( 'Memorial: Missing Fields', 'shelter-donations' ),
 			initialOpen:    true,
 		},
 			el( 'ul', { style: { margin: 0, paddingLeft: '20px', color: '#d63638' } },

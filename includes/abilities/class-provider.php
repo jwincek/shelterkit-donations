@@ -83,8 +83,8 @@ class Provider {
         $permission_callback = self::resolve_permission_callback( $config['permission'] ?? $config['permission_callback'] ?? 'logged_in' );
 
         $args = [
-            'label'               => __( $config['label'] ?? $name, 'starter-shelter' ), // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- ability label sourced from the ability config registry, not a literal.
-            'description'         => __( $config['description'] ?? '', 'starter-shelter' ), // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- ability description sourced from the ability config registry, not a literal.
+            'label'               => __( $config['label'] ?? $name, 'shelter-donations' ), // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- ability label sourced from the ability config registry, not a literal.
+            'description'         => __( $config['description'] ?? '', 'shelter-donations' ), // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- ability description sourced from the ability config registry, not a literal.
             'category'            => $config['category'] ?? 'shelter-donations',
             'execute_callback'    => $execute_callback,
             'permission_callback' => $permission_callback,
@@ -166,7 +166,7 @@ class Provider {
         // Log warning for missing callback.
         if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
             // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-            error_log( sprintf( 'Starter Shelter: Missing callback for ability "%s" (tried: %s)', $name, $callable ) );
+            error_log( sprintf( 'Shelter Donations: Missing callback for ability "%s" (tried: %s)', $name, $callable ) );
         }
 
         return null;

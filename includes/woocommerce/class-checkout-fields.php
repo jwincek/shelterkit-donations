@@ -263,8 +263,8 @@ class Checkout_Fields {
         // Memorial section.
         if ( in_array( 'memorial', $product_types, true ) ) {
             $sections['memorial'] = [
-                'title'       => __( 'Memorial Tribute Information', 'starter-shelter' ),
-                'description' => __( 'Please provide details about the person or pet you are honoring.', 'starter-shelter' ),
+                'title'       => __( 'Memorial Tribute Information', 'shelter-donations' ),
+                'description' => __( 'Please provide details about the person or pet you are honoring.', 'shelter-donations' ),
                 'fields'      => [],
             ];
         }
@@ -272,15 +272,15 @@ class Checkout_Fields {
         // Business membership section.
         if ( in_array( 'business_membership', $product_types, true ) ) {
             $sections['business'] = [
-                'title'       => __( 'Business Information', 'starter-shelter' ),
-                'description' => __( 'Your business will be recognized as a supporting partner.', 'starter-shelter' ),
+                'title'       => __( 'Business Information', 'shelter-donations' ),
+                'description' => __( 'Your business will be recognized as a supporting partner.', 'shelter-donations' ),
                 'fields'      => [],
             ];
         }
 
         // General donation options.
         $sections['donation_options'] = [
-            'title'  => __( 'Donation Options', 'starter-shelter' ),
+            'title'  => __( 'Donation Options', 'shelter-donations' ),
             'fields' => [],
         ];
 
@@ -371,7 +371,7 @@ class Checkout_Fields {
      * @return array Campaign options.
      */
     private static function get_campaign_options(): array {
-        $options = [ '' => __( '— Select a campaign (optional) —', 'starter-shelter' ) ];
+        $options = [ '' => __( '— Select a campaign (optional) —', 'shelter-donations' ) ];
 
         $campaigns = get_terms( [
             'taxonomy'   => 'sd_campaign',
@@ -470,7 +470,7 @@ class Checkout_Fields {
                 wc_add_notice(
                     sprintf(
                         /* translators: %s: field label */
-                        __( '%s is a required field.', 'starter-shelter' ),
+                        __( '%s is a required field.', 'shelter-donations' ),
                         '<strong>' . esc_html( $field['label'] ) . '</strong>'
                     ),
                     'error'
@@ -488,7 +488,7 @@ class Checkout_Fields {
      */
     public static function display_admin_order_fields( \WC_Order $order ): void {
         $has_fields = false;
-        $output = '<div class="sd-admin-order-fields"><h3>' . esc_html__( 'Shelter Donation Details', 'starter-shelter' ) . '</h3>';
+        $output = '<div class="sd-admin-order-fields"><h3>' . esc_html__( 'Shelter Donation Details', 'shelter-donations' ) . '</h3>';
 
         foreach ( self::get_field_definitions() as $key => $field ) {
             $meta_key = $field['meta_key'] ?? '_sd_' . $key;
@@ -535,7 +535,7 @@ class Checkout_Fields {
         }
 
         if ( ! empty( $fields_output ) ) {
-            echo '<h2>' . esc_html__( 'Donation Details', 'starter-shelter' ) . '</h2>';
+            echo '<h2>' . esc_html__( 'Donation Details', 'shelter-donations' ) . '</h2>';
             echo '<p>' . implode( '<br>', array_map( 'esc_html', $fields_output ) ) . '</p>';
         }
     }
@@ -553,7 +553,7 @@ class Checkout_Fields {
         $type = $field['type'] ?? 'text';
 
         if ( 'checkbox' === $type ) {
-            return $value ? __( 'Yes', 'starter-shelter' ) : __( 'No', 'starter-shelter' );
+            return $value ? __( 'Yes', 'shelter-donations' ) : __( 'No', 'shelter-donations' );
         }
 
         if ( 'select' === $type && is_array( $field['options'] ?? null ) ) {

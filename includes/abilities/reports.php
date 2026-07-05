@@ -50,7 +50,7 @@ function annual_summary( array $input ): array|WP_Error {
     if ( ! $donor_id ) {
         return new WP_Error(
             'invalid_donor_id',
-            __( 'Valid donor ID is required.', 'starter-shelter' ),
+            __( 'Valid donor ID is required.', 'shelter-donations' ),
             [ 'status' => 400 ]
         );
     }
@@ -59,7 +59,7 @@ function annual_summary( array $input ): array|WP_Error {
     if ( ! $donor ) {
         return new WP_Error(
             'donor_not_found',
-            __( 'Donor not found.', 'starter-shelter' ),
+            __( 'Donor not found.', 'shelter-donations' ),
             [ 'status' => 404 ]
         );
     }
@@ -158,7 +158,7 @@ function donor_summary( array $input ): array|WP_Error {
     if ( ! $donor_id ) {
         return new WP_Error(
             'invalid_donor_id',
-            __( 'Valid donor ID is required.', 'starter-shelter' ),
+            __( 'Valid donor ID is required.', 'shelter-donations' ),
             [ 'status' => 400 ]
         );
     }
@@ -596,9 +596,9 @@ function action_items( array $input = [] ): array {
             $items[] = [
                 'type'         => 'pending_logos',
                 'count'        => $pending_logos,
-                'label'        => __( 'logo pending review', 'starter-shelter' ),
-                'label_plural' => __( 'logos pending review', 'starter-shelter' ),
-                'url'          => admin_url( 'admin.php?page=starter-shelter-logos' ),
+                'label'        => __( 'logo pending review', 'shelter-donations' ),
+                'label_plural' => __( 'logos pending review', 'shelter-donations' ),
+                'url'          => admin_url( 'admin.php?page=shelter-donations-logos' ),
             ];
         }
     }
@@ -616,9 +616,9 @@ function action_items( array $input = [] ): array {
             'type'         => 'expiring_memberships',
             'count'        => $expiring,
             /* translators: %d: number of days */
-            'label'        => sprintf( __( 'membership expiring in %d days', 'starter-shelter' ), $expiring_window ),
+            'label'        => sprintf( __( 'membership expiring in %d days', 'shelter-donations' ), $expiring_window ),
             /* translators: %d: number of days */
-            'label_plural' => sprintf( __( 'memberships expiring in %d days', 'starter-shelter' ), $expiring_window ),
+            'label_plural' => sprintf( __( 'memberships expiring in %d days', 'shelter-donations' ), $expiring_window ),
             'url'          => admin_url( 'edit.php?post_type=sd_membership&expiring=' . $expiring_window ),
         ];
     }
@@ -632,8 +632,8 @@ function action_items( array $input = [] ): array {
         $items[] = [
             'type'         => 'pending_notifications',
             'count'        => $pending_notifications,
-            'label'        => __( 'family notification pending', 'starter-shelter' ),
-            'label_plural' => __( 'family notifications pending', 'starter-shelter' ),
+            'label'        => __( 'family notification pending', 'shelter-donations' ),
+            'label_plural' => __( 'family notifications pending', 'shelter-donations' ),
             'url'          => admin_url( 'edit.php?post_type=sd_memorial&notify_pending=1' ),
         ];
     }
@@ -756,7 +756,7 @@ function campaign_progress( array $input ): array|WP_Error {
     if ( ! $campaign_id ) {
         return new WP_Error(
             'invalid_campaign_id',
-            __( 'Valid campaign ID is required.', 'starter-shelter' ),
+            __( 'Valid campaign ID is required.', 'shelter-donations' ),
             [ 'status' => 400 ]
         );
     }
@@ -765,7 +765,7 @@ function campaign_progress( array $input ): array|WP_Error {
     if ( ! $term || is_wp_error( $term ) ) {
         return new WP_Error(
             'campaign_not_found',
-            __( 'Campaign not found.', 'starter-shelter' ),
+            __( 'Campaign not found.', 'shelter-donations' ),
             [ 'status' => 404 ]
         );
     }
@@ -811,7 +811,7 @@ function campaign_progress( array $input ): array|WP_Error {
         'goal_formatted'      => 'donation_drive' === $type
             ? Helpers\format_currency( $goal )
             /* translators: %d: number of members goal. */
-            : sprintf( _n( '%d member', '%d members', (int) $goal, 'starter-shelter' ), (int) $goal ),
+            : sprintf( _n( '%d member', '%d members', (int) $goal, 'shelter-donations' ), (int) $goal ),
         'end_date'            => $end_date,
         'tier_filter'         => $tier,
         'raised'              => $raised,
@@ -822,7 +822,7 @@ function campaign_progress( array $input ): array|WP_Error {
         'remaining_formatted' => 'donation_drive' === $type
             ? Helpers\format_currency( $remaining )
             /* translators: %d: number of members remaining to reach the goal. */
-            : sprintf( _n( '%d to go', '%d to go', (int) $remaining, 'starter-shelter' ), (int) $remaining ),
+            : sprintf( _n( '%d to go', '%d to go', (int) $remaining, 'shelter-donations' ), (int) $remaining ),
         'is_active'           => ! $end_date || strtotime( $end_date ) >= time(),
     ];
 }
@@ -978,7 +978,7 @@ function campaigns_progress( array $input = [] ): array {
             'goal_formatted'      => 'donation_drive' === $type
                 ? Helpers\format_currency( $goal )
                 /* translators: %d: number of members goal. */
-                : sprintf( _n( '%d member', '%d members', (int) $goal, 'starter-shelter' ), (int) $goal ),
+                : sprintf( _n( '%d member', '%d members', (int) $goal, 'shelter-donations' ), (int) $goal ),
             'end_date'            => $end_date,
             'tier_filter'         => $tier,
             'raised'              => $raised,
@@ -989,7 +989,7 @@ function campaigns_progress( array $input = [] ): array {
             'remaining_formatted' => 'donation_drive' === $type
                 ? Helpers\format_currency( $remaining )
                 /* translators: %d: number of members remaining to reach the goal. */
-                : sprintf( _n( '%d to go', '%d to go', (int) $remaining, 'starter-shelter' ), (int) $remaining ),
+                : sprintf( _n( '%d to go', '%d to go', (int) $remaining, 'shelter-donations' ), (int) $remaining ),
             'is_active'           => $is_active,
         ];
     }
@@ -1011,7 +1011,7 @@ function campaign_report( array $input ): array|WP_Error {
     if ( ! $campaign_id ) {
         return new WP_Error(
             'invalid_campaign_id',
-            __( 'Valid campaign ID is required.', 'starter-shelter' ),
+            __( 'Valid campaign ID is required.', 'shelter-donations' ),
             [ 'status' => 400 ]
         );
     }
@@ -1020,7 +1020,7 @@ function campaign_report( array $input ): array|WP_Error {
     if ( ! $term || is_wp_error( $term ) ) {
         return new WP_Error(
             'campaign_not_found',
-            __( 'Campaign not found.', 'starter-shelter' ),
+            __( 'Campaign not found.', 'shelter-donations' ),
             [ 'status' => 404 ]
         );
     }
@@ -1046,7 +1046,7 @@ function campaign_report( array $input ): array|WP_Error {
             : ( 'donation_drive' === $type
                 ? Helpers\format_currency( $goal )
                 /* translators: %d: number of members goal. */
-                : sprintf( _n( '%d member', '%d members', (int) $goal, 'starter-shelter' ), (int) $goal ) ),
+                : sprintf( _n( '%d member', '%d members', (int) $goal, 'shelter-donations' ), (int) $goal ) ),
         'tier_filter'    => $tier,
     ];
 

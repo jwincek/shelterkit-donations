@@ -16,7 +16,7 @@ let refreshIntervalId = null;
 /**
  * Donor Stats Store
  */
-const { state, actions } = store( 'starter-shelter/donor-stats', {
+const { state, actions } = store( 'shelter-donations/donor-stats', {
     state: {
         // Server-provided state:
         // - stats: { total, count, donors, members }
@@ -91,7 +91,7 @@ const { state, actions } = store( 'starter-shelter/donor-stats', {
             const context = getContext();
             
             try {
-                const response = yield fetch( '/wp-json/starter-shelter/v1/stats', {
+                const response = yield fetch( '/wp-json/shelter-donations/v1/stats', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',

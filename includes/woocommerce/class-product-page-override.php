@@ -35,10 +35,10 @@ class Product_Page_Override {
 	 * @since 2.2.0
 	 */
 	private const BLOCK_MAP = [
-		'donation'            => 'starter-shelter/donation-form',
-		'membership'          => 'starter-shelter/membership-form',
-		'business_membership' => 'starter-shelter/membership-form',
-		'memorial'            => 'starter-shelter/memorial-form',
+		'donation'            => 'shelter-donations/donation-form',
+		'membership'          => 'shelter-donations/membership-form',
+		'business_membership' => 'shelter-donations/membership-form',
+		'memorial'            => 'shelter-donations/memorial-form',
 	];
 
 	/**
@@ -187,7 +187,7 @@ class Product_Page_Override {
 
 		// Default the membership form to the business tab when arriving from
 		// a business-membership product page.
-		if ( 'starter-shelter/membership-form' === $block_name && 'business_membership' === $product_type ) {
+		if ( 'shelter-donations/membership-form' === $block_name && 'business_membership' === $product_type ) {
 			$attrs['membershipType'] = 'business';
 		}
 

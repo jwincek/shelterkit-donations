@@ -10,7 +10,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$label = $label ?? __( 'Secure payment powered by WooCommerce', 'starter-shelter' );
+$label = $label ?? __( 'Secure payment powered by WooCommerce', 'shelter-donations' );
 ?>
 <div class="sd-form-footer">
 	<p class="sd-secure-notice">

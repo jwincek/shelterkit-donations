@@ -67,7 +67,7 @@ jobs:
         # on `php -l`'s exit 255 (parse error) and propagates that as a
         # non-zero exit, which fails the step. Parse-error lines surface
         # on stderr; success lines are discarded.
-        run: find starter-shelter.php includes/ -name '*.php' -print0 | xargs -0 -n1 php -l > /dev/null
+        run: find shelter-donations.php includes/ -name '*.php' -print0 | xargs -0 -n1 php -l > /dev/null
 
   unit-tests:
     name: PHP ${{ matrix.php }} Unit Tests
@@ -235,15 +235,15 @@ jobs:
       # (timestamp, generator version, version-derived Project-Id-Version) are
       # ignored — everything else, including string source references, must
       # match, so a code change that adds/moves a translatable string fails the
-      # job until languages/starter-shelter.pot is regenerated and committed.
+      # job until languages/shelter-donations.pot is regenerated and committed.
       - name: Regenerate POT
-        run: wp i18n make-pot . /tmp/expected.pot --domain=starter-shelter --exclude=tests,vendor,node_modules
+        run: wp i18n make-pot . /tmp/expected.pot --domain=shelter-donations --exclude=tests,vendor,node_modules
 
       - name: Compare with committed POT
         run: |
           strip() { grep -vE '^"(POT-Creation-Date|X-Generator|Project-Id-Version):' "$1"; }
-          if ! diff <( strip languages/starter-shelter.pot ) <( strip /tmp/expected.pot ); then
-            echo "::error file=languages/starter-shelter.pot::POT is out of date. Run: wp i18n make-pot . languages/starter-shelter.pot --domain=starter-shelter --exclude=tests,vendor,node_modules — then commit."
+          if ! diff <( strip languages/shelter-donations.pot ) <( strip /tmp/expected.pot ); then
+            echo "::error file=languages/shelter-donations.pot::POT is out of date. Run: wp i18n make-pot . languages/shelter-donations.pot --domain=shelter-donations --exclude=tests,vendor,node_modules — then commit."
             exit 1
           fi
           echo "POT is up to date."

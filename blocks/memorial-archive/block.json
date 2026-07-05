@@ -1,14 +1,14 @@
 {
     "$schema": "https://schemas.wp.org/trunk/block.json",
     "apiVersion": 3,
-    "name": "starter-shelter/memorial-archive",
+    "name": "shelter-donations/memorial-archive",
     "version": "2.1.0",
     "title": "Memorial Archive (Deprecated)",
-    "category": "starter-shelter",
+    "category": "shelter-donations",
     "icon": "heart",
     "description": "Deprecated — use Memorial Wall instead. Existing instances render via the Memorial Wall block.",
     "keywords": [],
-    "textdomain": "starter-shelter",
+    "textdomain": "shelter-donations",
     "supports": {
         "inserter": false,
         "html": false

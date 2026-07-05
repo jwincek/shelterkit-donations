@@ -85,7 +85,7 @@ class Legacy_Memorial_Parser {
 		if ( ! $handle ) {
 			return new \WP_Error(
 				'file_error',
-				__( 'Could not open file.', 'starter-shelter' )
+				__( 'Could not open file.', 'shelter-donations' )
 			);
 		}
 
@@ -311,7 +311,7 @@ class Legacy_Memorial_Parser {
 					'skipped' => true,
 					'message' => sprintf(
 						/* translators: %s: honoree name */
-						__( 'Memorial for "%s" by this donor already exists.', 'starter-shelter' ),
+						__( 'Memorial for "%s" by this donor already exists.', 'shelter-donations' ),
 						$row['honoree_name']
 					),
 				];

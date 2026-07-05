@@ -1,14 +1,14 @@
 {
     "$schema": "https://schemas.wp.org/trunk/block.json",
     "apiVersion": 3,
-    "name": "starter-shelter/donor-dashboard",
+    "name": "shelter-donations/donor-dashboard",
     "version": "2.0.0",
     "title": "Donor Dashboard",
-    "category": "starter-shelter",
+    "category": "shelter-donations",
     "icon": "id-alt",
     "description": "Personal dashboard showing donor's giving history, stats, and membership status.",
     "keywords": ["donor", "dashboard", "profile", "giving", "history", "member"],
-    "textdomain": "starter-shelter",
+    "textdomain": "shelter-donations",
     "supports": {
         "html": false,
         "align": ["wide", "full"],

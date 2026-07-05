@@ -24,9 +24,9 @@ use Starter_Shelter\Helpers;
 function register_binding_sources(): void {
     // Shelter entity data binding.
     register_block_bindings_source(
-        'starter-shelter/entity',
+        'shelter-donations/entity',
         [
-            'label'              => __( 'Shelter Entity Data', 'starter-shelter' ),
+            'label'              => __( 'Shelter Entity Data', 'shelter-donations' ),
             'get_value_callback' => __NAMESPACE__ . '\\get_entity_value',
             'uses_context'       => [ 'postId', 'postType' ],
         ]
@@ -34,9 +34,9 @@ function register_binding_sources(): void {
 
     // Shelter donor data binding.
     register_block_bindings_source(
-        'starter-shelter/donor',
+        'shelter-donations/donor',
         [
-            'label'              => __( 'Shelter Donor Data', 'starter-shelter' ),
+            'label'              => __( 'Shelter Donor Data', 'shelter-donations' ),
             'get_value_callback' => __NAMESPACE__ . '\\get_donor_value',
             'uses_context'       => [ 'postId', 'postType' ],
         ]
@@ -44,9 +44,9 @@ function register_binding_sources(): void {
 
     // Shelter stats binding.
     register_block_bindings_source(
-        'starter-shelter/stats',
+        'shelter-donations/stats',
         [
-            'label'              => __( 'Shelter Statistics', 'starter-shelter' ),
+            'label'              => __( 'Shelter Statistics', 'shelter-donations' ),
             'get_value_callback' => __NAMESPACE__ . '\\get_stats_value',
             'uses_context'       => [],
         ]
@@ -54,9 +54,9 @@ function register_binding_sources(): void {
 
     // Campaign progress binding.
     register_block_bindings_source(
-        'starter-shelter/campaign',
+        'shelter-donations/campaign',
         [
-            'label'              => __( 'Campaign Data', 'starter-shelter' ),
+            'label'              => __( 'Campaign Data', 'shelter-donations' ),
             'get_value_callback' => __NAMESPACE__ . '\\get_campaign_value',
             'uses_context'       => [ 'postId', 'postType' ],
         ]
@@ -64,9 +64,9 @@ function register_binding_sources(): void {
 
     // Membership tier binding.
     register_block_bindings_source(
-        'starter-shelter/tier',
+        'shelter-donations/tier',
         [
-            'label'              => __( 'Membership Tier Data', 'starter-shelter' ),
+            'label'              => __( 'Membership Tier Data', 'shelter-donations' ),
             'get_value_callback' => __NAMESPACE__ . '\\get_tier_value',
             'uses_context'       => [],
         ]

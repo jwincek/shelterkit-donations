@@ -100,7 +100,7 @@ function get( array $input ): array|WP_Error {
     if ( ! $result ) {
         return new WP_Error(
             'donation_not_found',
-            __( 'Donation not found.', 'starter-shelter' ),
+            __( 'Donation not found.', 'shelter-donations' ),
             [ 'status' => 404 ]
         );
     }

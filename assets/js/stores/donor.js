@@ -12,7 +12,7 @@ import { getSharedConfig, apiRequest, formatCurrency, __ } from './utils.js';
 
 const config = getSharedConfig();
 
-const { state, actions } = store( 'starter-shelter/donor', {
+const { state, actions } = store( 'shelter-donations/donor', {
     state: {
         isLoading: true,
         isLoggedIn: !! config?.userId,

@@ -110,12 +110,12 @@ class List_Columns {
             'sd_donation' => [
                 'columns' => [
                     'cb'         => '<input type="checkbox" />',
-                    'title'      => __( 'Donation', 'starter-shelter' ),
-                    'amount'     => __( 'Amount', 'starter-shelter' ),
-                    'donor'      => __( 'Donor', 'starter-shelter' ),
-                    'allocation' => __( 'Allocation', 'starter-shelter' ),
-                    'campaign'   => __( 'Campaign', 'starter-shelter' ),
-                    'date'       => __( 'Date', 'starter-shelter' ),
+                    'title'      => __( 'Donation', 'shelter-donations' ),
+                    'amount'     => __( 'Amount', 'shelter-donations' ),
+                    'donor'      => __( 'Donor', 'shelter-donations' ),
+                    'allocation' => __( 'Allocation', 'shelter-donations' ),
+                    'campaign'   => __( 'Campaign', 'shelter-donations' ),
+                    'date'       => __( 'Date', 'shelter-donations' ),
                 ],
                 'sortable' => [ 'amount', 'date' ],
                 'row_actions' => [ 'view_receipt', 'view_order' ],
@@ -123,13 +123,13 @@ class List_Columns {
             'sd_membership' => [
                 'columns' => [
                     'cb'          => '<input type="checkbox" />',
-                    'title'       => __( 'Membership', 'starter-shelter' ),
-                    'donor'       => __( 'Member', 'starter-shelter' ),
-                    'tier'        => __( 'Tier', 'starter-shelter' ),
-                    'type'        => __( 'Type', 'starter-shelter' ),
-                    'status'      => __( 'Status', 'starter-shelter' ),
-                    'expiry'      => __( 'Expires', 'starter-shelter' ),
-                    'logo_status' => __( 'Logo', 'starter-shelter' ),
+                    'title'       => __( 'Membership', 'shelter-donations' ),
+                    'donor'       => __( 'Member', 'shelter-donations' ),
+                    'tier'        => __( 'Tier', 'shelter-donations' ),
+                    'type'        => __( 'Type', 'shelter-donations' ),
+                    'status'      => __( 'Status', 'shelter-donations' ),
+                    'expiry'      => __( 'Expires', 'shelter-donations' ),
+                    'logo_status' => __( 'Logo', 'shelter-donations' ),
                 ],
                 'sortable' => [ 'expiry', 'tier' ],
                 'row_actions' => [ 'send_reminder', 'extend_membership', 'view_order' ],
@@ -137,12 +137,12 @@ class List_Columns {
             'sd_memorial' => [
                 'columns' => [
                     'cb'             => '<input type="checkbox" />',
-                    'title'          => __( 'Memorial', 'starter-shelter' ),
-                    'honoree'        => __( 'Honoree', 'starter-shelter' ),
-                    'type'           => __( 'Type', 'starter-shelter' ),
-                    'donor'          => __( 'From', 'starter-shelter' ),
-                    'family_notified'=> __( 'Family Notified', 'starter-shelter' ),
-                    'date'           => __( 'Date', 'starter-shelter' ),
+                    'title'          => __( 'Memorial', 'shelter-donations' ),
+                    'honoree'        => __( 'Honoree', 'shelter-donations' ),
+                    'type'           => __( 'Type', 'shelter-donations' ),
+                    'donor'          => __( 'From', 'shelter-donations' ),
+                    'family_notified'=> __( 'Family Notified', 'shelter-donations' ),
+                    'date'           => __( 'Date', 'shelter-donations' ),
                 ],
                 'sortable' => [ 'date', 'type' ],
                 'row_actions' => [ 'view_tribute', 'notify_family' ],
@@ -150,12 +150,12 @@ class List_Columns {
             'sd_donor' => [
                 'columns' => [
                     'cb'              => '<input type="checkbox" />',
-                    'title'           => __( 'Donor', 'starter-shelter' ),
-                    'email'           => __( 'Email', 'starter-shelter' ),
-                    'lifetime_giving' => __( 'Lifetime Giving', 'starter-shelter' ),
-                    'donor_level'     => __( 'Level', 'starter-shelter' ),
-                    'membership'      => __( 'Membership', 'starter-shelter' ),
-                    'donation_count'  => __( 'Donations', 'starter-shelter' ),
+                    'title'           => __( 'Donor', 'shelter-donations' ),
+                    'email'           => __( 'Email', 'shelter-donations' ),
+                    'lifetime_giving' => __( 'Lifetime Giving', 'shelter-donations' ),
+                    'donor_level'     => __( 'Level', 'shelter-donations' ),
+                    'membership'      => __( 'Membership', 'shelter-donations' ),
+                    'donation_count'  => __( 'Donations', 'shelter-donations' ),
                 ],
                 'sortable' => [ 'lifetime_giving', 'donation_count', 'donor_level' ],
                 'row_actions' => [ 'view_dashboard', 'send_statement' ],
@@ -230,7 +230,7 @@ class List_Columns {
                 $amount = Helpers\format_currency( $donation['amount'] ?? 0 );
                 echo '<strong class="sd-amount">' . esc_html( $amount ) . '</strong>';
                 if ( ! empty( $donation['is_anonymous'] ) ) {
-                    echo ' <span class="sd-badge sd-badge--muted">' . esc_html__( 'Anonymous', 'starter-shelter' ) . '</span>';
+                    echo ' <span class="sd-badge sd-badge--muted">' . esc_html__( 'Anonymous', 'shelter-donations' ) . '</span>';
                 }
                 break;
 
@@ -322,9 +322,9 @@ class List_Columns {
             case 'type':
                 $type = $membership['membership_type'] ?? 'individual';
                 $type_labels = [
-                    'individual' => __( 'Individual', 'starter-shelter' ),
-                    'family'     => __( 'Family', 'starter-shelter' ),
-                    'business'   => __( 'Business', 'starter-shelter' ),
+                    'individual' => __( 'Individual', 'shelter-donations' ),
+                    'family'     => __( 'Family', 'shelter-donations' ),
+                    'business'   => __( 'Business', 'shelter-donations' ),
                 ];
                 $class = 'business' === $type ? 'sd-badge--business' : '';
                 echo '<span class="sd-badge ' . esc_attr( $class ) . '">' . esc_html( $type_labels[ $type ] ?? $type ) . '</span>';
@@ -337,12 +337,12 @@ class List_Columns {
                 if ( $is_active ) {
                     $days_left = ceil( ( strtotime( $end_date ) - time() ) / DAY_IN_SECONDS );
                     if ( $days_left <= 30 ) {
-                        echo '<span class="sd-badge sd-badge--warning">' . esc_html__( 'Expiring Soon', 'starter-shelter' ) . '</span>';
+                        echo '<span class="sd-badge sd-badge--warning">' . esc_html__( 'Expiring Soon', 'shelter-donations' ) . '</span>';
                     } else {
-                        echo '<span class="sd-badge sd-badge--success">' . esc_html__( 'Active', 'starter-shelter' ) . '</span>';
+                        echo '<span class="sd-badge sd-badge--success">' . esc_html__( 'Active', 'shelter-donations' ) . '</span>';
                     }
                 } else {
-                    echo '<span class="sd-badge sd-badge--error">' . esc_html__( 'Expired', 'starter-shelter' ) . '</span>';
+                    echo '<span class="sd-badge sd-badge--error">' . esc_html__( 'Expired', 'shelter-donations' ) . '</span>';
                 }
                 break;
 
@@ -368,12 +368,12 @@ class List_Columns {
                 $logo_status = $membership['logo_status'] ?? 'none';
                 
                 if ( ! $logo_id ) {
-                    echo '<span class="sd-badge sd-badge--muted">' . esc_html__( 'No Logo', 'starter-shelter' ) . '</span>';
+                    echo '<span class="sd-badge sd-badge--muted">' . esc_html__( 'No Logo', 'shelter-donations' ) . '</span>';
                 } else {
                     $statuses = [
-                        'pending'  => [ 'label' => __( 'Pending Review', 'starter-shelter' ), 'class' => 'sd-badge--warning' ],
-                        'approved' => [ 'label' => __( 'Approved', 'starter-shelter' ), 'class' => 'sd-badge--success' ],
-                        'rejected' => [ 'label' => __( 'Rejected', 'starter-shelter' ), 'class' => 'sd-badge--error' ],
+                        'pending'  => [ 'label' => __( 'Pending Review', 'shelter-donations' ), 'class' => 'sd-badge--warning' ],
+                        'approved' => [ 'label' => __( 'Approved', 'shelter-donations' ), 'class' => 'sd-badge--success' ],
+                        'rejected' => [ 'label' => __( 'Rejected', 'shelter-donations' ), 'class' => 'sd-badge--error' ],
                     ];
                     $status_info = $statuses[ $logo_status ] ?? $statuses['pending'];
                     
@@ -389,8 +389,8 @@ class List_Columns {
                     
                     // Quick action for pending.
                     if ( 'pending' === $logo_status ) {
-                        echo '<br><a href="' . esc_url( admin_url( 'admin.php?page=starter-shelter-logos' ) ) . '" class="sd-link-small">';
-                        echo esc_html__( 'Review', 'starter-shelter' ) . '</a>';
+                        echo '<br><a href="' . esc_url( admin_url( 'admin.php?page=shelter-donations-logos' ) ) . '" class="sd-link-small">';
+                        echo esc_html__( 'Review', 'shelter-donations' ) . '</a>';
                     }
                 }
                 break;
@@ -417,8 +417,8 @@ class List_Columns {
             case 'type':
                 $type  = Helpers\normalize_memorial_type( (string) ( $memorial['memorial_type'] ?? '' ) );
                 $types = [
-                    'person' => [ 'label' => __( 'Person', 'starter-shelter' ), 'icon' => '❤️' ],
-                    'pet'    => [ 'label' => __( 'Pet', 'starter-shelter' ), 'icon' => '🐾' ],
+                    'person' => [ 'label' => __( 'Person', 'shelter-donations' ), 'icon' => '❤️' ],
+                    'pet'    => [ 'label' => __( 'Pet', 'shelter-donations' ), 'icon' => '🐾' ],
                 ];
                 $type_info = $types[ $type ];
                 echo '<span class="sd-type-badge">' . esc_html( $type_info['icon'] . ' ' . $type_info['label'] ) . '</span>';
@@ -441,7 +441,7 @@ class List_Columns {
                             ?? $donor['full_name']
                             ?? ( ! empty( $donor['first_name'] ) || ! empty( $donor['last_name'] ) 
                                 ? trim( ( $donor['first_name'] ?? '' ) . ' ' . ( $donor['last_name'] ?? '' ) )
-                                : ( $donor_post ? $donor_post->post_title : __( 'Unknown', 'starter-shelter' ) ) 
+                                : ( $donor_post ? $donor_post->post_title : __( 'Unknown', 'shelter-donations' ) ) 
                             );
                         
                         printf(
@@ -473,12 +473,12 @@ class List_Columns {
                 $notified_date  = get_post_meta( $post_id, '_sd_family_notified_date', true );
                 
                 if ( ! $notify_enabled ) {
-                    echo '<span class="sd-meta">' . esc_html__( 'Not Requested', 'starter-shelter' ) . '</span>';
+                    echo '<span class="sd-meta">' . esc_html__( 'Not Requested', 'shelter-donations' ) . '</span>';
                 } elseif ( $notified_date ) {
-                    echo '<span class="sd-badge sd-badge--success">' . esc_html__( 'Sent', 'starter-shelter' ) . '</span>';
+                    echo '<span class="sd-badge sd-badge--success">' . esc_html__( 'Sent', 'shelter-donations' ) . '</span>';
                     echo '<br><span class="sd-meta">' . esc_html( Helpers\format_date( $notified_date ) ) . '</span>';
                 } else {
-                    echo '<span class="sd-badge sd-badge--warning">' . esc_html__( 'Pending', 'starter-shelter' ) . '</span>';
+                    echo '<span class="sd-badge sd-badge--warning">' . esc_html__( 'Pending', 'shelter-donations' ) . '</span>';
                 }
                 break;
         }
@@ -509,11 +509,11 @@ class List_Columns {
             case 'donor_level':
                 $level = $donor['donor_level'] ?? 'new';
                 $levels = [
-                    'new'      => [ 'label' => __( 'New', 'starter-shelter' ), 'class' => '' ],
-                    'bronze'   => [ 'label' => __( 'Bronze', 'starter-shelter' ), 'class' => 'sd-level--bronze' ],
-                    'silver'   => [ 'label' => __( 'Silver', 'starter-shelter' ), 'class' => 'sd-level--silver' ],
-                    'gold'     => [ 'label' => __( 'Gold', 'starter-shelter' ), 'class' => 'sd-level--gold' ],
-                    'platinum' => [ 'label' => __( 'Platinum', 'starter-shelter' ), 'class' => 'sd-level--platinum' ],
+                    'new'      => [ 'label' => __( 'New', 'shelter-donations' ), 'class' => '' ],
+                    'bronze'   => [ 'label' => __( 'Bronze', 'shelter-donations' ), 'class' => 'sd-level--bronze' ],
+                    'silver'   => [ 'label' => __( 'Silver', 'shelter-donations' ), 'class' => 'sd-level--silver' ],
+                    'gold'     => [ 'label' => __( 'Gold', 'shelter-donations' ), 'class' => 'sd-level--gold' ],
+                    'platinum' => [ 'label' => __( 'Platinum', 'shelter-donations' ), 'class' => 'sd-level--platinum' ],
                 ];
                 $level_info = $levels[ $level ] ?? $levels['new'];
                 echo '<span class="sd-level-badge ' . esc_attr( $level_info['class'] ) . '">';
@@ -546,7 +546,7 @@ class List_Columns {
                         esc_html( $tier_label )
                     );
                 } else {
-                    echo '<span class="sd-badge sd-badge--muted">' . esc_html__( 'None', 'starter-shelter' ) . '</span>';
+                    echo '<span class="sd-badge sd-badge--muted">' . esc_html__( 'None', 'shelter-donations' ) . '</span>';
                 }
                 break;
 
@@ -678,7 +678,7 @@ class List_Columns {
                             'id'     => $post->ID,
                             '_wpnonce' => wp_create_nonce( 'sd_view_receipt_' . $post->ID ),
                         ], admin_url( 'admin-ajax.php' ) ) ),
-                        esc_html__( 'View Receipt', 'starter-shelter' )
+                        esc_html__( 'View Receipt', 'shelter-donations' )
                     );
                     break;
 
@@ -688,7 +688,7 @@ class List_Columns {
                         $new_actions['view_order'] = sprintf(
                             '<a href="%s">%s</a>',
                             esc_url( admin_url( 'post.php?post=' . $order_id . '&action=edit' ) ),
-                            esc_html__( 'View Order', 'starter-shelter' )
+                            esc_html__( 'View Order', 'shelter-donations' )
                         );
                     }
                     break;
@@ -697,7 +697,7 @@ class List_Columns {
                     $new_actions['send_reminder'] = sprintf(
                         '<a href="%s" class="sd-action-link">%s</a>',
                         esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=sd_send_reminder&id=' . $post->ID ), 'sd_send_reminder_' . $post->ID ) ),
-                        esc_html__( 'Send Reminder', 'starter-shelter' )
+                        esc_html__( 'Send Reminder', 'shelter-donations' )
                     );
                     break;
 
@@ -705,7 +705,7 @@ class List_Columns {
                     $new_actions['extend'] = sprintf(
                         '<a href="%s" class="sd-action-link">%s</a>',
                         esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=sd_extend_membership&id=' . $post->ID ), 'sd_extend_' . $post->ID ) ),
-                        esc_html__( 'Extend 30 Days', 'starter-shelter' )
+                        esc_html__( 'Extend 30 Days', 'shelter-donations' )
                     );
                     break;
 
@@ -713,7 +713,7 @@ class List_Columns {
                     $new_actions['view_tribute'] = sprintf(
                         '<a href="%s" target="_blank">%s</a>',
                         esc_url( get_permalink( $post->ID ) ),
-                        esc_html__( 'View Tribute', 'starter-shelter' )
+                        esc_html__( 'View Tribute', 'shelter-donations' )
                     );
                     break;
 
@@ -726,7 +726,7 @@ class List_Columns {
                         $new_actions['notify_family'] = sprintf(
                             '<a href="%s" class="sd-action-link">%s</a>',
                             esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=sd_notify_family&id=' . $post->ID ), 'sd_notify_family_' . $post->ID ) ),
-                            esc_html__( 'Notify Family', 'starter-shelter' )
+                            esc_html__( 'Notify Family', 'shelter-donations' )
                         );
                     }
                     break;
@@ -738,7 +738,7 @@ class List_Columns {
                         $new_actions['view_dashboard'] = sprintf(
                             '<a href="%s" target="_blank">%s</a>',
                             esc_url( add_query_arg( 'donor_id', $post->ID, get_permalink( $dashboard_page ) ) ),
-                            esc_html__( 'View Dashboard', 'starter-shelter' )
+                            esc_html__( 'View Dashboard', 'shelter-donations' )
                         );
                     }
                     break;
@@ -747,7 +747,7 @@ class List_Columns {
                     $new_actions['send_statement'] = sprintf(
                         '<a href="%s" class="sd-action-link">%s</a>',
                         esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=sd_send_statement&id=' . $post->ID ), 'sd_send_statement_' . $post->ID ) ),
-                        esc_html__( 'Send Statement', 'starter-shelter' )
+                        esc_html__( 'Send Statement', 'shelter-donations' )
                     );
                     break;
             }

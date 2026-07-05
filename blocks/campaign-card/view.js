@@ -10,7 +10,7 @@ import { store, getContext, getElement } from '@wordpress/interactivity';
 /**
  * Campaign Card Store
  */
-const { state, actions } = store( 'starter-shelter/campaign-card', {
+const { state, actions } = store( 'shelter-donations/campaign-card', {
     state: {
         // Server-provided state:
         // - campaign: { id, name, goal, raised, progress, etc. }
@@ -79,7 +79,7 @@ const { state, actions } = store( 'starter-shelter/campaign-card', {
             
             try {
                 const response = yield fetch(
-                    `/wp-json/starter-shelter/v1/campaign/${context.campaignId}`
+                    `/wp-json/shelter-donations/v1/campaign/${context.campaignId}`
                 );
                 
                 if ( ! response.ok ) {

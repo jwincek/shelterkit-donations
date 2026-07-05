@@ -159,7 +159,7 @@ function get_donor_display_name( int $donor_id, ?bool $is_anonymous = null ): st
  */
 function get_memorial_donor_name( bool $is_anonymous, string $donor_display_name, int $donor_id ): string {
     if ( $is_anonymous ) {
-        return __( 'Anonymous Donor', 'starter-shelter' );
+        return __( 'Anonymous Donor', 'shelter-donations' );
     }
 
     if ( ! empty( $donor_display_name ) ) {
@@ -171,7 +171,7 @@ function get_memorial_donor_name( bool $is_anonymous, string $donor_display_name
     // Never return empty — use a friendly fallback.
     return ! empty( $name ) && 'Anonymous' !== $name
         ? $name
-        : __( 'A Friend', 'starter-shelter' );
+        : __( 'A Friend', 'shelter-donations' );
 }
 
 /**
@@ -403,8 +403,8 @@ function get_attachment_url( int $attachment_id, string $size = 'full' ): string
  */
 function get_memorial_type_label( string $type ): string {
     return match ( normalize_memorial_type( $type ) ) {
-        'pet'   => __( 'Pet', 'starter-shelter' ),
-        default => __( 'Person', 'starter-shelter' ),
+        'pet'   => __( 'Pet', 'shelter-donations' ),
+        default => __( 'Person', 'shelter-donations' ),
     };
 }
 
@@ -459,8 +459,8 @@ function normalize_dedication_type( string $raw ): string {
  */
 function get_dedication_type_label( string $type ): string {
     return match ( normalize_dedication_type( $type ) ) {
-        'honor' => __( 'In Honor Of', 'starter-shelter' ),
-        default => __( 'In Memory Of', 'starter-shelter' ),
+        'honor' => __( 'In Honor Of', 'shelter-donations' ),
+        default => __( 'In Memory Of', 'shelter-donations' ),
     };
 }
 
@@ -680,7 +680,7 @@ function normalize_tier( string $tier ): string {
  */
 function get_or_create_donor( string $email, string $name = '', array $extra_meta = [] ) {
     if ( empty( $email ) || ! is_email( $email ) ) {
-        return new \WP_Error( 'invalid_email', __( 'A valid email address is required.', 'starter-shelter' ) );
+        return new \WP_Error( 'invalid_email', __( 'A valid email address is required.', 'shelter-donations' ) );
     }
 
     $email = sanitize_email( $email );
@@ -964,11 +964,11 @@ function get_allocation_label( string $allocation ): string {
 
     // Default labels.
     return match ( $allocation ) {
-        'general-fund'      => __( 'General Fund', 'starter-shelter' ),
-        'medical-care'      => __( 'Medical Care', 'starter-shelter' ),
-        'food-supplies'     => __( 'Food & Supplies', 'starter-shelter' ),
-        'facility'          => __( 'Facility Improvements', 'starter-shelter' ),
-        'rescue-operations' => __( 'Rescue Operations', 'starter-shelter' ),
+        'general-fund'      => __( 'General Fund', 'shelter-donations' ),
+        'medical-care'      => __( 'Medical Care', 'shelter-donations' ),
+        'food-supplies'     => __( 'Food & Supplies', 'shelter-donations' ),
+        'facility'          => __( 'Facility Improvements', 'shelter-donations' ),
+        'rescue-operations' => __( 'Rescue Operations', 'shelter-donations' ),
         default             => ucwords( str_replace( [ '-', '_' ], ' ', $allocation ) ),
     };
 }

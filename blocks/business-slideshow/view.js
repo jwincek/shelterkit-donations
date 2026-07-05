@@ -21,7 +21,7 @@ const prefersReducedMotion = () =>
     window.matchMedia &&
     window.matchMedia( '(prefers-reduced-motion: reduce)' ).matches;
 
-const { state } = store( 'starter-shelter/business-slideshow', {
+const { state } = store( 'shelter-donations/business-slideshow', {
     state: {
         /** Track offset for the current index (value for style.transform). */
         get trackTransform() {

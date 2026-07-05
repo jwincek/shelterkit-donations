@@ -64,7 +64,7 @@ if ( ! $campaign_id ) {
     
     // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $wrapper_attributes is escaped markup from get_block_wrapper_attributes().
     echo '<div ' . $wrapper_attributes . '>';
-    echo '<p>' . esc_html__( 'No active campaign found.', 'starter-shelter' ) . '</p>';
+    echo '<p>' . esc_html__( 'No active campaign found.', 'shelter-donations' ) . '</p>';
     echo '</div>';
     return;
 }
@@ -145,7 +145,7 @@ $block_id = 'campaign-card-' . wp_unique_id();
 
 // Initialize interactivity state.
 wp_interactivity_state(
-    'starter-shelter/campaign-card',
+    'shelter-donations/campaign-card',
     [
         'campaign' => $campaign_data,
         'isAnimated' => false,
@@ -171,7 +171,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
 
 // Interactivity attributes.
 $interactive_attrs = sprintf(
-    'data-wp-interactive="starter-shelter/campaign-card" %s data-wp-init="callbacks.init"',
+    'data-wp-interactive="shelter-donations/campaign-card" %s data-wp-init="callbacks.init"',
     wp_interactivity_data_wp_context( $context )
 );
 ?>
@@ -182,7 +182,7 @@ $interactive_attrs = sprintf(
         <h3 class="sd-campaign-name"><?php echo esc_html( $campaign_data['name'] ); ?></h3>
         <?php if ( ! $campaign_data['is_active'] ) : ?>
         <span class="sd-campaign-badge sd-campaign-ended">
-            <?php esc_html_e( 'Ended', 'starter-shelter' ); ?>
+            <?php esc_html_e( 'Ended', 'shelter-donations' ); ?>
         </span>
         <?php endif; ?>
     </div>
@@ -220,12 +220,12 @@ $interactive_attrs = sprintf(
             <span class="sd-stat-value" data-wp-text="state.campaign.member_count">
                 <?php echo esc_html( (string) $campaign_data['member_count'] ); ?>
             </span>
-            <span class="sd-stat-label"><?php esc_html_e( 'Joined', 'starter-shelter' ); ?></span>
+            <span class="sd-stat-label"><?php esc_html_e( 'Joined', 'shelter-donations' ); ?></span>
             <?php else : ?>
             <span class="sd-stat-value" data-wp-text="state.campaign.raised_formatted">
                 <?php echo esc_html( $campaign_data['raised_formatted'] ); ?>
             </span>
-            <span class="sd-stat-label"><?php esc_html_e( 'Raised', 'starter-shelter' ); ?></span>
+            <span class="sd-stat-label"><?php esc_html_e( 'Raised', 'shelter-donations' ); ?></span>
             <?php endif; ?>
         </div>
         <?php endif; ?>
@@ -235,7 +235,7 @@ $interactive_attrs = sprintf(
             <span class="sd-stat-value">
                 <?php echo esc_html( $campaign_data['goal_formatted'] ); ?>
             </span>
-            <span class="sd-stat-label"><?php esc_html_e( 'Goal', 'starter-shelter' ); ?></span>
+            <span class="sd-stat-label"><?php esc_html_e( 'Goal', 'shelter-donations' ); ?></span>
         </div>
         <?php endif; ?>
 
@@ -244,7 +244,7 @@ $interactive_attrs = sprintf(
             <span class="sd-stat-value" data-wp-text="state.campaign.donor_count">
                 <?php echo esc_html( (string) $campaign_data['donor_count'] ); ?>
             </span>
-            <span class="sd-stat-label"><?php esc_html_e( 'Donors', 'starter-shelter' ); ?></span>
+            <span class="sd-stat-label"><?php esc_html_e( 'Donors', 'shelter-donations' ); ?></span>
         </div>
         <?php endif; ?>
 
@@ -253,7 +253,7 @@ $interactive_attrs = sprintf(
             <span class="sd-stat-value">
                 <?php echo esc_html( $campaign_data['end_date_formatted'] ); ?>
             </span>
-            <span class="sd-stat-label"><?php esc_html_e( 'Deadline', 'starter-shelter' ); ?></span>
+            <span class="sd-stat-label"><?php esc_html_e( 'Deadline', 'shelter-donations' ); ?></span>
         </div>
         <?php endif; ?>
     </div>
@@ -268,8 +268,8 @@ $interactive_attrs = sprintf(
         : Helpers\get_donation_page_url();
     if ( $show_donate_btn && $campaign_data['is_active'] && $button_url ) :
         $button_label = $is_member_drive
-            ? __( 'Join Now', 'starter-shelter' )
-            : __( 'Donate Now', 'starter-shelter' );
+            ? __( 'Join Now', 'shelter-donations' )
+            : __( 'Donate Now', 'shelter-donations' );
         ?>
     <div class="sd-campaign-action">
         <a

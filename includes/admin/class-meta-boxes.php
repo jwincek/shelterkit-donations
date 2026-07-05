@@ -154,7 +154,7 @@ class Meta_Boxes {
             case 'select':
                 $options = is_string( $field['options'] ) ? Config::get_item( 'settings', $field['options'], [] ) : $field['options'];
                 echo '<select id="sd_' . esc_attr( $field_id ) . '" name="sd_' . esc_attr( $field_id ) . '">';
-                echo '<option value="">' . esc_html__( '— Select —', 'starter-shelter' ) . '</option>';
+                echo '<option value="">' . esc_html__( '— Select —', 'shelter-donations' ) . '</option>';
                 foreach ( $options as $opt_val => $opt_label ) {
                     printf( '<option value="%s" %s>%s</option>', esc_attr( $opt_val ), selected( $value, $opt_val, false ), esc_html( $opt_label ) );
                 }
@@ -166,7 +166,7 @@ class Meta_Boxes {
                 $tiers_config = Config::get( 'tiers' );
                 $all_tiers = $tiers_config['tiers'] ?? [];
                 echo '<select id="sd_' . esc_attr( $field_id ) . '" name="sd_' . esc_attr( $field_id ) . '" class="sd-tier-select" data-tier-select>';
-                echo '<option value="">' . esc_html__( '— Select Tier —', 'starter-shelter' ) . '</option>';
+                echo '<option value="">' . esc_html__( '— Select Tier —', 'shelter-donations' ) . '</option>';
                 foreach ( $all_tiers as $tier_type => $tiers ) {
                     foreach ( $tiers as $slug => $data ) {
                         $hidden = $tier_type !== $type_val ? ' style="display:none;"' : '';
@@ -196,8 +196,8 @@ class Meta_Boxes {
                 if ( $img_url ) echo '<img src="' . esc_url( $img_url ) . '" />';
                 echo '</div>';
                 printf( '<input type="hidden" id="sd_%s" name="sd_%s" value="%s" />', esc_attr( $field_id ), esc_attr( $field_id ), esc_attr( $value ) );
-                echo '<button type="button" class="button sd-upload-image">' . esc_html__( 'Select Image', 'starter-shelter' ) . '</button>';
-                echo '<button type="button" class="button sd-remove-image"' . ( ! $value ? ' style="display:none;"' : '' ) . '>' . esc_html__( 'Remove', 'starter-shelter' ) . '</button></div>';
+                echo '<button type="button" class="button sd-upload-image">' . esc_html__( 'Select Image', 'shelter-donations' ) . '</button>';
+                echo '<button type="button" class="button sd-remove-image"' . ( ! $value ? ' style="display:none;"' : '' ) . '>' . esc_html__( 'Remove', 'shelter-donations' ) . '</button></div>';
                 break;
 
             case 'post_select':
@@ -208,12 +208,12 @@ class Meta_Boxes {
                 break;
 
             case 'user_select':
-                wp_dropdown_users( [ 'name' => 'sd_' . $field_id, 'id' => 'sd_' . $field_id, 'selected' => $value, 'show_option_none' => __( '— No User —', 'starter-shelter' ), 'option_none_value' => 0 ] );
+                wp_dropdown_users( [ 'name' => 'sd_' . $field_id, 'id' => 'sd_' . $field_id, 'selected' => $value, 'show_option_none' => __( '— No User —', 'shelter-donations' ), 'option_none_value' => 0 ] );
                 break;
 
             case 'order_link':
-                if ( $value ) printf( '<a href="%s" class="button">%s #%d</a>', esc_url( admin_url( 'post.php?post=' . $value . '&action=edit' ) ), esc_html__( 'View Order', 'starter-shelter' ), (int) $value );
-                else echo '<span class="description">' . esc_html__( 'Not linked to an order', 'starter-shelter' ) . '</span>';
+                if ( $value ) printf( '<a href="%s" class="button">%s #%d</a>', esc_url( admin_url( 'post.php?post=' . $value . '&action=edit' ) ), esc_html__( 'View Order', 'shelter-donations' ), (int) $value );
+                else echo '<span class="description">' . esc_html__( 'Not linked to an order', 'shelter-donations' ) . '</span>';
                 break;
 
             case 'currency_display':
@@ -359,7 +359,7 @@ class Meta_Boxes {
 
         $deps = array_values( array_filter( [ 'jquery', $select2_handle ] ) );
         wp_enqueue_script( 'sd-meta-boxes', STARTER_SHELTER_URL . 'assets/js/admin-meta-boxes.js', $deps, STARTER_SHELTER_VERSION, true );
-        wp_localize_script( 'sd-meta-boxes', 'sdMetaBoxes', [ 'restUrl' => rest_url( 'wp/v2/' ), 'nonce' => wp_create_nonce( 'wp_rest' ), 'selectImage' => __( 'Select Image', 'starter-shelter' ), 'useImage' => __( 'Use this image', 'starter-shelter' ) ] );
+        wp_localize_script( 'sd-meta-boxes', 'sdMetaBoxes', [ 'restUrl' => rest_url( 'wp/v2/' ), 'nonce' => wp_create_nonce( 'wp_rest' ), 'selectImage' => __( 'Select Image', 'shelter-donations' ), 'useImage' => __( 'Use this image', 'shelter-donations' ) ] );
 
         wp_add_inline_style( 'wp-admin', '
             /* Meta box table layout */

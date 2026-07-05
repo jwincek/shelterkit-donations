@@ -11,26 +11,26 @@
 
         return el( Fragment, {},
             el( InspectorControls, {},
-                el( PanelBody, { title: __( 'Form Settings', 'starter-shelter' ), initialOpen: true },
+                el( PanelBody, { title: __( 'Form Settings', 'shelter-donations' ), initialOpen: true },
                     el( TextControl, {
-                        label: __( 'Title', 'starter-shelter' ),
+                        label: __( 'Title', 'shelter-donations' ),
                         value: attributes.title || '',
                         onChange: function( value ) { setAttributes( { title: value } ); },
                     } ),
                     el( TextControl, {
-                        label: __( 'Subtitle', 'starter-shelter' ),
+                        label: __( 'Subtitle', 'shelter-donations' ),
                         value: attributes.subtitle || '',
                         onChange: function( value ) { setAttributes( { subtitle: value } ); },
                     } ),
                     el( TextControl, {
-                        label: __( 'Submit Button Text', 'starter-shelter' ),
+                        label: __( 'Submit Button Text', 'shelter-donations' ),
                         value: attributes.submitButtonText || '',
                         onChange: function( value ) { setAttributes( { submitButtonText: value } ); },
                     } )
                 ),
-                el( PanelBody, { title: __( 'Amount Options', 'starter-shelter' ), initialOpen: false },
+                el( PanelBody, { title: __( 'Amount Options', 'shelter-donations' ), initialOpen: false },
                     el( TextControl, {
-                        label: __( 'Preset Amounts (comma-separated)', 'starter-shelter' ),
+                        label: __( 'Preset Amounts (comma-separated)', 'shelter-donations' ),
                         value: ( attributes.presetAmounts || [] ).join( ', ' ),
                         onChange: function( value ) {
                             var amounts = value.split( ',' ).map( function( n ) {
@@ -40,53 +40,53 @@
                         },
                     } ),
                     el( RangeControl, {
-                        label: __( 'Default Amount', 'starter-shelter' ),
+                        label: __( 'Default Amount', 'shelter-donations' ),
                         value: attributes.defaultAmount || 50,
                         onChange: function( value ) { setAttributes( { defaultAmount: value } ); },
                         min: 1,
                         max: 1000,
                     } ),
                     el( RangeControl, {
-                        label: __( 'Minimum Amount', 'starter-shelter' ),
+                        label: __( 'Minimum Amount', 'shelter-donations' ),
                         value: attributes.minAmount || 10,
                         onChange: function( value ) { setAttributes( { minAmount: value } ); },
                         min: 1,
                         max: 100,
                     } )
                 ),
-                el( PanelBody, { title: __( 'Default Values', 'starter-shelter' ), initialOpen: false },
+                el( PanelBody, { title: __( 'Default Values', 'shelter-donations' ), initialOpen: false },
                     el( SelectControl, {
-                        label: __( 'Default Dedication Type', 'starter-shelter' ),
+                        label: __( 'Default Dedication Type', 'shelter-donations' ),
                         value: attributes.defaultDedicationType || 'memory',
                         options: [
-                            { value: 'memory', label: __( 'In Memory Of', 'starter-shelter' ) },
-                            { value: 'honor', label: __( 'In Honor Of', 'starter-shelter' ) },
+                            { value: 'memory', label: __( 'In Memory Of', 'shelter-donations' ) },
+                            { value: 'honor', label: __( 'In Honor Of', 'shelter-donations' ) },
                         ],
                         onChange: function( value ) { setAttributes( { defaultDedicationType: value } ); },
                     } ),
                     el( SelectControl, {
-                        label: __( 'Default Honoree Type', 'starter-shelter' ),
+                        label: __( 'Default Honoree Type', 'shelter-donations' ),
                         value: attributes.defaultHonoreeType || 'person',
                         options: [
-                            { value: 'person', label: __( 'Person', 'starter-shelter' ) },
-                            { value: 'pet', label: __( 'Pet', 'starter-shelter' ) },
+                            { value: 'person', label: __( 'Person', 'shelter-donations' ) },
+                            { value: 'pet', label: __( 'Pet', 'shelter-donations' ) },
                         ],
                         onChange: function( value ) { setAttributes( { defaultHonoreeType: value } ); },
                     } )
                 ),
-                el( PanelBody, { title: __( 'Display Options', 'starter-shelter' ), initialOpen: false },
+                el( PanelBody, { title: __( 'Display Options', 'shelter-donations' ), initialOpen: false },
                     el( ToggleControl, {
-                        label: __( 'Show Anonymous Option', 'starter-shelter' ),
+                        label: __( 'Show Anonymous Option', 'shelter-donations' ),
                         checked: attributes.showAnonymous,
                         onChange: function( value ) { setAttributes( { showAnonymous: value } ); },
                     } ),
                     el( ToggleControl, {
-                        label: __( 'Show Family Notification', 'starter-shelter' ),
+                        label: __( 'Show Family Notification', 'shelter-donations' ),
                         checked: attributes.showFamilyNotification,
                         onChange: function( value ) { setAttributes( { showFamilyNotification: value } ); },
                     } ),
                     el( ToggleControl, {
-                        label: __( 'Show Send Card Option', 'starter-shelter' ),
+                        label: __( 'Show Send Card Option', 'shelter-donations' ),
                         checked: attributes.showSendCard,
                         onChange: function( value ) { setAttributes( { showSendCard: value } ); },
                     } )
@@ -94,14 +94,14 @@
             ),
             el( 'div', blockProps,
                 el( ServerSideRender, {
-                    block: 'starter-shelter/memorial-form',
+                    block: 'shelter-donations/memorial-form',
                     attributes: attributes,
                 } )
             )
         );
     };
 
-    wp.blocks.registerBlockType( 'starter-shelter/memorial-form', {
+    wp.blocks.registerBlockType( 'shelter-donations/memorial-form', {
         edit: Edit,
     } );
 } )( window.wp );

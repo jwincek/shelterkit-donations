@@ -33,7 +33,7 @@ const CANDLE_RATE_LIMIT_SECONDS = 2;
  * @since 2.1.0
  */
 function register_candle_routes(): void {
-	$namespace = 'starter-shelter/v1';
+	$namespace = 'shelter-donations/v1';
 
 	register_rest_route( $namespace, '/candles/toggle', [
 		[

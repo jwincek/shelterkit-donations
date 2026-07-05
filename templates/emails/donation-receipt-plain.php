@@ -16,33 +16,33 @@ echo "= " . esc_html( $heading ) . " =\n\n";
 
 printf(
     /* translators: %s: recipient name */
-    esc_html__( 'Dear %s,', 'starter-shelter' ),
-    esc_html( $donor['first_name'] ?? __( 'Friend', 'starter-shelter' ) )
+    esc_html__( 'Dear %s,', 'shelter-donations' ),
+    esc_html( $donor['first_name'] ?? __( 'Friend', 'shelter-donations' ) )
 );
 echo "\n\n";
 
-echo esc_html__( 'Thank you for your generous donation to support our animal shelter. Your contribution makes a real difference in the lives of the animals in our care.', 'starter-shelter' );
+echo esc_html__( 'Thank you for your generous donation to support our animal shelter. Your contribution makes a real difference in the lives of the animals in our care.', 'shelter-donations' );
 echo "\n\n";
 
-echo "= " . esc_html__( 'Donation Details', 'starter-shelter' ) . " =\n\n";
+echo "= " . esc_html__( 'Donation Details', 'shelter-donations' ) . " =\n\n";
 
-echo esc_html__( 'Amount:', 'starter-shelter' ) . ' ' . esc_html( $donation['amount_formatted'] ?? '' ) . "\n";
-echo esc_html__( 'Date:', 'starter-shelter' ) . ' ' . esc_html( $donation['date_formatted'] ?? '' ) . "\n";
-echo esc_html__( 'Allocation:', 'starter-shelter' ) . ' ' . esc_html( $donation['allocation_label'] ?? $donation['allocation'] ?? '' ) . "\n";
+echo esc_html__( 'Amount:', 'shelter-donations' ) . ' ' . esc_html( $donation['amount_formatted'] ?? '' ) . "\n";
+echo esc_html__( 'Date:', 'shelter-donations' ) . ' ' . esc_html( $donation['date_formatted'] ?? '' ) . "\n";
+echo esc_html__( 'Allocation:', 'shelter-donations' ) . ' ' . esc_html( $donation['allocation_label'] ?? $donation['allocation'] ?? '' ) . "\n";
 
 if ( ! empty( $donation['dedication'] ) ) {
-    echo esc_html__( 'Dedication:', 'starter-shelter' ) . ' ' . esc_html( $donation['dedication'] ) . "\n";
+    echo esc_html__( 'Dedication:', 'shelter-donations' ) . ' ' . esc_html( $donation['dedication'] ) . "\n";
 }
 
-echo esc_html__( 'Reference:', 'starter-shelter' ) . ' #' . esc_html( $donation['id'] ?? '' ) . "\n\n";
+echo esc_html__( 'Reference:', 'shelter-donations' ) . ' #' . esc_html( $donation['id'] ?? '' ) . "\n\n";
 
-echo esc_html__( 'This donation is tax-deductible to the extent allowed by law. No goods or services were provided in exchange for this contribution.', 'starter-shelter' );
+echo esc_html__( 'This donation is tax-deductible to the extent allowed by law. No goods or services were provided in exchange for this contribution.', 'shelter-donations' );
 echo "\n\n";
 
-echo esc_html__( 'Please keep this email as your receipt for tax purposes.', 'starter-shelter' );
+echo esc_html__( 'Please keep this email as your receipt for tax purposes.', 'shelter-donations' );
 echo "\n\n";
 
-echo esc_html__( 'With gratitude,', 'starter-shelter' ) . "\n";
+echo esc_html__( 'With gratitude,', 'shelter-donations' ) . "\n";
 echo esc_html( get_bloginfo( 'name' ) ) . "\n";
 
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";

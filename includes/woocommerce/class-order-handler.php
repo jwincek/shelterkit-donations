@@ -245,7 +245,7 @@ class Order_Handler {
                 'ability_not_found',
                 sprintf(
                     /* translators: %s: ability name */
-                    __( 'Ability "%s" not found.', 'starter-shelter' ),
+                    __( 'Ability "%s" not found.', 'shelter-donations' ),
                     $ability_name
                 )
             );
@@ -310,7 +310,7 @@ class Order_Handler {
                 if ( empty( $honoree ) ) {
                     return new WP_Error(
                         'missing_required_meta',
-                        __( 'Memorial missing required fields (honoree name). Item may have been added directly without using the memorial form. Please use the memorial tribute form to add this item.', 'starter-shelter' )
+                        __( 'Memorial missing required fields (honoree name). Item may have been added directly without using the memorial form. Please use the memorial tribute form to add this item.', 'shelter-donations' )
                     );
                 }
             }
@@ -330,7 +330,7 @@ class Order_Handler {
             if ( empty( $honoree ) ) {
                 return new WP_Error(
                     'missing_honoree',
-                    __( 'Memorial tribute is missing the honoree name.', 'starter-shelter' )
+                    __( 'Memorial tribute is missing the honoree name.', 'shelter-donations' )
                 );
             }
         }
@@ -344,7 +344,7 @@ class Order_Handler {
                 if ( ! $variation_id ) {
                     return new WP_Error(
                         'missing_tier',
-                        __( 'Membership is missing the tier selection.', 'starter-shelter' )
+                        __( 'Membership is missing the tier selection.', 'shelter-donations' )
                     );
                 }
             }
@@ -388,10 +388,10 @@ class Order_Handler {
             return;
         }
 
-        $note = __( 'Shelter Donations Processing:', 'starter-shelter' ) . "\n" . implode( "\n", $note_parts );
+        $note = __( 'Shelter Donations Processing:', 'shelter-donations' ) . "\n" . implode( "\n", $note_parts );
 
         if ( $has_errors ) {
-            $note .= "\n\n" . __( '⚠️ Some items had errors. Please review and reprocess if needed.', 'starter-shelter' );
+            $note .= "\n\n" . __( '⚠️ Some items had errors. Please review and reprocess if needed.', 'shelter-donations' );
         }
 
         $order->add_order_note( $note );
@@ -409,7 +409,7 @@ class Order_Handler {
         if ( isset( $result['donation_id'] ) ) {
             return sprintf(
                 /* translators: %d: donation ID */
-                __( 'Donation #%d created', 'starter-shelter' ),
+                __( 'Donation #%d created', 'shelter-donations' ),
                 $result['donation_id']
             );
         }
@@ -418,7 +418,7 @@ class Order_Handler {
             $tier_label = $result['tier_label'] ?? $result['tier'] ?? '';
             return sprintf(
                 /* translators: 1: membership ID, 2: tier label */
-                __( 'Membership #%1$d created (%2$s)', 'starter-shelter' ),
+                __( 'Membership #%1$d created (%2$s)', 'shelter-donations' ),
                 $result['membership_id'],
                 $tier_label
             );
@@ -428,13 +428,13 @@ class Order_Handler {
             $honoree = $result['honoree_name'] ?? '';
             return sprintf(
                 /* translators: 1: memorial ID, 2: honoree name */
-                __( 'Memorial #%1$d created for %2$s', 'starter-shelter' ),
+                __( 'Memorial #%1$d created for %2$s', 'shelter-donations' ),
                 $result['memorial_id'],
                 $honoree
             );
         }
 
-        return $result['status'] ?? __( 'Processed', 'starter-shelter' );
+        return $result['status'] ?? __( 'Processed', 'shelter-donations' );
     }
 
     /**
@@ -449,7 +449,7 @@ class Order_Handler {
         if ( $screen_id ) {
             add_meta_box(
                 'sd_processing_status',
-                __( 'Shelter Donations', 'starter-shelter' ),
+                __( 'Shelter Donations', 'shelter-donations' ),
                 [ self::class, 'render_processing_meta_box' ],
                 $screen_id,
                 'side',
@@ -460,7 +460,7 @@ class Order_Handler {
         // Legacy support for traditional post-based orders.
         add_meta_box(
             'sd_processing_status',
-            __( 'Shelter Donations', 'starter-shelter' ),
+            __( 'Shelter Donations', 'shelter-donations' ),
             [ self::class, 'render_processing_meta_box' ],
             'shop_order',
             'side',
@@ -512,7 +512,7 @@ class Order_Handler {
 
         // Check if order has shelter products.
         if ( ! Product_Mapper::order_has_shelter_products( $order ) ) {
-            echo '<p>' . esc_html__( 'No shelter products in this order.', 'starter-shelter' ) . '</p>';
+            echo '<p>' . esc_html__( 'No shelter products in this order.', 'shelter-donations' ) . '</p>';
             return;
         }
 
@@ -520,11 +520,11 @@ class Order_Handler {
         $results = $order->get_meta( self::RESULTS_META_KEY );
 
         if ( $processed ) {
-            echo '<p><strong>' . esc_html__( 'Status:', 'starter-shelter' ) . '</strong> ';
+            echo '<p><strong>' . esc_html__( 'Status:', 'shelter-donations' ) . '</strong> ';
             echo '<span class="dashicons dashicons-yes-alt" style="color: green;"></span> ';
             printf(
                 /* translators: %s: processing date */
-                esc_html__( 'Processed on %s', 'starter-shelter' ),
+                esc_html__( 'Processed on %s', 'shelter-donations' ),
                 esc_html( $processed )
             );
             echo '</p>';
@@ -547,7 +547,7 @@ class Order_Handler {
 
             // Reprocess button.
             echo '<button type="button" class="button" id="sd-reprocess-order" data-order-id="' . esc_attr( $order->get_id() ) . '">';
-            echo esc_html__( 'Reprocess Order', 'starter-shelter' );
+            echo esc_html__( 'Reprocess Order', 'shelter-donations' );
             echo '</button>';
             
             wp_nonce_field( 'sd_reprocess_order', 'sd_reprocess_nonce' );
@@ -557,12 +557,12 @@ class Order_Handler {
             <script>
             jQuery(document).ready(function($) {
                 $('#sd-reprocess-order').on('click', function() {
-                    if (!confirm('<?php echo esc_js( __( 'Are you sure you want to reprocess this order? This may create duplicate records.', 'starter-shelter' ) ); ?>')) {
+                    if (!confirm('<?php echo esc_js( __( 'Are you sure you want to reprocess this order? This may create duplicate records.', 'shelter-donations' ) ); ?>')) {
                         return;
                     }
                     
                     var $btn = $(this);
-                    $btn.prop('disabled', true).text('<?php echo esc_js( __( 'Processing...', 'starter-shelter' ) ); ?>');
+                    $btn.prop('disabled', true).text('<?php echo esc_js( __( 'Processing...', 'shelter-donations' ) ); ?>');
                     
                     $.post(ajaxurl, {
                         action: 'sd_reprocess_order',
@@ -572,8 +572,8 @@ class Order_Handler {
                         if (response.success) {
                             location.reload();
                         } else {
-                            alert(response.data || '<?php echo esc_js( __( 'An error occurred.', 'starter-shelter' ) ); ?>');
-                            $btn.prop('disabled', false).text('<?php echo esc_js( __( 'Reprocess Order', 'starter-shelter' ) ); ?>');
+                            alert(response.data || '<?php echo esc_js( __( 'An error occurred.', 'shelter-donations' ) ); ?>');
+                            $btn.prop('disabled', false).text('<?php echo esc_js( __( 'Reprocess Order', 'shelter-donations' ) ); ?>');
                         }
                     });
                 });
@@ -581,11 +581,11 @@ class Order_Handler {
             </script>
             <?php
         } else {
-            echo '<p><strong>' . esc_html__( 'Status:', 'starter-shelter' ) . '</strong> ';
+            echo '<p><strong>' . esc_html__( 'Status:', 'shelter-donations' ) . '</strong> ';
             echo '<span class="dashicons dashicons-clock" style="color: orange;"></span> ';
-            echo esc_html__( 'Pending processing', 'starter-shelter' );
+            echo esc_html__( 'Pending processing', 'shelter-donations' );
             echo '</p>';
-            echo '<p class="description">' . esc_html__( 'Order will be processed when status changes to Processing or Completed.', 'starter-shelter' ) . '</p>';
+            echo '<p class="description">' . esc_html__( 'Order will be processed when status changes to Processing or Completed.', 'shelter-donations' ) . '</p>';
         }
     }
 
@@ -598,14 +598,14 @@ class Order_Handler {
         check_ajax_referer( 'sd_reprocess_order', 'nonce' );
 
         if ( ! current_user_can( 'manage_woocommerce' ) ) {
-            wp_send_json_error( __( 'Permission denied.', 'starter-shelter' ) );
+            wp_send_json_error( __( 'Permission denied.', 'shelter-donations' ) );
         }
 
         $order_id = isset( $_POST['order_id'] ) ? absint( $_POST['order_id'] ) : 0;
         $order = wc_get_order( $order_id );
 
         if ( ! $order ) {
-            wp_send_json_error( __( 'Order not found.', 'starter-shelter' ) );
+            wp_send_json_error( __( 'Order not found.', 'shelter-donations' ) );
         }
 
         // Clear processed flag to allow reprocessing.

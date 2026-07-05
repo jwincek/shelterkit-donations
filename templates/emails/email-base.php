@@ -3,7 +3,7 @@
  * Base email template for Shelter Donations.
  *
  * This template provides common structure for all shelter donation emails.
- * Override by copying to yourtheme/starter-shelter/emails/email-base.php
+ * Override by copying to yourtheme/shelter-donations/emails/email-base.php
  *
  * @package Starter_Shelter
  * @subpackage Templates

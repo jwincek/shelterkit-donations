@@ -17,3 +17,13 @@
 /phpunit-integration.xml.dist
 /phpunit-wc.xml.dist
 /phpcs.xml
+/phpcs.xml.dist
+/.editorconfig
+/.wp-env.json
+/.phpunit.cache
+/.phpunit.result.cache
+/AUDIT-admin-dashboard-reports.md
+/AUDIT-campaigns.md
+/AUDIT-pattern-sweep.md
+/AUDIT-wc-integration.md
+/migration-scripts

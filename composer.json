@@ -1,13 +1,13 @@
 {
-	"name": "starter-shelter/starter-shelter-donations",
+	"name": "jwincek/shelter-donations",
 	"description": "Animal shelter donations, memberships, and memorials management using WordPress 6.9+ Abilities API.",
 	"type": "wordpress-plugin",
 	"license": "GPL-2.0-or-later",
-	"homepage": "https://github.com/starter-shelter/starter-shelter-donations",
+	"homepage": "https://github.com/jwincek/shelter-donations",
 	"authors": [
 		{
-			"name": "Starter Shelter",
-			"homepage": "https://github.com/starter-shelter"
+			"name": "VCPA Humane Society",
+			"homepage": "https://vcpahumane.org"
 		}
 	],
 	"require": {

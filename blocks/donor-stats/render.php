@@ -47,7 +47,7 @@ $block_id = 'donor-stats-' . wp_unique_id();
 // Initialize interactivity state if animation is enabled.
 if ( $animate_numbers ) {
     wp_interactivity_state(
-        'starter-shelter/donor-stats',
+        'shelter-donations/donor-stats',
         [
             'stats' => [
                 'total'   => $stats,
@@ -89,7 +89,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
 $interactive_attrs = '';
 if ( $animate_numbers ) {
     $interactive_attrs = sprintf(
-        'data-wp-interactive="starter-shelter/donor-stats" %s data-wp-init="callbacks.init" data-wp-watch="callbacks.watchViewport"',
+        'data-wp-interactive="shelter-donations/donor-stats" %s data-wp-init="callbacks.init" data-wp-watch="callbacks.watchViewport"',
         wp_interactivity_data_wp_context( $context )
     );
 }
@@ -114,7 +114,7 @@ if ( $animate_numbers ) {
             >
                 <?php echo esc_html( $total_formatted ); ?>
             </span>
-            <span class="sd-stat-label"><?php esc_html_e( 'Total Donations', 'starter-shelter' ); ?></span>
+            <span class="sd-stat-label"><?php esc_html_e( 'Total Donations', 'shelter-donations' ); ?></span>
         </div>
     </div>
     <?php endif; ?>
@@ -135,7 +135,7 @@ if ( $animate_numbers ) {
             >
                 <?php echo esc_html( number_format( $count ) ); ?>
             </span>
-            <span class="sd-stat-label"><?php esc_html_e( 'Donations Made', 'starter-shelter' ); ?></span>
+            <span class="sd-stat-label"><?php esc_html_e( 'Donations Made', 'shelter-donations' ); ?></span>
         </div>
     </div>
     <?php endif; ?>
@@ -156,7 +156,7 @@ if ( $animate_numbers ) {
             >
                 <?php echo esc_html( number_format( $donors ) ); ?>
             </span>
-            <span class="sd-stat-label"><?php esc_html_e( 'Generous Donors', 'starter-shelter' ); ?></span>
+            <span class="sd-stat-label"><?php esc_html_e( 'Generous Donors', 'shelter-donations' ); ?></span>
         </div>
     </div>
     <?php endif; ?>
@@ -177,7 +177,7 @@ if ( $animate_numbers ) {
             >
                 <?php echo esc_html( number_format( $members ) ); ?>
             </span>
-            <span class="sd-stat-label"><?php esc_html_e( 'Active Members', 'starter-shelter' ); ?></span>
+            <span class="sd-stat-label"><?php esc_html_e( 'Active Members', 'shelter-donations' ); ?></span>
         </div>
     </div>
     <?php endif; ?>

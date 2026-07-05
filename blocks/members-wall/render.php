@@ -50,7 +50,7 @@ if ( empty( $items ) ) {
     if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
         // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $wrapper_attributes is escaped markup from get_block_wrapper_attributes().
         echo '<div ' . $wrapper_attributes . '><p class="sd-mw-empty">'
-            . esc_html__( 'No members to recognize yet (active members who haven\'t opted out will appear here).', 'starter-shelter' )
+            . esc_html__( 'No members to recognize yet (active members who haven\'t opted out will appear here).', 'shelter-donations' )
             . '</p></div>';
     }
     return;

@@ -7,7 +7,7 @@
 
 import { store, getContext } from '@wordpress/interactivity';
 
-const NAMESPACE = 'starter-shelter/contribution-tabs';
+const NAMESPACE = 'shelter-donations/contribution-tabs';
 
 const { state } = store( NAMESPACE, {
 	state: {

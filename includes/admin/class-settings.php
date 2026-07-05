@@ -23,7 +23,7 @@ class Settings {
 
     private const OPTION_GROUP = 'starter_shelter_settings';
     private const OPTION_NAME = 'starter_shelter_options';
-    private const PAGE_SLUG = 'starter-shelter-settings';
+    private const PAGE_SLUG = 'shelter-donations-settings';
 
     private static array $tabs = [
         'general'  => 'General',
@@ -41,8 +41,8 @@ class Settings {
     public static function add_settings_page(): void {
         add_submenu_page(
             Menu::MENU_SLUG,
-            __( 'Shelter Donations Settings', 'starter-shelter' ),
-            __( 'Settings', 'starter-shelter' ),
+            __( 'Shelter Donations Settings', 'shelter-donations' ),
+            __( 'Settings', 'shelter-donations' ),
             'manage_options',
             self::PAGE_SLUG,
             [ self::class, 'render_settings_page' ]
@@ -127,35 +127,35 @@ class Settings {
     }
 
     private static function register_sections(): void {
-        add_settings_section( 'sd_general', __( 'General Settings', 'starter-shelter' ), function() {
-            echo '<p>' . esc_html__( 'Configure general plugin settings.', 'starter-shelter' ) . '</p>';
+        add_settings_section( 'sd_general', __( 'General Settings', 'shelter-donations' ), function() {
+            echo '<p>' . esc_html__( 'Configure general plugin settings.', 'shelter-donations' ) . '</p>';
         }, self::PAGE_SLUG . '_general' );
 
-        add_settings_section( 'sd_organization', __( 'Organization Information', 'starter-shelter' ), function() {
-            echo '<p>' . esc_html__( 'Your organization details for receipts and communications.', 'starter-shelter' ) . '</p>';
+        add_settings_section( 'sd_organization', __( 'Organization Information', 'shelter-donations' ), function() {
+            echo '<p>' . esc_html__( 'Your organization details for receipts and communications.', 'shelter-donations' ) . '</p>';
         }, self::PAGE_SLUG . '_general' );
 
-        add_settings_section( 'sd_pages', __( 'Pages', 'starter-shelter' ), function() {
-            echo '<p>' . esc_html__( 'Map donate and join CTAs to specific pages on your site. When unset, those buttons are hidden rather than emit broken /donate/ links.', 'starter-shelter' ) . '</p>';
+        add_settings_section( 'sd_pages', __( 'Pages', 'shelter-donations' ), function() {
+            echo '<p>' . esc_html__( 'Map donate and join CTAs to specific pages on your site. When unset, those buttons are hidden rather than emit broken /donate/ links.', 'shelter-donations' ) . '</p>';
         }, self::PAGE_SLUG . '_general' );
 
-        add_settings_section( 'sd_features', __( 'Features', 'starter-shelter' ), function() {
-            echo '<p>' . esc_html__( 'Enable or disable plugin features.', 'starter-shelter' ) . '</p>';
+        add_settings_section( 'sd_features', __( 'Features', 'shelter-donations' ), function() {
+            echo '<p>' . esc_html__( 'Enable or disable plugin features.', 'shelter-donations' ) . '</p>';
         }, self::PAGE_SLUG . '_general' );
 
-        add_settings_section( 'sd_emails', __( 'Email Settings', 'starter-shelter' ), function() {
-            echo '<p>' . esc_html__( 'Configure email notifications.', 'starter-shelter' ) . '</p>';
+        add_settings_section( 'sd_emails', __( 'Email Settings', 'shelter-donations' ), function() {
+            echo '<p>' . esc_html__( 'Configure email notifications.', 'shelter-donations' ) . '</p>';
         }, self::PAGE_SLUG . '_emails' );
 
-        add_settings_section( 'sd_data', __( 'Data Management', 'starter-shelter' ), function() {
-            echo '<p>' . esc_html__( 'Control what happens to your data when the plugin is uninstalled.', 'starter-shelter' ) . '</p>';
+        add_settings_section( 'sd_data', __( 'Data Management', 'shelter-donations' ), function() {
+            echo '<p>' . esc_html__( 'Control what happens to your data when the plugin is uninstalled.', 'shelter-donations' ) . '</p>';
         }, self::PAGE_SLUG . '_general' );
 
     }
 
     private static function register_fields(): void {
         // General tab fields
-        self::add_field( 'fiscal_year_start_month', __( 'Fiscal Year Start Month', 'starter-shelter' ), 'sd_general', 'select', [
+        self::add_field( 'fiscal_year_start_month', __( 'Fiscal Year Start Month', 'shelter-donations' ), 'sd_general', 'select', [
             'options' => array_combine( range( 1, 12 ), [
                 'January', 'February', 'March', 'April', 'May', 'June',
                 'July', 'August', 'September', 'October', 'November', 'December'
@@ -163,31 +163,31 @@ class Settings {
             'default' => 7,
         ], 'general' );
 
-        self::add_field( 'renewal_reminder_days', __( 'Membership Renewal Reminder (days)', 'starter-shelter' ), 'sd_general', 'number', [
+        self::add_field( 'renewal_reminder_days', __( 'Membership Renewal Reminder (days)', 'shelter-donations' ), 'sd_general', 'number', [
             'default' => 30, 'min' => 7, 'max' => 90,
         ], 'general' );
 
-        self::add_field( 'org_name', __( 'Organization Name', 'starter-shelter' ), 'sd_organization', 'text', [
+        self::add_field( 'org_name', __( 'Organization Name', 'shelter-donations' ), 'sd_organization', 'text', [
             'default' => get_bloginfo( 'name' ),
         ], 'general' );
 
-        self::add_field( 'org_ein', __( 'EIN (Tax ID)', 'starter-shelter' ), 'sd_organization', 'text', [
+        self::add_field( 'org_ein', __( 'EIN (Tax ID)', 'shelter-donations' ), 'sd_organization', 'text', [
             'placeholder' => 'XX-XXXXXXX',
         ], 'general' );
 
-        self::add_field( 'org_address', __( 'Mailing Address', 'starter-shelter' ), 'sd_organization', 'textarea', [
+        self::add_field( 'org_address', __( 'Mailing Address', 'shelter-donations' ), 'sd_organization', 'textarea', [
             'rows' => 3,
         ], 'general' );
 
-        self::add_field( 'org_phone', __( 'Phone Number', 'starter-shelter' ), 'sd_organization', 'text', [], 'general' );
+        self::add_field( 'org_phone', __( 'Phone Number', 'shelter-donations' ), 'sd_organization', 'text', [], 'general' );
 
         // Page mappings.
-        self::add_field( 'donation_page', __( 'Donation Page', 'starter-shelter' ), 'sd_pages', 'page', [
-            'description' => __( 'Where "Donate Now" buttons (including campaign-card on donation drives) should link. Campaign-card appends ?campaign={id}.', 'starter-shelter' ),
+        self::add_field( 'donation_page', __( 'Donation Page', 'shelter-donations' ), 'sd_pages', 'page', [
+            'description' => __( 'Where "Donate Now" buttons (including campaign-card on donation drives) should link. Campaign-card appends ?campaign={id}.', 'shelter-donations' ),
         ], 'general' );
 
-        self::add_field( 'membership_page', __( 'Membership Page', 'starter-shelter' ), 'sd_pages', 'page', [
-            'description' => __( 'Where "Join Now" buttons (campaign-card on membership drives) should link. Campaign-card appends ?campaign={id}.', 'starter-shelter' ),
+        self::add_field( 'membership_page', __( 'Membership Page', 'shelter-donations' ), 'sd_pages', 'page', [
+            'description' => __( 'Where "Join Now" buttons (campaign-card on membership drives) should link. Campaign-card appends ?campaign={id}.', 'shelter-donations' ),
         ], 'general' );
 
         // Feature toggles
@@ -198,27 +198,27 @@ class Settings {
             'feature_renewal_reminders'    => 'Send Membership Renewal Reminders',
             'feature_annual_statements'    => 'Send Annual Giving Statements',
         ] as $id => $label ) {
-            self::add_field( $id, __( $label, 'starter-shelter' ), 'sd_features', 'checkbox', [ 'default' => true ], 'general' ); // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- feature toggle label sourced from the settings config map, not a literal.
+            self::add_field( $id, __( $label, 'shelter-donations' ), 'sd_features', 'checkbox', [ 'default' => true ], 'general' ); // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- feature toggle label sourced from the settings config map, not a literal.
         }
 
         // Email tab fields
-        self::add_field( 'email_from_name', __( 'Email From Name', 'starter-shelter' ), 'sd_emails', 'text', [
+        self::add_field( 'email_from_name', __( 'Email From Name', 'shelter-donations' ), 'sd_emails', 'text', [
             'default' => get_bloginfo( 'name' ),
         ], 'emails' );
 
-        self::add_field( 'email_from_address', __( 'Email From Address', 'starter-shelter' ), 'sd_emails', 'email', [
+        self::add_field( 'email_from_address', __( 'Email From Address', 'shelter-donations' ), 'sd_emails', 'email', [
             'default' => get_option( 'admin_email' ),
         ], 'emails' );
 
-        self::add_field( 'logo_moderation_email', __( 'Logo Moderation Notifications', 'starter-shelter' ), 'sd_emails', 'email', [
+        self::add_field( 'logo_moderation_email', __( 'Logo Moderation Notifications', 'shelter-donations' ), 'sd_emails', 'email', [
             'default' => get_option( 'admin_email' ),
-            'description' => __( 'Email address for business logo moderation notifications.', 'starter-shelter' ),
+            'description' => __( 'Email address for business logo moderation notifications.', 'shelter-donations' ),
         ], 'emails' );
 
         // Data management — destructive, so off by default.
-        self::add_field( 'delete_data_on_uninstall', __( 'Delete all data on uninstall', 'starter-shelter' ), 'sd_data', 'checkbox', [
+        self::add_field( 'delete_data_on_uninstall', __( 'Delete all data on uninstall', 'shelter-donations' ), 'sd_data', 'checkbox', [
             'default'     => false,
-            'description' => __( 'When enabled, uninstalling the plugin permanently deletes all donations, memberships, memorials, donors, campaigns, and the activity log. Leave OFF to preserve your records — this cannot be undone. Before enabling, download a full backup from Import / Export. WooCommerce products and the media library are always kept.', 'starter-shelter' ),
+            'description' => __( 'When enabled, uninstalling the plugin permanently deletes all donations, memberships, memorials, donors, campaigns, and the activity log. Leave OFF to preserve your records — this cannot be undone. Before enabling, download a full backup from Import / Export. WooCommerce products and the media library are always kept.', 'shelter-donations' ),
         ], 'general' );
 
     }
@@ -332,18 +332,18 @@ class Settings {
             <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 
             <?php if ( 'data_saved' === $message ) : ?>
-                <div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Configuration saved. Sync check cache cleared.', 'starter-shelter' ); ?></p></div>
+                <div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Configuration saved. Sync check cache cleared.', 'shelter-donations' ); ?></p></div>
             <?php elseif ( 'products_created' === $message ) : ?>
-                <div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Products have been created successfully.', 'starter-shelter' ); ?></p></div>
+                <div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Products have been created successfully.', 'shelter-donations' ); ?></p></div>
             <?php elseif ( 'products_saved' === $message ) : ?>
-                <div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Product settings have been saved.', 'starter-shelter' ); ?></p></div>
+                <div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Product settings have been saved.', 'shelter-donations' ); ?></p></div>
             <?php endif; ?>
 
             <nav class="nav-tab-wrapper">
                 <?php foreach ( self::$tabs as $tab_slug => $tab_label ) : ?>
                     <a href="<?php echo esc_url( add_query_arg( 'tab', $tab_slug, admin_url( 'admin.php?page=' . self::PAGE_SLUG ) ) ); ?>" 
                        class="nav-tab <?php echo $current_tab === $tab_slug ? 'nav-tab-active' : ''; ?>">
-                        <?php echo esc_html( __( $tab_label, 'starter-shelter' ) ); // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- tab label sourced from the self::$tabs config map, not a literal. ?>
+                        <?php echo esc_html( __( $tab_label, 'shelter-donations' ) ); // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- tab label sourced from the self::$tabs config map, not a literal. ?>
                     </a>
                 <?php endforeach; ?>
             </nav>
@@ -360,7 +360,7 @@ class Settings {
                         <?php
                         settings_fields( self::OPTION_GROUP );
                         do_settings_sections( self::PAGE_SLUG . '_' . $current_tab );
-                        submit_button( __( 'Save Settings', 'starter-shelter' ) );
+                        submit_button( __( 'Save Settings', 'shelter-donations' ) );
                         ?>
                     </form>
                     <?php
@@ -398,25 +398,25 @@ class Settings {
         }
 
         $recipient_labels = [
-            'donor'  => __( 'Donor', 'starter-shelter' ),
-            'admin'  => __( 'Admin', 'starter-shelter' ),
-            'custom' => __( 'Custom', 'starter-shelter' ),
+            'donor'  => __( 'Donor', 'shelter-donations' ),
+            'admin'  => __( 'Admin', 'shelter-donations' ),
+            'custom' => __( 'Custom', 'shelter-donations' ),
         ];
         ?>
         <hr style="margin: 30px 0;" />
 
-        <h2><?php esc_html_e( 'Email Templates', 'starter-shelter' ); ?></h2>
-        <p class="description"><?php esc_html_e( 'These emails are triggered automatically by plugin events. Click "Configure" to customize subjects, headings, and enable/disable individual emails in WooCommerce.', 'starter-shelter' ); ?></p>
+        <h2><?php esc_html_e( 'Email Templates', 'shelter-donations' ); ?></h2>
+        <p class="description"><?php esc_html_e( 'These emails are triggered automatically by plugin events. Click "Configure" to customize subjects, headings, and enable/disable individual emails in WooCommerce.', 'shelter-donations' ); ?></p>
 
         <table class="widefat striped" style="margin-top: 15px;">
             <thead>
                 <tr>
                     <th style="width: 5%;"></th>
-                    <th style="width: 20%;"><?php esc_html_e( 'Email', 'starter-shelter' ); ?></th>
-                    <th style="width: 30%;"><?php esc_html_e( 'Subject', 'starter-shelter' ); ?></th>
-                    <th style="width: 10%;"><?php esc_html_e( 'Recipient', 'starter-shelter' ); ?></th>
-                    <th style="width: 20%;"><?php esc_html_e( 'Trigger', 'starter-shelter' ); ?></th>
-                    <th style="width: 15%;"><?php esc_html_e( 'Actions', 'starter-shelter' ); ?></th>
+                    <th style="width: 20%;"><?php esc_html_e( 'Email', 'shelter-donations' ); ?></th>
+                    <th style="width: 30%;"><?php esc_html_e( 'Subject', 'shelter-donations' ); ?></th>
+                    <th style="width: 10%;"><?php esc_html_e( 'Recipient', 'shelter-donations' ); ?></th>
+                    <th style="width: 20%;"><?php esc_html_e( 'Trigger', 'shelter-donations' ); ?></th>
+                    <th style="width: 15%;"><?php esc_html_e( 'Actions', 'shelter-donations' ); ?></th>
                 </tr>
             </thead>
             <tbody>
@@ -431,9 +431,9 @@ class Settings {
                 <tr<?php echo $enabled ? '' : ' style="opacity: 0.6;"'; ?>>
                     <td>
                         <?php if ( $enabled ) : ?>
-                            <span class="dashicons dashicons-yes-alt" style="color: #00a32a;" title="<?php esc_attr_e( 'Enabled', 'starter-shelter' ); ?>"></span>
+                            <span class="dashicons dashicons-yes-alt" style="color: #00a32a;" title="<?php esc_attr_e( 'Enabled', 'shelter-donations' ); ?>"></span>
                         <?php else : ?>
-                            <span class="dashicons dashicons-dismiss" style="color: #999;" title="<?php esc_attr_e( 'Disabled', 'starter-shelter' ); ?>"></span>
+                            <span class="dashicons dashicons-dismiss" style="color: #999;" title="<?php esc_attr_e( 'Disabled', 'shelter-donations' ); ?>"></span>
                         <?php endif; ?>
                     </td>
                     <td>
@@ -447,7 +447,7 @@ class Settings {
                         <?php
                         echo esc_html( $recipient_labels[ $recipient_type ] ?? $recipient_type );
                         if ( ! empty( $email_config['condition'] ) ) {
-                            echo ' <span class="dashicons dashicons-filter" style="font-size: 14px; color: #999;" title="' . esc_attr__( 'Conditional', 'starter-shelter' ) . '"></span>';
+                            echo ' <span class="dashicons dashicons-filter" style="font-size: 14px; color: #999;" title="' . esc_attr__( 'Conditional', 'shelter-donations' ) . '"></span>';
                         }
                         ?>
                     </td>
@@ -457,10 +457,10 @@ class Settings {
                     <td>
                         <?php if ( $wc_email ) : ?>
                             <a href="<?php echo esc_url( $settings_url ); ?>" class="button button-small">
-                                <?php esc_html_e( 'Configure', 'starter-shelter' ); ?>
+                                <?php esc_html_e( 'Configure', 'shelter-donations' ); ?>
                             </a>
                         <?php else : ?>
-                            <span class="description"><?php esc_html_e( 'Not registered', 'starter-shelter' ); ?></span>
+                            <span class="description"><?php esc_html_e( 'Not registered', 'shelter-donations' ); ?></span>
                         <?php endif; ?>
                     </td>
                 </tr>
@@ -471,7 +471,7 @@ class Settings {
         <?php if ( ! empty( $wc_emails ) ) : ?>
         <p style="margin-top: 15px;">
             <a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=email' ) ); ?>" class="button">
-                <?php esc_html_e( 'WooCommerce Email Settings', 'starter-shelter' ); ?> →
+                <?php esc_html_e( 'WooCommerce Email Settings', 'shelter-donations' ); ?> →
             </a>
         </p>
         <?php endif; ?>
@@ -498,13 +498,13 @@ class Settings {
             <?php wp_nonce_field( 'sd_data_config' ); ?>
 
             <!-- Allocations -->
-            <h2><?php esc_html_e( 'Donation Allocations', 'starter-shelter' ); ?></h2>
-            <p class="description"><?php esc_html_e( 'Fund designations that donors can direct their gifts to.', 'starter-shelter' ); ?></p>
+            <h2><?php esc_html_e( 'Donation Allocations', 'shelter-donations' ); ?></h2>
+            <p class="description"><?php esc_html_e( 'Fund designations that donors can direct their gifts to.', 'shelter-donations' ); ?></p>
             <table class="widefat striped sd-data-table" style="max-width: 600px; margin: 15px 0;">
                 <thead>
                     <tr>
-                        <th style="width: 40%;"><?php esc_html_e( 'Slug', 'starter-shelter' ); ?></th>
-                        <th style="width: 50%;"><?php esc_html_e( 'Display Name', 'starter-shelter' ); ?></th>
+                        <th style="width: 40%;"><?php esc_html_e( 'Slug', 'shelter-donations' ); ?></th>
+                        <th style="width: 50%;"><?php esc_html_e( 'Display Name', 'shelter-donations' ); ?></th>
                         <th style="width: 10%;"></th>
                     </tr>
                 </thead>
@@ -513,27 +513,27 @@ class Settings {
                     <tr>
                         <td><input type="text" name="sd_allocations[slugs][]" value="<?php echo esc_attr( $slug ); ?>" class="regular-text" /></td>
                         <td><input type="text" name="sd_allocations[labels][]" value="<?php echo esc_attr( $label ); ?>" class="regular-text" /></td>
-                        <td><button type="button" class="button sd-remove-row" title="<?php esc_attr_e( 'Remove', 'starter-shelter' ); ?>">&times;</button></td>
+                        <td><button type="button" class="button sd-remove-row" title="<?php esc_attr_e( 'Remove', 'shelter-donations' ); ?>">&times;</button></td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
-            <button type="button" class="button sd-add-row" data-target="sd-allocations-list" data-fields="sd_allocations"><?php esc_html_e( '+ Add Allocation', 'starter-shelter' ); ?></button>
+            <button type="button" class="button sd-add-row" data-target="sd-allocations-list" data-fields="sd_allocations"><?php esc_html_e( '+ Add Allocation', 'shelter-donations' ); ?></button>
             <?php if ( Config::has_override( 'settings', 'allocations' ) ) : ?>
-                <span class="sd-override-badge"><?php esc_html_e( 'Custom', 'starter-shelter' ); ?></span>
+                <span class="sd-override-badge"><?php esc_html_e( 'Custom', 'shelter-donations' ); ?></span>
             <?php endif; ?>
 
             <hr style="margin: 30px 0;" />
 
             <!-- Individual Tiers -->
-            <h2><?php esc_html_e( 'Individual Membership Tiers', 'starter-shelter' ); ?></h2>
-            <p class="description"><?php esc_html_e( 'Membership levels for individual supporters.', 'starter-shelter' ); ?></p>
+            <h2><?php esc_html_e( 'Individual Membership Tiers', 'shelter-donations' ); ?></h2>
+            <p class="description"><?php esc_html_e( 'Membership levels for individual supporters.', 'shelter-donations' ); ?></p>
             <table class="widefat striped sd-data-table" style="max-width: 700px; margin: 15px 0;">
                 <thead>
                     <tr>
-                        <th style="width: 25%;"><?php esc_html_e( 'Slug', 'starter-shelter' ); ?></th>
-                        <th style="width: 40%;"><?php esc_html_e( 'Label', 'starter-shelter' ); ?></th>
-                        <th style="width: 20%;"><?php esc_html_e( 'Price', 'starter-shelter' ); ?></th>
+                        <th style="width: 25%;"><?php esc_html_e( 'Slug', 'shelter-donations' ); ?></th>
+                        <th style="width: 40%;"><?php esc_html_e( 'Label', 'shelter-donations' ); ?></th>
+                        <th style="width: 20%;"><?php esc_html_e( 'Price', 'shelter-donations' ); ?></th>
                         <th style="width: 15%;"></th>
                     </tr>
                 </thead>
@@ -548,19 +548,19 @@ class Settings {
                     <?php endforeach; ?>
                 </tbody>
             </table>
-            <button type="button" class="button sd-add-row" data-target="sd-ind-tiers-list" data-fields="sd_ind_tiers"><?php esc_html_e( '+ Add Tier', 'starter-shelter' ); ?></button>
+            <button type="button" class="button sd-add-row" data-target="sd-ind-tiers-list" data-fields="sd_ind_tiers"><?php esc_html_e( '+ Add Tier', 'shelter-donations' ); ?></button>
 
             <hr style="margin: 30px 0;" />
 
             <!-- Business Tiers -->
-            <h2><?php esc_html_e( 'Business Membership Tiers', 'starter-shelter' ); ?></h2>
-            <p class="description"><?php esc_html_e( 'Membership levels for business/corporate supporters.', 'starter-shelter' ); ?></p>
+            <h2><?php esc_html_e( 'Business Membership Tiers', 'shelter-donations' ); ?></h2>
+            <p class="description"><?php esc_html_e( 'Membership levels for business/corporate supporters.', 'shelter-donations' ); ?></p>
             <table class="widefat striped sd-data-table" style="max-width: 700px; margin: 15px 0;">
                 <thead>
                     <tr>
-                        <th style="width: 25%;"><?php esc_html_e( 'Slug', 'starter-shelter' ); ?></th>
-                        <th style="width: 40%;"><?php esc_html_e( 'Label', 'starter-shelter' ); ?></th>
-                        <th style="width: 20%;"><?php esc_html_e( 'Price', 'starter-shelter' ); ?></th>
+                        <th style="width: 25%;"><?php esc_html_e( 'Slug', 'shelter-donations' ); ?></th>
+                        <th style="width: 40%;"><?php esc_html_e( 'Label', 'shelter-donations' ); ?></th>
+                        <th style="width: 20%;"><?php esc_html_e( 'Price', 'shelter-donations' ); ?></th>
                         <th style="width: 15%;"></th>
                     </tr>
                 </thead>
@@ -575,18 +575,18 @@ class Settings {
                     <?php endforeach; ?>
                 </tbody>
             </table>
-            <button type="button" class="button sd-add-row" data-target="sd-biz-tiers-list" data-fields="sd_biz_tiers"><?php esc_html_e( '+ Add Tier', 'starter-shelter' ); ?></button>
+            <button type="button" class="button sd-add-row" data-target="sd-biz-tiers-list" data-fields="sd_biz_tiers"><?php esc_html_e( '+ Add Tier', 'shelter-donations' ); ?></button>
 
             <hr style="margin: 30px 0;" />
 
             <!-- Pet Species -->
-            <h2><?php esc_html_e( 'Pet Species', 'starter-shelter' ); ?></h2>
-            <p class="description"><?php esc_html_e( 'Species options for pet memorials.', 'starter-shelter' ); ?></p>
+            <h2><?php esc_html_e( 'Pet Species', 'shelter-donations' ); ?></h2>
+            <p class="description"><?php esc_html_e( 'Species options for pet memorials.', 'shelter-donations' ); ?></p>
             <table class="widefat striped sd-data-table" style="max-width: 500px; margin: 15px 0;">
                 <thead>
                     <tr>
-                        <th style="width: 40%;"><?php esc_html_e( 'Slug', 'starter-shelter' ); ?></th>
-                        <th style="width: 50%;"><?php esc_html_e( 'Display Name', 'starter-shelter' ); ?></th>
+                        <th style="width: 40%;"><?php esc_html_e( 'Slug', 'shelter-donations' ); ?></th>
+                        <th style="width: 50%;"><?php esc_html_e( 'Display Name', 'shelter-donations' ); ?></th>
                         <th style="width: 10%;"></th>
                     </tr>
                 </thead>
@@ -600,18 +600,18 @@ class Settings {
                     <?php endforeach; ?>
                 </tbody>
             </table>
-            <button type="button" class="button sd-add-row" data-target="sd-species-list" data-fields="sd_species"><?php esc_html_e( '+ Add Species', 'starter-shelter' ); ?></button>
+            <button type="button" class="button sd-add-row" data-target="sd-species-list" data-fields="sd_species"><?php esc_html_e( '+ Add Species', 'shelter-donations' ); ?></button>
 
             <hr style="margin: 30px 0;" />
 
             <!-- Donor Levels -->
-            <h2><?php esc_html_e( 'Donor Recognition Levels', 'starter-shelter' ); ?></h2>
-            <p class="description"><?php esc_html_e( 'Lifetime giving thresholds for donor recognition tiers.', 'starter-shelter' ); ?></p>
+            <h2><?php esc_html_e( 'Donor Recognition Levels', 'shelter-donations' ); ?></h2>
+            <p class="description"><?php esc_html_e( 'Lifetime giving thresholds for donor recognition tiers.', 'shelter-donations' ); ?></p>
             <table class="widefat striped sd-data-table" style="max-width: 500px; margin: 15px 0;">
                 <thead>
                     <tr>
-                        <th style="width: 50%;"><?php esc_html_e( 'Level Name', 'starter-shelter' ); ?></th>
-                        <th style="width: 40%;"><?php esc_html_e( 'Minimum ($)', 'starter-shelter' ); ?></th>
+                        <th style="width: 50%;"><?php esc_html_e( 'Level Name', 'shelter-donations' ); ?></th>
+                        <th style="width: 40%;"><?php esc_html_e( 'Minimum ($)', 'shelter-donations' ); ?></th>
                         <th style="width: 10%;"></th>
                     </tr>
                 </thead>
@@ -625,10 +625,10 @@ class Settings {
                     <?php endforeach; ?>
                 </tbody>
             </table>
-            <button type="button" class="button sd-add-row" data-target="sd-donor-levels-list" data-fields="sd_donor_levels"><?php esc_html_e( '+ Add Level', 'starter-shelter' ); ?></button>
+            <button type="button" class="button sd-add-row" data-target="sd-donor-levels-list" data-fields="sd_donor_levels"><?php esc_html_e( '+ Add Level', 'shelter-donations' ); ?></button>
 
             <p class="submit">
-                <button type="submit" name="sd_save_data_config" class="button button-primary"><?php esc_html_e( 'Save Data Configuration', 'starter-shelter' ); ?></button>
+                <button type="submit" name="sd_save_data_config" class="button button-primary"><?php esc_html_e( 'Save Data Configuration', 'shelter-donations' ); ?></button>
             </p>
         </form>
 
@@ -767,21 +767,21 @@ class Settings {
 
     private static function render_products_tab(): void {
         if ( ! class_exists( 'WooCommerce' ) ) {
-            echo '<div class="notice notice-error"><p>' . esc_html__( 'WooCommerce is required to manage donation products.', 'starter-shelter' ) . '</p></div>';
+            echo '<div class="notice notice-error"><p>' . esc_html__( 'WooCommerce is required to manage donation products.', 'shelter-donations' ) . '</p></div>';
             return;
         }
 
         $product_status = Activator::get_product_status();
         $all_products   = self::get_all_wc_products();
         ?>
-        <h2><?php esc_html_e( 'WooCommerce Product Configuration', 'starter-shelter' ); ?></h2>
-        <p class="description"><?php esc_html_e( 'Configure which WooCommerce products are used for donations, memberships, and memorials.', 'starter-shelter' ); ?></p>
+        <h2><?php esc_html_e( 'WooCommerce Product Configuration', 'shelter-donations' ); ?></h2>
+        <p class="description"><?php esc_html_e( 'Configure which WooCommerce products are used for donations, memberships, and memorials.', 'shelter-donations' ); ?></p>
 
         <div style="margin: 20px 0; padding: 15px; background: #f0f0f1; border-left: 4px solid #2271b1;">
             <a href="<?php echo esc_url( wp_nonce_url( add_query_arg( [ 'page' => self::PAGE_SLUG, 'tab' => 'products', 'action' => 'create_products' ], admin_url( 'admin.php' ) ), 'sd_create_products' ) ); ?>" class="button button-primary">
-                <?php esc_html_e( 'Auto-Create Missing Products', 'starter-shelter' ); ?>
+                <?php esc_html_e( 'Auto-Create Missing Products', 'shelter-donations' ); ?>
             </a>
-            <p class="description" style="margin-top: 10px;"><?php esc_html_e( 'Creates variable WooCommerce products with standard variations for any missing products.', 'starter-shelter' ); ?></p>
+            <p class="description" style="margin-top: 10px;"><?php esc_html_e( 'Creates variable WooCommerce products with standard variations for any missing products.', 'shelter-donations' ); ?></p>
         </div>
 
         <form method="post">
@@ -790,10 +790,10 @@ class Settings {
             <table class="widefat striped" style="margin-top: 20px;">
                 <thead>
                     <tr>
-                        <th style="width: 25%;"><?php esc_html_e( 'Product Type', 'starter-shelter' ); ?></th>
-                        <th style="width: 15%;"><?php esc_html_e( 'Status', 'starter-shelter' ); ?></th>
-                        <th style="width: 40%;"><?php esc_html_e( 'WooCommerce Product', 'starter-shelter' ); ?></th>
-                        <th style="width: 20%;"><?php esc_html_e( 'Actions', 'starter-shelter' ); ?></th>
+                        <th style="width: 25%;"><?php esc_html_e( 'Product Type', 'shelter-donations' ); ?></th>
+                        <th style="width: 15%;"><?php esc_html_e( 'Status', 'shelter-donations' ); ?></th>
+                        <th style="width: 40%;"><?php esc_html_e( 'WooCommerce Product', 'shelter-donations' ); ?></th>
+                        <th style="width: 20%;"><?php esc_html_e( 'Actions', 'shelter-donations' ); ?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -805,14 +805,14 @@ class Settings {
                             </td>
                             <td>
                                 <?php if ( $status['exists'] ) : ?>
-                                    <span style="color: #00a32a;"><span class="dashicons dashicons-yes-alt"></span> <?php esc_html_e( 'Configured', 'starter-shelter' ); ?></span>
+                                    <span style="color: #00a32a;"><span class="dashicons dashicons-yes-alt"></span> <?php esc_html_e( 'Configured', 'shelter-donations' ); ?></span>
                                 <?php else : ?>
-                                    <span style="color: #dba617;"><span class="dashicons dashicons-warning"></span> <?php esc_html_e( 'Not Set', 'starter-shelter' ); ?></span>
+                                    <span style="color: #dba617;"><span class="dashicons dashicons-warning"></span> <?php esc_html_e( 'Not Set', 'shelter-donations' ); ?></span>
                                 <?php endif; ?>
                             </td>
                             <td>
                                 <select name="<?php echo esc_attr( $status['option_key'] ); ?>" style="width: 100%; max-width: 400px;">
-                                    <option value="0"><?php esc_html_e( '— Select Product —', 'starter-shelter' ); ?></option>
+                                    <option value="0"><?php esc_html_e( '— Select Product —', 'shelter-donations' ); ?></option>
                                     <?php foreach ( $all_products as $product ) : ?>
                                         <option value="<?php echo esc_attr( $product['id'] ); ?>" <?php selected( $status['product_id'], $product['id'] ); ?>>
                                             <?php echo esc_html( $product['name'] . ' (' . ( $product['sku'] ?: 'No SKU' ) . ')' ); ?>
@@ -823,7 +823,7 @@ class Settings {
                             <td>
                                 <?php if ( $status['exists'] && $status['edit_url'] ) : ?>
                                     <a href="<?php echo esc_url( $status['edit_url'] ); ?>" class="button button-small" target="_blank">
-                                        <?php esc_html_e( 'Edit', 'starter-shelter' ); ?> <span class="dashicons dashicons-external" style="font-size: 14px; line-height: 1.8;"></span>
+                                        <?php esc_html_e( 'Edit', 'shelter-donations' ); ?> <span class="dashicons dashicons-external" style="font-size: 14px; line-height: 1.8;"></span>
                                     </a>
                                 <?php endif; ?>
                             </td>
@@ -833,21 +833,21 @@ class Settings {
             </table>
 
             <p class="submit">
-                <button type="submit" name="sd_save_product_mappings" class="button button-primary"><?php esc_html_e( 'Save Product Settings', 'starter-shelter' ); ?></button>
+                <button type="submit" name="sd_save_product_mappings" class="button button-primary"><?php esc_html_e( 'Save Product Settings', 'shelter-donations' ); ?></button>
             </p>
         </form>
 
         <div style="margin-top: 30px; padding: 20px; background: #fff; border: 1px solid #c3c4c7;">
-            <h3 style="margin-top: 0;"><?php esc_html_e( 'Product Requirements', 'starter-shelter' ); ?></h3>
-            <p><?php esc_html_e( 'Each product type requires a Variable Product with specific attributes:', 'starter-shelter' ); ?></p>
+            <h3 style="margin-top: 0;"><?php esc_html_e( 'Product Requirements', 'shelter-donations' ); ?></h3>
+            <p><?php esc_html_e( 'Each product type requires a Variable Product with specific attributes:', 'shelter-donations' ); ?></p>
             
             <table class="widefat striped" style="margin-top: 15px;">
                 <thead>
                     <tr>
-                        <th><?php esc_html_e( 'Product', 'starter-shelter' ); ?></th>
-                        <th><?php esc_html_e( 'SKU', 'starter-shelter' ); ?></th>
-                        <th><?php esc_html_e( 'Attribute', 'starter-shelter' ); ?></th>
-                        <th><?php esc_html_e( 'Variations', 'starter-shelter' ); ?></th>
+                        <th><?php esc_html_e( 'Product', 'shelter-donations' ); ?></th>
+                        <th><?php esc_html_e( 'SKU', 'shelter-donations' ); ?></th>
+                        <th><?php esc_html_e( 'Attribute', 'shelter-donations' ); ?></th>
+                        <th><?php esc_html_e( 'Variations', 'shelter-donations' ); ?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -863,10 +863,10 @@ class Settings {
 
     private static function get_product_description( string $key ): string {
         return [
-            'shelter-donations'             => __( 'General donations with allocation options.', 'starter-shelter' ),
-            'shelter-memberships'           => __( 'Individual membership tiers.', 'starter-shelter' ),
-            'shelter-memberships-business'  => __( 'Business/corporate membership tiers.', 'starter-shelter' ),
-            'shelter-donations-in-memoriam' => __( 'Memorial donations for people or pets.', 'starter-shelter' ),
+            'shelter-donations'             => __( 'General donations with allocation options.', 'shelter-donations' ),
+            'shelter-memberships'           => __( 'Individual membership tiers.', 'shelter-donations' ),
+            'shelter-memberships-business'  => __( 'Business/corporate membership tiers.', 'shelter-donations' ),
+            'shelter-donations-in-memoriam' => __( 'Memorial donations for people or pets.', 'shelter-donations' ),
         ][ $key ] ?? '';
     }
 

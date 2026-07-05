@@ -84,7 +84,7 @@ class CSV_Importer {
 		$config = Config::get_path( 'import-export', "entity_types.{$entity_type}.import" );
 
 		if ( ! $config ) {
-			return self::error_result( __( 'Invalid import type.', 'starter-shelter' ) );
+			return self::error_result( __( 'Invalid import type.', 'shelter-donations' ) );
 		}
 
 		// Verify the ability exists (except for donor imports which don't use one).
@@ -96,7 +96,7 @@ class CSV_Importer {
 				return self::error_result(
 					sprintf(
 						/* translators: %s: ability name */
-						__( 'Required ability "%s" is not registered. Ensure WordPress 6.9+ and abilities are loaded.', 'starter-shelter' ),
+						__( 'Required ability "%s" is not registered. Ensure WordPress 6.9+ and abilities are loaded.', 'shelter-donations' ),
 						$ability_name
 					)
 				);
@@ -278,7 +278,7 @@ class CSV_Importer {
 	public static function start_import( string $entity_type, string $filepath, array $options = [] ): array|\WP_Error {
 		$config = Config::get_path( 'import-export', "entity_types.{$entity_type}.import" );
 		if ( ! $config ) {
-			return new \WP_Error( 'invalid_type', __( 'Invalid import type.', 'starter-shelter' ) );
+			return new \WP_Error( 'invalid_type', __( 'Invalid import type.', 'shelter-donations' ) );
 		}
 
 		// Move uploaded file to a persistent temp location.
@@ -287,7 +287,7 @@ class CSV_Importer {
 		$dest       = $upload_dir['basedir'] . '/' . $import_key . '.csv';
 
 		if ( ! copy( $filepath, $dest ) ) {
-			return new \WP_Error( 'file_error', __( 'Could not save uploaded file.', 'starter-shelter' ) );
+			return new \WP_Error( 'file_error', __( 'Could not save uploaded file.', 'shelter-donations' ) );
 		}
 
 		// Count total data rows.
@@ -336,7 +336,7 @@ class CSV_Importer {
 	public static function process_batch( string $import_key ): array|\WP_Error {
 		$session = get_transient( $import_key );
 		if ( ! $session ) {
-			return new \WP_Error( 'session_expired', __( 'Import session expired. Please start again.', 'starter-shelter' ) );
+			return new \WP_Error( 'session_expired', __( 'Import session expired. Please start again.', 'shelter-donations' ) );
 		}
 
 		$entity_type = $session['entity_type'];
@@ -347,7 +347,7 @@ class CSV_Importer {
 
 		$config = Config::get_path( 'import-export', "entity_types.{$entity_type}.import" );
 		if ( ! $config ) {
-			return new \WP_Error( 'invalid_type', __( 'Invalid import type.', 'starter-shelter' ) );
+			return new \WP_Error( 'invalid_type', __( 'Invalid import type.', 'shelter-donations' ) );
 		}
 
 		$ability_name = $config['ability'] ?? null;
@@ -580,7 +580,7 @@ class CSV_Importer {
 		$ability = wp_get_ability( $ability_name );
 		$result  = $ability ? $ability->execute( $input ) : new \WP_Error(
 			'ability_not_found',
-			sprintf( /* translators: %s: ability name. */ __( 'Ability "%s" could not be loaded.', 'starter-shelter' ), $ability_name )
+			sprintf( /* translators: %s: ability name. */ __( 'Ability "%s" could not be loaded.', 'shelter-donations' ), $ability_name )
 		);
 
 		if ( is_wp_error( $result ) ) {
@@ -842,13 +842,13 @@ class CSV_Importer {
 	private static function open_csv( string $filepath, CSV_Validator $validator, string $entity_type = '' ): array|\WP_Error {
 		$handle = fopen( $filepath, 'r' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- reading an uploaded CSV for import.
 		if ( ! $handle ) {
-			return new \WP_Error( 'file_error', __( 'Could not open file.', 'starter-shelter' ) );
+			return new \WP_Error( 'file_error', __( 'Could not open file.', 'shelter-donations' ) );
 		}
 
 		$raw_headers = fgetcsv( $handle );
 		if ( ! $raw_headers ) {
 			fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- reading an uploaded CSV for import.
-			return new \WP_Error( 'empty_file', __( 'Empty file or invalid CSV.', 'starter-shelter' ) );
+			return new \WP_Error( 'empty_file', __( 'Empty file or invalid CSV.', 'shelter-donations' ) );
 		}
 
 		// Normalize: lowercase, trim, then spaces → underscores.
@@ -875,7 +875,7 @@ class CSV_Importer {
 				'missing_columns',
 				sprintf(
 					/* translators: %s: comma-separated list of missing column names. */
-					__( 'Missing required columns: %s', 'starter-shelter' ),
+					__( 'Missing required columns: %s', 'shelter-donations' ),
 					implode( ', ', $missing )
 				)
 			);

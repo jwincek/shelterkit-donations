@@ -54,22 +54,22 @@
         return el( 'div', { className: 'sd-stats-grid' },
             el( StatCard, { 
                 value: stats.total_orders || 0, 
-                label: __( 'Total Orders', 'starter-shelter' ),
+                label: __( 'Total Orders', 'shelter-donations' ),
                 type: 'total'
             }),
             el( StatCard, { 
                 value: stats.unsynced_orders || 0, 
-                label: __( 'Unsynced', 'starter-shelter' ),
+                label: __( 'Unsynced', 'shelter-donations' ),
                 type: 'unsynced'
             }),
             el( StatCard, { 
                 value: stats.synced_orders || 0, 
-                label: __( 'Legacy Synced', 'starter-shelter' ),
+                label: __( 'Legacy Synced', 'shelter-donations' ),
                 type: 'synced'
             }),
             el( StatCard, { 
                 value: stats.processed_orders || 0, 
-                label: __( 'Auto Processed', 'starter-shelter' ),
+                label: __( 'Auto Processed', 'shelter-donations' ),
                 type: 'processed'
             })
         );
@@ -81,34 +81,34 @@
     function Filters( { filters, onChange, onScan, isScanning } ) {
         return el( 'div', { className: 'sd-filters' },
             el( 'div', { className: 'sd-filter-group' },
-                el( 'label', null, __( 'Order Status', 'starter-shelter' ) ),
+                el( 'label', null, __( 'Order Status', 'shelter-donations' ) ),
                 el( SelectControl, {
                     value: filters.status,
                     options: [
-                        { label: __( 'All', 'starter-shelter' ), value: 'all' },
-                        { label: __( 'Completed', 'starter-shelter' ), value: 'completed' },
-                        { label: __( 'Processing', 'starter-shelter' ), value: 'processing' },
+                        { label: __( 'All', 'shelter-donations' ), value: 'all' },
+                        { label: __( 'Completed', 'shelter-donations' ), value: 'completed' },
+                        { label: __( 'Processing', 'shelter-donations' ), value: 'processing' },
                     ],
                     onChange: ( value ) => onChange( { ...filters, status: value } ),
                     __nextHasNoMarginBottom: true,
                 })
             ),
             el( 'div', { className: 'sd-filter-group' },
-                el( 'label', null, __( 'Product Type', 'starter-shelter' ) ),
+                el( 'label', null, __( 'Product Type', 'shelter-donations' ) ),
                 el( SelectControl, {
                     value: filters.product_type,
                     options: [
-                        { label: __( 'All Types', 'starter-shelter' ), value: 'all' },
-                        { label: __( 'Donations', 'starter-shelter' ), value: 'donation' },
-                        { label: __( 'Memberships', 'starter-shelter' ), value: 'membership' },
-                        { label: __( 'Memorials', 'starter-shelter' ), value: 'memorial' },
+                        { label: __( 'All Types', 'shelter-donations' ), value: 'all' },
+                        { label: __( 'Donations', 'shelter-donations' ), value: 'donation' },
+                        { label: __( 'Memberships', 'shelter-donations' ), value: 'membership' },
+                        { label: __( 'Memorials', 'shelter-donations' ), value: 'memorial' },
                     ],
                     onChange: ( value ) => onChange( { ...filters, product_type: value } ),
                     __nextHasNoMarginBottom: true,
                 })
             ),
             el( 'div', { className: 'sd-filter-group' },
-                el( 'label', null, __( 'Date From', 'starter-shelter' ) ),
+                el( 'label', null, __( 'Date From', 'shelter-donations' ) ),
                 el( TextControl, {
                     type: 'date',
                     value: filters.date_from,
@@ -117,7 +117,7 @@
                 })
             ),
             el( 'div', { className: 'sd-filter-group' },
-                el( 'label', null, __( 'Date To', 'starter-shelter' ) ),
+                el( 'label', null, __( 'Date To', 'shelter-donations' ) ),
                 el( TextControl, {
                     type: 'date',
                     value: filters.date_to,
@@ -127,7 +127,7 @@
             ),
             el( 'div', { className: 'sd-filter-group', style: { alignSelf: 'flex-end' } },
                 el( CheckboxControl, {
-                    label: __( 'Include already synced', 'starter-shelter' ),
+                    label: __( 'Include already synced', 'shelter-donations' ),
                     checked: filters.include_synced,
                     onChange: ( value ) => onChange( { ...filters, include_synced: value } ),
                     __nextHasNoMarginBottom: true,
@@ -140,7 +140,7 @@
                     isBusy: isScanning,
                     disabled: isScanning,
                 },
-                    isScanning ? __( 'Scanning...', 'starter-shelter' ) : __( 'Scan Orders', 'starter-shelter' )
+                    isScanning ? __( 'Scanning...', 'shelter-donations' ) : __( 'Scan Orders', 'shelter-donations' )
                 )
             )
         );
@@ -160,9 +160,9 @@
      */
     function SyncStatusBadge( { status } ) {
         const labels = {
-            unsynced: __( 'Unsynced', 'starter-shelter' ),
-            synced: __( 'Synced', 'starter-shelter' ),
-            processed: __( 'Processed', 'starter-shelter' ),
+            unsynced: __( 'Unsynced', 'shelter-donations' ),
+            synced: __( 'Synced', 'shelter-donations' ),
+            processed: __( 'Processed', 'shelter-donations' ),
         };
         
         return el( 'span', { 
@@ -191,13 +191,13 @@
                             __nextHasNoMarginBottom: true,
                         })
                     ),
-                    el( 'th', null, __( 'Order', 'starter-shelter' ) ),
-                    el( 'th', null, __( 'Date', 'starter-shelter' ) ),
-                    el( 'th', null, __( 'Customer', 'starter-shelter' ) ),
-                    el( 'th', null, __( 'Items', 'starter-shelter' ) ),
-                    el( 'th', null, __( 'Total', 'starter-shelter' ) ),
-                    el( 'th', null, __( 'Status', 'starter-shelter' ) ),
-                    el( 'th', null, __( 'Actions', 'starter-shelter' ) )
+                    el( 'th', null, __( 'Order', 'shelter-donations' ) ),
+                    el( 'th', null, __( 'Date', 'shelter-donations' ) ),
+                    el( 'th', null, __( 'Customer', 'shelter-donations' ) ),
+                    el( 'th', null, __( 'Items', 'shelter-donations' ) ),
+                    el( 'th', null, __( 'Total', 'shelter-donations' ) ),
+                    el( 'th', null, __( 'Status', 'shelter-donations' ) ),
+                    el( 'th', null, __( 'Actions', 'shelter-donations' ) )
                 )
             ),
             el( 'tbody', null,
@@ -243,7 +243,7 @@
                                 variant: 'link',
                                 onClick: () => onPreview( order.order_id ),
                                 isSmall: true,
-                            }, __( 'Preview', 'starter-shelter' ) )
+                            }, __( 'Preview', 'shelter-donations' ) )
                         )
                     );
                 })
@@ -277,11 +277,11 @@
                 if ( data.success ) {
                     setPreview( data.data );
                 } else {
-                    setError( data.data || __( 'Failed to load preview.', 'starter-shelter' ) );
+                    setError( data.data || __( 'Failed to load preview.', 'shelter-donations' ) );
                 }
             })
             .catch( () => {
-                setError( __( 'Failed to load preview.', 'starter-shelter' ) );
+                setError( __( 'Failed to load preview.', 'shelter-donations' ) );
             })
             .finally( () => {
                 setIsLoading( false );
@@ -289,16 +289,16 @@
         }, [ orderId ] );
 
         return el( Modal, {
-            title: __( 'Sync Preview', 'starter-shelter' ) + ` - Order #${ orderId }`,
+            title: __( 'Sync Preview', 'shelter-donations' ) + ` - Order #${ orderId }`,
             onRequestClose: onClose,
         },
             isLoading && el( 'div', { style: { textAlign: 'center', padding: '40px' } },
                 el( Spinner ),
-                el( 'p', null, __( 'Loading preview...', 'starter-shelter' ) )
+                el( 'p', null, __( 'Loading preview...', 'shelter-donations' ) )
             ),
             error && el( Notice, { status: 'error', isDismissible: false }, error ),
             preview && el( Fragment, null,
-                el( 'h4', null, __( 'Donor', 'starter-shelter' ) ),
+                el( 'h4', null, __( 'Donor', 'shelter-donations' ) ),
                 el( 'p', null,
                     preview.donor.name,
                     el( 'br' ),
@@ -311,11 +311,11 @@
                                 fontSize: '12px' 
                             } 
                         }, 
-                            __( '✓ Existing donor record', 'starter-shelter' )
+                            __( '✓ Existing donor record', 'shelter-donations' )
                         )
                     )
                 ),
-                el( 'h4', null, __( 'Records to Create', 'starter-shelter' ) ),
+                el( 'h4', null, __( 'Records to Create', 'shelter-donations' ) ),
                 preview.items.map( ( item, idx ) =>
                     el( Card, { key: idx, size: 'small', style: { marginBottom: '12px' } },
                         el( CardBody, null,
@@ -347,32 +347,32 @@
      */
     function SyncResults( { results } ) {
         return el( Card, null,
-            el( CardHeader, null, __( 'Sync Results', 'starter-shelter' ) ),
+            el( CardHeader, null, __( 'Sync Results', 'shelter-donations' ) ),
             el( CardBody, null,
                 el( 'div', { className: 'sd-stats-grid' },
                     el( StatCard, { 
                         value: results.processed, 
-                        label: __( 'Processed', 'starter-shelter' ),
+                        label: __( 'Processed', 'shelter-donations' ),
                         type: 'synced'
                     }),
                     el( StatCard, { 
                         value: results.created.donations, 
-                        label: __( 'Donations', 'starter-shelter' ),
+                        label: __( 'Donations', 'shelter-donations' ),
                         type: 'total'
                     }),
                     el( StatCard, { 
                         value: results.created.memberships, 
-                        label: __( 'Memberships', 'starter-shelter' ),
+                        label: __( 'Memberships', 'shelter-donations' ),
                         type: 'total'
                     }),
                     el( StatCard, { 
                         value: results.created.memorials, 
-                        label: __( 'Memorials', 'starter-shelter' ),
+                        label: __( 'Memorials', 'shelter-donations' ),
                         type: 'total'
                     }),
                     ( results.created.updated > 0 ) && el( StatCard, { 
                         value: results.created.updated, 
-                        label: __( 'Updated', 'starter-shelter' ),
+                        label: __( 'Updated', 'shelter-donations' ),
                         type: 'processed'
                     })
                 ),
@@ -382,7 +382,7 @@
                 }, 
                     sprintf(
                         // translators: %d: number of orders skipped because they were already synced.
-                        __( '%d order(s) skipped (already synced).', 'starter-shelter' ),
+                        __( '%d order(s) skipped (already synced).', 'shelter-donations' ),
                         results.skipped
                     )
                 ),
@@ -392,7 +392,7 @@
                 },
                     sprintf(
                         // translators: %d: number of errors that occurred during sync.
-                        __( '%d error(s) occurred during sync.', 'starter-shelter' ),
+                        __( '%d error(s) occurred during sync.', 'shelter-donations' ),
                         results.errors
                     )
                 )
@@ -476,21 +476,21 @@
                         status: 'success',
                         message: sprintf(
                             // translators: %d: number of orders found containing shelter products.
-                            __( 'Found %d order(s) with shelter products.', 'starter-shelter' ),
+                            __( 'Found %d order(s) with shelter products.', 'shelter-donations' ),
                             data.data.summary.total
                         ),
                     });
                 } else {
                     setNotice({
                         status: 'error',
-                        message: data.data || __( 'Scan failed.', 'starter-shelter' ),
+                        message: data.data || __( 'Scan failed.', 'shelter-donations' ),
                     });
                 }
             })
             .catch( () => {
                 setNotice({
                     status: 'error',
-                    message: __( 'Scan failed.', 'starter-shelter' ),
+                    message: __( 'Scan failed.', 'shelter-donations' ),
                 });
             })
             .finally( () => {
@@ -513,13 +513,13 @@
             if ( selectedOrders.length === 0 ) {
                 setNotice({
                     status: 'warning',
-                    message: __( 'Please select orders to sync.', 'starter-shelter' ),
+                    message: __( 'Please select orders to sync.', 'shelter-donations' ),
                 });
                 return;
             }
 
             const confirmMessage = forceResync 
-                ? __( 'Are you sure you want to re-sync these orders? This may create DUPLICATE records if the orders were previously synced.', 'starter-shelter' )
+                ? __( 'Are you sure you want to re-sync these orders? This may create DUPLICATE records if the orders were previously synced.', 'shelter-donations' )
                 : config.strings.confirmSync;
 
             if ( ! confirm( confirmMessage ) ) {
@@ -559,21 +559,21 @@
                         status: 'success',
                         message: sprintf(
                             // translators: %d: number of orders successfully synced.
-                            __( 'Synced %d order(s) successfully.', 'starter-shelter' ),
+                            __( 'Synced %d order(s) successfully.', 'shelter-donations' ),
                             data.data.processed
                         ),
                     });
                 } else {
                     setNotice({
                         status: 'error',
-                        message: data.data || __( 'Sync failed.', 'starter-shelter' ),
+                        message: data.data || __( 'Sync failed.', 'shelter-donations' ),
                     });
                 }
             })
             .catch( () => {
                 setNotice({
                     status: 'error',
-                    message: __( 'Sync failed.', 'starter-shelter' ),
+                    message: __( 'Sync failed.', 'shelter-donations' ),
                 });
             })
             .finally( () => {
@@ -584,8 +584,8 @@
         // Sync all matching orders with batching
         const handleSyncAll = useCallback( () => {
             const confirmMessage = forceResync 
-                ? __( 'Are you sure you want to re-sync ALL matching orders? This may create DUPLICATE records.', 'starter-shelter' )
-                : __( 'Are you sure you want to sync ALL matching orders? This may take a while for large datasets.', 'starter-shelter' );
+                ? __( 'Are you sure you want to re-sync ALL matching orders? This may create DUPLICATE records.', 'shelter-donations' )
+                : __( 'Are you sure you want to sync ALL matching orders? This may take a while for large datasets.', 'shelter-donations' );
 
             if ( ! confirm( confirmMessage ) ) {
                 return;
@@ -655,7 +655,7 @@
                                 status: 'success',
                                 message: sprintf(
                                     // translators: %d: total number of orders processed.
-                                    __( 'Sync complete! Processed %d order(s).', 'starter-shelter' ),
+                                    __( 'Sync complete! Processed %d order(s).', 'shelter-donations' ),
                                     cumulativeResults.processed
                                 ),
                             });
@@ -667,7 +667,7 @@
                         setIsSyncing( false );
                         setNotice({
                             status: 'error',
-                            message: data.data || __( 'Sync failed.', 'starter-shelter' ),
+                            message: data.data || __( 'Sync failed.', 'shelter-donations' ),
                         });
                     }
                 })
@@ -675,7 +675,7 @@
                     setIsSyncing( false );
                     setNotice({
                         status: 'error',
-                        message: __( 'Sync failed.', 'starter-shelter' ),
+                        message: __( 'Sync failed.', 'shelter-donations' ),
                     });
                 });
             };
@@ -711,7 +711,7 @@
                 } else {
                     setNotice({
                         status: 'error',
-                        message: data.data || __( 'Reset failed.', 'starter-shelter' ),
+                        message: data.data || __( 'Reset failed.', 'shelter-donations' ),
                     });
                 }
             });
@@ -729,13 +729,13 @@
             el( Card, { style: { marginBottom: '20px' } },
                 el( CardHeader, null,
                     el( Flex, { justify: 'space-between', align: 'center' },
-                        el( FlexItem, null, __( 'Overview', 'starter-shelter' ) ),
+                        el( FlexItem, null, __( 'Overview', 'shelter-donations' ) ),
                         el( FlexItem, null,
                             el( Button, {
                                 variant: 'link',
                                 onClick: refreshStats,
                                 isSmall: true,
-                            }, __( 'Refresh', 'starter-shelter' ) )
+                            }, __( 'Refresh', 'shelter-donations' ) )
                         )
                     )
                 ),
@@ -749,14 +749,14 @@
                         } 
                     }, 
                         // translators: %s: date/time of the last scan.
-                        sprintf( __( 'Last scan: %s', 'starter-shelter' ), stats.last_scan )
+                        sprintf( __( 'Last scan: %s', 'shelter-donations' ), stats.last_scan )
                     )
                 )
             ),
 
             // Filters & Scan Card
             el( Card, { style: { marginBottom: '20px' } },
-                el( CardHeader, null, __( 'Scan Orders', 'starter-shelter' ) ),
+                el( CardHeader, null, __( 'Scan Orders', 'shelter-donations' ) ),
                 el( CardBody, null,
                     el( Filters, {
                         filters,
@@ -789,14 +789,14 @@
                         el( FlexItem, null,
                             sprintf(
                                 // translators: %d: number of orders found.
-                                __( '%d Order(s) Found (showing first 50)', 'starter-shelter' ),
+                                __( '%d Order(s) Found (showing first 50)', 'shelter-donations' ),
                                 orders.length
                             )
                         ),
                         el( FlexItem, null,
                             el( Flex, { gap: 3, align: 'center' },
                                 el( CheckboxControl, {
-                                    label: __( 'Force re-sync (creates duplicates!)', 'starter-shelter' ),
+                                    label: __( 'Force re-sync (creates duplicates!)', 'shelter-donations' ),
                                     checked: forceResync,
                                     onChange: ( value ) => {
                                         setForceResync( value );
@@ -811,8 +811,8 @@
                                     isBusy: isSyncing,
                                 },
                                     forceResync
-                                        ? __( 'Re-Sync All Matching', 'starter-shelter' )
-                                        : __( 'Sync All Matching', 'starter-shelter' )
+                                        ? __( 'Re-Sync All Matching', 'shelter-donations' )
+                                        : __( 'Sync All Matching', 'shelter-donations' )
                                 ),
                                 el( Button, {
                                     variant: 'secondary',
@@ -821,14 +821,14 @@
                                     isBusy: isSyncing,
                                 },
                                     // translators: %d: number of selected orders.
-                                    sprintf( __( 'Sync Selected (%d)', 'starter-shelter' ), selectedOrders.length )
+                                    sprintf( __( 'Sync Selected (%d)', 'shelter-donations' ), selectedOrders.length )
                                 ),
                                 el( Button, {
                                     variant: 'tertiary',
                                     onClick: handleReset,
                                     disabled: isSyncing,
                                     isDestructive: true,
-                                }, __( 'Reset All', 'starter-shelter' ) )
+                                }, __( 'Reset All', 'shelter-donations' ) )
                             )
                         )
                     )
@@ -859,13 +859,13 @@
                         } 
                     },
                     // translators: %d: percent of the sync completed (0-100).
-                    sprintf( __( '%d%% complete', 'starter-shelter' ), syncProgress ) )
+                    sprintf( __( '%d%% complete', 'shelter-donations' ), syncProgress ) )
                 ),
                 forceResync && el( Notice, {
                     status: 'warning',
                     isDismissible: false,
                     style: { margin: '0 16px' }
-                }, __( 'Warning: Force re-sync is enabled. This will create new records even for already-synced orders, potentially creating duplicates. Use with caution!', 'starter-shelter' ) ),
+                }, __( 'Warning: Force re-sync is enabled. This will create new records even for already-synced orders, potentially creating duplicates. Use with caution!', 'shelter-donations' ) ),
                 el( CardBody, null,
                     el( OrdersTable, {
                         orders,
@@ -882,7 +882,7 @@
             ! isScanning && orders.length === 0 && el( Card, null,
                 el( CardBody, null,
                     el( 'p', { style: { textAlign: 'center', margin: '40px 0' } },
-                        __( 'Click "Scan Orders" to find orders with shelter products.', 'starter-shelter' )
+                        __( 'Click "Scan Orders" to find orders with shelter products.', 'shelter-donations' )
                     )
                 )
             ),

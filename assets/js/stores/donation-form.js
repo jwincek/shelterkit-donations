@@ -19,7 +19,7 @@ import {
 	createBaseFormData,
 } from './form-base.js';
 
-const NAMESPACE = 'starter-shelter/donation-form';
+const NAMESPACE = 'shelter-donations/donation-form';
 
 const { state, actions } = store( NAMESPACE, {
 	state: {

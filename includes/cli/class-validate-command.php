@@ -1,6 +1,6 @@
 <?php
 /**
- * WP-CLI: starter-shelter validate
+ * WP-CLI: shelter-donations validate
  *
  * Static-analysis-style consistency checker for the plugin's
  * config-driven contracts. Catches the classes of bug that recurred
@@ -25,7 +25,7 @@ use Starter_Shelter\Core\Field_Manifest;
 use WP_CLI;
 
 /**
- * `wp starter-shelter validate` — config/code contract validator.
+ * `wp shelter-donations validate` — config/code contract validator.
  *
  * @since 1.1.2
  */
@@ -44,9 +44,9 @@ class Validate_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp starter-shelter validate
-	 *     wp starter-shelter validate --check=abilities
-	 *     wp starter-shelter validate --format=json
+	 *     wp shelter-donations validate
+	 *     wp shelter-donations validate --check=abilities
+	 *     wp shelter-donations validate --format=json
 	 *
 	 * @when before_wp_load
 	 *

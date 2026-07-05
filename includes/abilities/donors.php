@@ -70,7 +70,7 @@ function get_profile( array $input ): array|WP_Error {
     if ( ! $donor_id ) {
         return new WP_Error(
             'donor_not_found',
-            __( 'Donor not found.', 'starter-shelter' ),
+            __( 'Donor not found.', 'shelter-donations' ),
             [ 'status' => 404 ]
         );
     }
@@ -80,7 +80,7 @@ function get_profile( array $input ): array|WP_Error {
     if ( ! $donor ) {
         return new WP_Error(
             'donor_not_found',
-            __( 'Donor not found.', 'starter-shelter' ),
+            __( 'Donor not found.', 'shelter-donations' ),
             [ 'status' => 404 ]
         );
     }
@@ -105,7 +105,7 @@ function update_address( array $input ): array|WP_Error {
     if ( ! $donor_id ) {
         return new WP_Error(
             'invalid_donor_id',
-            __( 'Valid donor ID is required.', 'starter-shelter' ),
+            __( 'Valid donor ID is required.', 'shelter-donations' ),
             [ 'status' => 400 ]
         );
     }
@@ -114,7 +114,7 @@ function update_address( array $input ): array|WP_Error {
     if ( ! $donor || 'sd_donor' !== $donor->post_type ) {
         return new WP_Error(
             'donor_not_found',
-            __( 'Donor not found.', 'starter-shelter' ),
+            __( 'Donor not found.', 'shelter-donations' ),
             [ 'status' => 404 ]
         );
     }
@@ -164,7 +164,7 @@ function get_history( array $input ): array|WP_Error {
     if ( ! $donor_id ) {
         return new WP_Error(
             'invalid_donor_id',
-            __( 'Valid donor ID is required.', 'starter-shelter' ),
+            __( 'Valid donor ID is required.', 'shelter-donations' ),
             [ 'status' => 400 ]
         );
     }
@@ -173,7 +173,7 @@ function get_history( array $input ): array|WP_Error {
     if ( ! $donor ) {
         return new WP_Error(
             'donor_not_found',
-            __( 'Donor not found.', 'starter-shelter' ),
+            __( 'Donor not found.', 'shelter-donations' ),
             [ 'status' => 404 ]
         );
     }
@@ -239,7 +239,7 @@ function update_profile( array $input ): array|WP_Error {
     if ( ! $donor_id ) {
         return new WP_Error(
             'invalid_donor_id',
-            __( 'Valid donor ID is required.', 'starter-shelter' ),
+            __( 'Valid donor ID is required.', 'shelter-donations' ),
             [ 'status' => 400 ]
         );
     }
@@ -248,7 +248,7 @@ function update_profile( array $input ): array|WP_Error {
     if ( ! $donor || 'sd_donor' !== $donor->post_type ) {
         return new WP_Error(
             'donor_not_found',
-            __( 'Donor not found.', 'starter-shelter' ),
+            __( 'Donor not found.', 'shelter-donations' ),
             [ 'status' => 404 ]
         );
     }

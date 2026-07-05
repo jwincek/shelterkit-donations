@@ -19,9 +19,9 @@ $default_honoree_type  = $attributes['defaultHonoreeType'] ?? 'person';
 $show_anonymous        = $attributes['showAnonymous'] ?? true;
 $show_family           = $attributes['showFamilyNotification'] ?? true;
 $show_send_card        = $attributes['showSendCard'] ?? true;
-$title                 = $attributes['title'] ?? __( 'Give in Memory or Honor', 'starter-shelter' );
-$subtitle              = $attributes['subtitle'] ?? __( 'Honor a loved one with a meaningful tribute gift.', 'starter-shelter' );
-$submit_text           = $attributes['submitButtonText'] ?? __( 'Add Memorial Gift to Cart', 'starter-shelter' );
+$title                 = $attributes['title'] ?? __( 'Give in Memory or Honor', 'shelter-donations' );
+$subtitle              = $attributes['subtitle'] ?? __( 'Honor a loved one with a meaningful tribute gift.', 'shelter-donations' );
+$submit_text           = $attributes['submitButtonText'] ?? __( 'Add Memorial Gift to Cart', 'shelter-donations' );
 $min_amount            = $attributes['minAmount'] ?? 10;
 $max_amount            = $attributes['maxAmount'] ?? 100000;
 
@@ -29,7 +29,7 @@ $checkout_url = function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url()
 $product_id = (int) get_option( 'sd_memorial_product_id', 0 );
 $product_ok = $product_id && function_exists( 'wc_get_product' ) && wc_get_product( $product_id );
 
-wp_interactivity_state( 'starter-shelter/memorial-form', [
+wp_interactivity_state( 'shelter-donations/memorial-form', [
     'forms' => [
         $form_id => [
             'amount' => $default_amount, 'customAmount' => '', 'isAnonymous' => false,
@@ -55,7 +55,7 @@ $context = wp_json_encode( [
 
 $wrapper = get_block_wrapper_attributes( [
     'class' => 'sd-memorial-form', 'id' => $form_id,
-    'data-wp-interactive' => '{"namespace":"starter-shelter/memorial-form"}',
+    'data-wp-interactive' => '{"namespace":"shelter-donations/memorial-form"}',
     'data-wp-context' => $context, 'data-wp-init' => 'actions.initForm',
 ] );
 ?>
@@ -64,21 +64,21 @@ $wrapper = get_block_wrapper_attributes( [
         <?php if ( $title ) : ?><h2 class="sd-form-title"><?php echo esc_html( $title ); ?></h2><?php endif; ?>
         <?php if ( $subtitle ) : ?><p class="sd-form-subtitle"><?php echo esc_html( $subtitle ); ?></p><?php endif; ?>
         <?php if ( ! $product_ok ) : ?>
-            <div class="sd-config-warning" role="alert"><p><?php esc_html_e( 'Memorial form not configured.', 'starter-shelter' ); ?></p></div>
+            <div class="sd-config-warning" role="alert"><p><?php esc_html_e( 'Memorial form not configured.', 'shelter-donations' ); ?></p></div>
         <?php endif; ?>
     </div>
 
     <div class="sd-memorial-form-inner">
         <!-- Dedication Type -->
         <div class="sd-form-section sd-dedication-type-section">
-            <span class="sd-section-label"><?php esc_html_e( 'This gift is:', 'starter-shelter' ); ?></span>
+            <span class="sd-section-label"><?php esc_html_e( 'This gift is:', 'shelter-donations' ); ?></span>
             <div class="sd-toggle-buttons">
                 <label class="sd-toggle-button">
                     <input type="radio" name="<?php echo esc_attr( $form_id ); ?>_ded" value="memory" class="sd-radio"
                         data-wp-on--change="actions.setDedicationType" data-wp-bind--checked="state.forms['<?php echo esc_attr( $form_id ); ?>'].dedicationType === 'memory'">
                     <span class="sd-toggle-content">
                         <svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor"/></svg>
-                        <?php esc_html_e( 'In Memory Of', 'starter-shelter' ); ?>
+                        <?php esc_html_e( 'In Memory Of', 'shelter-donations' ); ?>
                     </span>
                 </label>
                 <label class="sd-toggle-button">
@@ -86,7 +86,7 @@ $wrapper = get_block_wrapper_attributes( [
                         data-wp-on--change="actions.setDedicationType" data-wp-bind--checked="state.forms['<?php echo esc_attr( $form_id ); ?>'].dedicationType === 'honor'">
                     <span class="sd-toggle-content">
                         <svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" fill="currentColor"/></svg>
-                        <?php esc_html_e( 'In Honor Of', 'starter-shelter' ); ?>
+                        <?php esc_html_e( 'In Honor Of', 'shelter-donations' ); ?>
                     </span>
                 </label>
             </div>
@@ -94,14 +94,14 @@ $wrapper = get_block_wrapper_attributes( [
 
         <!-- Honoree Type -->
         <div class="sd-form-section sd-honoree-type-section">
-            <span class="sd-section-label"><?php esc_html_e( 'Honoring a:', 'starter-shelter' ); ?></span>
+            <span class="sd-section-label"><?php esc_html_e( 'Honoring a:', 'shelter-donations' ); ?></span>
             <div class="sd-honoree-cards">
                 <label class="sd-honoree-card">
                     <input type="radio" name="<?php echo esc_attr( $form_id ); ?>_hon" value="person" class="sd-radio"
                         data-wp-on--change="actions.setHonoreeType" data-wp-bind--checked="state.forms['<?php echo esc_attr( $form_id ); ?>'].honoreeType === 'person'">
                     <span class="sd-card-inner">
                         <svg viewBox="0 0 24 24" width="32" height="32"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="currentColor"/></svg>
-                        <span><?php esc_html_e( 'Person', 'starter-shelter' ); ?></span>
+                        <span><?php esc_html_e( 'Person', 'shelter-donations' ); ?></span>
                     </span>
                 </label>
                 <label class="sd-honoree-card">
@@ -109,7 +109,7 @@ $wrapper = get_block_wrapper_attributes( [
                         data-wp-on--change="actions.setHonoreeType" data-wp-bind--checked="state.forms['<?php echo esc_attr( $form_id ); ?>'].honoreeType === 'pet'">
                     <span class="sd-card-inner">
                         <svg viewBox="0 0 24 24" width="32" height="32"><path d="M4.5 9.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zm5-3a2.5 2.5 0 100-5 2.5 2.5 0 000 5zm5 0a2.5 2.5 0 100-5 2.5 2.5 0 000 5zm5 3a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM12 10c-2.5 0-4.5 2.24-4.5 5v5h9v-5c0-2.76-2-5-4.5-5z" fill="currentColor"/></svg>
-                        <span><?php esc_html_e( 'Pet', 'starter-shelter' ); ?></span>
+                        <span><?php esc_html_e( 'Pet', 'shelter-donations' ); ?></span>
                     </span>
                 </label>
             </div>
@@ -118,26 +118,26 @@ $wrapper = get_block_wrapper_attributes( [
         <!-- Honoree Name -->
         <div class="sd-form-section">
             <label for="<?php echo esc_attr( $form_id ); ?>-honoree" class="sd-section-label">
-                <span data-wp-text="callbacks.getHonoreeLabel"><?php esc_html_e( "Person's Name", 'starter-shelter' ); ?></span>
+                <span data-wp-text="callbacks.getHonoreeLabel"><?php esc_html_e( "Person's Name", 'shelter-donations' ); ?></span>
                 <span class="sd-required">*</span>
             </label>
             <input type="text" id="<?php echo esc_attr( $form_id ); ?>-honoree" class="sd-text-input sd-honoree-input" maxlength="100"
-                placeholder="<?php esc_attr_e( 'Enter their name...', 'starter-shelter' ); ?>"
+                placeholder="<?php esc_attr_e( 'Enter their name...', 'shelter-donations' ); ?>"
                 data-wp-on--input="actions.setHonoreeName" data-wp-bind--value="state.forms['<?php echo esc_attr( $form_id ); ?>'].honoreeName">
         </div>
 
         <?php
         // Amount selector (shared partial).
-        $namespace = 'starter-shelter/memorial-form';
-        $legend = __( 'Gift Amount', 'starter-shelter' );
+        $namespace = 'shelter-donations/memorial-form';
+        $legend = __( 'Gift Amount', 'shelter-donations' );
         require dirname( __DIR__ ) . '/shared/partials/amount-selector.php';
         ?>
 
         <!-- Tribute Message -->
         <div class="sd-form-section">
-            <label for="<?php echo esc_attr( $form_id ); ?>-tribute" class="sd-section-label"><?php esc_html_e( 'Tribute Message', 'starter-shelter' ); ?> <span class="sd-optional">(<?php esc_html_e( 'Optional', 'starter-shelter' ); ?>)</span></label>
+            <label for="<?php echo esc_attr( $form_id ); ?>-tribute" class="sd-section-label"><?php esc_html_e( 'Tribute Message', 'shelter-donations' ); ?> <span class="sd-optional">(<?php esc_html_e( 'Optional', 'shelter-donations' ); ?>)</span></label>
             <textarea id="<?php echo esc_attr( $form_id ); ?>-tribute" class="sd-textarea" rows="4" maxlength="500"
-                placeholder="<?php esc_attr_e( 'Share a memory or message about your loved one...', 'starter-shelter' ); ?>"
+                placeholder="<?php esc_attr_e( 'Share a memory or message about your loved one...', 'shelter-donations' ); ?>"
                 data-wp-on--input="actions.setTributeMessage" data-wp-bind--value="state.forms['<?php echo esc_attr( $form_id ); ?>'].tributeMessage"></textarea>
             <p class="sd-char-count"><span data-wp-text="callbacks.getTributeCharCount">0</span>/500</p>
         </div>
@@ -150,7 +150,7 @@ $wrapper = get_block_wrapper_attributes( [
                     data-wp-bind--checked="state.forms['<?php echo esc_attr( $form_id ); ?>'].notifyFamily"
                     data-wp-bind--aria-expanded="state.forms['<?php echo esc_attr( $form_id ); ?>'].notifyFamily">
                 <span class="sd-checkbox-custom"><svg class="sd-checkbox-icon" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" fill="currentColor"/></svg></span>
-                <span class="sd-checkbox-text"><?php esc_html_e( 'Notify the family of this tribute gift', 'starter-shelter' ); ?></span>
+                <span class="sd-checkbox-text"><?php esc_html_e( 'Notify the family of this tribute gift', 'shelter-donations' ); ?></span>
             </label>
 
             <div class="sd-family-fields sd-collapsed"
@@ -158,23 +158,23 @@ $wrapper = get_block_wrapper_attributes( [
                 data-wp-bind--aria-hidden="callbacks.isFamilyHidden">
                 <div class="sd-field-row">
                     <div class="sd-field-wrapper">
-                        <label class="sd-field-label"><?php esc_html_e( 'Family Contact Name', 'starter-shelter' ); ?> <span class="sd-required">*</span></label>
+                        <label class="sd-field-label"><?php esc_html_e( 'Family Contact Name', 'shelter-donations' ); ?> <span class="sd-required">*</span></label>
                         <input type="text" class="sd-text-input" data-wp-on--input="actions.setFamilyName" data-wp-bind--value="state.forms['<?php echo esc_attr( $form_id ); ?>'].familyName">
                     </div>
                     <div class="sd-field-wrapper">
-                        <label class="sd-field-label"><?php esc_html_e( 'Family Email', 'starter-shelter' ); ?></label>
+                        <label class="sd-field-label"><?php esc_html_e( 'Family Email', 'shelter-donations' ); ?></label>
                         <input type="email" class="sd-text-input" data-wp-on--input="actions.setFamilyEmail" data-wp-bind--value="state.forms['<?php echo esc_attr( $form_id ); ?>'].familyEmail">
                     </div>
                 </div>
                 <div class="sd-field-wrapper">
-                    <label class="sd-field-label"><?php esc_html_e( 'Family Mailing Address', 'starter-shelter' ); ?></label>
+                    <label class="sd-field-label"><?php esc_html_e( 'Family Mailing Address', 'shelter-donations' ); ?></label>
                     <textarea class="sd-textarea" rows="2" data-wp-on--input="actions.setFamilyAddress" data-wp-bind--value="state.forms['<?php echo esc_attr( $form_id ); ?>'].familyAddress"></textarea>
                 </div>
                 <?php if ( $show_send_card ) : ?>
                 <label class="sd-checkbox-label">
                     <input type="checkbox" class="sd-checkbox" data-wp-on--change="actions.toggleSendCard" data-wp-bind--checked="state.forms['<?php echo esc_attr( $form_id ); ?>'].sendCard">
                     <span class="sd-checkbox-custom"><svg class="sd-checkbox-icon" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" fill="currentColor"/></svg></span>
-                    <span class="sd-checkbox-text"><?php esc_html_e( 'Send a physical sympathy/tribute card', 'starter-shelter' ); ?></span>
+                    <span class="sd-checkbox-text"><?php esc_html_e( 'Send a physical sympathy/tribute card', 'shelter-donations' ); ?></span>
                 </label>
                 <?php endif; ?>
             </div>
@@ -183,14 +183,14 @@ $wrapper = get_block_wrapper_attributes( [
 
         <?php
         // Donor display name (shared partial).
-        $namespace = 'starter-shelter/memorial-form';
-        $label = __( 'Your Name', 'starter-shelter' );
-        $help  = __( 'How your name will appear on the memorial wall.', 'starter-shelter' );
+        $namespace = 'shelter-donations/memorial-form';
+        $label = __( 'Your Name', 'shelter-donations' );
+        $help  = __( 'How your name will appear on the memorial wall.', 'shelter-donations' );
         require dirname( __DIR__ ) . '/shared/partials/donor-name.php';
 
         // Anonymous toggle (shared partial).
         if ( $show_anonymous ) :
-            $label = __( 'Make my tribute gift anonymous', 'starter-shelter' );
+            $label = __( 'Make my tribute gift anonymous', 'shelter-donations' );
             require dirname( __DIR__ ) . '/shared/partials/anonymous-toggle.php';
         endif;
         ?>
@@ -200,7 +200,7 @@ $wrapper = get_block_wrapper_attributes( [
             <div class="sd-memorial-summary">
                 <div class="sd-summary-dedication" data-wp-text="callbacks.getDedicationSummary"></div>
                 <div class="sd-summary-amount">
-                    <span class="sd-summary-label"><?php esc_html_e( 'Gift Amount:', 'starter-shelter' ); ?></span>
+                    <span class="sd-summary-label"><?php esc_html_e( 'Gift Amount:', 'shelter-donations' ); ?></span>
                     <span class="sd-summary-value" data-wp-text="callbacks.getDisplayAmount">$<?php echo number_format( (int) $default_amount ); ?></span>
                 </div>
             </div>
@@ -208,18 +208,18 @@ $wrapper = get_block_wrapper_attributes( [
             <button type="button" class="sd-submit-button wp-element-button" data-wp-on--click="actions.submitToCart"
                 data-wp-bind--disabled="!callbacks.canProceed" data-wp-class--is-processing="state.forms['<?php echo esc_attr( $form_id ); ?>'].isProcessing">
                 <span data-wp-bind--hidden="state.forms['<?php echo esc_attr( $form_id ); ?>'].isProcessing"><?php echo esc_html( $submit_text ); ?></span>
-                <span class="sd-button-loading" data-wp-bind--hidden="!state.forms['<?php echo esc_attr( $form_id ); ?>'].isProcessing"><span class="sd-spinner-small"></span> <?php esc_html_e( 'Adding...', 'starter-shelter' ); ?></span>
+                <span class="sd-button-loading" data-wp-bind--hidden="!state.forms['<?php echo esc_attr( $form_id ); ?>'].isProcessing"><span class="sd-spinner-small"></span> <?php esc_html_e( 'Adding...', 'shelter-donations' ); ?></span>
             </button>
 
             <?php
-            $namespace = 'starter-shelter/memorial-form';
+            $namespace = 'shelter-donations/memorial-form';
             require dirname( __DIR__ ) . '/shared/partials/form-messages.php';
             ?>
         </div>
     </div>
 
     <?php
-    $label = __( 'Secure tribute gift powered by WooCommerce', 'starter-shelter' );
+    $label = __( 'Secure tribute gift powered by WooCommerce', 'shelter-donations' );
     require dirname( __DIR__ ) . '/shared/partials/trust-badge.php';
     ?>
 </div>

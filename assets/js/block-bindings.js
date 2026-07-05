@@ -1,5 +1,5 @@
 /**
- * Register Starter Shelter block binding sources in the editor.
+ * Register Shelter Donations block binding sources in the editor.
  *
  * PHP register_block_bindings_source() handles server-side rendering,
  * but the editor needs client-side registration via
@@ -12,27 +12,27 @@
 	var registerBlockBindingsSource = wp.blocks.registerBlockBindingsSource;
 
 	registerBlockBindingsSource( {
-		name: 'starter-shelter/entity',
+		name: 'shelter-donations/entity',
 		label: 'Shelter Entity Data',
 	} );
 
 	registerBlockBindingsSource( {
-		name: 'starter-shelter/donor',
+		name: 'shelter-donations/donor',
 		label: 'Shelter Donor Data',
 	} );
 
 	registerBlockBindingsSource( {
-		name: 'starter-shelter/stats',
+		name: 'shelter-donations/stats',
 		label: 'Shelter Statistics',
 	} );
 
 	registerBlockBindingsSource( {
-		name: 'starter-shelter/campaign',
+		name: 'shelter-donations/campaign',
 		label: 'Campaign Data',
 	} );
 
 	registerBlockBindingsSource( {
-		name: 'starter-shelter/tier',
+		name: 'shelter-donations/tier',
 		label: 'Membership Tier Data',
 	} );
 } )();

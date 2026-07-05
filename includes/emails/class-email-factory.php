@@ -74,7 +74,7 @@ class Email_Factory {
      * @return array Modified sections.
      */
     public static function add_email_section( array $sections ): array {
-        $sections['shelter_donations'] = __( 'Shelter Donations', 'starter-shelter' );
+        $sections['shelter_donations'] = __( 'Shelter Donations', 'shelter-donations' );
         return $sections;
     }
 

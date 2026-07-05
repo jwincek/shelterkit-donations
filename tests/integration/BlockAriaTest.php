@@ -66,7 +66,7 @@ final class BlockAriaTest extends WP_UnitTestCase {
             'date'            => '2026-01-15',
         ] );
 
-        $html = do_blocks( '<!-- wp:starter-shelter/members-wall /-->' );
+        $html = do_blocks( '<!-- wp:shelter-donations/members-wall /-->' );
 
         $this->assertStringContainsString( 'role="list"', $html );
         $this->assertStringContainsString( 'aria-labelledby="sd-mw-tier-', $html, 'Tier section is labelled by its heading.' );
@@ -78,7 +78,7 @@ final class BlockAriaTest extends WP_UnitTestCase {
         $this->make_business( 'Acme Pets' );
         $this->make_business( 'Marigold Vet' );
 
-        $html = do_blocks( '<!-- wp:starter-shelter/business-slideshow /-->' );
+        $html = do_blocks( '<!-- wp:shelter-donations/business-slideshow /-->' );
 
         $this->assertStringContainsString( 'role="group"', $html );
         $this->assertStringContainsString( 'aria-current', $html, 'Active slide marked with aria-current.' );

@@ -32,7 +32,7 @@ import { store, getContext, getElement, withSyncEvent } from '@wordpress/interac
 let navCounter = 0;
 
 
-const { state, actions } = store( 'starter-shelter/memorials', {
+const { state, actions } = store( 'shelter-donations/memorials', {
 
     state: {
         /**
@@ -202,7 +202,7 @@ const { state, actions } = store( 'starter-shelter/memorials', {
             const ctx = getContext();
             const id  = ctx.item?.id;
             if ( ! id ) return false;
-            const candlesState = store( 'starter-shelter/candles' ).state;
+            const candlesState = store( 'shelter-donations/candles' ).state;
             return ( candlesState.candles || [] ).includes( id );
         },
 
@@ -225,7 +225,7 @@ const { state, actions } = store( 'starter-shelter/memorials', {
             const name = ctx.item?.honoree_name || '';
             const id   = ctx.item?.id;
             const lit  = id
-                ? ( store( 'starter-shelter/candles' ).state.candles || [] ).includes( id )
+                ? ( store( 'shelter-donations/candles' ).state.candles || [] ).includes( id )
                 : false;
             return lit
                 ? 'Remove candle for ' + name
@@ -247,7 +247,7 @@ const { state, actions } = store( 'starter-shelter/memorials', {
             const memorialId = item?.id;
             if ( ! memorialId ) return;
 
-            const candlesState = store( 'starter-shelter/candles' ).state;
+            const candlesState = store( 'shelter-donations/candles' ).state;
             const wasLit       = ( candlesState.candles || [] ).includes( memorialId );
 
             const writeCount = ( delta ) => {
@@ -268,7 +268,7 @@ const { state, actions } = store( 'starter-shelter/memorials', {
             }
 
             // Server call.
-            const apiUrl = ctx.candleApiUrl || '/wp-json/starter-shelter/v1/candles/toggle';
+            const apiUrl = ctx.candleApiUrl || '/wp-json/shelter-donations/v1/candles/toggle';
 
             try {
                 const response = yield fetch( apiUrl, {

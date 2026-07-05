@@ -37,8 +37,8 @@ defined( 'ABSPATH' ) || exit;
 function get_plugin_templates(): array {
     return [
         'single-sd_memorial' => [
-            'title'       => __( 'Single Memorial', 'starter-shelter' ),
-            'description' => __( 'Displays an individual memorial tribute with honoree name, message, and donor attribution.', 'starter-shelter' ),
+            'title'       => __( 'Single Memorial', 'shelter-donations' ),
+            'description' => __( 'Displays an individual memorial tribute with honoree name, message, and donor attribution.', 'shelter-donations' ),
             'post_types'  => [ 'sd_memorial' ],
         ],
     ];
@@ -166,8 +166,8 @@ function build_template_object( string $slug, array $data ): \WP_Block_Template 
     $content = get_template_content( $slug . '.html' );
 
     $template                 = new \WP_Block_Template();
-    $template->id             = 'starter-shelter//' . $slug;
-    $template->theme          = 'starter-shelter';
+    $template->id             = 'shelter-donations//' . $slug;
+    $template->theme          = 'shelter-donations';
     $template->slug           = $slug;
     $template->source         = 'plugin';
     $template->type           = 'wp_template';

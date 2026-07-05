@@ -48,8 +48,8 @@ class CSV_Exporter {
 
 		if ( ! $type_config ) {
 			wp_die(
-				esc_html__( 'Invalid export type.', 'starter-shelter' ),
-				esc_html__( 'Export Error', 'starter-shelter' ),
+				esc_html__( 'Invalid export type.', 'shelter-donations' ),
+				esc_html__( 'Export Error', 'shelter-donations' ),
 				[ 'response' => 400 ]
 			);
 		}
@@ -127,7 +127,7 @@ class CSV_Exporter {
 	 */
 	public static function build_archive( array $entity_types = [], array $options = [] ) {
 		if ( ! class_exists( '\ZipArchive' ) ) {
-			return new \WP_Error( 'no_zip', __( 'The ZipArchive PHP extension is required to download a full backup.', 'starter-shelter' ) );
+			return new \WP_Error( 'no_zip', __( 'The ZipArchive PHP extension is required to download a full backup.', 'shelter-donations' ) );
 		}
 
 		if ( empty( $entity_types ) ) {
@@ -137,7 +137,7 @@ class CSV_Exporter {
 		$tmp = wp_tempnam( 'sd-backup.zip' );
 		$zip = new \ZipArchive();
 		if ( true !== $zip->open( $tmp, \ZipArchive::CREATE | \ZipArchive::OVERWRITE ) ) {
-			return new \WP_Error( 'zip_open', __( 'Could not create the backup archive.', 'starter-shelter' ) );
+			return new \WP_Error( 'zip_open', __( 'Could not create the backup archive.', 'shelter-donations' ) );
 		}
 
 		foreach ( $entity_types as $type ) {

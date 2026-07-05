@@ -28,7 +28,7 @@ use WP_Error;
  * @since 1.0.0
  */
 function register_routes(): void {
-    $namespace = 'starter-shelter/v1';
+    $namespace = 'shelter-donations/v1';
 
     // Campaign endpoints.
     register_rest_route( $namespace, '/campaigns', [
@@ -264,7 +264,7 @@ function get_campaign( WP_REST_Request $request ) {
     $term = get_term( $campaign_id, 'sd_campaign' );
 
     if ( ! $term || is_wp_error( $term ) ) {
-        return new WP_Error( 'not_found', __( 'Campaign not found.', 'starter-shelter' ), [ 'status' => 404 ] );
+        return new WP_Error( 'not_found', __( 'Campaign not found.', 'shelter-donations' ), [ 'status' => 404 ] );
     }
 
     return new WP_REST_Response( format_campaign( $term ), 200 );
@@ -342,13 +342,13 @@ function get_current_donor( WP_REST_Request $request ) {
     $donor_id = get_donor_id_for_current_user();
 
     if ( ! $donor_id ) {
-        return new WP_Error( 'no_donor', __( 'No donor profile found.', 'starter-shelter' ), [ 'status' => 404 ] );
+        return new WP_Error( 'no_donor', __( 'No donor profile found.', 'shelter-donations' ), [ 'status' => 404 ] );
     }
 
     $donor = Entity_Hydrator::get( 'sd_donor', $donor_id );
 
     if ( ! $donor ) {
-        return new WP_Error( 'not_found', __( 'Donor not found.', 'starter-shelter' ), [ 'status' => 404 ] );
+        return new WP_Error( 'not_found', __( 'Donor not found.', 'shelter-donations' ), [ 'status' => 404 ] );
     }
 
     return new WP_REST_Response( $donor, 200 );
@@ -366,12 +366,12 @@ function get_donor_summary( WP_REST_Request $request ) {
     $donor_id = get_donor_id_for_current_user();
 
     if ( ! $donor_id ) {
-        return new WP_Error( 'no_donor', __( 'No donor profile found.', 'starter-shelter' ), [ 'status' => 404 ] );
+        return new WP_Error( 'no_donor', __( 'No donor profile found.', 'shelter-donations' ), [ 'status' => 404 ] );
     }
 
     $ability = wp_get_ability( 'shelter-reports/donor-summary' );
     if ( ! $ability ) {
-        return new WP_Error( 'ability_unavailable', __( 'Donor summary unavailable.', 'starter-shelter' ), [ 'status' => 500 ] );
+        return new WP_Error( 'ability_unavailable', __( 'Donor summary unavailable.', 'shelter-donations' ), [ 'status' => 500 ] );
     }
 
     $result = $ability->execute( [ 'donor_id' => $donor_id ] );
@@ -394,7 +394,7 @@ function get_donor_donations( WP_REST_Request $request ) {
     $donor_id = get_donor_id_for_current_user();
 
     if ( ! $donor_id ) {
-        return new WP_Error( 'no_donor', __( 'No donor profile found.', 'starter-shelter' ), [ 'status' => 404 ] );
+        return new WP_Error( 'no_donor', __( 'No donor profile found.', 'shelter-donations' ), [ 'status' => 404 ] );
     }
 
     $result = Query::for( 'sd_donation' )
@@ -420,7 +420,7 @@ function get_donor_memberships( WP_REST_Request $request ) {
     $donor_id = get_donor_id_for_current_user();
 
     if ( ! $donor_id ) {
-        return new WP_Error( 'no_donor', __( 'No donor profile found.', 'starter-shelter' ), [ 'status' => 404 ] );
+        return new WP_Error( 'no_donor', __( 'No donor profile found.', 'shelter-donations' ), [ 'status' => 404 ] );
     }
 
     $memberships = Query::for( 'sd_membership' )
@@ -458,7 +458,7 @@ function get_donor_memorials( WP_REST_Request $request ) {
     $donor_id = get_donor_id_for_current_user();
 
     if ( ! $donor_id ) {
-        return new WP_Error( 'no_donor', __( 'No donor profile found.', 'starter-shelter' ), [ 'status' => 404 ] );
+        return new WP_Error( 'no_donor', __( 'No donor profile found.', 'shelter-donations' ), [ 'status' => 404 ] );
     }
 
     $result = Query::for( 'sd_memorial' )
@@ -489,7 +489,7 @@ function get_annual_statement( WP_REST_Request $request ) {
     $donor_id = get_donor_id_for_current_user();
 
     if ( ! $donor_id ) {
-        return new WP_Error( 'no_donor', __( 'No donor profile found.', 'starter-shelter' ), [ 'status' => 404 ] );
+        return new WP_Error( 'no_donor', __( 'No donor profile found.', 'shelter-donations' ), [ 'status' => 404 ] );
     }
 
     $year = (int) $request->get_param( 'year' );
@@ -508,7 +508,7 @@ function get_annual_statement( WP_REST_Request $request ) {
         }
     }
 
-    return new WP_Error( 'generation_failed', __( 'Failed to generate statement.', 'starter-shelter' ), [ 'status' => 500 ] );
+    return new WP_Error( 'generation_failed', __( 'Failed to generate statement.', 'shelter-donations' ), [ 'status' => 500 ] );
 }
 
 /**
@@ -572,11 +572,11 @@ function get_allocations( WP_REST_Request $request ): WP_REST_Response {
 
     if ( empty( $allocations ) ) {
         $allocations = [
-            'general-fund'       => __( 'General Fund', 'starter-shelter' ),
-            'medical-care'       => __( 'Medical Care', 'starter-shelter' ),
-            'food-supplies'      => __( 'Food & Supplies', 'starter-shelter' ),
-            'facility'           => __( 'Facility Improvements', 'starter-shelter' ),
-            'rescue-operations'  => __( 'Rescue Operations', 'starter-shelter' ),
+            'general-fund'       => __( 'General Fund', 'shelter-donations' ),
+            'medical-care'       => __( 'Medical Care', 'shelter-donations' ),
+            'food-supplies'      => __( 'Food & Supplies', 'shelter-donations' ),
+            'facility'           => __( 'Facility Improvements', 'shelter-donations' ),
+            'rescue-operations'  => __( 'Rescue Operations', 'shelter-donations' ),
         ];
     }
 

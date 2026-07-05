@@ -15,7 +15,7 @@ import { getConfig } from '@wordpress/interactivity';
  * @returns {Object} Configuration object.
  */
 export function getSharedConfig() {
-    return getConfig( 'starter-shelter' ) || {};
+    return getConfig( 'shelter-donations' ) || {};
 }
 
 /**

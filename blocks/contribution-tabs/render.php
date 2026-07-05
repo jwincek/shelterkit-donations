@@ -22,7 +22,7 @@ $icon_svgs = [
 	'format-quote' => 'M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z',
 ];
 
-wp_interactivity_state( 'starter-shelter/contribution-tabs', [
+wp_interactivity_state( 'shelter-donations/contribution-tabs', [
 	'tabs' => [
 		$block_id => [
 			'activeTab' => $default_tab,
@@ -38,13 +38,13 @@ $context = wp_json_encode( [
 $wrapper = get_block_wrapper_attributes( [
 	'class'               => 'sd-contribution-tabs',
 	'id'                  => $block_id,
-	'data-wp-interactive' => '{"namespace":"starter-shelter/contribution-tabs"}',
+	'data-wp-interactive' => '{"namespace":"shelter-donations/contribution-tabs"}',
 	'data-wp-context'     => $context,
 ] );
 
 ?>
 <div <?php echo $wrapper; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped markup from get_block_wrapper_attributes(). ?>>
-	<div class="sd-tabs-nav" role="tablist" aria-label="<?php esc_attr_e( 'Contribution type', 'starter-shelter' ); ?>">
+	<div class="sd-tabs-nav" role="tablist" aria-label="<?php esc_attr_e( 'Contribution type', 'shelter-donations' ); ?>">
 		<?php foreach ( $tab_labels as $i => $label ) :
 			$is_active = ( $i === $default_tab );
 			$icon_path = $icon_svgs[ $tab_icons[ $i ] ?? '' ] ?? '';

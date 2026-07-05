@@ -5,15 +5,15 @@
 	const { __ } = wp.i18n;
 
 	const ALLOWED_BLOCKS = [
-		'starter-shelter/donation-form',
-		'starter-shelter/membership-form',
-		'starter-shelter/memorial-form',
+		'shelter-donations/donation-form',
+		'shelter-donations/membership-form',
+		'shelter-donations/memorial-form',
 	];
 
 	const DEFAULT_TEMPLATE = [
-		[ 'starter-shelter/donation-form', {} ],
-		[ 'starter-shelter/membership-form', {} ],
-		[ 'starter-shelter/memorial-form', {} ],
+		[ 'shelter-donations/donation-form', {} ],
+		[ 'shelter-donations/membership-form', {} ],
+		[ 'shelter-donations/memorial-form', {} ],
 	];
 
 	const Edit = function( props ) {
@@ -34,11 +34,11 @@
 
 		return el( Fragment, {},
 			el( InspectorControls, {},
-				el( PanelBody, { title: __( 'Tab Settings', 'starter-shelter' ), initialOpen: true },
+				el( PanelBody, { title: __( 'Tab Settings', 'shelter-donations' ), initialOpen: true },
 					tabLabels.map( function( label, i ) {
 						return el( TextControl, {
 							key: i,
-							label: __( 'Tab', 'starter-shelter' ) + ' ' + ( i + 1 ) + ' ' + __( 'Label', 'starter-shelter' ),
+							label: __( 'Tab', 'shelter-donations' ) + ' ' + ( i + 1 ) + ' ' + __( 'Label', 'shelter-donations' ),
 							value: label,
 							onChange: function( value ) {
 								var newLabels = tabLabels.slice();
@@ -49,7 +49,7 @@
 						} );
 					} ),
 					el( SelectControl, {
-						label: __( 'Default Tab', 'starter-shelter' ),
+						label: __( 'Default Tab', 'shelter-donations' ),
 						value: String( attributes.defaultTab || 0 ),
 						options: tabLabels.map( function( label, i ) {
 							return { value: String( i ), label: label };
@@ -75,7 +75,7 @@
 		);
 	};
 
-	wp.blocks.registerBlockType( 'starter-shelter/contribution-tabs', {
+	wp.blocks.registerBlockType( 'shelter-donations/contribution-tabs', {
 		edit: Edit,
 		save: function() {
 			return el( wp.blockEditor.InnerBlocks.Content );

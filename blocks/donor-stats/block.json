@@ -1,14 +1,14 @@
 {
     "$schema": "https://schemas.wp.org/trunk/block.json",
     "apiVersion": 3,
-    "name": "starter-shelter/donor-stats",
+    "name": "shelter-donations/donor-stats",
     "version": "1.0.0",
     "title": "Donor Statistics",
-    "category": "starter-shelter",
+    "category": "shelter-donations",
     "icon": "chart-bar",
     "description": "Display donation statistics with real-time updates. Uses core blocks with block bindings.",
     "keywords": [ "stats", "statistics", "donations", "counter", "total" ],
-    "textdomain": "starter-shelter",
+    "textdomain": "shelter-donations",
     "supports": {
         "html": false,
         "align": [ "wide", "full" ],

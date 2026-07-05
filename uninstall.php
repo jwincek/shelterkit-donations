@@ -1,6 +1,6 @@
 <?php
 /**
- * Uninstall handler for Starter Shelter Donations.
+ * Uninstall handler for Shelter Donations.
  *
  * Runs when the plugin is deleted from wp-admin. Data is preserved unless the
  * admin enabled "Delete all data on uninstall" — see includes/uninstall-cleanup.php.

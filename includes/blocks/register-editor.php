@@ -22,7 +22,7 @@ function register_editor_assets(): void {
     // Register block binding sources on the client side.
     // The names must match the PHP register_block_bindings_source() calls.
     wp_enqueue_script(
-        'starter-shelter-block-bindings',
+        'shelter-donations-block-bindings',
         STARTER_SHELTER_URL . 'assets/js/block-bindings.js',
         [ 'wp-blocks' ],
         filemtime( STARTER_SHELTER_PATH . 'assets/js/block-bindings.js' ),
@@ -33,14 +33,14 @@ function register_editor_assets(): void {
     // lack dependency metadata (no .asset.php from build step). We need to
     // add wp-server-side-render explicitly since every edit.js uses SSR.
     $block_handles = [
-        'starter-shelter-donation-form-editor-script',
-        'starter-shelter-memorial-form-editor-script',
-        'starter-shelter-membership-form-editor-script',
-        'starter-shelter-memorial-wall-editor-script',
-        'starter-shelter-campaign-progress-editor-script',
-        'starter-shelter-campaign-card-editor-script',
-        'starter-shelter-donor-dashboard-editor-script',
-        'starter-shelter-contribution-tabs-editor-script',
+        'shelter-donations-donation-form-editor-script',
+        'shelter-donations-memorial-form-editor-script',
+        'shelter-donations-membership-form-editor-script',
+        'shelter-donations-memorial-wall-editor-script',
+        'shelter-donations-campaign-progress-editor-script',
+        'shelter-donations-campaign-card-editor-script',
+        'shelter-donations-donor-dashboard-editor-script',
+        'shelter-donations-contribution-tabs-editor-script',
     ];
 
     // All edit.js files use wp.serverSideRender, wp.blockEditor,
@@ -80,7 +80,7 @@ function register_editor_assets(): void {
 
     // Add inline script to window before any block scripts load
     add_action( 'admin_print_scripts', function() use ( $data ) {
-        echo '<script>window.starterShelterBlocks = ' . wp_json_encode( $data ) . ';</script>';
+        echo '<script>window.shelterDonationsBlocks = ' . wp_json_encode( $data ) . ';</script>';
     }, 5 );
 }
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\\register_editor_assets' );
@@ -103,7 +103,7 @@ function get_campaigns_for_editor(): array {
     }
 
     $options = [
-        [ 'value' => 0, 'label' => __( '— Select Campaign —', 'starter-shelter' ) ],
+        [ 'value' => 0, 'label' => __( '— Select Campaign —', 'shelter-donations' ) ],
     ];
 
     foreach ( $campaigns as $campaign ) {
@@ -128,11 +128,11 @@ function get_allocations_for_editor(): array {
 
     if ( empty( $allocations ) ) {
         $allocations = [
-            'general-fund'      => __( 'General Fund', 'starter-shelter' ),
-            'medical-care'      => __( 'Medical Care', 'starter-shelter' ),
-            'food-supplies'     => __( 'Food & Supplies', 'starter-shelter' ),
-            'facility'          => __( 'Facility Improvements', 'starter-shelter' ),
-            'rescue-operations' => __( 'Rescue Operations', 'starter-shelter' ),
+            'general-fund'      => __( 'General Fund', 'shelter-donations' ),
+            'medical-care'      => __( 'Medical Care', 'shelter-donations' ),
+            'food-supplies'     => __( 'Food & Supplies', 'shelter-donations' ),
+            'facility'          => __( 'Facility Improvements', 'shelter-donations' ),
+            'rescue-operations' => __( 'Rescue Operations', 'shelter-donations' ),
         ];
     }
 
@@ -160,7 +160,7 @@ function get_memorial_years(): array {
     " );
 
     $options = [
-        [ 'value' => '', 'label' => __( 'All Years', 'starter-shelter' ) ],
+        [ 'value' => '', 'label' => __( 'All Years', 'shelter-donations' ) ],
     ];
 
     foreach ( $years as $year ) {

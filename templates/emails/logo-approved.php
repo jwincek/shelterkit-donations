@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
 
 $membership   = $data['membership'] ?? [];
 $donor        = $data['donor'] ?? [];
-$business_name = $membership['business_name'] ?? __( 'Your business', 'starter-shelter' );
+$business_name = $membership['business_name'] ?? __( 'Your business', 'shelter-donations' );
 
 do_action( 'woocommerce_email_header', $heading, $email );
 ?>
@@ -26,8 +26,8 @@ do_action( 'woocommerce_email_header', $heading, $email );
     <?php
     printf(
         /* translators: %s: recipient name */
-        esc_html__( 'Dear %s,', 'starter-shelter' ),
-        esc_html( $donor['first_name'] ?? $donor['full_name'] ?? __( 'Valued Member', 'starter-shelter' ) )
+        esc_html__( 'Dear %s,', 'shelter-donations' ),
+        esc_html( $donor['first_name'] ?? $donor['full_name'] ?? __( 'Valued Member', 'shelter-donations' ) )
     );
     ?>
 </p>
@@ -36,32 +36,32 @@ do_action( 'woocommerce_email_header', $heading, $email );
     <?php
     printf(
         /* translators: %s: business name */
-        esc_html__( 'Great news! The logo for %s has been approved and is now visible on our website.', 'starter-shelter' ),
+        esc_html__( 'Great news! The logo for %s has been approved and is now visible on our website.', 'shelter-donations' ),
         '<strong>' . esc_html( $business_name ) . '</strong>'
     );
     ?>
 </p>
 
 <p>
-    <?php esc_html_e( 'Your business logo will appear on:', 'starter-shelter' ); ?>
+    <?php esc_html_e( 'Your business logo will appear on:', 'shelter-donations' ); ?>
 </p>
 
 <ul>
-    <li><?php esc_html_e( 'Our Business Sponsors page', 'starter-shelter' ); ?></li>
-    <li><?php esc_html_e( 'The Donor Wall (if applicable to your membership tier)', 'starter-shelter' ); ?></li>
-    <li><?php esc_html_e( 'Our annual report and promotional materials', 'starter-shelter' ); ?></li>
+    <li><?php esc_html_e( 'Our Business Sponsors page', 'shelter-donations' ); ?></li>
+    <li><?php esc_html_e( 'The Donor Wall (if applicable to your membership tier)', 'shelter-donations' ); ?></li>
+    <li><?php esc_html_e( 'Our annual report and promotional materials', 'shelter-donations' ); ?></li>
 </ul>
 
 <p>
-    <?php esc_html_e( 'Thank you for your generous support of our shelter and the animals in our care. Your business partnership makes a real difference!', 'starter-shelter' ); ?>
+    <?php esc_html_e( 'Thank you for your generous support of our shelter and the animals in our care. Your business partnership makes a real difference!', 'shelter-donations' ); ?>
 </p>
 
 <p>
-    <?php esc_html_e( 'If you have any questions about your business membership benefits, please don\'t hesitate to contact us.', 'starter-shelter' ); ?>
+    <?php esc_html_e( 'If you have any questions about your business membership benefits, please don\'t hesitate to contact us.', 'shelter-donations' ); ?>
 </p>
 
 <p>
-    <?php esc_html_e( 'With gratitude,', 'starter-shelter' ); ?><br>
+    <?php esc_html_e( 'With gratitude,', 'shelter-donations' ); ?><br>
     <?php echo esc_html( get_bloginfo( 'name' ) ); ?>
 </p>
 

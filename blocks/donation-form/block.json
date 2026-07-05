@@ -1,14 +1,14 @@
 {
     "$schema": "https://schemas.wp.org/trunk/block.json",
     "apiVersion": 3,
-    "name": "starter-shelter/donation-form",
+    "name": "shelter-donations/donation-form",
     "version": "2.0.0",
     "title": "Donation Form",
-    "category": "starter-shelter",
+    "category": "shelter-donations",
     "icon": "money-alt",
     "description": "Interactive donation form with preset amounts, allocation selection, and WooCommerce checkout integration.",
     "keywords": ["donate", "giving", "form", "payment", "contribution", "charity"],
-    "textdomain": "starter-shelter",
+    "textdomain": "shelter-donations",
     "supports": {
         "html": false,
         "align": ["wide"],
@@ -40,8 +40,8 @@
     },
     "usesContext": ["postId", "postType"],
     "providesContext": {
-        "starter-shelter/formId": "formId",
-        "starter-shelter/campaignId": "campaignId"
+        "shelter-donations/formId": "formId",
+        "shelter-donations/campaignId": "campaignId"
     },
     "attributes": {
         "formId": {

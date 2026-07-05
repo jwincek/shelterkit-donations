@@ -197,7 +197,7 @@ class Donor_Lookup {
 					'donor_not_found',
 					sprintf(
 						/* translators: %s: email address or name searched for */
-						__( 'Donor not found: %s', 'starter-shelter' ),
+						__( 'Donor not found: %s', 'shelter-donations' ),
 						$email
 					)
 				);
@@ -220,7 +220,7 @@ class Donor_Lookup {
 					'donor_not_found',
 					sprintf(
 						/* translators: %s: email address or name searched for */
-						__( 'Donor not found: %s', 'starter-shelter' ),
+						__( 'Donor not found: %s', 'shelter-donations' ),
 						$display_name
 					)
 				);
@@ -231,7 +231,7 @@ class Donor_Lookup {
 
 		return new \WP_Error(
 			'insufficient_data',
-			__( 'Either email or display_name is required to find or create a donor.', 'starter-shelter' )
+			__( 'Either email or display_name is required to find or create a donor.', 'shelter-donations' )
 		);
 	}
 
@@ -395,7 +395,7 @@ class Donor_Lookup {
 		if ( empty( $display_name ) ) {
 			return new \WP_Error(
 				'empty_name',
-				__( 'Donor display name is empty after sanitization.', 'starter-shelter' )
+				__( 'Donor display name is empty after sanitization.', 'shelter-donations' )
 			);
 		}
 
@@ -568,9 +568,9 @@ class Donor_Lookup {
 			// Turn "john.doe" or "john_doe" into "John Doe".
 			$local = str_replace( [ '.', '_', '-' ], ' ', $local );
 			$humanized = mb_convert_case( trim( $local ), MB_CASE_TITLE, 'UTF-8' );
-			return $humanized ?: __( 'Anonymous Donor', 'starter-shelter' );
+			return $humanized ?: __( 'Anonymous Donor', 'shelter-donations' );
 		}
 
-		return $fallback ?: __( 'Anonymous Donor', 'starter-shelter' );
+		return $fallback ?: __( 'Anonymous Donor', 'shelter-donations' );
 	}
 }

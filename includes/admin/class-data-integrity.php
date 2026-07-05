@@ -32,7 +32,7 @@ class Data_Integrity {
 	/**
 	 * Page slug.
 	 */
-	private const SLUG = 'starter-shelter-data-tools';
+	private const SLUG = 'shelter-donations-data-tools';
 
 	/**
 	 * Nonce action.
@@ -71,8 +71,8 @@ class Data_Integrity {
 	public static function add_menu_page(): void {
 		$hook = add_submenu_page(
 			Menu::MENU_SLUG,
-			__( 'Data Tools', 'starter-shelter' ),
-			__( 'Data Tools', 'starter-shelter' ),
+			__( 'Data Tools', 'shelter-donations' ),
+			__( 'Data Tools', 'shelter-donations' ),
 			'manage_options',
 			self::SLUG,
 			[ self::class, 'render_page' ]
@@ -99,15 +99,15 @@ class Data_Integrity {
 			'batchSize'  => self::BATCH_SIZE,
 			'entityTypes' => self::ENTITY_TYPES,
 			'i18n'       => [
-				'scanning'        => __( 'Scanning…', 'starter-shelter' ),
-				'backfilling'     => __( 'Backfilling…', 'starter-shelter' ),
-				'purging'         => __( 'Deleting…', 'starter-shelter' ),
-				'recalculating'   => __( 'Recalculating…', 'starter-shelter' ),
-				'complete'        => __( 'Complete!', 'starter-shelter' ),
-				'confirmPurge'    => __( 'Type the post type slug to confirm:', 'starter-shelter' ),
+				'scanning'        => __( 'Scanning…', 'shelter-donations' ),
+				'backfilling'     => __( 'Backfilling…', 'shelter-donations' ),
+				'purging'         => __( 'Deleting…', 'shelter-donations' ),
+				'recalculating'   => __( 'Recalculating…', 'shelter-donations' ),
+				'complete'        => __( 'Complete!', 'shelter-donations' ),
+				'confirmPurge'    => __( 'Type the post type slug to confirm:', 'shelter-donations' ),
 				/* translators: %s: record type label. */
-				'purgeWarning'    => __( 'This will permanently delete ALL %s records. This cannot be undone.', 'starter-shelter' ),
-				'noIssues'        => __( 'All records look good — no missing fields found.', 'starter-shelter' ),
+				'purgeWarning'    => __( 'This will permanently delete ALL %s records. This cannot be undone.', 'shelter-donations' ),
+				'noIssues'        => __( 'All records look good — no missing fields found.', 'shelter-donations' ),
 			],
 		] );
 	}
@@ -122,12 +122,12 @@ class Data_Integrity {
 	public static function render_page(): void {
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'Data Tools', 'starter-shelter' ); ?></h1>
+			<h1><?php esc_html_e( 'Data Tools', 'shelter-donations' ); ?></h1>
 
 			<nav class="nav-tab-wrapper" id="sd-data-tools-tabs">
-				<a href="#backfill" class="nav-tab nav-tab-active"><?php esc_html_e( 'Backfill &amp; Repair', 'starter-shelter' ); ?></a>
-				<a href="#purge" class="nav-tab"><?php esc_html_e( 'Purge Records', 'starter-shelter' ); ?></a>
-				<a href="#recalc" class="nav-tab"><?php esc_html_e( 'Recalculate', 'starter-shelter' ); ?></a>
+				<a href="#backfill" class="nav-tab nav-tab-active"><?php esc_html_e( 'Backfill &amp; Repair', 'shelter-donations' ); ?></a>
+				<a href="#purge" class="nav-tab"><?php esc_html_e( 'Purge Records', 'shelter-donations' ); ?></a>
+				<a href="#recalc" class="nav-tab"><?php esc_html_e( 'Recalculate', 'shelter-donations' ); ?></a>
 			</nav>
 
 			<?php self::render_backfill_tab(); ?>
@@ -164,17 +164,17 @@ class Data_Integrity {
 	private static function render_backfill_tab(): void {
 		?>
 		<div id="tab-backfill" class="sd-tool-section active">
-			<h2><?php esc_html_e( 'Backfill Missing Fields', 'starter-shelter' ); ?></h2>
+			<h2><?php esc_html_e( 'Backfill Missing Fields', 'shelter-donations' ); ?></h2>
 			<p class="description">
 				<?php esc_html_e(
 					'Scans all records and reports missing or empty meta fields based on the entity schema. You can then backfill defaults, denormalized fields, and taxonomy terms in batches.',
-					'starter-shelter'
+					'shelter-donations'
 				); ?>
 			</p>
 
 			<p>
 				<button type="button" id="sd-scan-btn" class="button button-primary">
-					<?php esc_html_e( 'Scan All Records', 'starter-shelter' ); ?>
+					<?php esc_html_e( 'Scan All Records', 'shelter-donations' ); ?>
 				</button>
 			</p>
 
@@ -182,10 +182,10 @@ class Data_Integrity {
 
 			<p id="sd-backfill-actions" style="display:none;">
 				<button type="button" id="sd-backfill-btn" class="button button-primary">
-					<?php esc_html_e( 'Backfill All Issues', 'starter-shelter' ); ?>
+					<?php esc_html_e( 'Backfill All Issues', 'shelter-donations' ); ?>
 				</button>
 				<span class="description" style="margin-left: 10px;">
-					<?php esc_html_e( 'Fills in missing defaults, display names, and taxonomy terms. Does not overwrite existing values.', 'starter-shelter' ); ?>
+					<?php esc_html_e( 'Fills in missing defaults, display names, and taxonomy terms. Does not overwrite existing values.', 'shelter-donations' ); ?>
 				</span>
 			</p>
 		</div>
@@ -198,14 +198,14 @@ class Data_Integrity {
 	private static function render_purge_tab(): void {
 		?>
 		<div id="tab-purge" class="sd-tool-section">
-			<h2><?php esc_html_e( 'Purge Records', 'starter-shelter' ); ?></h2>
+			<h2><?php esc_html_e( 'Purge Records', 'shelter-donations' ); ?></h2>
 
 			<div class="notice notice-warning inline" style="margin: 10px 0 20px;">
 				<p>
-					<strong><?php esc_html_e( 'Warning:', 'starter-shelter' ); ?></strong>
+					<strong><?php esc_html_e( 'Warning:', 'shelter-donations' ); ?></strong>
 					<?php esc_html_e(
 						'This permanently deletes posts and their meta. Use this to start fresh before re-running Legacy Order Sync or CSV imports. WooCommerce orders and donor records are not affected unless you explicitly choose them.',
-						'starter-shelter'
+						'shelter-donations'
 					); ?>
 				</p>
 			</div>
@@ -223,7 +223,7 @@ class Data_Integrity {
 					<p class="description">
 						<?php printf(
 							/* translators: %s: post type slug */
-							esc_html__( 'Post type: %s', 'starter-shelter' ),
+							esc_html__( 'Post type: %s', 'shelter-donations' ),
 							'<code>' . esc_html( $post_type ) . '</code>'
 						); ?>
 					</p>
@@ -237,7 +237,7 @@ class Data_Integrity {
 						>
 							<?php printf(
 								/* translators: %s: record type label */
-								esc_html__( 'Delete All %s', 'starter-shelter' ),
+								esc_html__( 'Delete All %s', 'shelter-donations' ),
 								esc_html( $label )
 							); ?>
 						</button>
@@ -247,16 +247,16 @@ class Data_Integrity {
 
 			<?php if ( function_exists( 'wc_get_orders' ) ) : ?>
 			<div class="sd-entity-card" style="border-left: 4px solid #2271b1; margin-top: 20px;">
-				<h3><?php esc_html_e( 'Reset Legacy Sync Flags', 'starter-shelter' ); ?></h3>
+				<h3><?php esc_html_e( 'Reset Legacy Sync Flags', 'shelter-donations' ); ?></h3>
 				<p class="description">
 					<?php esc_html_e(
 						'Clears the "_sd_legacy_synced" flag on all WooCommerce orders so they can be re-processed by the Legacy Order Sync tool. Does NOT delete any records.',
-						'starter-shelter'
+						'shelter-donations'
 					); ?>
 				</p>
 				<p style="margin-top: 10px;">
 					<button type="button" id="sd-reset-sync-flags" class="button">
-						<?php esc_html_e( 'Reset Sync Flags', 'starter-shelter' ); ?>
+						<?php esc_html_e( 'Reset Sync Flags', 'shelter-donations' ); ?>
 					</button>
 				</p>
 			</div>
@@ -271,16 +271,16 @@ class Data_Integrity {
 	private static function render_recalc_tab(): void {
 		?>
 		<div id="tab-recalc" class="sd-tool-section">
-			<h2><?php esc_html_e( 'Recalculate Donor Stats', 'starter-shelter' ); ?></h2>
+			<h2><?php esc_html_e( 'Recalculate Donor Stats', 'shelter-donations' ); ?></h2>
 			<p class="description">
 				<?php esc_html_e(
 					'Recalculates lifetime_giving for every donor by summing their donations, memorials, and memberships. Use this after bulk imports or if stats look incorrect.',
-					'starter-shelter'
+					'shelter-donations'
 				); ?>
 			</p>
 			<p>
 				<button type="button" id="sd-recalc-btn" class="button button-primary">
-					<?php esc_html_e( 'Recalculate All Donors', 'starter-shelter' ); ?>
+					<?php esc_html_e( 'Recalculate All Donors', 'shelter-donations' ); ?>
 				</button>
 			</p>
 		</div>
@@ -925,7 +925,7 @@ class Data_Integrity {
 
 		// Double-check confirmation matches.
 		if ( $confirmation !== $post_type ) {
-			wp_send_json_error( __( 'Confirmation does not match. Type the exact post type slug.', 'starter-shelter' ) );
+			wp_send_json_error( __( 'Confirmation does not match. Type the exact post type slug.', 'shelter-donations' ) );
 		}
 
 		// Get a batch of posts to delete.

@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
-<ruleset name="Starter Shelter">
-	<description>PHPCS ruleset for Starter Shelter Donations plugin.</description>
+<ruleset name="Shelter Donations">
+	<description>PHPCS ruleset for Shelter Donations plugin.</description>
 
 	<!-- Scan these files -->
-	<file>starter-shelter.php</file>
+	<file>shelter-donations.php</file>
 	<file>includes/</file>
 
 	<!-- Exclude third-party code -->
@@ -30,7 +30,7 @@
 	<rule ref="WordPress.WP.I18n">
 		<properties>
 			<property name="text_domain" type="array">
-				<element value="starter-shelter"/>
+				<element value="shelter-donations"/>
 			</property>
 		</properties>
 	</rule>

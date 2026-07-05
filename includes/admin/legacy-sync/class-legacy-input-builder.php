@@ -159,7 +159,7 @@ class Legacy_Input_Builder {
 
 		if ( empty( $honoree_name ) ) {
 			$honoree_name = $order->get_meta( '_sd_honoree_name' )
-				?: __( 'In Loving Memory', 'starter-shelter' );
+				?: __( 'In Loving Memory', 'shelter-donations' );
 		}
 		$input['honoree_name'] = $honoree_name;
 

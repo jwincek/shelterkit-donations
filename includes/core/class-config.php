@@ -131,7 +131,7 @@ class Config {
      *
      * Each manifest replaces (not deep-merges) the corresponding entity
      * section. Drift between an entities.json entry and a manifest is
-     * surfaced by `wp starter-shelter validate`, not silently resolved.
+     * surfaced by `wp shelter-donations validate`, not silently resolved.
      *
      * @since 1.1.2
      *

@@ -11,7 +11,7 @@
 import { store, getContext } from '@wordpress/interactivity';
 import { getSharedConfig, apiRequest, formatCurrency } from './utils.js';
 
-const { state, actions } = store( 'starter-shelter/campaign', {
+const { state, actions } = store( 'shelter-donations/campaign', {
     state: {
         campaigns: {},
         isLoading: false,

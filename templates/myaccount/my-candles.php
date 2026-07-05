@@ -6,7 +6,7 @@
  * garden"). Candles are a permanent tribute, so this is a read-only list;
  * each row links to the memorial, where the candle can be toggled.
  *
- * Override from a theme at `starter-shelter/myaccount/my-candles.php`.
+ * Override from a theme at `shelter-donations/myaccount/my-candles.php`.
  * Runs in the plugin's WooCommerce namespace (see donor-dashboard.php).
  *
  * @package Starter_Shelter
@@ -25,8 +25,8 @@ defined( 'ABSPATH' ) || exit;
 <div class="sd-my-candles">
     <?php if ( empty( $memorials ) ) : ?>
     <div class="sd-candles-empty">
-        <p><?php esc_html_e( 'You haven\'t lit any candles yet.', 'starter-shelter' ); ?></p>
-        <p><?php esc_html_e( 'Light a candle on a memorial to remember a beloved companion.', 'starter-shelter' ); ?></p>
+        <p><?php esc_html_e( 'You haven\'t lit any candles yet.', 'shelter-donations' ); ?></p>
+        <p><?php esc_html_e( 'Light a candle on a memorial to remember a beloved companion.', 'shelter-donations' ); ?></p>
     </div>
     <?php else : ?>
     <ul class="sd-candles-list">
@@ -53,7 +53,7 @@ defined( 'ABSPATH' ) || exit;
             <span class="sd-candle-count">
                 <?php
                 printf(
-                    esc_html( /* translators: %d: number of candles lit */ _n( '%d candle lit', '%d candles lit', $count, 'starter-shelter' ) ),
+                    esc_html( /* translators: %d: number of candles lit */ _n( '%d candle lit', '%d candles lit', $count, 'shelter-donations' ) ),
                     (int) $count
                 );
                 ?>

@@ -1,15 +1,16 @@
 <?php
 /**
- * Plugin Name: Starter Shelter Donations
- * Plugin URI: https://github.com/starter-shelter
+ * Plugin Name: Shelter Donations
+ * Plugin URI: https://github.com/jwincek/shelter-donations
  * Description: Animal shelter donations, memberships, and memorials management using WordPress 6.9+ Abilities API.
- * Version: 1.2.0
+ * Version: 2.0.0
  * Requires at least: 6.9
  * Requires PHP: 8.1
- * Author: Jerome Wincek / Claude
+ * Author: VCPA Humane Society
+ * Author URI: https://vcpahumane.org
  * License: GPL-2.0+
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: starter-shelter
+ * Text Domain: shelter-donations
  * Domain Path: /languages
  */
 
@@ -18,7 +19,7 @@ declare( strict_types = 1 );
 defined( 'ABSPATH' ) || exit;
 
 // Plugin constants.
-define( 'STARTER_SHELTER_VERSION', '1.2.0' );
+define( 'STARTER_SHELTER_VERSION', '2.0.0' );
 define( 'STARTER_SHELTER_FILE', __FILE__ );
 define( 'STARTER_SHELTER_PATH', plugin_dir_path( __FILE__ ) );
 define( 'STARTER_SHELTER_URL', plugin_dir_url( __FILE__ ) );
@@ -62,7 +63,7 @@ function starter_shelter_init(): void {
         add_action( 'admin_notices', function(): void {
             printf(
                 '<div class="error"><p>%s</p></div>',
-                esc_html__( 'Starter Shelter Donations requires WordPress 6.9 or higher.', 'starter-shelter' )
+                esc_html__( 'Shelter Donations requires WordPress 6.9 or higher.', 'shelter-donations' )
             );
         } );
         return;
@@ -97,28 +98,28 @@ add_action( 'plugins_loaded', 'starter_shelter_init', 10 );
  */
 function starter_shelter_register_ability_categories(): void {
     wp_register_ability_category( 'shelter-donations', [
-        'label'       => __( 'Shelter Donations', 'starter-shelter' ),
-        'description' => __( 'Abilities for managing animal shelter donations.', 'starter-shelter' ),
+        'label'       => __( 'Shelter Donations', 'shelter-donations' ),
+        'description' => __( 'Abilities for managing animal shelter donations.', 'shelter-donations' ),
     ] );
 
     wp_register_ability_category( 'shelter-memberships', [
-        'label'       => __( 'Shelter Memberships', 'starter-shelter' ),
-        'description' => __( 'Abilities for managing shelter memberships.', 'starter-shelter' ),
+        'label'       => __( 'Shelter Memberships', 'shelter-donations' ),
+        'description' => __( 'Abilities for managing shelter memberships.', 'shelter-donations' ),
     ] );
 
     wp_register_ability_category( 'shelter-memorials', [
-        'label'       => __( 'Shelter Memorials', 'starter-shelter' ),
-        'description' => __( 'Abilities for managing memorial donations.', 'starter-shelter' ),
+        'label'       => __( 'Shelter Memorials', 'shelter-donations' ),
+        'description' => __( 'Abilities for managing memorial donations.', 'shelter-donations' ),
     ] );
 
     wp_register_ability_category( 'shelter-donors', [
-        'label'       => __( 'Shelter Donors', 'starter-shelter' ),
-        'description' => __( 'Abilities for managing donor profiles.', 'starter-shelter' ),
+        'label'       => __( 'Shelter Donors', 'shelter-donations' ),
+        'description' => __( 'Abilities for managing donor profiles.', 'shelter-donations' ),
     ] );
 
     wp_register_ability_category( 'shelter-reports', [
-        'label'       => __( 'Shelter Reports', 'starter-shelter' ),
-        'description' => __( 'Abilities for generating shelter reports.', 'starter-shelter' ),
+        'label'       => __( 'Shelter Reports', 'shelter-donations' ),
+        'description' => __( 'Abilities for generating shelter reports.', 'shelter-donations' ),
     ] );
 }
 add_action( 'wp_abilities_api_categories_init', 'starter_shelter_register_ability_categories' );
@@ -296,8 +297,8 @@ function starter_shelter_register_blocks(): void {
         return array_merge(
             [
                 [
-                    'slug'  => 'starter-shelter',
-                    'title' => __( 'Shelter Donations', 'starter-shelter' ),
+                    'slug'  => 'shelter-donations',
+                    'title' => __( 'Shelter Donations', 'shelter-donations' ),
                     'icon'  => 'heart',
                 ],
             ],
@@ -328,7 +329,7 @@ function starter_shelter_register_blocks(): void {
     // Add shared feedback styles as dependency for form blocks.
     $form_blocks = [ 'donation-form', 'memorial-form', 'membership-form' ];
     foreach ( $form_blocks as $block ) {
-        $handle = 'starter-shelter-' . $block . '-style';
+        $handle = 'shelter-donations-' . $block . '-style';
         $style = wp_styles()->query( $handle );
         if ( $style ) {
             $style->deps[] = 'sd-form-feedback';
@@ -391,13 +392,13 @@ function starter_shelter_product_setup_notice(): void {
         return;
     }
 
-    $setup_url = admin_url( 'admin.php?page=starter-shelter-settings&tab=products' );
+    $setup_url = admin_url( 'admin.php?page=shelter-donations-settings&tab=products' );
     ?>
     <div class="notice notice-warning is-dismissible">
         <p>
-            <strong><?php esc_html_e( 'Starter Shelter Donations:', 'starter-shelter' ); ?></strong>
-            <?php esc_html_e( 'Some donation products need to be created.', 'starter-shelter' ); ?>
-            <a href="<?php echo esc_url( $setup_url ); ?>"><?php esc_html_e( 'Set up products', 'starter-shelter' ); ?></a>
+            <strong><?php esc_html_e( 'Shelter Donations:', 'shelter-donations' ); ?></strong>
+            <?php esc_html_e( 'Some donation products need to be created.', 'shelter-donations' ); ?>
+            <a href="<?php echo esc_url( $setup_url ); ?>"><?php esc_html_e( 'Set up products', 'shelter-donations' ); ?></a>
         </p>
     </div>
     <?php
@@ -414,11 +415,11 @@ function starter_shelter_deactivate(): void {
 }
 register_deactivation_hook( __FILE__, 'starter_shelter_deactivate' );
 
-// Register the WP-CLI `wp starter-shelter validate` contract-checker.
+// Register the WP-CLI `wp shelter-donations validate` contract-checker.
 // Loaded only when WP-CLI is active to keep production overhead at zero.
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
     \WP_CLI::add_command(
-        'starter-shelter validate',
+        'shelter-donations validate',
         \Starter_Shelter\Cli\Validate_Command::class
     );
 }

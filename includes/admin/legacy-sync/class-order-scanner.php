@@ -372,25 +372,25 @@ class Order_Scanner {
 		return match ( $type ) {
 			'donation' => sprintf(
 				/* translators: 1: amount, 2: allocation */
-				__( 'Donation of %1$s to %2$s', 'starter-shelter' ),
+				__( 'Donation of %1$s to %2$s', 'shelter-donations' ),
 				wc_price( $input['amount'] ?? 0 ),
 				ucwords( str_replace( '-', ' ', $input['allocation'] ?? 'General Fund' ) )
 			),
 			'membership' => sprintf(
 				/* translators: 1: membership type, 2: tier */
-				__( '%1$s Membership: %2$s', 'starter-shelter' ),
+				__( '%1$s Membership: %2$s', 'shelter-donations' ),
 				( $input['membership_type'] ?? 'individual' ) === 'business'
-					? __( 'Business', 'starter-shelter' )
-					: __( 'Individual', 'starter-shelter' ),
+					? __( 'Business', 'shelter-donations' )
+					: __( 'Individual', 'shelter-donations' ),
 				ucwords( str_replace( '-', ' ', $input['tier'] ?? 'unknown' ) )
 			),
 			'memorial' => sprintf(
 				/* translators: 1: memorial type, 2: honoree name */
-				__( '%1$s Memorial for %2$s', 'starter-shelter' ),
+				__( '%1$s Memorial for %2$s', 'shelter-donations' ),
 				ucfirst( $input['memorial_type'] ?? 'person' ),
-				$input['honoree_name'] ?? __( 'Unknown', 'starter-shelter' )
+				$input['honoree_name'] ?? __( 'Unknown', 'shelter-donations' )
 			),
-			default => __( 'Unknown record type', 'starter-shelter' ),
+			default => __( 'Unknown record type', 'shelter-donations' ),
 		};
 	}
 

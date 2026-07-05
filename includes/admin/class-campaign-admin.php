@@ -62,7 +62,7 @@ class Campaign_Admin {
         add_action( "created_{$tax}",          [ self::class, 'save_fields' ] );
         add_action( "edited_{$tax}",           [ self::class, 'save_fields' ] );
 
-        // The sd_donation CPT lives under the 'starter-shelter' menu, but
+        // The sd_donation CPT lives under the 'shelter-donations' menu, but
         // taxonomies attached to a CPT with a custom show_in_menu parent
         // don't auto-follow there — so add an explicit submenu link.
         add_action( 'admin_menu', [ self::class, 'register_submenu' ] );
@@ -75,8 +75,8 @@ class Campaign_Admin {
     public static function register_submenu(): void {
         add_submenu_page(
             Menu::MENU_SLUG,
-            __( 'Campaigns', 'starter-shelter' ),
-            __( 'Campaigns', 'starter-shelter' ),
+            __( 'Campaigns', 'shelter-donations' ),
+            __( 'Campaigns', 'shelter-donations' ),
             'manage_categories',
             'edit-tags.php?taxonomy=' . self::TAXONOMY . '&post_type=sd_donation'
         );
@@ -162,7 +162,7 @@ class Campaign_Admin {
     public static function render_add_fields(): void {
         ?>
         <div class="form-field">
-            <label for="sd_campaign_type"><?php esc_html_e( 'Campaign Type', 'starter-shelter' ); ?></label>
+            <label for="sd_campaign_type"><?php esc_html_e( 'Campaign Type', 'shelter-donations' ); ?></label>
             <select name="sd_campaign_type" id="sd_campaign_type">
                 <?php foreach ( self::TYPES as $value => $label ) : ?>
                 <option value="<?php echo esc_attr( $value ); ?>" <?php selected( $value, 'donation_drive' ); ?>>
@@ -170,22 +170,22 @@ class Campaign_Admin {
                 </option>
                 <?php endforeach; ?>
             </select>
-            <p><?php esc_html_e( 'Donation Drive: goal is dollars raised. Membership Drive: goal is count of new members.', 'starter-shelter' ); ?></p>
+            <p><?php esc_html_e( 'Donation Drive: goal is dollars raised. Membership Drive: goal is count of new members.', 'shelter-donations' ); ?></p>
         </div>
         <div class="form-field">
-            <label for="sd_goal"><?php esc_html_e( 'Goal', 'starter-shelter' ); ?></label>
+            <label for="sd_goal"><?php esc_html_e( 'Goal', 'shelter-donations' ); ?></label>
             <input type="number" name="sd_goal" id="sd_goal" value="" min="0" step="0.01" />
-            <p><?php esc_html_e( 'Donation Drive: target in dollars. Membership Drive: number of new memberships.', 'starter-shelter' ); ?></p>
+            <p><?php esc_html_e( 'Donation Drive: target in dollars. Membership Drive: number of new memberships.', 'shelter-donations' ); ?></p>
         </div>
         <div class="form-field">
-            <label for="sd_membership_tier_filter"><?php esc_html_e( 'Tier Filter (Membership Drive only)', 'starter-shelter' ); ?></label>
+            <label for="sd_membership_tier_filter"><?php esc_html_e( 'Tier Filter (Membership Drive only)', 'shelter-donations' ); ?></label>
             <input type="text" name="sd_membership_tier_filter" id="sd_membership_tier_filter" value="" />
-            <p><?php esc_html_e( 'Optional tier slug to restrict counting (e.g. "guardian"). Leave blank to count all memberships.', 'starter-shelter' ); ?></p>
+            <p><?php esc_html_e( 'Optional tier slug to restrict counting (e.g. "guardian"). Leave blank to count all memberships.', 'shelter-donations' ); ?></p>
         </div>
         <div class="form-field">
-            <label for="sd_end_date"><?php esc_html_e( 'End Date', 'starter-shelter' ); ?></label>
+            <label for="sd_end_date"><?php esc_html_e( 'End Date', 'shelter-donations' ); ?></label>
             <input type="date" name="sd_end_date" id="sd_end_date" value="" />
-            <p><?php esc_html_e( 'Campaign ends on this date. Leave blank for ongoing campaigns.', 'starter-shelter' ); ?></p>
+            <p><?php esc_html_e( 'Campaign ends on this date. Leave blank for ongoing campaigns.', 'shelter-donations' ); ?></p>
         </div>
         <?php
     }
@@ -202,7 +202,7 @@ class Campaign_Admin {
         $tier_filter   = (string) get_term_meta( $term->term_id, '_sd_membership_tier_filter', true );
         ?>
         <tr class="form-field">
-            <th scope="row"><label for="sd_campaign_type"><?php esc_html_e( 'Campaign Type', 'starter-shelter' ); ?></label></th>
+            <th scope="row"><label for="sd_campaign_type"><?php esc_html_e( 'Campaign Type', 'shelter-donations' ); ?></label></th>
             <td>
                 <select name="sd_campaign_type" id="sd_campaign_type">
                     <?php foreach ( self::TYPES as $value => $label ) : ?>
@@ -211,28 +211,28 @@ class Campaign_Admin {
                     </option>
                     <?php endforeach; ?>
                 </select>
-                <p class="description"><?php esc_html_e( 'Donation Drive: goal is dollars raised. Membership Drive: goal is count of new members.', 'starter-shelter' ); ?></p>
+                <p class="description"><?php esc_html_e( 'Donation Drive: goal is dollars raised. Membership Drive: goal is count of new members.', 'shelter-donations' ); ?></p>
             </td>
         </tr>
         <tr class="form-field">
-            <th scope="row"><label for="sd_goal"><?php esc_html_e( 'Goal', 'starter-shelter' ); ?></label></th>
+            <th scope="row"><label for="sd_goal"><?php esc_html_e( 'Goal', 'shelter-donations' ); ?></label></th>
             <td>
                 <input type="number" name="sd_goal" id="sd_goal" value="<?php echo esc_attr( '' === $goal ? '' : (string) (float) $goal ); ?>" min="0" step="0.01" />
-                <p class="description"><?php esc_html_e( 'Donation Drive: target in dollars. Membership Drive: number of new memberships.', 'starter-shelter' ); ?></p>
+                <p class="description"><?php esc_html_e( 'Donation Drive: target in dollars. Membership Drive: number of new memberships.', 'shelter-donations' ); ?></p>
             </td>
         </tr>
         <tr class="form-field">
-            <th scope="row"><label for="sd_membership_tier_filter"><?php esc_html_e( 'Tier Filter', 'starter-shelter' ); ?></label></th>
+            <th scope="row"><label for="sd_membership_tier_filter"><?php esc_html_e( 'Tier Filter', 'shelter-donations' ); ?></label></th>
             <td>
                 <input type="text" name="sd_membership_tier_filter" id="sd_membership_tier_filter" value="<?php echo esc_attr( $tier_filter ); ?>" />
-                <p class="description"><?php esc_html_e( 'Membership Drive only. Optional tier slug to restrict counting (e.g. "guardian"). Leave blank to count all memberships.', 'starter-shelter' ); ?></p>
+                <p class="description"><?php esc_html_e( 'Membership Drive only. Optional tier slug to restrict counting (e.g. "guardian"). Leave blank to count all memberships.', 'shelter-donations' ); ?></p>
             </td>
         </tr>
         <tr class="form-field">
-            <th scope="row"><label for="sd_end_date"><?php esc_html_e( 'End Date', 'starter-shelter' ); ?></label></th>
+            <th scope="row"><label for="sd_end_date"><?php esc_html_e( 'End Date', 'shelter-donations' ); ?></label></th>
             <td>
                 <input type="date" name="sd_end_date" id="sd_end_date" value="<?php echo esc_attr( $end_date ); ?>" />
-                <p class="description"><?php esc_html_e( 'Campaign ends on this date. Leave blank for ongoing campaigns.', 'starter-shelter' ); ?></p>
+                <p class="description"><?php esc_html_e( 'Campaign ends on this date. Leave blank for ongoing campaigns.', 'shelter-donations' ); ?></p>
             </td>
         </tr>
         <?php

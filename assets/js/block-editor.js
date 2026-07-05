@@ -29,7 +29,7 @@
     const ServerSideRender = wp.serverSideRender;
 
     // Get localized data.
-    const blockData = window.starterShelterBlocks || {};
+    const blockData = window.shelterDonationsBlocks || {};
 
     /* ==========================================================================
        Donation Form Block
@@ -41,26 +41,26 @@
 
         return el( Fragment, {},
             el( InspectorControls, {},
-                el( PanelBody, { title: __( 'Form Settings', 'starter-shelter' ), initialOpen: true },
+                el( PanelBody, { title: __( 'Form Settings', 'shelter-donations' ), initialOpen: true },
                     el( TextControl, {
-                        label: __( 'Title', 'starter-shelter' ),
+                        label: __( 'Title', 'shelter-donations' ),
                         value: attributes.title,
                         onChange: function( value ) { setAttributes( { title: value } ); },
                     } ),
                     el( TextControl, {
-                        label: __( 'Subtitle', 'starter-shelter' ),
+                        label: __( 'Subtitle', 'shelter-donations' ),
                         value: attributes.subtitle,
                         onChange: function( value ) { setAttributes( { subtitle: value } ); },
                     } ),
                     el( TextControl, {
-                        label: __( 'Submit Button Text', 'starter-shelter' ),
+                        label: __( 'Submit Button Text', 'shelter-donations' ),
                         value: attributes.submitButtonText,
                         onChange: function( value ) { setAttributes( { submitButtonText: value } ); },
                     } )
                 ),
-                el( PanelBody, { title: __( 'Amount Options', 'starter-shelter' ), initialOpen: false },
+                el( PanelBody, { title: __( 'Amount Options', 'shelter-donations' ), initialOpen: false },
                     el( TextControl, {
-                        label: __( 'Preset Amounts (comma-separated)', 'starter-shelter' ),
+                        label: __( 'Preset Amounts (comma-separated)', 'shelter-donations' ),
                         value: ( attributes.presetAmounts || [] ).join( ', ' ),
                         onChange: function( value ) {
                             var amounts = value.split( ',' ).map( function( n ) {
@@ -68,52 +68,52 @@
                             } ).filter( function( n ) { return ! isNaN( n ); } );
                             setAttributes( { presetAmounts: amounts } );
                         },
-                        help: __( 'Example: 25, 50, 100, 250, 500', 'starter-shelter' ),
+                        help: __( 'Example: 25, 50, 100, 250, 500', 'shelter-donations' ),
                     } ),
                     el( NumberControl, {
-                        label: __( 'Default Amount', 'starter-shelter' ),
+                        label: __( 'Default Amount', 'shelter-donations' ),
                         value: attributes.defaultAmount,
                         onChange: function( value ) { setAttributes( { defaultAmount: parseInt( value, 10 ) } ); },
                         min: 1,
                     } ),
                     el( NumberControl, {
-                        label: __( 'Minimum Amount', 'starter-shelter' ),
+                        label: __( 'Minimum Amount', 'shelter-donations' ),
                         value: attributes.minAmount,
                         onChange: function( value ) { setAttributes( { minAmount: parseInt( value, 10 ) } ); },
                         min: 1,
                     } ),
                     el( NumberControl, {
-                        label: __( 'Maximum Amount', 'starter-shelter' ),
+                        label: __( 'Maximum Amount', 'shelter-donations' ),
                         value: attributes.maxAmount,
                         onChange: function( value ) { setAttributes( { maxAmount: parseInt( value, 10 ) } ); },
                         min: 1,
                     } )
                 ),
-                el( PanelBody, { title: __( 'Display Options', 'starter-shelter' ), initialOpen: false },
+                el( PanelBody, { title: __( 'Display Options', 'shelter-donations' ), initialOpen: false },
                     el( ToggleControl, {
-                        label: __( 'Show Allocation Selector', 'starter-shelter' ),
+                        label: __( 'Show Allocation Selector', 'shelter-donations' ),
                         checked: attributes.showAllocation,
                         onChange: function( value ) { setAttributes( { showAllocation: value } ); },
                     } ),
                     el( ToggleControl, {
-                        label: __( 'Show Dedication Field', 'starter-shelter' ),
+                        label: __( 'Show Dedication Field', 'shelter-donations' ),
                         checked: attributes.showDedication,
                         onChange: function( value ) { setAttributes( { showDedication: value } ); },
                     } ),
                     el( ToggleControl, {
-                        label: __( 'Show Anonymous Option', 'starter-shelter' ),
+                        label: __( 'Show Anonymous Option', 'shelter-donations' ),
                         checked: attributes.showAnonymous,
                         onChange: function( value ) { setAttributes( { showAnonymous: value } ); },
                     } ),
                     el( ToggleControl, {
-                        label: __( 'Show Secure Badge', 'starter-shelter' ),
+                        label: __( 'Show Secure Badge', 'shelter-donations' ),
                         checked: attributes.showSecureBadge,
                         onChange: function( value ) { setAttributes( { showSecureBadge: value } ); },
                     } )
                 ),
-                el( PanelBody, { title: __( 'Campaign', 'starter-shelter' ), initialOpen: false },
+                el( PanelBody, { title: __( 'Campaign', 'shelter-donations' ), initialOpen: false },
                     el( SelectControl, {
-                        label: __( 'Link to Campaign', 'starter-shelter' ),
+                        label: __( 'Link to Campaign', 'shelter-donations' ),
                         value: attributes.campaignId || 0,
                         options: blockData.campaigns || [],
                         onChange: function( value ) { setAttributes( { campaignId: parseInt( value, 10 ) || null } ); },
@@ -122,18 +122,18 @@
             ),
             el( 'div', blockProps,
                 el( ServerSideRender, {
-                    block: 'starter-shelter/donation-form',
+                    block: 'shelter-donations/donation-form',
                     attributes: attributes,
                     EmptyResponsePlaceholder: function() {
                         return el( Placeholder, {
                             icon: 'money-alt',
-                            label: __( 'Donation Form', 'starter-shelter' ),
-                        }, __( 'Configure the form settings in the sidebar.', 'starter-shelter' ) );
+                            label: __( 'Donation Form', 'shelter-donations' ),
+                        }, __( 'Configure the form settings in the sidebar.', 'shelter-donations' ) );
                     },
                     LoadingResponsePlaceholder: function() {
                         return el( Placeholder, {
                             icon: 'money-alt',
-                            label: __( 'Donation Form', 'starter-shelter' ),
+                            label: __( 'Donation Form', 'shelter-donations' ),
                         }, el( Spinner ) );
                     },
                 } )
@@ -143,10 +143,10 @@
 
     // Re-register with edit function (block.json handles the rest).
     wp.domReady( function() {
-        var block = getBlockType( 'starter-shelter/donation-form' );
+        var block = getBlockType( 'shelter-donations/donation-form' );
         if ( block && ! block.edit ) {
-            wp.blocks.unregisterBlockType( 'starter-shelter/donation-form' );
-            registerBlockType( 'starter-shelter/donation-form', Object.assign( {}, block, {
+            wp.blocks.unregisterBlockType( 'shelter-donations/donation-form' );
+            registerBlockType( 'shelter-donations/donation-form', Object.assign( {}, block, {
                 edit: donationFormEdit,
             } ) );
         }
@@ -162,107 +162,107 @@
 
         return el( Fragment, {},
             el( InspectorControls, {},
-                el( PanelBody, { title: __( 'Layout', 'starter-shelter' ), initialOpen: true },
+                el( PanelBody, { title: __( 'Layout', 'shelter-donations' ), initialOpen: true },
                     el( SelectControl, {
-                        label: __( 'Layout Style', 'starter-shelter' ),
+                        label: __( 'Layout Style', 'shelter-donations' ),
                         value: attributes.layout,
                         options: [
-                            { value: 'grid', label: __( 'Grid', 'starter-shelter' ) },
-                            { value: 'masonry', label: __( 'Masonry', 'starter-shelter' ) },
-                            { value: 'list', label: __( 'List', 'starter-shelter' ) },
+                            { value: 'grid', label: __( 'Grid', 'shelter-donations' ) },
+                            { value: 'masonry', label: __( 'Masonry', 'shelter-donations' ) },
+                            { value: 'list', label: __( 'List', 'shelter-donations' ) },
                         ],
                         onChange: function( value ) { setAttributes( { layout: value } ); },
                     } ),
                     el( RangeControl, {
-                        label: __( 'Columns', 'starter-shelter' ),
+                        label: __( 'Columns', 'shelter-donations' ),
                         value: attributes.columns,
                         onChange: function( value ) { setAttributes( { columns: value } ); },
                         min: 1,
                         max: 6,
                     } ),
                     el( SelectControl, {
-                        label: __( 'Card Style', 'starter-shelter' ),
+                        label: __( 'Card Style', 'shelter-donations' ),
                         value: attributes.cardStyle,
                         options: [
-                            { value: 'elevated', label: __( 'Elevated (Shadow)', 'starter-shelter' ) },
-                            { value: 'flat', label: __( 'Flat', 'starter-shelter' ) },
-                            { value: 'bordered', label: __( 'Bordered', 'starter-shelter' ) },
+                            { value: 'elevated', label: __( 'Elevated (Shadow)', 'shelter-donations' ) },
+                            { value: 'flat', label: __( 'Flat', 'shelter-donations' ) },
+                            { value: 'bordered', label: __( 'Bordered', 'shelter-donations' ) },
                         ],
                         onChange: function( value ) { setAttributes( { cardStyle: value } ); },
                     } )
                 ),
-                el( PanelBody, { title: __( 'Content', 'starter-shelter' ), initialOpen: false },
+                el( PanelBody, { title: __( 'Content', 'shelter-donations' ), initialOpen: false },
                     el( NumberControl, {
-                        label: __( 'Items Per Page', 'starter-shelter' ),
+                        label: __( 'Items Per Page', 'shelter-donations' ),
                         value: attributes.perPage,
                         onChange: function( value ) { setAttributes( { perPage: parseInt( value, 10 ) } ); },
                         min: 1,
                         max: 50,
                     } ),
                     el( SelectControl, {
-                        label: __( 'Default Type Filter', 'starter-shelter' ),
+                        label: __( 'Default Type Filter', 'shelter-donations' ),
                         value: attributes.defaultType,
                         options: [
-                            { value: 'all', label: __( 'All', 'starter-shelter' ) },
-                            { value: 'human', label: __( 'People', 'starter-shelter' ) },
-                            { value: 'pet', label: __( 'Pets', 'starter-shelter' ) },
+                            { value: 'all', label: __( 'All', 'shelter-donations' ) },
+                            { value: 'human', label: __( 'People', 'shelter-donations' ) },
+                            { value: 'pet', label: __( 'Pets', 'shelter-donations' ) },
                         ],
                         onChange: function( value ) { setAttributes( { defaultType: value } ); },
                     } ),
                     el( NumberControl, {
-                        label: __( 'Truncate Tribute (characters)', 'starter-shelter' ),
+                        label: __( 'Truncate Tribute (characters)', 'shelter-donations' ),
                         value: attributes.truncateTribute,
                         onChange: function( value ) { setAttributes( { truncateTribute: parseInt( value, 10 ) } ); },
                         min: 50,
                         max: 500,
                     } )
                 ),
-                el( PanelBody, { title: __( 'Display Options', 'starter-shelter' ), initialOpen: false },
+                el( PanelBody, { title: __( 'Display Options', 'shelter-donations' ), initialOpen: false },
                     el( ToggleControl, {
-                        label: __( 'Show Search', 'starter-shelter' ),
+                        label: __( 'Show Search', 'shelter-donations' ),
                         checked: attributes.showSearch,
                         onChange: function( value ) { setAttributes( { showSearch: value } ); },
                     } ),
                     el( ToggleControl, {
-                        label: __( 'Show Filters', 'starter-shelter' ),
+                        label: __( 'Show Filters', 'shelter-donations' ),
                         checked: attributes.showFilters,
                         onChange: function( value ) { setAttributes( { showFilters: value } ); },
                     } ),
                     el( ToggleControl, {
-                        label: __( 'Show Year Filter', 'starter-shelter' ),
+                        label: __( 'Show Year Filter', 'shelter-donations' ),
                         checked: attributes.showYearFilter,
                         onChange: function( value ) { setAttributes( { showYearFilter: value } ); },
                     } ),
                     el( ToggleControl, {
-                        label: __( 'Show Pagination', 'starter-shelter' ),
+                        label: __( 'Show Pagination', 'shelter-donations' ),
                         checked: attributes.showPagination,
                         onChange: function( value ) { setAttributes( { showPagination: value } ); },
                     } ),
                     el( ToggleControl, {
-                        label: __( 'Show Images', 'starter-shelter' ),
+                        label: __( 'Show Images', 'shelter-donations' ),
                         checked: attributes.showImage,
                         onChange: function( value ) { setAttributes( { showImage: value } ); },
                     } ),
                     el( ToggleControl, {
-                        label: __( 'Show Donor Name', 'starter-shelter' ),
+                        label: __( 'Show Donor Name', 'shelter-donations' ),
                         checked: attributes.showDonorName,
                         onChange: function( value ) { setAttributes( { showDonorName: value } ); },
                     } ),
                     el( ToggleControl, {
-                        label: __( 'Show Date', 'starter-shelter' ),
+                        label: __( 'Show Date', 'shelter-donations' ),
                         checked: attributes.showDate,
                         onChange: function( value ) { setAttributes( { showDate: value } ); },
                     } )
                 ),
-                el( PanelBody, { title: __( 'Advanced', 'starter-shelter' ), initialOpen: false },
+                el( PanelBody, { title: __( 'Advanced', 'shelter-donations' ), initialOpen: false },
                     el( ToggleControl, {
-                        label: __( 'Enable Router Navigation', 'starter-shelter' ),
+                        label: __( 'Enable Router Navigation', 'shelter-donations' ),
                         checked: attributes.enableRouterNavigation,
                         onChange: function( value ) { setAttributes( { enableRouterNavigation: value } ); },
-                        help: __( 'SPA-like navigation without full page reloads.', 'starter-shelter' ),
+                        help: __( 'SPA-like navigation without full page reloads.', 'shelter-donations' ),
                     } ),
                     el( TextControl, {
-                        label: __( 'Empty Message', 'starter-shelter' ),
+                        label: __( 'Empty Message', 'shelter-donations' ),
                         value: attributes.emptyMessage,
                         onChange: function( value ) { setAttributes( { emptyMessage: value } ); },
                     } )
@@ -270,18 +270,18 @@
             ),
             el( 'div', blockProps,
                 el( ServerSideRender, {
-                    block: 'starter-shelter/memorial-wall',
+                    block: 'shelter-donations/memorial-wall',
                     attributes: attributes,
                     EmptyResponsePlaceholder: function() {
                         return el( Placeholder, {
                             icon: 'heart',
-                            label: __( 'Memorial Wall', 'starter-shelter' ),
-                        }, __( 'No memorials found. Add some memorial donations first.', 'starter-shelter' ) );
+                            label: __( 'Memorial Wall', 'shelter-donations' ),
+                        }, __( 'No memorials found. Add some memorial donations first.', 'shelter-donations' ) );
                     },
                     LoadingResponsePlaceholder: function() {
                         return el( Placeholder, {
                             icon: 'heart',
-                            label: __( 'Memorial Wall', 'starter-shelter' ),
+                            label: __( 'Memorial Wall', 'shelter-donations' ),
                         }, el( Spinner ) );
                     },
                 } )
@@ -290,10 +290,10 @@
     };
 
     wp.domReady( function() {
-        var block = getBlockType( 'starter-shelter/memorial-wall' );
+        var block = getBlockType( 'shelter-donations/memorial-wall' );
         if ( block && ! block.edit ) {
-            wp.blocks.unregisterBlockType( 'starter-shelter/memorial-wall' );
-            registerBlockType( 'starter-shelter/memorial-wall', Object.assign( {}, block, {
+            wp.blocks.unregisterBlockType( 'shelter-donations/memorial-wall' );
+            registerBlockType( 'shelter-donations/memorial-wall', Object.assign( {}, block, {
                 edit: memorialWallEdit,
             } ) );
         }
@@ -309,54 +309,54 @@
 
         return el( Fragment, {},
             el( InspectorControls, {},
-                el( PanelBody, { title: __( 'Campaign', 'starter-shelter' ), initialOpen: true },
+                el( PanelBody, { title: __( 'Campaign', 'shelter-donations' ), initialOpen: true },
                     el( SelectControl, {
-                        label: __( 'Select Campaign', 'starter-shelter' ),
+                        label: __( 'Select Campaign', 'shelter-donations' ),
                         value: attributes.campaignId || 0,
                         options: blockData.campaigns || [],
                         onChange: function( value ) { setAttributes( { campaignId: parseInt( value, 10 ) || null } ); },
                     } )
                 ),
-                el( PanelBody, { title: __( 'Display Options', 'starter-shelter' ), initialOpen: false },
+                el( PanelBody, { title: __( 'Display Options', 'shelter-donations' ), initialOpen: false },
                     el( SelectControl, {
-                        label: __( 'Layout', 'starter-shelter' ),
+                        label: __( 'Layout', 'shelter-donations' ),
                         value: attributes.layout,
                         options: [
-                            { value: 'horizontal', label: __( 'Horizontal', 'starter-shelter' ) },
-                            { value: 'vertical', label: __( 'Vertical', 'starter-shelter' ) },
-                            { value: 'compact', label: __( 'Compact', 'starter-shelter' ) },
+                            { value: 'horizontal', label: __( 'Horizontal', 'shelter-donations' ) },
+                            { value: 'vertical', label: __( 'Vertical', 'shelter-donations' ) },
+                            { value: 'compact', label: __( 'Compact', 'shelter-donations' ) },
                         ],
                         onChange: function( value ) { setAttributes( { layout: value } ); },
                     } ),
                     el( ToggleControl, {
-                        label: __( 'Show Title', 'starter-shelter' ),
+                        label: __( 'Show Title', 'shelter-donations' ),
                         checked: attributes.showTitle,
                         onChange: function( value ) { setAttributes( { showTitle: value } ); },
                     } ),
                     el( ToggleControl, {
-                        label: __( 'Show Description', 'starter-shelter' ),
+                        label: __( 'Show Description', 'shelter-donations' ),
                         checked: attributes.showDescription,
                         onChange: function( value ) { setAttributes( { showDescription: value } ); },
                     } ),
                     el( ToggleControl, {
-                        label: __( 'Show Donor Count', 'starter-shelter' ),
+                        label: __( 'Show Donor Count', 'shelter-donations' ),
                         checked: attributes.showDonorCount,
                         onChange: function( value ) { setAttributes( { showDonorCount: value } ); },
                     } ),
                     el( ToggleControl, {
-                        label: __( 'Show End Date', 'starter-shelter' ),
+                        label: __( 'Show End Date', 'shelter-donations' ),
                         checked: attributes.showEndDate,
                         onChange: function( value ) { setAttributes( { showEndDate: value } ); },
                     } ),
                     el( ToggleControl, {
-                        label: __( 'Show Percentage', 'starter-shelter' ),
+                        label: __( 'Show Percentage', 'shelter-donations' ),
                         checked: attributes.showPercentage,
                         onChange: function( value ) { setAttributes( { showPercentage: value } ); },
                     } )
                 ),
-                el( PanelBody, { title: __( 'Progress Bar', 'starter-shelter' ), initialOpen: false },
+                el( PanelBody, { title: __( 'Progress Bar', 'shelter-donations' ), initialOpen: false },
                     el( RangeControl, {
-                        label: __( 'Bar Height (px)', 'starter-shelter' ),
+                        label: __( 'Bar Height (px)', 'shelter-donations' ),
                         value: attributes.progressBarHeight,
                         onChange: function( value ) { setAttributes( { progressBarHeight: value } ); },
                         min: 8,
@@ -364,7 +364,7 @@
                     } ),
                     el( 'div', { style: { marginBottom: '16px' } },
                         el( 'label', { style: { display: 'block', marginBottom: '8px' } },
-                            __( 'Progress Bar Color', 'starter-shelter' )
+                            __( 'Progress Bar Color', 'shelter-donations' )
                         ),
                         el( ColorPicker, {
                             color: attributes.progressBarColor,
@@ -372,41 +372,41 @@
                         } )
                     )
                 ),
-                el( PanelBody, { title: __( 'Advanced', 'starter-shelter' ), initialOpen: false },
+                el( PanelBody, { title: __( 'Advanced', 'shelter-donations' ), initialOpen: false },
                     el( NumberControl, {
-                        label: __( 'Auto-Refresh Interval (seconds)', 'starter-shelter' ),
+                        label: __( 'Auto-Refresh Interval (seconds)', 'shelter-donations' ),
                         value: attributes.refreshInterval,
                         onChange: function( value ) { setAttributes( { refreshInterval: parseInt( value, 10 ) } ); },
                         min: 0,
-                        help: __( 'Set to 0 to disable. Recommended: 30-60 seconds.', 'starter-shelter' ),
+                        help: __( 'Set to 0 to disable. Recommended: 30-60 seconds.', 'shelter-donations' ),
                     } )
                 )
             ),
             el( 'div', blockProps,
                 attributes.campaignId
                     ? el( ServerSideRender, {
-                        block: 'starter-shelter/campaign-progress',
+                        block: 'shelter-donations/campaign-progress',
                         attributes: attributes,
                         LoadingResponsePlaceholder: function() {
                             return el( Placeholder, {
                                 icon: 'chart-line',
-                                label: __( 'Campaign Progress', 'starter-shelter' ),
+                                label: __( 'Campaign Progress', 'shelter-donations' ),
                             }, el( Spinner ) );
                         },
                     } )
                     : el( Placeholder, {
                         icon: 'chart-line',
-                        label: __( 'Campaign Progress', 'starter-shelter' ),
-                    }, __( 'Select a campaign in the sidebar.', 'starter-shelter' ) )
+                        label: __( 'Campaign Progress', 'shelter-donations' ),
+                    }, __( 'Select a campaign in the sidebar.', 'shelter-donations' ) )
             )
         );
     };
 
     wp.domReady( function() {
-        var block = getBlockType( 'starter-shelter/campaign-progress' );
+        var block = getBlockType( 'shelter-donations/campaign-progress' );
         if ( block && ! block.edit ) {
-            wp.blocks.unregisterBlockType( 'starter-shelter/campaign-progress' );
-            registerBlockType( 'starter-shelter/campaign-progress', Object.assign( {}, block, {
+            wp.blocks.unregisterBlockType( 'shelter-donations/campaign-progress' );
+            registerBlockType( 'shelter-donations/campaign-progress', Object.assign( {}, block, {
                 edit: campaignProgressEdit,
             } ) );
         }
@@ -422,62 +422,62 @@
 
         return el( Fragment, {},
             el( InspectorControls, {},
-                el( PanelBody, { title: __( 'Display Options', 'starter-shelter' ), initialOpen: true },
+                el( PanelBody, { title: __( 'Display Options', 'shelter-donations' ), initialOpen: true },
                     el( SelectControl, {
-                        label: __( 'Layout', 'starter-shelter' ),
+                        label: __( 'Layout', 'shelter-donations' ),
                         value: attributes.layout,
                         options: [
-                            { value: 'cards', label: __( 'Cards', 'starter-shelter' ) },
-                            { value: 'list', label: __( 'List', 'starter-shelter' ) },
-                            { value: 'compact', label: __( 'Compact', 'starter-shelter' ) },
+                            { value: 'cards', label: __( 'Cards', 'shelter-donations' ) },
+                            { value: 'list', label: __( 'List', 'shelter-donations' ) },
+                            { value: 'compact', label: __( 'Compact', 'shelter-donations' ) },
                         ],
                         onChange: function( value ) { setAttributes( { layout: value } ); },
                     } ),
                     el( ToggleControl, {
-                        label: __( 'Show Stats', 'starter-shelter' ),
+                        label: __( 'Show Stats', 'shelter-donations' ),
                         checked: attributes.showStats,
                         onChange: function( value ) { setAttributes( { showStats: value } ); },
                     } ),
                     el( ToggleControl, {
-                        label: __( 'Show Recent Gifts', 'starter-shelter' ),
+                        label: __( 'Show Recent Gifts', 'shelter-donations' ),
                         checked: attributes.showRecentGifts,
                         onChange: function( value ) { setAttributes( { showRecentGifts: value } ); },
                     } ),
                     el( ToggleControl, {
-                        label: __( 'Show Membership', 'starter-shelter' ),
+                        label: __( 'Show Membership', 'shelter-donations' ),
                         checked: attributes.showMembership,
                         onChange: function( value ) { setAttributes( { showMembership: value } ); },
                     } ),
                     el( ToggleControl, {
-                        label: __( 'Show Donor Level', 'starter-shelter' ),
+                        label: __( 'Show Donor Level', 'shelter-donations' ),
                         checked: attributes.showDonorLevel,
                         onChange: function( value ) { setAttributes( { showDonorLevel: value } ); },
                     } )
                 ),
-                el( PanelBody, { title: __( 'Content', 'starter-shelter' ), initialOpen: false },
+                el( PanelBody, { title: __( 'Content', 'shelter-donations' ), initialOpen: false },
                     el( NumberControl, {
-                        label: __( 'Recent Gifts Count', 'starter-shelter' ),
+                        label: __( 'Recent Gifts Count', 'shelter-donations' ),
                         value: attributes.recentGiftsCount,
                         onChange: function( value ) { setAttributes( { recentGiftsCount: parseInt( value, 10 ) } ); },
                         min: 1,
                         max: 20,
                     } ),
                     el( TextControl, {
-                        label: __( 'Guest Message', 'starter-shelter' ),
+                        label: __( 'Guest Message', 'shelter-donations' ),
                         value: attributes.guestMessage,
                         onChange: function( value ) { setAttributes( { guestMessage: value } ); },
-                        help: __( 'Message shown to logged-out visitors.', 'starter-shelter' ),
+                        help: __( 'Message shown to logged-out visitors.', 'shelter-donations' ),
                     } )
                 )
             ),
             el( 'div', blockProps,
                 el( ServerSideRender, {
-                    block: 'starter-shelter/donor-dashboard',
+                    block: 'shelter-donations/donor-dashboard',
                     attributes: attributes,
                     LoadingResponsePlaceholder: function() {
                         return el( Placeholder, {
                             icon: 'id-alt',
-                            label: __( 'Donor Dashboard', 'starter-shelter' ),
+                            label: __( 'Donor Dashboard', 'shelter-donations' ),
                         }, el( Spinner ) );
                     },
                 } )
@@ -486,10 +486,10 @@
     };
 
     wp.domReady( function() {
-        var block = getBlockType( 'starter-shelter/donor-dashboard' );
+        var block = getBlockType( 'shelter-donations/donor-dashboard' );
         if ( block && ! block.edit ) {
-            wp.blocks.unregisterBlockType( 'starter-shelter/donor-dashboard' );
-            registerBlockType( 'starter-shelter/donor-dashboard', Object.assign( {}, block, {
+            wp.blocks.unregisterBlockType( 'shelter-donations/donor-dashboard' );
+            registerBlockType( 'shelter-donations/donor-dashboard', Object.assign( {}, block, {
                 edit: donorDashboardEdit,
             } ) );
         }

@@ -12,12 +12,12 @@
    ========================================================================== */
 
 /* Ensure blocks have minimum height in editor */
-.editor-styles-wrapper [data-type^="starter-shelter/"] {
+.editor-styles-wrapper [data-type^="shelter-donations/"] {
     min-height: 100px;
 }
 
 /* Fix ServerSideRender overflow */
-.editor-styles-wrapper [data-type^="starter-shelter/"] .components-server-side-render {
+.editor-styles-wrapper [data-type^="shelter-donations/"] .components-server-side-render {
     overflow: visible;
 }
 
@@ -25,20 +25,20 @@
    Placeholder Styles
    ========================================================================== */
 
-.editor-styles-wrapper .wp-block-starter-shelter-donation-form .components-placeholder,
-.editor-styles-wrapper .wp-block-starter-shelter-memorial-wall .components-placeholder,
-.editor-styles-wrapper .wp-block-starter-shelter-campaign-progress .components-placeholder,
-.editor-styles-wrapper .wp-block-starter-shelter-donor-dashboard .components-placeholder {
+.editor-styles-wrapper .wp-block-shelter-donations-donation-form .components-placeholder,
+.editor-styles-wrapper .wp-block-shelter-donations-memorial-wall .components-placeholder,
+.editor-styles-wrapper .wp-block-shelter-donations-campaign-progress .components-placeholder,
+.editor-styles-wrapper .wp-block-shelter-donations-donor-dashboard .components-placeholder {
     min-height: 200px;
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     border: 2px dashed #dee2e6;
     border-radius: 8px;
 }
 
-.editor-styles-wrapper .wp-block-starter-shelter-donation-form .components-placeholder__label,
-.editor-styles-wrapper .wp-block-starter-shelter-memorial-wall .components-placeholder__label,
-.editor-styles-wrapper .wp-block-starter-shelter-campaign-progress .components-placeholder__label,
-.editor-styles-wrapper .wp-block-starter-shelter-donor-dashboard .components-placeholder__label {
+.editor-styles-wrapper .wp-block-shelter-donations-donation-form .components-placeholder__label,
+.editor-styles-wrapper .wp-block-shelter-donations-memorial-wall .components-placeholder__label,
+.editor-styles-wrapper .wp-block-shelter-donations-campaign-progress .components-placeholder__label,
+.editor-styles-wrapper .wp-block-shelter-donations-donor-dashboard .components-placeholder__label {
     font-weight: 600;
     color: #059669;
 }
@@ -63,7 +63,7 @@
 }
 
 /* Show a subtle overlay to indicate preview mode */
-.editor-styles-wrapper [data-type^="starter-shelter/"]::after {
+.editor-styles-wrapper [data-type^="shelter-donations/"]::after {
     content: '';
     position: absolute;
     inset: 0;
@@ -72,7 +72,7 @@
     z-index: 1;
 }
 
-.editor-styles-wrapper [data-type^="starter-shelter/"]:not(.is-selected)::after {
+.editor-styles-wrapper [data-type^="shelter-donations/"]:not(.is-selected)::after {
     background: rgba(255, 255, 255, 0.1);
 }
 
@@ -80,7 +80,7 @@
    Loading States
    ========================================================================== */
 
-.editor-styles-wrapper [data-type^="starter-shelter/"] .components-spinner {
+.editor-styles-wrapper [data-type^="shelter-donations/"] .components-spinner {
     margin: 20px auto;
 }
 
@@ -234,7 +234,7 @@
    Block Category Icon
    ========================================================================== */
 
-.block-editor-inserter__panel-header [class*="starter-shelter"]::before {
+.block-editor-inserter__panel-header [class*="shelter-donations"]::before {
     content: "❤️";
     margin-right: 4px;
 }

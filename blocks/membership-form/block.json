@@ -1,14 +1,14 @@
 {
     "$schema": "https://schemas.wp.org/trunk/block.json",
     "apiVersion": 3,
-    "name": "starter-shelter/membership-form",
+    "name": "shelter-donations/membership-form",
     "version": "2.0.0",
     "title": "Membership Form",
-    "category": "starter-shelter",
+    "category": "shelter-donations",
     "icon": "groups",
     "description": "Membership signup form with tier selection. Supports both individual and business memberships.",
     "keywords": ["membership", "subscribe", "join", "tier", "sponsor"],
-    "textdomain": "starter-shelter",
+    "textdomain": "shelter-donations",
     "supports": {
         "html": false,
         "align": ["wide", "full"],

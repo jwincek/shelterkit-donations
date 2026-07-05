@@ -12,7 +12,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$label = $label ?? __( 'Make my donation anonymous', 'starter-shelter' );
+$label = $label ?? __( 'Make my donation anonymous', 'shelter-donations' );
 ?>
 <div class="sd-form-section sd-anonymous-section">
 	<label class="sd-checkbox-label">
@@ -27,6 +27,6 @@ $label = $label ?? __( 'Make my donation anonymous', 'starter-shelter' );
 	<p class="sd-anonymous-explainer sd-collapsed"
 		data-wp-class--sd-collapsed="!callbacks.isAnonymousExplainer"
 		aria-live="polite">
-		<?php esc_html_e( 'Your name will not be displayed publicly.', 'starter-shelter' ); ?>
+		<?php esc_html_e( 'Your name will not be displayed publicly.', 'shelter-donations' ); ?>
 	</p>
 </div>

@@ -1,14 +1,14 @@
 {
     "$schema": "https://schemas.wp.org/trunk/block.json",
     "apiVersion": 3,
-    "name": "starter-shelter/memorial-form",
+    "name": "shelter-donations/memorial-form",
     "version": "2.0.0",
     "title": "Memorial Tribute Form",
-    "category": "starter-shelter",
+    "category": "shelter-donations",
     "icon": "heart",
     "description": "Dedicated form for In Memory Of and In Honor Of tribute gifts with honoree details and family notification.",
     "keywords": ["memorial", "tribute", "honor", "memory", "dedication", "gift"],
-    "textdomain": "starter-shelter",
+    "textdomain": "shelter-donations",
     "supports": {
         "html": false,
         "align": ["wide"],

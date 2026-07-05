@@ -9,7 +9,7 @@
         <!-- wp:group {"className":"sd-memorial-header","style":{"spacing":{"blockGap":"0.5rem","padding":{"bottom":"var:preset|spacing|30"}}},"layout":{"type":"constrained"}} -->
         <div class="wp-block-group sd-memorial-header" style="padding-bottom:var(--wp--preset--spacing--30)">
 
-            <!-- wp:paragraph {"className":"sd-memorial-type-badge","style":{"typography":{"fontSize":"0.75rem","textTransform":"uppercase","letterSpacing":"0.08em","fontStyle":"normal","fontWeight":"500"}},"textColor":"contrast-2","metadata":{"bindings":{"content":{"source":"starter-shelter/entity","args":{"entity":"memorial","field":"memorial_type_label"}}}}} -->
+            <!-- wp:paragraph {"className":"sd-memorial-type-badge","style":{"typography":{"fontSize":"0.75rem","textTransform":"uppercase","letterSpacing":"0.08em","fontStyle":"normal","fontWeight":"500"}},"textColor":"contrast-2","metadata":{"bindings":{"content":{"source":"shelter-donations/entity","args":{"entity":"memorial","field":"memorial_type_label"}}}}} -->
             <p class="sd-memorial-type-badge has-contrast-2-color has-text-color" style="font-size:0.75rem;font-style:normal;font-weight:500;letter-spacing:0.08em;text-transform:uppercase">In Memory</p>
             <!-- /wp:paragraph -->
 
@@ -25,7 +25,7 @@
         <!-- wp:group {"className":"sd-memorial-body","style":{"spacing":{"padding":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30"},"blockGap":"var:preset|spacing|30"}},"layout":{"type":"constrained"}} -->
         <div class="wp-block-group sd-memorial-body" style="padding-top:var(--wp--preset--spacing--30);padding-bottom:var(--wp--preset--spacing--30)">
 
-            <!-- wp:paragraph {"className":"sd-memorial-tribute","style":{"typography":{"fontSize":"1.1rem","lineHeight":"1.75"}},"metadata":{"bindings":{"content":{"source":"starter-shelter/entity","args":{"entity":"memorial","field":"tribute_message"}}}}} -->
+            <!-- wp:paragraph {"className":"sd-memorial-tribute","style":{"typography":{"fontSize":"1.1rem","lineHeight":"1.75"}},"metadata":{"bindings":{"content":{"source":"shelter-donations/entity","args":{"entity":"memorial","field":"tribute_message"}}}}} -->
             <p class="sd-memorial-tribute" style="font-size:1.1rem;line-height:1.75">This tribute message will be replaced by the memorial's tribute.</p>
             <!-- /wp:paragraph -->
 
@@ -46,7 +46,7 @@
                 <p class="has-contrast-3-color has-text-color" style="font-size:0.75rem;letter-spacing:0.06em;text-transform:uppercase">Dedicated by</p>
                 <!-- /wp:paragraph -->
 
-                <!-- wp:paragraph {"className":"sd-memorial-donor","style":{"typography":{"fontSize":"1rem","fontStyle":"normal","fontWeight":"500"}},"textColor":"contrast-1","metadata":{"bindings":{"content":{"source":"starter-shelter/entity","args":{"entity":"memorial","field":"donor_name"}}}}} -->
+                <!-- wp:paragraph {"className":"sd-memorial-donor","style":{"typography":{"fontSize":"1rem","fontStyle":"normal","fontWeight":"500"}},"textColor":"contrast-1","metadata":{"bindings":{"content":{"source":"shelter-donations/entity","args":{"entity":"memorial","field":"donor_name"}}}}} -->
                 <p class="sd-memorial-donor has-contrast-1-color has-text-color" style="font-size:1rem;font-style:normal;font-weight:500">Donor Name</p>
                 <!-- /wp:paragraph -->
 
@@ -60,7 +60,7 @@
                 <p class="has-contrast-3-color has-text-color" style="font-size:0.75rem;letter-spacing:0.06em;text-transform:uppercase">Date</p>
                 <!-- /wp:paragraph -->
 
-                <!-- wp:paragraph {"className":"sd-memorial-date","style":{"typography":{"fontSize":"1rem"}},"textColor":"contrast-2","metadata":{"bindings":{"content":{"source":"starter-shelter/entity","args":{"entity":"memorial","field":"date_formatted"}}}}} -->
+                <!-- wp:paragraph {"className":"sd-memorial-date","style":{"typography":{"fontSize":"1rem"}},"textColor":"contrast-2","metadata":{"bindings":{"content":{"source":"shelter-donations/entity","args":{"entity":"memorial","field":"date_formatted"}}}}} -->
                 <p class="sd-memorial-date has-contrast-2-color has-text-color" style="font-size:1rem">January 1, 2025</p>
                 <!-- /wp:paragraph -->
 

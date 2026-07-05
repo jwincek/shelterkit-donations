@@ -41,7 +41,7 @@ final class CandleToggleTest extends WP_UnitTestCase {
     }
 
     private function toggle( int $memorial_id ): array {
-        $req = new WP_REST_Request( 'POST', '/starter-shelter/v1/candles/toggle' );
+        $req = new WP_REST_Request( 'POST', '/shelter-donations/v1/candles/toggle' );
         $req->set_param( 'memorial_id', $memorial_id );
         return toggle_candle( $req )->get_data();
     }

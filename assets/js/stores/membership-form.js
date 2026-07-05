@@ -17,7 +17,7 @@ import {
 	createBaseFormData,
 } from './form-base.js';
 
-const NAMESPACE = 'starter-shelter/membership-form';
+const NAMESPACE = 'shelter-donations/membership-form';
 
 // File objects can't be stored in reactive state (Proxy breaks them).
 // Keep them in a plain Map keyed by form ID.

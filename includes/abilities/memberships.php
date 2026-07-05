@@ -136,7 +136,7 @@ function renew( array $input ): array|WP_Error {
     if ( ! $membership ) {
         return new WP_Error(
             'membership_not_found',
-            __( 'Membership not found.', 'starter-shelter' ),
+            __( 'Membership not found.', 'shelter-donations' ),
             [ 'status' => 404 ]
         );
     }
@@ -206,7 +206,7 @@ function get_status( array $input ): array|WP_Error {
         if ( ! $membership ) {
             return new WP_Error(
                 'membership_not_found',
-                __( 'Membership not found.', 'starter-shelter' ),
+                __( 'Membership not found.', 'shelter-donations' ),
                 [ 'status' => 404 ]
             );
         }
@@ -237,7 +237,7 @@ function get_status( array $input ): array|WP_Error {
 
     return new WP_Error(
         'invalid_input',
-        __( 'Either membership_id or donor_id is required.', 'starter-shelter' ),
+        __( 'Either membership_id or donor_id is required.', 'shelter-donations' ),
         [ 'status' => 400 ]
     );
 }
@@ -408,7 +408,7 @@ function cancel( array $input ): array|WP_Error {
     if ( ! $membership_id ) {
         return new WP_Error(
             'missing_membership_id',
-            __( 'Membership ID is required.', 'starter-shelter' )
+            __( 'Membership ID is required.', 'shelter-donations' )
         );
     }
 
@@ -417,7 +417,7 @@ function cancel( array $input ): array|WP_Error {
     if ( ! $membership ) {
         return new WP_Error(
             'membership_not_found',
-            __( 'Membership not found.', 'starter-shelter' )
+            __( 'Membership not found.', 'shelter-donations' )
         );
     }
 
@@ -426,7 +426,7 @@ function cancel( array $input ): array|WP_Error {
     if ( 'cancelled' === $current_status ) {
         return new WP_Error(
             'already_cancelled',
-            __( 'This membership is already cancelled.', 'starter-shelter' )
+            __( 'This membership is already cancelled.', 'shelter-donations' )
         );
     }
 

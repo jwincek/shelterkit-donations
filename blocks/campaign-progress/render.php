@@ -61,7 +61,7 @@ if ( $end_date && $is_active ) {
 }
 
 // Set state for this campaign.
-wp_interactivity_state( 'starter-shelter/campaign', [
+wp_interactivity_state( 'shelter-donations/campaign', [
     'campaigns' => [
         $campaign_id => [
             'id'            => $campaign_id,
@@ -95,7 +95,7 @@ $classes = [
 
 $wrapper_attrs = [
     'class'               => implode( ' ', array_filter( $classes ) ),
-    'data-wp-interactive' => wp_json_encode( [ 'namespace' => 'starter-shelter/campaign' ] ),
+    'data-wp-interactive' => wp_json_encode( [ 'namespace' => 'shelter-donations/campaign' ] ),
     'data-wp-context'     => wp_json_encode( $context ),
 ];
 
@@ -124,7 +124,7 @@ $wrapper_attributes = get_block_wrapper_attributes( $wrapper_attrs );
             aria-valuenow="<?php echo esc_attr( round( $progress ) ); ?>"
             aria-valuemin="0"
             aria-valuemax="100"
-            aria-label="<?php esc_attr_e( 'Campaign progress', 'starter-shelter' ); ?>"
+            aria-label="<?php esc_attr_e( 'Campaign progress', 'shelter-donations' ); ?>"
             style="height: <?php echo (int) $bar_height; ?>px;"
             data-wp-bind--aria-valuenow="state.campaigns[context.campaignId].progress"
         >
@@ -151,15 +151,15 @@ $wrapper_attributes = get_block_wrapper_attributes( $wrapper_attrs );
             <span class="sd-stat-value" data-wp-text="callbacks.getRaisedFormatted">
                 <?php echo esc_html( Helpers\format_currency( $raised ) ); ?>
             </span>
-            <span class="sd-stat-label"><?php esc_html_e( 'raised', 'starter-shelter' ); ?></span>
+            <span class="sd-stat-label"><?php esc_html_e( 'raised', 'shelter-donations' ); ?></span>
         </div>
 
         <div class="sd-stat sd-stat-goal">
-            <span class="sd-stat-label"><?php esc_html_e( 'of', 'starter-shelter' ); ?></span>
+            <span class="sd-stat-label"><?php esc_html_e( 'of', 'shelter-donations' ); ?></span>
             <span class="sd-stat-value">
                 <?php echo esc_html( Helpers\format_currency( $goal ) ); ?>
             </span>
-            <span class="sd-stat-label"><?php esc_html_e( 'goal', 'starter-shelter' ); ?></span>
+            <span class="sd-stat-label"><?php esc_html_e( 'goal', 'shelter-donations' ); ?></span>
         </div>
 
         <?php if ( $show_donors ) : ?>
@@ -167,7 +167,7 @@ $wrapper_attributes = get_block_wrapper_attributes( $wrapper_attrs );
             <span class="sd-stat-value" data-wp-text="state.campaigns[context.campaignId].donorCount">
                 <?php echo esc_html( number_format_i18n( $donor_count ) ); ?>
             </span>
-            <span class="sd-stat-label"><?php esc_html_e( 'donors', 'starter-shelter' ); ?></span>
+            <span class="sd-stat-label"><?php esc_html_e( 'donors', 'shelter-donations' ); ?></span>
         </div>
         <?php endif; ?>
 
@@ -176,11 +176,11 @@ $wrapper_attributes = get_block_wrapper_attributes( $wrapper_attrs );
             <span class="sd-stat-value">
                 <?php echo esc_html( number_format_i18n( $days_remaining ) ); ?>
             </span>
-            <span class="sd-stat-label"><?php esc_html_e( 'days left', 'starter-shelter' ); ?></span>
+            <span class="sd-stat-label"><?php esc_html_e( 'days left', 'shelter-donations' ); ?></span>
         </div>
         <?php elseif ( $show_end_date && ! $is_active ) : ?>
         <div class="sd-stat sd-stat-ended">
-            <span class="sd-stat-label"><?php esc_html_e( 'Campaign ended', 'starter-shelter' ); ?></span>
+            <span class="sd-stat-label"><?php esc_html_e( 'Campaign ended', 'shelter-donations' ); ?></span>
         </div>
         <?php endif; ?>
     </div>
@@ -190,7 +190,7 @@ $wrapper_attributes = get_block_wrapper_attributes( $wrapper_attrs );
         <svg class="sd-complete-icon" viewBox="0 0 20 20" width="20" height="20" aria-hidden="true">
             <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" fill="currentColor"/>
         </svg>
-        <?php esc_html_e( 'Goal reached! Thank you!', 'starter-shelter' ); ?>
+        <?php esc_html_e( 'Goal reached! Thank you!', 'shelter-donations' ); ?>
     </div>
     <?php endif; ?>
 </div>

@@ -63,12 +63,12 @@ class Quick_Actions {
         check_admin_referer( 'sd_send_reminder_' . $membership_id );
 
         if ( ! current_user_can( 'manage_options' ) || ! $membership_id ) {
-            wp_die( esc_html__( 'Invalid request.', 'starter-shelter' ) );
+            wp_die( esc_html__( 'Invalid request.', 'shelter-donations' ) );
         }
 
         $membership = Entity_Hydrator::get( 'sd_membership', $membership_id );
         if ( ! $membership ) {
-            wp_die( esc_html__( 'Membership not found.', 'starter-shelter' ) );
+            wp_die( esc_html__( 'Membership not found.', 'shelter-donations' ) );
         }
 
         $donor_id = $membership['donor_id'] ?? 0;
@@ -101,7 +101,7 @@ class Quick_Actions {
         check_admin_referer( 'sd_extend_' . $membership_id );
 
         if ( ! current_user_can( 'manage_options' ) || ! $membership_id ) {
-            wp_die( esc_html__( 'Invalid request.', 'starter-shelter' ) );
+            wp_die( esc_html__( 'Invalid request.', 'shelter-donations' ) );
         }
 
         $end_date = get_post_meta( $membership_id, '_sd_end_date', true );
@@ -121,7 +121,7 @@ class Quick_Actions {
         // Add note.
         $note = sprintf(
             /* translators: 1: new end date, 2: admin user */
-            __( 'Membership extended to %1$s by %2$s', 'starter-shelter' ),
+            __( 'Membership extended to %1$s by %2$s', 'shelter-donations' ),
             Helpers\format_date( $new_end_date ),
             wp_get_current_user()->display_name
         );
@@ -148,18 +148,18 @@ class Quick_Actions {
         check_admin_referer( 'sd_notify_family_' . $memorial_id );
 
         if ( ! current_user_can( 'manage_options' ) || ! $memorial_id ) {
-            wp_die( esc_html__( 'Invalid request.', 'starter-shelter' ) );
+            wp_die( esc_html__( 'Invalid request.', 'shelter-donations' ) );
         }
 
         $memorial = Entity_Hydrator::get( 'sd_memorial', $memorial_id );
         if ( ! $memorial ) {
-            wp_die( esc_html__( 'Memorial not found.', 'starter-shelter' ) );
+            wp_die( esc_html__( 'Memorial not found.', 'shelter-donations' ) );
         }
 
         // Check if notification is enabled.
         $notify_family = Helpers\get_memorial_notify_family( $memorial_id );
         if ( ! $notify_family['enabled'] || '' === $notify_family['email'] ) {
-            wp_die( esc_html__( 'Family notification not configured for this memorial.', 'starter-shelter' ) );
+            wp_die( esc_html__( 'Family notification not configured for this memorial.', 'shelter-donations' ) );
         }
 
         $donor_id = $memorial['donor_id'] ?? 0;
@@ -189,12 +189,12 @@ class Quick_Actions {
         check_admin_referer( 'sd_send_statement_' . $donor_id );
 
         if ( ! current_user_can( 'manage_options' ) || ! $donor_id ) {
-            wp_die( esc_html__( 'Invalid request.', 'starter-shelter' ) );
+            wp_die( esc_html__( 'Invalid request.', 'shelter-donations' ) );
         }
 
         $donor = Entity_Hydrator::get( 'sd_donor', $donor_id );
         if ( ! $donor ) {
-            wp_die( esc_html__( 'Donor not found.', 'starter-shelter' ) );
+            wp_die( esc_html__( 'Donor not found.', 'shelter-donations' ) );
         }
 
         // Compute the annual giving summary via the shelter-reports ability.
@@ -234,12 +234,12 @@ class Quick_Actions {
         check_admin_referer( 'sd_resend_receipt_' . $donation_id );
 
         if ( ! current_user_can( 'manage_options' ) || ! $donation_id ) {
-            wp_die( esc_html__( 'Invalid request.', 'starter-shelter' ) );
+            wp_die( esc_html__( 'Invalid request.', 'shelter-donations' ) );
         }
 
         $donation = Entity_Hydrator::get( 'sd_donation', $donation_id );
         if ( ! $donation ) {
-            wp_die( esc_html__( 'Donation not found.', 'starter-shelter' ) );
+            wp_die( esc_html__( 'Donation not found.', 'shelter-donations' ) );
         }
 
         $donor_id = $donation['donor_id'] ?? 0;
@@ -270,12 +270,12 @@ class Quick_Actions {
         check_ajax_referer( 'sd_view_receipt_' . $donation_id, '_wpnonce' );
 
         if ( ! current_user_can( 'manage_options' ) || ! $donation_id ) {
-            wp_die( esc_html__( 'Invalid request.', 'starter-shelter' ) );
+            wp_die( esc_html__( 'Invalid request.', 'shelter-donations' ) );
         }
 
         $donation = Entity_Hydrator::get( 'sd_donation', $donation_id );
         if ( ! $donation ) {
-            wp_die( esc_html__( 'Donation not found.', 'starter-shelter' ) );
+            wp_die( esc_html__( 'Donation not found.', 'shelter-donations' ) );
         }
 
         $donor = $donation['donor_id'] ? Entity_Hydrator::get( 'sd_donor', $donation['donor_id'] ) : null;
@@ -285,7 +285,7 @@ class Quick_Actions {
         <!DOCTYPE html>
         <html>
         <head>
-            <title><?php esc_html_e( 'Donation Receipt', 'starter-shelter' ); ?></title>
+            <title><?php esc_html_e( 'Donation Receipt', 'shelter-donations' ); ?></title>
             <style>
                 body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 40px; max-width: 600px; margin: 0 auto; }
                 .receipt-header { text-align: center; margin-bottom: 30px; }
@@ -301,7 +301,7 @@ class Quick_Actions {
         <body>
             <div class="receipt-header">
                 <h1><?php echo esc_html( Settings::get( 'org_name', get_bloginfo( 'name' ) ) ); ?></h1>
-                <p><?php esc_html_e( 'Donation Receipt', 'starter-shelter' ); ?></p>
+                <p><?php esc_html_e( 'Donation Receipt', 'shelter-donations' ); ?></p>
             </div>
 
             <div class="receipt-amount">
@@ -310,19 +310,19 @@ class Quick_Actions {
 
             <div class="receipt-details">
                 <div class="receipt-row">
-                    <span><?php esc_html_e( 'Receipt #', 'starter-shelter' ); ?></span>
+                    <span><?php esc_html_e( 'Receipt #', 'shelter-donations' ); ?></span>
                     <strong><?php echo esc_html( $donation_id ); ?></strong>
                 </div>
                 <div class="receipt-row">
-                    <span><?php esc_html_e( 'Date', 'starter-shelter' ); ?></span>
+                    <span><?php esc_html_e( 'Date', 'shelter-donations' ); ?></span>
                     <strong><?php echo esc_html( Helpers\format_date( $donation['donation_date'] ?? '' ) ); ?></strong>
                 </div>
                 <div class="receipt-row">
-                    <span><?php esc_html_e( 'Donor', 'starter-shelter' ); ?></span>
+                    <span><?php esc_html_e( 'Donor', 'shelter-donations' ); ?></span>
                     <strong>
                         <?php 
                         if ( $donation['is_anonymous'] ?? false ) {
-                            esc_html_e( 'Anonymous', 'starter-shelter' );
+                            esc_html_e( 'Anonymous', 'shelter-donations' );
                         } else {
                             echo esc_html( $donor['display_name'] ?? $donor['first_name'] . ' ' . $donor['last_name'] ?? 'N/A' );
                         }
@@ -330,12 +330,12 @@ class Quick_Actions {
                     </strong>
                 </div>
                 <div class="receipt-row">
-                    <span><?php esc_html_e( 'Allocation', 'starter-shelter' ); ?></span>
+                    <span><?php esc_html_e( 'Allocation', 'shelter-donations' ); ?></span>
                     <strong><?php echo esc_html( Helpers\get_allocation_label( $donation['allocation'] ?? '' ) ); ?></strong>
                 </div>
                 <?php if ( ! empty( $donation['dedication'] ) ) : ?>
                 <div class="receipt-row">
-                    <span><?php esc_html_e( 'Dedication', 'starter-shelter' ); ?></span>
+                    <span><?php esc_html_e( 'Dedication', 'shelter-donations' ); ?></span>
                     <strong><?php echo esc_html( $donation['dedication'] ); ?></strong>
                 </div>
                 <?php endif; ?>
@@ -347,16 +347,16 @@ class Quick_Actions {
                 if ( $ein ) {
                     printf(
                         /* translators: %s: EIN number */
-                        esc_html__( 'Tax ID (EIN): %s', 'starter-shelter' ),
+                        esc_html__( 'Tax ID (EIN): %s', 'shelter-donations' ),
                         esc_html( $ein )
                     );
                     echo '<br>';
                 }
                 ?>
-                <?php esc_html_e( 'Thank you for your generous support!', 'starter-shelter' ); ?>
+                <?php esc_html_e( 'Thank you for your generous support!', 'shelter-donations' ); ?>
                 <br><br>
                 <button onclick="window.print();" style="padding: 10px 20px; cursor: pointer;">
-                    <?php esc_html_e( 'Print Receipt', 'starter-shelter' ); ?>
+                    <?php esc_html_e( 'Print Receipt', 'shelter-donations' ); ?>
                 </button>
             </div>
         </body>
@@ -369,9 +369,9 @@ class Quick_Actions {
      * Register bulk actions for memberships.
      */
     public static function register_membership_bulk_actions( array $actions ): array {
-        $actions['sd_send_reminders'] = __( 'Send Renewal Reminders', 'starter-shelter' );
-        $actions['sd_extend_30_days'] = __( 'Extend 30 Days', 'starter-shelter' );
-        $actions['sd_export_selected'] = __( 'Export Selected', 'starter-shelter' );
+        $actions['sd_send_reminders'] = __( 'Send Renewal Reminders', 'shelter-donations' );
+        $actions['sd_extend_30_days'] = __( 'Extend 30 Days', 'shelter-donations' );
+        $actions['sd_export_selected'] = __( 'Export Selected', 'shelter-donations' );
         return $actions;
     }
 
@@ -424,8 +424,8 @@ class Quick_Actions {
      * Register bulk actions for memorials.
      */
     public static function register_memorial_bulk_actions( array $actions ): array {
-        $actions['sd_notify_families'] = __( 'Send Family Notifications', 'starter-shelter' );
-        $actions['sd_export_selected'] = __( 'Export Selected', 'starter-shelter' );
+        $actions['sd_notify_families'] = __( 'Send Family Notifications', 'shelter-donations' );
+        $actions['sd_export_selected'] = __( 'Export Selected', 'shelter-donations' );
         return $actions;
     }
 
@@ -459,8 +459,8 @@ class Quick_Actions {
      * Register bulk actions for donations.
      */
     public static function register_donation_bulk_actions( array $actions ): array {
-        $actions['sd_resend_receipts'] = __( 'Resend Receipts', 'starter-shelter' );
-        $actions['sd_export_selected'] = __( 'Export Selected', 'starter-shelter' );
+        $actions['sd_resend_receipts'] = __( 'Resend Receipts', 'shelter-donations' );
+        $actions['sd_export_selected'] = __( 'Export Selected', 'shelter-donations' );
         return $actions;
     }
 
@@ -502,20 +502,20 @@ class Quick_Actions {
 
         $messages = [
             /* translators: %d: number of renewal reminders sent. */
-            'reminder_sent'       => _n( '%d renewal reminder sent.', '%d renewal reminders sent.', $count, 'starter-shelter' ),
+            'reminder_sent'       => _n( '%d renewal reminder sent.', '%d renewal reminders sent.', $count, 'shelter-donations' ),
             /* translators: %d: number of renewal reminders sent. */
-            'reminders_sent'      => _n( '%d renewal reminder sent.', '%d renewal reminders sent.', $count, 'starter-shelter' ),
+            'reminders_sent'      => _n( '%d renewal reminder sent.', '%d renewal reminders sent.', $count, 'shelter-donations' ),
             /* translators: %d: number of memberships extended. */
-            'extended'            => _n( '%d membership extended by 30 days.', '%d memberships extended by 30 days.', $count, 'starter-shelter' ),
+            'extended'            => _n( '%d membership extended by 30 days.', '%d memberships extended by 30 days.', $count, 'shelter-donations' ),
             /* translators: %d: number of memberships extended. */
-            'memberships_extended'=> _n( '%d membership extended.', '%d memberships extended.', $count, 'starter-shelter' ),
-            'family_notified'     => __( 'Family notification sent.', 'starter-shelter' ),
+            'memberships_extended'=> _n( '%d membership extended.', '%d memberships extended.', $count, 'shelter-donations' ),
+            'family_notified'     => __( 'Family notification sent.', 'shelter-donations' ),
             /* translators: %d: number of family notifications sent. */
-            'families_notified'   => _n( '%d family notification sent.', '%d family notifications sent.', $count, 'starter-shelter' ),
-            'statement_sent'      => __( 'Annual statement sent.', 'starter-shelter' ),
-            'receipt_sent'        => __( 'Donation receipt sent.', 'starter-shelter' ),
+            'families_notified'   => _n( '%d family notification sent.', '%d family notifications sent.', $count, 'shelter-donations' ),
+            'statement_sent'      => __( 'Annual statement sent.', 'shelter-donations' ),
+            'receipt_sent'        => __( 'Donation receipt sent.', 'shelter-donations' ),
             /* translators: %d: number of receipts sent. */
-            'receipts_sent'       => _n( '%d receipt sent.', '%d receipts sent.', $count, 'starter-shelter' ),
+            'receipts_sent'       => _n( '%d receipt sent.', '%d receipts sent.', $count, 'shelter-donations' ),
         ];
 
         if ( isset( $messages[ $action ] ) ) {
@@ -557,17 +557,17 @@ class Quick_Actions {
 
         ?>
         <select name="membership_status">
-            <option value=""><?php esc_html_e( 'All Statuses', 'starter-shelter' ); ?></option>
-            <option value="active" <?php selected( $status, 'active' ); ?>><?php esc_html_e( 'Active', 'starter-shelter' ); ?></option>
-            <option value="expiring" <?php selected( $status, 'expiring' ); ?>><?php esc_html_e( 'Expiring Soon (30 days)', 'starter-shelter' ); ?></option>
-            <option value="expired" <?php selected( $status, 'expired' ); ?>><?php esc_html_e( 'Expired', 'starter-shelter' ); ?></option>
+            <option value=""><?php esc_html_e( 'All Statuses', 'shelter-donations' ); ?></option>
+            <option value="active" <?php selected( $status, 'active' ); ?>><?php esc_html_e( 'Active', 'shelter-donations' ); ?></option>
+            <option value="expiring" <?php selected( $status, 'expiring' ); ?>><?php esc_html_e( 'Expiring Soon (30 days)', 'shelter-donations' ); ?></option>
+            <option value="expired" <?php selected( $status, 'expired' ); ?>><?php esc_html_e( 'Expired', 'shelter-donations' ); ?></option>
         </select>
 
         <select name="membership_type">
-            <option value=""><?php esc_html_e( 'All Types', 'starter-shelter' ); ?></option>
-            <option value="individual" <?php selected( $type, 'individual' ); ?>><?php esc_html_e( 'Individual', 'starter-shelter' ); ?></option>
-            <option value="family" <?php selected( $type, 'family' ); ?>><?php esc_html_e( 'Family', 'starter-shelter' ); ?></option>
-            <option value="business" <?php selected( $type, 'business' ); ?>><?php esc_html_e( 'Business', 'starter-shelter' ); ?></option>
+            <option value=""><?php esc_html_e( 'All Types', 'shelter-donations' ); ?></option>
+            <option value="individual" <?php selected( $type, 'individual' ); ?>><?php esc_html_e( 'Individual', 'shelter-donations' ); ?></option>
+            <option value="family" <?php selected( $type, 'family' ); ?>><?php esc_html_e( 'Family', 'shelter-donations' ); ?></option>
+            <option value="business" <?php selected( $type, 'business' ); ?>><?php esc_html_e( 'Business', 'shelter-donations' ); ?></option>
         </select>
         <?php
     }
@@ -581,17 +581,17 @@ class Quick_Actions {
 
         ?>
         <select name="memorial_type">
-            <option value=""><?php esc_html_e( 'All Types', 'starter-shelter' ); ?></option>
-            <option value="human" <?php selected( $type, 'human' ); ?>><?php esc_html_e( 'Person', 'starter-shelter' ); ?></option>
-            <option value="pet" <?php selected( $type, 'pet' ); ?>><?php esc_html_e( 'Pet', 'starter-shelter' ); ?></option>
-            <option value="honor" <?php selected( $type, 'honor' ); ?>><?php esc_html_e( 'In Honor Of', 'starter-shelter' ); ?></option>
+            <option value=""><?php esc_html_e( 'All Types', 'shelter-donations' ); ?></option>
+            <option value="human" <?php selected( $type, 'human' ); ?>><?php esc_html_e( 'Person', 'shelter-donations' ); ?></option>
+            <option value="pet" <?php selected( $type, 'pet' ); ?>><?php esc_html_e( 'Pet', 'shelter-donations' ); ?></option>
+            <option value="honor" <?php selected( $type, 'honor' ); ?>><?php esc_html_e( 'In Honor Of', 'shelter-donations' ); ?></option>
         </select>
 
         <select name="notify_status">
-            <option value=""><?php esc_html_e( 'All Notifications', 'starter-shelter' ); ?></option>
-            <option value="pending" <?php selected( $notify, 'pending' ); ?>><?php esc_html_e( 'Pending', 'starter-shelter' ); ?></option>
-            <option value="sent" <?php selected( $notify, 'sent' ); ?>><?php esc_html_e( 'Sent', 'starter-shelter' ); ?></option>
-            <option value="not_requested" <?php selected( $notify, 'not_requested' ); ?>><?php esc_html_e( 'Not Requested', 'starter-shelter' ); ?></option>
+            <option value=""><?php esc_html_e( 'All Notifications', 'shelter-donations' ); ?></option>
+            <option value="pending" <?php selected( $notify, 'pending' ); ?>><?php esc_html_e( 'Pending', 'shelter-donations' ); ?></option>
+            <option value="sent" <?php selected( $notify, 'sent' ); ?>><?php esc_html_e( 'Sent', 'shelter-donations' ); ?></option>
+            <option value="not_requested" <?php selected( $notify, 'not_requested' ); ?>><?php esc_html_e( 'Not Requested', 'shelter-donations' ); ?></option>
         </select>
         <?php
     }
@@ -605,7 +605,7 @@ class Quick_Actions {
 
         ?>
         <select name="allocation">
-            <option value=""><?php esc_html_e( 'All Allocations', 'starter-shelter' ); ?></option>
+            <option value=""><?php esc_html_e( 'All Allocations', 'shelter-donations' ); ?></option>
             <?php foreach ( $allocations as $value => $label ) : ?>
             <option value="<?php echo esc_attr( $value ); ?>" <?php selected( $allocation, $value ); ?>>
                 <?php echo esc_html( $label ); ?>
@@ -624,18 +624,18 @@ class Quick_Actions {
 
         ?>
         <select name="donor_level">
-            <option value=""><?php esc_html_e( 'All Levels', 'starter-shelter' ); ?></option>
-            <option value="new" <?php selected( $level, 'new' ); ?>><?php esc_html_e( 'New', 'starter-shelter' ); ?></option>
-            <option value="bronze" <?php selected( $level, 'bronze' ); ?>><?php esc_html_e( 'Bronze', 'starter-shelter' ); ?></option>
-            <option value="silver" <?php selected( $level, 'silver' ); ?>><?php esc_html_e( 'Silver', 'starter-shelter' ); ?></option>
-            <option value="gold" <?php selected( $level, 'gold' ); ?>><?php esc_html_e( 'Gold', 'starter-shelter' ); ?></option>
-            <option value="platinum" <?php selected( $level, 'platinum' ); ?>><?php esc_html_e( 'Platinum', 'starter-shelter' ); ?></option>
+            <option value=""><?php esc_html_e( 'All Levels', 'shelter-donations' ); ?></option>
+            <option value="new" <?php selected( $level, 'new' ); ?>><?php esc_html_e( 'New', 'shelter-donations' ); ?></option>
+            <option value="bronze" <?php selected( $level, 'bronze' ); ?>><?php esc_html_e( 'Bronze', 'shelter-donations' ); ?></option>
+            <option value="silver" <?php selected( $level, 'silver' ); ?>><?php esc_html_e( 'Silver', 'shelter-donations' ); ?></option>
+            <option value="gold" <?php selected( $level, 'gold' ); ?>><?php esc_html_e( 'Gold', 'shelter-donations' ); ?></option>
+            <option value="platinum" <?php selected( $level, 'platinum' ); ?>><?php esc_html_e( 'Platinum', 'shelter-donations' ); ?></option>
         </select>
 
         <select name="has_membership">
-            <option value=""><?php esc_html_e( 'All Donors', 'starter-shelter' ); ?></option>
-            <option value="yes" <?php selected( $has_membership, 'yes' ); ?>><?php esc_html_e( 'With Membership', 'starter-shelter' ); ?></option>
-            <option value="no" <?php selected( $has_membership, 'no' ); ?>><?php esc_html_e( 'Without Membership', 'starter-shelter' ); ?></option>
+            <option value=""><?php esc_html_e( 'All Donors', 'shelter-donations' ); ?></option>
+            <option value="yes" <?php selected( $has_membership, 'yes' ); ?>><?php esc_html_e( 'With Membership', 'shelter-donations' ); ?></option>
+            <option value="no" <?php selected( $has_membership, 'no' ); ?>><?php esc_html_e( 'Without Membership', 'shelter-donations' ); ?></option>
         </select>
         <?php
     }

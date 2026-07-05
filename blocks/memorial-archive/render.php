@@ -2,8 +2,8 @@
 /**
  * Memorial Archive Block — Deprecation Bridge
  *
- * Maps the old starter-shelter/memorial-archive block to the unified
- * starter-shelter/memorial-wall block with paginationStyle = 'paged'.
+ * Maps the old shelter-donations/memorial-archive block to the unified
+ * shelter-donations/memorial-wall block with paginationStyle = 'paged'.
  *
  * When WordPress encounters a saved memorial-archive block, this render.php
  * translates its attributes and delegates to the memorial-wall render.
