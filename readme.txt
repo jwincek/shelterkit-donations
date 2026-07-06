@@ -3,7 +3,7 @@ Contributors: jeromewincek
 Tags: donations, memberships, memorials, animal-shelter, nonprofit
 Requires at least: 6.9
 Tested up to: 7.0
-Stable tag: 2.0.0
+Stable tag: 2.0.1
 Requires PHP: 8.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -67,6 +67,9 @@ Everything is stored locally as private custom post types (donations, donors, me
 No — uninstall preserves all data by default. Deletion is an explicit opt-in, and the admin tools include a full-backup CSV ZIP export you can take first.
 
 == Changelog ==
+
+= 2.0.1 =
+* Fixed a WordPress 6.7+ "translation loading triggered too early" notice on admin pages: meta-box configuration (which translates field labels) is now built lazily after the `init` action instead of at `plugins_loaded`.
 
 = 2.0.0 =
 * Renamed the plugin's public identity to `shelter-donations` (formerly "Starter Shelter Donations") for the first WordPress.org release.

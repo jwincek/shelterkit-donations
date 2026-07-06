@@ -3,7 +3,7 @@
  * Plugin Name: Shelter Donations
  * Plugin URI: https://github.com/jwincek/shelter-donations
  * Description: Animal shelter donations, memberships, and memorials management using WordPress 6.9+ Abilities API.
- * Version: 2.0.0
+ * Version: 2.0.1
  * Requires at least: 6.9
  * Requires PHP: 8.1
  * Requires Plugins: woocommerce
@@ -20,7 +20,7 @@ declare( strict_types = 1 );
 defined( 'ABSPATH' ) || exit;
 
 // Plugin constants.
-define( 'STARTER_SHELTER_VERSION', '2.0.0' );
+define( 'STARTER_SHELTER_VERSION', '2.0.1' );
 define( 'STARTER_SHELTER_FILE', __FILE__ );
 define( 'STARTER_SHELTER_PATH', plugin_dir_path( __FILE__ ) );
 define( 'STARTER_SHELTER_URL', plugin_dir_url( __FILE__ ) );

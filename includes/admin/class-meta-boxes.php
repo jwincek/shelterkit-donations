@@ -32,14 +32,39 @@ class Meta_Boxes {
      * Initialize meta boxes.
      */
     public static function init(): void {
-        self::$meta_boxes = self::get_meta_box_config();
+        // The full config is built lazily on first access (see get_config())
+        // because projecting it translates manifest labels via __(), and
+        // init() runs on `plugins_loaded`, before the `init` action —
+        // calling __() here would trigger WordPress's "translation loading
+        // too early" notice. Hook registration only needs the post-type
+        // keys, which get_meta_box_post_types() yields without translating.
+        $post_types = array_unique( array_merge(
+            array_keys( self::get_hard_coded_meta_box_config() ),
+            Field_Manifest::get_meta_box_post_types()
+        ) );
 
-        foreach ( array_keys( self::$meta_boxes ) as $post_type ) {
+        foreach ( $post_types as $post_type ) {
             add_action( "add_meta_boxes_{$post_type}", [ self::class, 'register_meta_boxes' ] );
             add_action( "save_post_{$post_type}", [ self::class, 'save_meta_boxes' ], 10, 2 );
         }
 
         add_action( 'admin_enqueue_scripts', [ self::class, 'enqueue_assets' ] );
+    }
+
+    /**
+     * Lazily build and memoize the full meta-box configuration.
+     *
+     * Building translates labels, so this must not run before the
+     * `init` action; all callers are edit-screen/save/enqueue hooks,
+     * which fire well after it.
+     *
+     * @return array Meta box configurations by post type.
+     */
+    private static function get_config(): array {
+        if ( [] === self::$meta_boxes ) {
+            self::$meta_boxes = self::get_meta_box_config();
+        }
+        return self::$meta_boxes;
     }
 
     /**
@@ -80,11 +105,12 @@ class Meta_Boxes {
      */
     public static function register_meta_boxes( \WP_Post $post ): void {
         $post_type = $post->post_type;
-        if ( ! isset( self::$meta_boxes[ $post_type ] ) ) {
+        $config    = self::get_config();
+        if ( ! isset( $config[ $post_type ] ) ) {
             return;
         }
 
-        foreach ( self::$meta_boxes[ $post_type ]['boxes'] as $box_id => $box ) {
+        foreach ( $config[ $post_type ]['boxes'] as $box_id => $box ) {
             add_meta_box(
                 'sd_' . $box_id,
                 $box['title'],
@@ -258,9 +284,10 @@ class Meta_Boxes {
         if ( ! current_user_can( 'edit_post', $post_id ) ) return;
 
         $post_type = $post->post_type;
-        if ( ! isset( self::$meta_boxes[ $post_type ] ) ) return;
+        $config    = self::get_config();
+        if ( ! isset( $config[ $post_type ] ) ) return;
 
-        foreach ( self::$meta_boxes[ $post_type ]['boxes'] as $box_id => $box ) {
+        foreach ( $config[ $post_type ]['boxes'] as $box_id => $box ) {
             $nonce_key = 'sd_meta_box_' . $box_id . '_nonce';
             if ( ! isset( $_POST[ $nonce_key ] ) || ! wp_verify_nonce( $_POST[ $nonce_key ], 'sd_meta_box_' . $box_id ) ) continue;
 
@@ -341,7 +368,7 @@ class Meta_Boxes {
         if ( 'post.php' !== $hook && 'post-new.php' !== $hook ) return;
 
         $screen = get_current_screen();
-        if ( ! $screen || ! isset( self::$meta_boxes[ $screen->post_type ] ) ) return;
+        if ( ! $screen || ! isset( self::get_config()[ $screen->post_type ] ) ) return;
 
         wp_enqueue_media();
 

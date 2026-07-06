@@ -449,6 +449,39 @@ class Field_Manifest {
 	 * @return array<string, array{boxes: array<string, array<string, mixed>>}>
 	 */
 	public static function get_meta_boxes(): array {
+		return self::collect_meta_boxes();
+	}
+
+	/**
+	 * Post types that declare a `meta_boxes` block, without projecting
+	 * the boxes. Unlike get_meta_boxes() this never calls __(), so it
+	 * is safe before the `init` action (hook registration at
+	 * `plugins_loaded` needs only the keys).
+	 *
+	 * @since 2.0.1
+	 *
+	 * @return string[]
+	 */
+	public static function get_meta_box_post_types(): array {
+		$out = [];
+
+		foreach ( self::list_entities() as $entity ) {
+			$manifest = self::get( $entity );
+			if ( is_array( $manifest['meta_boxes'] ?? null ) ) {
+				$out[] = $entity;
+			}
+		}
+
+		return $out;
+	}
+
+	/**
+	 * Collect and project meta-box declarations (translates labels —
+	 * only call at `init` or later).
+	 *
+	 * @return array<string, array{boxes: array<string, array<string, mixed>>}>
+	 */
+	private static function collect_meta_boxes(): array {
 		$out = [];
 
 		foreach ( self::list_entities() as $entity ) {

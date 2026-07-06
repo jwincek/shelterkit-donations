@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] - 2026-07-05
+
+### Fixed
+- WordPress 6.7+ "translation loading for the `shelter-donations` domain was triggered too
+  early" notice on every admin request. `Meta_Boxes::init()` (running at `plugins_loaded`)
+  eagerly built the meta-box config, whose projection translates manifest labels before the
+  `init` action. Hook registration now uses a new keys-only
+  `Field_Manifest::get_meta_box_post_types()` (never translates), and the translated config
+  is built lazily on first access — the same pattern `List_Columns` already used.
+
 ## [2.0.0] - 2026-07-05
 
 ### Changed
