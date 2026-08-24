@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="ShelterKit Donations">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#17A398"/>
+      <stop offset="100%" stop-color="#0B6E67"/>
+    </linearGradient>
+    <linearGradient id="badge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FBBF3C"/>
+      <stop offset="100%" stop-color="#EE9613"/>
+    </linearGradient>
+    <!-- Centred on x=112, not 128: the point has to clear the badge, which
+         starts at x=136. Centred, the badge crops it and the heart reads as a
+         lopsided blob rather than a heart. -->
+    <path id="heartmark" d="M112 181
+             C 112 181 42 141 42 100
+             C 42 76 60 59 82 59
+             C 96 59 107 67 112 77
+             C 117 67 128 59 142 59
+             C 164 59 182 76 182 100
+             C 182 141 112 181 112 181 Z"/>
+  </defs>
+
+  <rect width="256" height="256" rx="56" fill="url(#bg)"/>
+
+  <use href="#heartmark" fill="#FFFFFF"/>
+
+  <!-- Contribution badge, in the same corner slot Pets uses for its sync mark.
+       A plus rather than an arrow: at the 40px WordPress.org search-row size an
+       arrow's triangle-and-stem loses definition and starts reading as a 't',
+       while a plus keeps its stroke weight. -->
+  <circle cx="192" cy="192" r="56" fill="#0B6E67"/>
+  <circle cx="192" cy="192" r="46" fill="url(#badge)"/>
+  <g fill="#FFFFFF" transform="translate(192,192)">
+    <rect x="-6.5" y="-24" width="13" height="48" rx="3"/>
+    <rect x="-24" y="-6.5" width="48" height="13" rx="3"/>
+  </g>
+</svg>

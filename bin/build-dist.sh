@@ -39,20 +39,40 @@ rm -f "${OUT_DIR}/.rsync-excludes"
 # --- leak guard --------------------------------------------------------------
 fail=0
 
-# Nothing from the development toolchain may ship. Each of these has cost
-# somebody a rejected release somewhere.
-while IFS= read -r leaked; do
-  echo "  LEAK    ${leaked#"${DEST}/"}"
-  fail=1
-done < <(
-  find "$DEST" \( \
-    -name '.git*' -o -name '.editorconfig' -o -name 'composer.*' \
-    -o -name 'phpcs.xml*' -o -name 'phpunit*.xml*' -o -name '.phpunit*' \
-    -o -name 'AUDIT-*.md' -o -name '.wp-env.json' -o -name '*.zip' \
-    -o -name 'node_modules' -o -name 'vendor' -o -name 'tests' -o -name 'bin' \
-    -o -name 'migration-scripts' -o -name '.wordpress-org' -o -name '.DS_Store' \
-  \) -print
-)
+# Nothing may ship that is not on this list. An allowlist rather than a list of
+# known-bad names: the deny-list version of this guard silently passed
+# assets-src/ and CONTRIBUTING.md, because both were added to the repository
+# after the guard was written. Anything new now has to be declared here, which
+# is a decision rather than an oversight.
+ALLOWED_TOP="LICENSE readme.txt shelterkit-donations.php uninstall.php \
+             assets blocks config includes languages templates"
+
+while IFS= read -r entry; do
+  name=$( basename "$entry" )
+  case " $ALLOWED_TOP " in
+    *" $name "*) ;;
+    *) echo "  LEAK    ${name}  (not in the build's allowlist)"; fail=1 ;;
+  esac
+done < <( find "$DEST" -mindepth 1 -maxdepth 1 )
+
+# The allowlist above only sees the top level. A stray file nested inside
+# includes/ or blocks/ would pass it — which is how ShelterKit Pets once swept
+# eleven megabytes of untracked working files into a build minutes before a
+# release, because .distignore had never heard of the directory.
+#
+# Every file this plugin ships is committed, so "tracked by git" is the correct
+# invariant, and unlike any list it holds for paths nobody has invented yet.
+# Borrowed from shelterkit-pets, where it was learned the hard way.
+if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  tracked=$( mktemp )
+  trap 'rm -f "$tracked"' EXIT
+  git ls-files > "$tracked"
+
+  while IFS= read -r f; do
+    rel="${f#"${DEST}/"}"
+    grep -Fxq "$rel" "$tracked" || { echo "  UNTRACKED ${rel}"; fail=1; }
+  done < <( find "$DEST" -type f )
+fi
 
 # ...and nothing the plugin needs at runtime may go missing. A .distignore
 # pattern that is slightly too broad silently ships a plugin that fatals on

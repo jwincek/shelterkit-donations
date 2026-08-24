@@ -19,6 +19,7 @@
 # Shipping them here would send banners and screenshots to every user and
 # still leave the listing page blank.
 /.wordpress-org
+/assets-src
 /screenshots-draft
 
 # Development toolchain
@@ -43,6 +44,7 @@
 /README.md
 /CHANGELOG.md
 /RELEASING.md
+/CONTRIBUTING.md
 AUDIT-*.md
 
 # One-shot upgrade scripts, run from a checkout, never from an install.
