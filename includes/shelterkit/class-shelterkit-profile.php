@@ -22,7 +22,7 @@
  * or Donations do the same if they are. Any one of them works installed alone.
  *
  * @package ShelterKit
- * @version 1.2.0
+ * @version 1.3.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -31,7 +31,7 @@ if ( ! class_exists( 'ShelterKit_Profile' ) ) {
 
 	class ShelterKit_Profile {
 
-		public const VERSION = '1.2.0';
+		public const VERSION = '1.3.0';
 
 		/**
 		 * Deliberately not prefixed with any one plugin's name. The profile
@@ -192,7 +192,15 @@ if ( ! class_exists( 'ShelterKit_Profile' ) ) {
 				$clean[ $field ] = call_user_func( $sanitiser, $input[ $field ] );
 			}
 
-			update_option( self::OPTION, $clean );
+			// Merge rather than replace. A copy only knows the fields IT
+			// declares, so replacing drops anything a newer copy stored: with
+			// Donations deactivated, saving from an older Pets would silently
+			// lose tax_id. Merging makes the option forward-compatible in both
+			// directions and removes any need to keep copies in lockstep.
+			$stored = get_option( self::OPTION, array() );
+			$stored = is_array( $stored ) ? $stored : array();
+
+			update_option( self::OPTION, array_merge( $stored, $clean ) );
 		}
 
 		// ─── Admin screen ───────────────────────────────────────────────────
