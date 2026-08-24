@@ -39,20 +39,21 @@ rm -f "${OUT_DIR}/.rsync-excludes"
 # --- leak guard --------------------------------------------------------------
 fail=0
 
-# Nothing from the development toolchain may ship. Each of these has cost
-# somebody a rejected release somewhere.
-while IFS= read -r leaked; do
-  echo "  LEAK    ${leaked#"${DEST}/"}"
-  fail=1
-done < <(
-  find "$DEST" \( \
-    -name '.git*' -o -name '.editorconfig' -o -name 'composer.*' \
-    -o -name 'phpcs.xml*' -o -name 'phpunit*.xml*' -o -name '.phpunit*' \
-    -o -name 'AUDIT-*.md' -o -name '.wp-env.json' -o -name '*.zip' \
-    -o -name 'node_modules' -o -name 'vendor' -o -name 'tests' -o -name 'bin' \
-    -o -name 'migration-scripts' -o -name '.wordpress-org' -o -name '.DS_Store' \
-  \) -print
-)
+# Nothing may ship that is not on this list. An allowlist rather than a list of
+# known-bad names: the deny-list version of this guard silently passed
+# assets-src/ and CONTRIBUTING.md, because both were added to the repository
+# after the guard was written. Anything new now has to be declared here, which
+# is a decision rather than an oversight.
+ALLOWED_TOP="LICENSE readme.txt shelterkit-donations.php uninstall.php \
+             assets blocks config includes languages templates"
+
+while IFS= read -r entry; do
+  name=$( basename "$entry" )
+  case " $ALLOWED_TOP " in
+    *" $name "*) ;;
+    *) echo "  LEAK    ${name}  (not in the build's allowlist)"; fail=1 ;;
+  esac
+done < <( find "$DEST" -mindepth 1 -maxdepth 1 )
 
 # ...and nothing the plugin needs at runtime may go missing. A .distignore
 # pattern that is slightly too broad silently ships a plugin that fatals on
