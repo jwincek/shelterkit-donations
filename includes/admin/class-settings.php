@@ -167,10 +167,6 @@ class Settings {
             'default' => 30, 'min' => 7, 'max' => 90,
         ], 'general' );
 
-
-
-
-
         // Page mappings.
         self::add_field( 'donation_page', __( 'Donation Page', 'shelterkit-donations' ), 'sd_pages', 'page', [
             'description' => __( 'Where "Donate Now" buttons (including campaign-card on donation drives) should link. Campaign-card appends ?campaign={id}.', 'shelterkit-donations' ),
