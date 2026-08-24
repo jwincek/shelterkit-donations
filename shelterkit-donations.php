@@ -257,6 +257,10 @@ function starter_shelter_admin_init(): void {
     // Initialize settings page.
     Starter_Shelter\Admin\Settings::init();
 
+    // One-time move of the organisation fields into the shared profile. Runs
+    // after the profile registry has loaded on plugins_loaded.
+    add_action( 'admin_init', [ Starter_Shelter\Admin\Settings::class, 'maybe_migrate_organization_to_profile' ], 5 );
+
     // Initialize reports page.
     Starter_Shelter\Admin\Reports::init();
 

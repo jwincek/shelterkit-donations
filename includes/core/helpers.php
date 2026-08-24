@@ -1116,3 +1116,28 @@ function starter_shelter_tax_id(): string {
 
     return (string) \Starter_Shelter\Admin\Settings::get( 'org_ein', '' );
 }
+
+/**
+ * The shelter's name for a receipt or statement.
+ *
+ * Shared profile first, then this plugin's own legacy setting, then the site
+ * title. Exists so the printed receipt and the emailed statement cannot
+ * disagree about who the organisation is — before 3.1.0 they read different
+ * keys and did.
+ *
+ * @since 3.1.0
+ *
+ * @return string Organisation name; never empty.
+ */
+function starter_shelter_org_name(): string {
+    if ( class_exists( 'ShelterKit_Profile' ) ) {
+        $name = \ShelterKit_Profile::get( 'name' );
+        if ( '' !== $name ) {
+            return $name;
+        }
+    }
+
+    $legacy = (string) \Starter_Shelter\Admin\Settings::get( 'org_name', '' );
+
+    return '' !== $legacy ? $legacy : (string) get_bloginfo( 'name' );
+}

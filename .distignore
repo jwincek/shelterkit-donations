@@ -50,12 +50,10 @@ AUDIT-*.md
 # One-shot upgrade scripts, run from a checkout, never from an install.
 /migration-scripts
 
-# Superseded editor experiments, kept in the repository for reference but
-# never enqueued: each block registers its own edit.js via block.json, and
-# memorial-panel.js is the parked block-editor alternative to the classic
-# meta boxes (see the note in includes/blocks/register-editor.php).
-/assets/js/block-editor.js
-/assets/css/block-editor.css
+# memorial-panel.js is the parked block-editor alternative to the classic meta
+# boxes for sd_memorial. Deliberately kept in the repository and deliberately
+# not enqueued — three comments point at it as the record of that decision (see
+# includes/blocks/register-editor.php). It has no business in a user's install.
 /assets/js/memorial-panel.js
 
 .DS_Store

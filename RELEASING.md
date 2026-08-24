@@ -91,14 +91,13 @@ ShelterKit plugin, all editing the same option.
 
 | Plugin | Profile copy |
 | --- | --- |
-| ShelterKit Donations | 1.2.0 — adds `tax_id` |
+| ShelterKit Donations | 1.3.0 — adds `tax_id`, merges on save |
 | ShelterKit Pets | 1.1.0 — sync when convenient |
 
 A lower copy is not a bug: the highest present wins, and nothing in Pets reads
-`tax_id`. The one edge worth knowing is that `ShelterKit_Profile::save()`
-replaces the whole option rather than merging, so saving the profile from a
-site where an *older* copy won would drop fields the older copy does not
-declare. Syncing Pets to 1.2.0 closes that.
+`tax_id`. As of 1.3.0 `save()` merges into the stored option rather than
+replacing it, so an older copy winning the negotiation no longer drops fields
+it does not declare — the copies no longer have to be kept in lockstep.
 
 ## Security sniff baseline
 
