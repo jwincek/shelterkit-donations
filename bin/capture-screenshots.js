@@ -106,8 +106,11 @@ async function go( page, url, settle = '#wpbody-content' ) {
 	// --- admin screens --------------------------------------------------------
 	const admin = ( slug ) => `${ SITE }/wp-admin/admin.php?page=${ slug }`;
 
-	await go( page, admin( 'shelterkit-donations-reports' ) );
+	await go( page, `${ admin( 'shelterkit-donations-reports' ) }&period=all_time` );
 	await shot( page, '#wpbody-content', 'reports.png' );
+
+	await go( page, `${ admin( 'shelterkit-donations-reports' ) }&period=all_time&tab=campaigns` );
+	await shot( page, '#wpbody-content', 'reports-campaigns.png' );
 
 	await go( page, admin( 'shelterkit-donations-settings' ) );
 	await shot( page, '#wpbody-content', 'settings-general.png' );
