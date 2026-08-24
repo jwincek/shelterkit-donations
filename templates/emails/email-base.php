@@ -1,6 +1,6 @@
 <?php
 /**
- * Base email template for Shelter Donations.
+ * Base email template for ShelterKit Donations.
  *
  * This template provides common structure for all shelter donation emails.
  * Override by copying to yourtheme/shelter-donations/emails/email-base.php

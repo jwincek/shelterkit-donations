@@ -388,7 +388,7 @@ class Order_Handler {
             return;
         }
 
-        $note = __( 'Shelter Donations Processing:', 'shelterkit-donations' ) . "\n" . implode( "\n", $note_parts );
+        $note = __( 'ShelterKit Donations Processing:', 'shelterkit-donations' ) . "\n" . implode( "\n", $note_parts );
 
         if ( $has_errors ) {
             $note .= "\n\n" . __( '⚠️ Some items had errors. Please review and reprocess if needed.', 'shelterkit-donations' );
@@ -449,7 +449,7 @@ class Order_Handler {
         if ( $screen_id ) {
             add_meta_box(
                 'sd_processing_status',
-                __( 'Shelter Donations', 'shelterkit-donations' ),
+                __( 'ShelterKit Donations', 'shelterkit-donations' ),
                 [ self::class, 'render_processing_meta_box' ],
                 $screen_id,
                 'side',
@@ -460,7 +460,7 @@ class Order_Handler {
         // Legacy support for traditional post-based orders.
         add_meta_box(
             'sd_processing_status',
-            __( 'Shelter Donations', 'shelterkit-donations' ),
+            __( 'ShelterKit Donations', 'shelterkit-donations' ),
             [ self::class, 'render_processing_meta_box' ],
             'shop_order',
             'side',

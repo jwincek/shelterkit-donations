@@ -69,7 +69,7 @@ class Campaign_Admin {
     }
 
     /**
-     * Add a "Campaigns" item to the Shelter Donations menu that opens
+     * Add a "Campaigns" item to the ShelterKit Donations menu that opens
      * the standard WP taxonomy edit page for sd_campaign.
      */
     public static function register_submenu(): void {

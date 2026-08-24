@@ -694,7 +694,7 @@ class Product_Sync_Checker {
 		?>
 		<div class="notice <?php echo esc_attr( $class ); ?> is-dismissible">
 			<p>
-				<strong><?php esc_html_e( 'Shelter Donations — Product Sync:', 'shelterkit-donations' ); ?></strong>
+				<strong><?php esc_html_e( 'ShelterKit Donations — Product Sync:', 'shelterkit-donations' ); ?></strong>
 				<?php echo esc_html( $results['summary'] ); ?>
 			</p>
 			<details>
@@ -774,7 +774,7 @@ class Product_Sync_Checker {
 		?>
 		<div class="notice notice-success is-dismissible">
 			<p>
-				<strong><?php esc_html_e( 'Shelter Donations — Repair Complete:', 'shelterkit-donations' ); ?></strong>
+				<strong><?php esc_html_e( 'ShelterKit Donations — Repair Complete:', 'shelterkit-donations' ); ?></strong>
 				<?php
                 printf(
 					/* translators: 1: number of products repaired; 2: number of products skipped. */

@@ -60,7 +60,7 @@ class Reports {
     public static function add_reports_page(): void {
         self::$page_hook = (string) add_submenu_page(
             Menu::MENU_SLUG,
-            __( 'Shelter Donations Reports', 'shelterkit-donations' ),
+            __( 'ShelterKit Donations Reports', 'shelterkit-donations' ),
             __( 'Reports', 'shelterkit-donations' ),
             'manage_options',
             self::PAGE_SLUG,
@@ -143,7 +143,7 @@ class Reports {
 
         ?>
         <div class="wrap sd-reports">
-            <h1><?php esc_html_e( 'Shelter Donations Reports', 'shelterkit-donations' ); ?></h1>
+            <h1><?php esc_html_e( 'ShelterKit Donations Reports', 'shelterkit-donations' ); ?></h1>
 
             <nav class="nav-tab-wrapper">
                 <a href="<?php echo esc_url( add_query_arg( 'tab', 'donations' ) ); ?>" 

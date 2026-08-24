@@ -46,7 +46,7 @@ class Settings {
     public static function add_settings_page(): void {
         add_submenu_page(
             Menu::MENU_SLUG,
-            __( 'Shelter Donations Settings', 'shelterkit-donations' ),
+            __( 'ShelterKit Donations Settings', 'shelterkit-donations' ),
             __( 'Settings', 'shelterkit-donations' ),
             'manage_options',
             self::PAGE_SLUG,
@@ -852,6 +852,7 @@ class Settings {
                     </tr>
                 </thead>
                 <tbody>
+                    <?php // The product's real name, which is frozen — see Activator::$products. ?>
                     <tr><td>Shelter Donations</td><td><code>shelterkit-donations</code></td><td>Preferred Allocation</td><td>General Fund, Medical Care, etc.</td></tr>
                     <tr><td>Individual Memberships</td><td><code>shelter-memberships</code></td><td>Membership Level</td><td>Single ($10) - Benefactor ($1000)</td></tr>
                     <tr><td>Business Memberships</td><td><code>shelter-memberships-business</code></td><td>Membership Level</td><td>Contributing ($50) - Benefactor ($1000)</td></tr>

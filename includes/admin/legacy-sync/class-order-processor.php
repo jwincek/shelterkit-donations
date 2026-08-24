@@ -458,7 +458,7 @@ class Order_Processor {
 
 		$note = sprintf(
 			/* translators: 1: donations, 2: memberships, 3: memorials, 4: updated */
-			__( 'Shelter Donations legacy sync completed: %1$d donation(s), %2$d membership(s), %3$d memorial(s), %4$d updated', 'shelterkit-donations' ),
+			__( 'ShelterKit Donations legacy sync completed: %1$d donation(s), %2$d membership(s), %3$d memorial(s), %4$d updated', 'shelterkit-donations' ),
 			$created['donations'],
 			$created['memberships'],
 			$created['memorials'],

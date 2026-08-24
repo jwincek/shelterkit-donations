@@ -94,7 +94,7 @@ if ( $ability ) {
         if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
             // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
             error_log( sprintf(
-                'Shelter Donations: shelter-memorials/list ability returned WP_Error [%s]: %s | input: %s',
+                'ShelterKit Donations: shelter-memorials/list ability returned WP_Error [%s]: %s | input: %s',
                 $result->get_error_code(),
                 $result->get_error_message(),
                 wp_json_encode( $ability_input )

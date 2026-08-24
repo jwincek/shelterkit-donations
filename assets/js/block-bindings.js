@@ -1,5 +1,5 @@
 /**
- * Register Shelter Donations block binding sources in the editor.
+ * Register ShelterKit Donations block binding sources in the editor.
  *
  * PHP register_block_bindings_source() handles server-side rendering,
  * but the editor needs client-side registration via

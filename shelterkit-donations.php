@@ -66,7 +66,7 @@ function starter_shelter_init(): void {
         add_action( 'admin_notices', function (): void {
             printf(
                 '<div class="error"><p>%s</p></div>',
-                esc_html__( 'Shelter Donations requires WordPress 6.9 or higher.', 'shelterkit-donations' )
+                esc_html__( 'ShelterKit Donations requires WordPress 6.9 or higher.', 'shelterkit-donations' )
             );
         } );
         return;
@@ -101,7 +101,7 @@ add_action( 'plugins_loaded', 'starter_shelter_init', 10 );
  */
 function starter_shelter_register_ability_categories(): void {
     wp_register_ability_category( 'shelterkit-donations', [
-        'label'       => __( 'Shelter Donations', 'shelterkit-donations' ),
+        'label'       => __( 'ShelterKit Donations', 'shelterkit-donations' ),
         'description' => __( 'Abilities for managing animal shelter donations.', 'shelterkit-donations' ),
     ] );
 
@@ -319,7 +319,7 @@ function starter_shelter_register_blocks(): void {
             [
                 [
                     'slug'  => 'shelterkit-donations',
-                    'title' => __( 'Shelter Donations', 'shelterkit-donations' ),
+                    'title' => __( 'ShelterKit Donations', 'shelterkit-donations' ),
                     'icon'  => 'heart',
                 ],
             ],
@@ -417,7 +417,7 @@ function starter_shelter_product_setup_notice(): void {
     ?>
     <div class="notice notice-warning is-dismissible">
         <p>
-            <strong><?php esc_html_e( 'Shelter Donations:', 'shelterkit-donations' ); ?></strong>
+            <strong><?php esc_html_e( 'ShelterKit Donations:', 'shelterkit-donations' ); ?></strong>
             <?php esc_html_e( 'Some donation products need to be created.', 'shelterkit-donations' ); ?>
             <a href="<?php echo esc_url( $setup_url ); ?>"><?php esc_html_e( 'Set up products', 'shelterkit-donations' ); ?></a>
         </p>

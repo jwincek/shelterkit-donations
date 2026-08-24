@@ -12,7 +12,7 @@
 
     // Ensure WordPress dependencies are available
     if ( typeof wp === 'undefined' || ! wp.element || ! wp.components ) {
-        console.error( 'Shelter Donations: Required WordPress scripts not loaded.' );
+        console.error( 'ShelterKit Donations: Required WordPress scripts not loaded.' );
         return;
     }
 
@@ -1029,7 +1029,7 @@
         var container = document.getElementById( 'sd-import-export-root' );
         
         // Debug output
-        console.log( 'Shelter Donations Import/Export: Initializing...' );
+        console.log( 'ShelterKit Donations Import/Export: Initializing...' );
         console.log( 'Container found:', !!container );
         console.log( 'sdImportExport defined:', typeof sdImportExport !== 'undefined' );
         
@@ -1038,22 +1038,22 @@
         }
         
         if ( ! container ) {
-            console.error( 'Shelter Donations: Could not find #sd-import-export-root element.' );
+            console.error( 'ShelterKit Donations: Could not find #sd-import-export-root element.' );
             return;
         }
         
         if ( typeof sdImportExport === 'undefined' ) {
-            console.error( 'Shelter Donations: sdImportExport config not defined. Script may not be properly enqueued.' );
+            console.error( 'ShelterKit Donations: sdImportExport config not defined. Script may not be properly enqueued.' );
             container.innerHTML = '<div class="notice notice-error"><p>Import/Export configuration not loaded. Please refresh the page.</p></div>';
             return;
         }
         
         try {
-            console.log( 'Shelter Donations: Rendering app...' );
+            console.log( 'ShelterKit Donations: Rendering app...' );
             render( el( ImportExportApp ), container );
-            console.log( 'Shelter Donations: App rendered successfully.' );
+            console.log( 'ShelterKit Donations: App rendered successfully.' );
         } catch ( e ) {
-            console.error( 'Shelter Donations render error:', e );
+            console.error( 'ShelterKit Donations render error:', e );
             container.innerHTML = '<div class="notice notice-error"><p>Error loading Import/Export UI: ' + e.message + '</p></div>';
         }
     }

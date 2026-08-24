@@ -25,6 +25,13 @@ class Activator {
      */
     private static array $products = [
         'shelterkit-donations' => [
+            // FROZEN — not renamed with the plugin. WooCommerce copies a
+            // product's title into every order line item, and the legacy-sync
+            // matcher in config/sync.json keys off it with
+            // "^Shelter Donations - (.+)". Renaming the product would leave
+            // future orders unmatched by that pattern while historical ones
+            // still carry the old name. The customer-facing name is a donor's
+            // words anyway, not the plugin's brand.
             'name'        => 'Shelter Donations',
             'sku'         => 'shelterkit-donations',
             'description' => 'Support us with a donation to help care for animals in need.',

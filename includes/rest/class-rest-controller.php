@@ -1,6 +1,6 @@
 <?php
 /**
- * REST API Controller for Shelter Donations.
+ * REST API Controller for ShelterKit Donations.
  *
  * Provides additional REST endpoints beyond auto-generated ability endpoints.
  *
