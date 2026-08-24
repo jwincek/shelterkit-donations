@@ -269,7 +269,7 @@ class Settings {
         }
 
         // The organisation fields moved to the shared Shelter Details screen in
-        // 3.1.0 and are no longer on this form. Carry the stored values forward
+        // 3.0.0 and are no longer on this form. Carry the stored values forward
         // rather than reading $input: sanitise() rebuilds the option from
         // scratch, so anything not carried is deleted, and the receipt helpers
         // still fall back to these for installs that filled them in before the
@@ -890,14 +890,14 @@ class Settings {
      * 3.0.0 adopted the shared Shelter Details screen but left this plugin's
      * own Organization fields in place beside it, so the same information had
      * two homes and nothing said which the receipts read. The fields are gone
-     * from the form as of 3.1.0; this carries what an install already had.
+     * from the form as of 3.0.0; this carries what an install already had.
      *
      * Only fills profile fields that are empty, so a shelter that has already
      * filled in Shelter Details is never overwritten. The source values are
      * left in place: the receipt helpers still fall back to them, and keeping
      * them makes this safe to re-run.
      *
-     * @since 3.1.0
+     * @since 3.0.0
      */
     public static function maybe_migrate_organization_to_profile(): void {
         if ( get_option( 'sd_org_profile_migrated' ) ) {

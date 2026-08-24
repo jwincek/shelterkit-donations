@@ -85,6 +85,8 @@ No — uninstall preserves all data by default. Deletion is an explicit opt-in, 
 * Fixed: the emailed annual contribution statement printed the literal text "[EIN Number]" instead of your tax ID. It read a setting that nothing ever saved, so no configuration could correct it. The printed receipt was unaffected, which is why the two disagreed.
 * Fixed: the annual statement's letterhead took its address from your WooCommerce store settings — the address goods ship from, which matches the shelter only by coincidence. It now uses the Shelter Details address, falling back to the store address when that is blank.
 * A statement for a shelter with no tax ID recorded now omits the line entirely rather than printing a placeholder.
+* Your shelter's name, address, phone and tax ID are now entered once, on Shelter Details, instead of also having their own fields under Settings. Anything you had already filled in is carried across for you.
+* Fixed: the admin screens still said "Shelter Donations" after the rename — the menu, page titles and the dashboard widget now all read ShelterKit Donations. The WooCommerce product keeps its existing name so your order history stays intact.
 
 = 2.0.1 =
 * Fixed a WordPress 6.7+ "translation loading triggered too early" notice on admin pages: meta-box configuration (which translates field labels) is now built lazily after the `init` action instead of at `plugins_loaded`.

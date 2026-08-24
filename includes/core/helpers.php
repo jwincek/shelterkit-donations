@@ -1122,10 +1122,10 @@ function starter_shelter_tax_id(): string {
  *
  * Shared profile first, then this plugin's own legacy setting, then the site
  * title. Exists so the printed receipt and the emailed statement cannot
- * disagree about who the organisation is — before 3.1.0 they read different
+ * disagree about who the organisation is — before 3.0.0 they read different
  * keys and did.
  *
- * @since 3.1.0
+ * @since 3.0.0
  *
  * @return string Organisation name; never empty.
  */
