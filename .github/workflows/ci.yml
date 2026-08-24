@@ -32,7 +32,7 @@ jobs:
           tools: composer
 
       - name: Cache Composer dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: vendor
           key: composer-${{ hashFiles('composer.lock', 'composer.json') }}
@@ -62,7 +62,7 @@ jobs:
           tools: composer
 
       - name: Cache Composer dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: vendor
           key: composer-${{ matrix.php }}-${{ hashFiles('composer.lock', 'composer.json') }}
@@ -97,7 +97,7 @@ jobs:
           tools: composer
 
       - name: Cache Composer dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: vendor
           key: composer-${{ matrix.php }}-${{ hashFiles('composer.lock', 'composer.json') }}
@@ -147,7 +147,7 @@ jobs:
           extensions: mysqli
 
       - name: Cache Composer dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: vendor
           key: composer-${{ matrix.php }}-${{ hashFiles('composer.lock', 'composer.json') }}
@@ -203,7 +203,7 @@ jobs:
           extensions: mysqli, mbstring, bcmath, intl, gd
 
       - name: Cache Composer dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: vendor
           key: composer-8.3-${{ hashFiles('composer.lock', 'composer.json') }}
