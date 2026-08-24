@@ -1,0 +1,28 @@
+version: 2
+updates:
+  # GitHub Actions only.
+  #
+  # Deliberately no composer or npm entry: composer.json's `require` is just
+  # `php: >=8.1` and the plugin autoloads its own classes, so nothing composer
+  # installs ever reaches the zip (.distignore drops vendor/ wholesale, and the
+  # build's leak guard fails if it does not). Updates there would be pure
+  # dev-tooling churn on a solo-maintained plugin — and PHPCS/WPCS bumps in
+  # particular tend to surface new sniffs that fail CI without any change to
+  # shipped code.
+  #
+  # Action versions do matter: they drift silently and surface only as runner
+  # deprecation warnings.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      # One PR for the routine bumps; majors arrive separately so a breaking
+      # action change is reviewed on its own rather than buried in a batch.
+      actions-minor-and-patch:
+        update-types:
+          - minor
+          - patch
+    labels:
+      - dependencies
