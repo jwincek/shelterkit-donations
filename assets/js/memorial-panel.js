@@ -112,55 +112,55 @@
 
 		return el( PluginDocumentSettingPanel, {
 			name:  'sd-memorial-details',
-			title: __( 'Memorial Details', 'shelter-donations' ),
+			title: __( 'Memorial Details', 'shelterkit-donations' ),
 		},
 			el( TextControl, {
-				label:    __( 'Honoree Name', 'shelter-donations' ),
+				label:    __( 'Honoree Name', 'shelterkit-donations' ),
 				value:    m.meta._sd_honoree_name || '',
 				onChange: function( v ) { m.set( '_sd_honoree_name', v ); },
-				help:     __( 'Also used as the post title.', 'shelter-donations' ),
+				help:     __( 'Also used as the post title.', 'shelterkit-donations' ),
 				__nextHasNoMarginBottom: true,
 			} ),
 			// Two orthogonal axes, mirroring the customer-facing
 			// memorial-form: dedication (the occasion) + honoree type
 			// (the subject). The old single "Type" select conflated them.
 			el( SelectControl, {
-				label:   __( 'Dedication', 'shelter-donations' ),
+				label:   __( 'Dedication', 'shelterkit-donations' ),
 				value:   m.meta._sd_dedication_type || 'memory',
 				options: [
-					{ value: 'memory', label: __( 'In Memory Of', 'shelter-donations' ) },
-					{ value: 'honor',  label: __( 'In Honor Of', 'shelter-donations' ) },
+					{ value: 'memory', label: __( 'In Memory Of', 'shelterkit-donations' ) },
+					{ value: 'honor',  label: __( 'In Honor Of', 'shelterkit-donations' ) },
 				],
 				onChange: function( v ) { m.set( '_sd_dedication_type', v ); },
 				__nextHasNoMarginBottom: true,
 			} ),
 			el( SelectControl, {
-				label:   __( 'Honoree Type', 'shelter-donations' ),
+				label:   __( 'Honoree Type', 'shelterkit-donations' ),
 				value:   m.meta._sd_memorial_type || 'person',
 				options: [
-					{ value: 'person', label: __( 'Person', 'shelter-donations' ) },
-					{ value: 'pet',    label: __( 'Pet', 'shelter-donations' ) },
+					{ value: 'person', label: __( 'Person', 'shelterkit-donations' ) },
+					{ value: 'pet',    label: __( 'Pet', 'shelterkit-donations' ) },
 				],
 				onChange: function( v ) { m.set( '_sd_memorial_type', v ); },
 				__nextHasNoMarginBottom: true,
 			} ),
 			m.meta._sd_memorial_type === 'pet' && el( SelectControl, {
-				label:   __( 'Pet Species', 'shelter-donations' ),
+				label:   __( 'Pet Species', 'shelterkit-donations' ),
 				value:   m.meta._sd_pet_species || '',
 				options: [
-					{ value: '',       label: __( '— Select —', 'shelter-donations' ) },
-					{ value: 'dog',    label: __( 'Dog', 'shelter-donations' ) },
-					{ value: 'cat',    label: __( 'Cat', 'shelter-donations' ) },
-					{ value: 'bird',   label: __( 'Bird', 'shelter-donations' ) },
-					{ value: 'horse',  label: __( 'Horse', 'shelter-donations' ) },
-					{ value: 'rabbit', label: __( 'Rabbit', 'shelter-donations' ) },
-					{ value: 'other',  label: __( 'Other', 'shelter-donations' ) },
+					{ value: '',       label: __( '— Select —', 'shelterkit-donations' ) },
+					{ value: 'dog',    label: __( 'Dog', 'shelterkit-donations' ) },
+					{ value: 'cat',    label: __( 'Cat', 'shelterkit-donations' ) },
+					{ value: 'bird',   label: __( 'Bird', 'shelterkit-donations' ) },
+					{ value: 'horse',  label: __( 'Horse', 'shelterkit-donations' ) },
+					{ value: 'rabbit', label: __( 'Rabbit', 'shelterkit-donations' ) },
+					{ value: 'other',  label: __( 'Other', 'shelterkit-donations' ) },
 				],
 				onChange: function( v ) { m.set( '_sd_pet_species', v ); },
 				__nextHasNoMarginBottom: true,
 			} ),
 			el( TextareaControl, {
-				label:    __( 'Tribute Message', 'shelter-donations' ),
+				label:    __( 'Tribute Message', 'shelterkit-donations' ),
 				value:    m.meta._sd_tribute_message || '',
 				onChange: function( v ) { m.set( '_sd_tribute_message', v ); },
 				rows:     6,
@@ -210,7 +210,7 @@
 					setDonorOptions( [ { value: String( donorId ), label: name } ] );
 				} ).catch( function() {
 					// Donor may have been deleted.
-					setSelectedLabel( __( '(unknown donor)', 'shelter-donations' ) );
+					setSelectedLabel( __( '(unknown donor)', 'shelterkit-donations' ) );
 				} );
 			}
 		}, [] );
@@ -277,8 +277,8 @@
 				setQcNotice( {
 					status:  'success',
 					message: isNew
-						? __( 'New donor created.', 'shelter-donations' )
-						: __( 'Linked to existing donor.', 'shelter-donations' ),
+						? __( 'New donor created.', 'shelterkit-donations' )
+						: __( 'Linked to existing donor.', 'shelterkit-donations' ),
 				} );
 				setQcName( '' );
 				setQcSaving( false );
@@ -291,7 +291,7 @@
 			} ).catch( function( error ) {
 				setQcNotice( {
 					status:  'error',
-					message: error.message || __( 'Failed to create donor.', 'shelter-donations' ),
+					message: error.message || __( 'Failed to create donor.', 'shelterkit-donations' ),
 				} );
 				setQcSaving( false );
 			} );
@@ -299,11 +299,11 @@
 
 		return el( PluginDocumentSettingPanel, {
 			name:  'sd-donation-info',
-			title: __( 'Donation Info', 'shelter-donations' ),
+			title: __( 'Donation Info', 'shelterkit-donations' ),
 		},
 			// Donor combobox.
 			el( ComboboxControl, {
-				label:               __( 'Donated By', 'shelter-donations' ),
+				label:               __( 'Donated By', 'shelterkit-donations' ),
 				value:               m.meta._sd_donor_id ? String( m.meta._sd_donor_id ) : null,
 				options:             donorOptions,
 				onFilterValueChange: onDonorFilter,
@@ -320,8 +320,8 @@
 						setQcNotice( null );
 					},
 				}, showQC
-					? __( 'Cancel', 'shelter-donations' )
-					: __( '+ New Donor', 'shelter-donations' )
+					? __( 'Cancel', 'shelterkit-donations' )
+					: __( '+ New Donor', 'shelterkit-donations' )
 				)
 			),
 
@@ -335,10 +335,10 @@
 				},
 			},
 				el( TextControl, {
-					label:       __( 'Donor Name', 'shelter-donations' ),
+					label:       __( 'Donor Name', 'shelterkit-donations' ),
 					value:       qcName,
 					onChange:     setQcName,
-					placeholder: __( 'e.g. John & Mary Smith', 'shelter-donations' ),
+					placeholder: __( 'e.g. John & Mary Smith', 'shelterkit-donations' ),
 					onKeyDown:   function( e ) {
 						if ( e.key === 'Enter' ) {
 							e.preventDefault();
@@ -353,7 +353,7 @@
 					isBusy:   qcSaving,
 					disabled: ! qcName.trim() || qcSaving,
 					style:    { marginTop: '8px' },
-				}, __( 'Create Donor', 'shelter-donations' ) ),
+				}, __( 'Create Donor', 'shelterkit-donations' ) ),
 				qcNotice && el( Notice, {
 					status:      qcNotice.status,
 					isDismissible: false,
@@ -363,16 +363,16 @@
 
 			// Display name override.
 			el( TextControl, {
-				label:    __( 'Display Name', 'shelter-donations' ),
+				label:    __( 'Display Name', 'shelterkit-donations' ),
 				value:    m.meta._sd_donor_display_name || '',
 				onChange: function( v ) { m.set( '_sd_donor_display_name', v ); },
-				help:     __( 'Name shown on the memorial wall. Leave empty to pull from donor record.', 'shelter-donations' ),
+				help:     __( 'Name shown on the memorial wall. Leave empty to pull from donor record.', 'shelterkit-donations' ),
 				__nextHasNoMarginBottom: true,
 			} ),
 
 			// Amount.
 			el( TextControl, {
-				label:    __( 'Amount', 'shelter-donations' ),
+				label:    __( 'Amount', 'shelterkit-donations' ),
 				value:    m.meta._sd_amount ? String( m.meta._sd_amount ) : '',
 				onChange: function( v ) { m.set( '_sd_amount', parseFloat( v ) || 0 ); },
 				type:     'number',
@@ -383,7 +383,7 @@
 
 			// Date.
 			el( TextControl, {
-				label:    __( 'Date', 'shelter-donations' ),
+				label:    __( 'Date', 'shelterkit-donations' ),
 				value:    ( m.meta._sd_donation_date || '' ).substring( 0, 10 ),
 				onChange: function( v ) { m.set( '_sd_donation_date', v ); },
 				type:     'date',
@@ -392,7 +392,7 @@
 
 			// Anonymous toggle.
 			el( ToggleControl, {
-				label:    __( 'Anonymous', 'shelter-donations' ),
+				label:    __( 'Anonymous', 'shelterkit-donations' ),
 				checked:  !! m.meta._sd_is_anonymous,
 				onChange: function( v ) { m.set( '_sd_is_anonymous', v ); },
 				__nextHasNoMarginBottom: true,
@@ -408,23 +408,23 @@
 
 		return el( PluginDocumentSettingPanel, {
 			name:  'sd-family-notification',
-			title: __( 'Family Notification', 'shelter-donations' ),
+			title: __( 'Family Notification', 'shelterkit-donations' ),
 		},
 			el( ToggleControl, {
-				label:    __( 'Notify Family', 'shelter-donations' ),
+				label:    __( 'Notify Family', 'shelterkit-donations' ),
 				checked:  enabled,
 				onChange: function( v ) { m.set( '_sd_notify_family_enabled', v ); },
 				__nextHasNoMarginBottom: true,
 			} ),
 			enabled && el( Fragment, {},
 				el( TextControl, {
-					label:    __( 'Family Name', 'shelter-donations' ),
+					label:    __( 'Family Name', 'shelterkit-donations' ),
 					value:    m.meta._sd_notify_family_name || '',
 					onChange: function( v ) { m.set( '_sd_notify_family_name', v ); },
 					__nextHasNoMarginBottom: true,
 				} ),
 				el( TextControl, {
-					label:    __( 'Family Email', 'shelter-donations' ),
+					label:    __( 'Family Email', 'shelterkit-donations' ),
 					value:    m.meta._sd_notify_family_email || '',
 					onChange: function( v ) { m.set( '_sd_notify_family_email', v ); },
 					type:     'email',
@@ -434,7 +434,7 @@
 			m.meta._sd_family_notified_date && el( 'p', {
 				style: { color: '#757575', fontSize: '12px', marginTop: '12px' },
 			},
-				__( 'Notification sent: ', 'shelter-donations' ),
+				__( 'Notification sent: ', 'shelterkit-donations' ),
 				el( 'strong', {}, m.meta._sd_family_notified_date )
 			)
 		);
@@ -448,10 +448,10 @@
 		var errors = [];
 
 		if ( ! m.meta._sd_honoree_name || ! m.meta._sd_honoree_name.trim() ) {
-			errors.push( __( 'Honoree Name is required.', 'shelter-donations' ) );
+			errors.push( __( 'Honoree Name is required.', 'shelterkit-donations' ) );
 		}
 		if ( ! m.meta._sd_memorial_type ) {
-			errors.push( __( 'Memorial Type is required.', 'shelter-donations' ) );
+			errors.push( __( 'Memorial Type is required.', 'shelterkit-donations' ) );
 		}
 
 		if ( errors.length === 0 ) {
@@ -459,7 +459,7 @@
 		}
 
 		return el( PluginPrePublishPanel, {
-			title:          __( 'Memorial: Missing Fields', 'shelter-donations' ),
+			title:          __( 'Memorial: Missing Fields', 'shelterkit-donations' ),
 			initialOpen:    true,
 		},
 			el( 'ul', { style: { margin: 0, paddingLeft: '20px', color: '#d63638' } },

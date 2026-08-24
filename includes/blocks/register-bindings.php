@@ -26,7 +26,7 @@ function register_binding_sources(): void {
     register_block_bindings_source(
         'shelter-donations/entity',
         [
-            'label'              => __( 'Shelter Entity Data', 'shelter-donations' ),
+            'label'              => __( 'Shelter Entity Data', 'shelterkit-donations' ),
             'get_value_callback' => __NAMESPACE__ . '\\get_entity_value',
             'uses_context'       => [ 'postId', 'postType' ],
         ]
@@ -36,7 +36,7 @@ function register_binding_sources(): void {
     register_block_bindings_source(
         'shelter-donations/donor',
         [
-            'label'              => __( 'Shelter Donor Data', 'shelter-donations' ),
+            'label'              => __( 'Shelter Donor Data', 'shelterkit-donations' ),
             'get_value_callback' => __NAMESPACE__ . '\\get_donor_value',
             'uses_context'       => [ 'postId', 'postType' ],
         ]
@@ -46,7 +46,7 @@ function register_binding_sources(): void {
     register_block_bindings_source(
         'shelter-donations/stats',
         [
-            'label'              => __( 'Shelter Statistics', 'shelter-donations' ),
+            'label'              => __( 'Shelter Statistics', 'shelterkit-donations' ),
             'get_value_callback' => __NAMESPACE__ . '\\get_stats_value',
             'uses_context'       => [],
         ]
@@ -56,7 +56,7 @@ function register_binding_sources(): void {
     register_block_bindings_source(
         'shelter-donations/campaign',
         [
-            'label'              => __( 'Campaign Data', 'shelter-donations' ),
+            'label'              => __( 'Campaign Data', 'shelterkit-donations' ),
             'get_value_callback' => __NAMESPACE__ . '\\get_campaign_value',
             'uses_context'       => [ 'postId', 'postType' ],
         ]
@@ -66,7 +66,7 @@ function register_binding_sources(): void {
     register_block_bindings_source(
         'shelter-donations/tier',
         [
-            'label'              => __( 'Membership Tier Data', 'shelter-donations' ),
+            'label'              => __( 'Membership Tier Data', 'shelterkit-donations' ),
             'get_value_callback' => __NAMESPACE__ . '\\get_tier_value',
             'uses_context'       => [],
         ]
@@ -372,12 +372,12 @@ function calculate_stat( string $stat, string $period ) {
     $date_clause = '';
     if ( 'this_year' === $period ) {
         $date_clause = $wpdb->prepare(
-            " AND pm_date.meta_value >= %s",
+            ' AND pm_date.meta_value >= %s',
             wp_date( 'Y-01-01' )
         );
     } elseif ( 'this_month' === $period ) {
         $date_clause = $wpdb->prepare(
-            " AND pm_date.meta_value >= %s",
+            ' AND pm_date.meta_value >= %s',
             wp_date( 'Y-m-01' )
         );
     }
@@ -386,6 +386,7 @@ function calculate_stat( string $stat, string $period ) {
         case 'total_donations':
         case 'total_donations_formatted':
             // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- table names are $wpdb->posts/$wpdb->postmeta; $date_clause is either empty or already prepared via $wpdb->prepare() above (the wp_date() value is bound with %s).
+            // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the only interpolated parts are $wpdb table properties and a generated %d placeholder list; every user value is bound through $wpdb->prepare().
             $total = (float) $wpdb->get_var( "
                 SELECT COALESCE(SUM(pm.meta_value), 0)
                 FROM {$wpdb->posts} p
@@ -442,6 +443,7 @@ function calculate_stat( string $stat, string $period ) {
                 {$date_clause}
             " );
 
+            // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         default:
             return null;
     }

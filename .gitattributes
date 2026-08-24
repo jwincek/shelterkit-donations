@@ -2,15 +2,24 @@
 # "Source code (zip)" asset GitHub attaches to a release. The plugin loads its
 # own classes (spl_autoload_register) and helpers (direct require), so it has
 # no runtime Composer dependency; none of the below ship in a usable plugin.
+#
+# Kept in step with .distignore, which is what bin/build-dist.sh and the
+# WordPress.org deploy actually read.
 /.github            export-ignore
 /.gitattributes     export-ignore
 /.gitignore         export-ignore
 /.distignore        export-ignore
+/.editorconfig      export-ignore
+/.wp-env.json       export-ignore
+/.wordpress-org     export-ignore
+/screenshots-draft  export-ignore
 /tests              export-ignore
 /bin                export-ignore
+/migration-scripts  export-ignore
 /phpunit.xml.dist             export-ignore
 /phpunit-integration.xml.dist export-ignore
 /phpunit-wc.xml.dist          export-ignore
-/phpcs.xml          export-ignore
+/phpcs.xml.dist     export-ignore
 /composer.json      export-ignore
 /composer.lock      export-ignore
+AUDIT-*.md          export-ignore

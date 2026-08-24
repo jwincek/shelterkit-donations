@@ -322,7 +322,7 @@ return [
 	 * for shape rationale).
 	 */
 	'products' => [
-		'shelter-donations' => [
+		'shelterkit-donations' => [
 			'ability'       => 'shelter-donations/create',
 			'product_type'  => 'donation',
 			'description'   => 'General shelter donations',
@@ -441,7 +441,7 @@ return [
 			],
 			'entities'      => [
 				'donation' => [ 'entity' => 'sd_donation', 'id_from' => 'donation_id' ],
-				'donor'    => [ 'entity' => 'sd_donor',    'id_from' => 'donor_id' ],
+				'donor'    => [ 'entity' => 'sd_donor', 'id_from' => 'donor_id' ],
 			],
 			'recipient_type' => 'donor',
 			'subject'        => 'Thank you for your donation to {site_name}!',

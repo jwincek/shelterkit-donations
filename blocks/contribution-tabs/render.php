@@ -44,11 +44,12 @@ $wrapper = get_block_wrapper_attributes( [
 
 ?>
 <div <?php echo $wrapper; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped markup from get_block_wrapper_attributes(). ?>>
-	<div class="sd-tabs-nav" role="tablist" aria-label="<?php esc_attr_e( 'Contribution type', 'shelter-donations' ); ?>">
-		<?php foreach ( $tab_labels as $i => $label ) :
+	<div class="sd-tabs-nav" role="tablist" aria-label="<?php esc_attr_e( 'Contribution type', 'shelterkit-donations' ); ?>">
+		<?php
+        foreach ( $tab_labels as $i => $label ) :
 			$is_active = ( $i === $default_tab );
 			$icon_path = $icon_svgs[ $tab_icons[ $i ] ?? '' ] ?? '';
-		?>
+			?>
 		<button type="button" role="tab" class="sd-tab-button <?php echo $is_active ? 'sd-tab-active' : ''; ?>"
 			id="<?php echo esc_attr( $block_id ); ?>-tab-<?php echo (int) $i; ?>"
 			aria-selected="<?php echo $is_active ? 'true' : 'false'; ?>"
@@ -65,10 +66,11 @@ $wrapper = get_block_wrapper_attributes( [
 		<?php endforeach; ?>
 	</div>
 
-	<?php foreach ( $block->inner_blocks as $i => $inner_block ) :
+	<?php
+    foreach ( $block->inner_blocks as $i => $inner_block ) :
 		$is_active = ( $i === $default_tab );
 		$panel_content = $inner_block->render();
-	?>
+		?>
 	<div role="tabpanel" class="sd-tab-panel <?php echo $is_active ? 'sd-tab-panel-active' : ''; ?>"
 		id="<?php echo esc_attr( $block_id ); ?>-panel-<?php echo (int) $i; ?>"
 		aria-labelledby="<?php echo esc_attr( $block_id ); ?>-tab-<?php echo (int) $i; ?>"

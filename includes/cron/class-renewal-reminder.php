@@ -62,7 +62,7 @@ class Renewal_Reminder {
         if ( ! wp_next_scheduled( self::CRON_HOOK ) ) {
             // Schedule for 9 AM local time.
             $timestamp = strtotime( 'today 9:00 AM', current_time( 'timestamp' ) );
-            
+
             // If 9 AM has already passed today, schedule for tomorrow.
             if ( $timestamp < current_time( 'timestamp' ) ) {
                 $timestamp = strtotime( 'tomorrow 9:00 AM', current_time( 'timestamp' ) );
@@ -79,7 +79,7 @@ class Renewal_Reminder {
      */
     public static function unschedule_cron(): void {
         $timestamp = wp_next_scheduled( self::CRON_HOOK );
-        
+
         if ( $timestamp ) {
             wp_unschedule_event( $timestamp, self::CRON_HOOK );
         }
@@ -155,7 +155,7 @@ class Renewal_Reminder {
 
         // Check if reminder was already sent (double-check).
         $already_sent = get_post_meta( $membership_id, self::REMINDER_SENT_META, true );
-        
+
         if ( $already_sent ) {
             return;
         }
@@ -213,7 +213,7 @@ class Renewal_Reminder {
     public static function send_manual_reminder( int $membership_id, bool $force = false ): bool {
         // Get membership data.
         $membership = \Starter_Shelter\Core\Entity_Hydrator::get( 'sd_membership', $membership_id );
-        
+
         if ( ! $membership ) {
             return false;
         }
@@ -221,7 +221,7 @@ class Renewal_Reminder {
         // Check if already sent (unless forcing).
         if ( ! $force ) {
             $already_sent = get_post_meta( $membership_id, self::REMINDER_SENT_META, true );
-            
+
             if ( $already_sent ) {
                 return false;
             }
@@ -233,7 +233,7 @@ class Renewal_Reminder {
         }
 
         self::send_reminder( $membership );
-        
+
         return true;
     }
 
@@ -272,7 +272,7 @@ class Renewal_Reminder {
      */
     public static function get_reminder_sent_date( int $membership_id ): ?string {
         $sent = get_post_meta( $membership_id, self::REMINDER_SENT_META, true );
-        
+
         return $sent ?: null;
     }
 }

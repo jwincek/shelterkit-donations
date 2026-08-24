@@ -19,15 +19,16 @@ defined( 'ABSPATH' ) || exit;
 ?>
 <div class="sd-my-memorials">
     <?php if ( empty( $memorials['items'] ) ) : ?>
-    <p><?php esc_html_e( 'You haven\'t created any memorial tributes yet.', 'shelter-donations' ); ?></p>
+    <p><?php esc_html_e( 'You haven\'t created any memorial tributes yet.', 'shelterkit-donations' ); ?></p>
     <?php else : ?>
     <div class="sd-memorials-grid">
-        <?php foreach ( $memorials['items'] as $memorial ) :
+        <?php
+        foreach ( $memorials['items'] as $memorial ) :
             $type_label = Helpers\get_memorial_type_label( $memorial['memorial_type'] ?? '' );
             $tribute    = $memorial['tribute_message'] ?? '';
             $excerpt    = $tribute ? wp_trim_words( $tribute, 15 ) : '';
             $photo_url  = ! empty( $memorial['photo_url'] ) ? $memorial['photo_url'] : '';
-        ?>
+			?>
         <div class="sd-memorial-card">
             <?php if ( $photo_url ) : ?>
             <div class="sd-memorial-photo">
@@ -44,26 +45,27 @@ defined( 'ABSPATH' ) || exit;
                     <span><?php echo esc_html( Helpers\format_date( $memorial['donation_date'] ) ); ?></span>
                     <span><?php echo esc_html( $memorial['amount_formatted'] ?? '' ); ?></span>
                 </div>
-                <a href="<?php echo esc_url( get_permalink( $memorial['id'] ) ); ?>" class="sd-memorial-link"><?php esc_html_e( 'View Memorial →', 'shelter-donations' ); ?></a>
+                <a href="<?php echo esc_url( get_permalink( $memorial['id'] ) ); ?>" class="sd-memorial-link"><?php esc_html_e( 'View Memorial →', 'shelterkit-donations' ); ?></a>
             </div>
         </div>
         <?php endforeach; ?>
     </div>
 
-    <?php
-    $mem_total_pages = (int) ceil( ( $memorials['total'] ?? 0 ) / 12 );
-    $mem_current_page = isset( $_GET['memorial-page'] ) ? absint( $_GET['memorial-page'] ) : 1;
-    if ( $mem_total_pages > 1 ) : ?>
+		<?php
+		$mem_total_pages = (int) ceil( ( $memorials['total'] ?? 0 ) / 12 );
+		$mem_current_page = isset( $_GET['memorial-page'] ) ? absint( $_GET['memorial-page'] ) : 1;
+		if ( $mem_total_pages > 1 ) :
+			?>
     <nav class="sd-pagination">
-        <?php if ( $mem_current_page > 1 ) : ?>
-            <a href="<?php echo esc_url( add_query_arg( 'memorial-page', $mem_current_page - 1 ) ); ?>" class="sd-page-link">← <?php esc_html_e( 'Previous', 'shelter-donations' ); ?></a>
+			<?php if ( $mem_current_page > 1 ) : ?>
+            <a href="<?php echo esc_url( add_query_arg( 'memorial-page', $mem_current_page - 1 ) ); ?>" class="sd-page-link">← <?php esc_html_e( 'Previous', 'shelterkit-donations' ); ?></a>
         <?php endif; ?>
-        <span class="sd-page-info"><?php printf( /* translators: 1: current page number, 2: total pages */ esc_html__( 'Page %1$d of %2$d', 'shelter-donations' ), (int) $mem_current_page, (int) $mem_total_pages ); ?></span>
-        <?php if ( $mem_current_page < $mem_total_pages ) : ?>
-            <a href="<?php echo esc_url( add_query_arg( 'memorial-page', $mem_current_page + 1 ) ); ?>" class="sd-page-link"><?php esc_html_e( 'Next', 'shelter-donations' ); ?> →</a>
+        <span class="sd-page-info"><?php printf( /* translators: 1: current page number, 2: total pages */ esc_html__( 'Page %1$d of %2$d', 'shelterkit-donations' ), (int) $mem_current_page, (int) $mem_total_pages ); ?></span>
+			<?php if ( $mem_current_page < $mem_total_pages ) : ?>
+            <a href="<?php echo esc_url( add_query_arg( 'memorial-page', $mem_current_page + 1 ) ); ?>" class="sd-page-link"><?php esc_html_e( 'Next', 'shelterkit-donations' ); ?> →</a>
         <?php endif; ?>
     </nav>
-    <?php endif; ?>
+		<?php endif; ?>
 
     <?php endif; ?>
 </div>

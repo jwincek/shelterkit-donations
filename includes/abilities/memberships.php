@@ -48,7 +48,7 @@ function create( array $input ): array|WP_Error {
     $amount = $input['amount'] ?? Helpers\get_tier_amount( $tier, $type );
 
     // Calculate dates - use provided date or current time for start.
-    $start_date = isset( $input['date'] ) 
+    $start_date = isset( $input['date'] )
         ? wp_date( 'Y-m-d', strtotime( $input['date'] ) )
         : wp_date( 'Y-m-d' );
     $end_date = wp_date( 'Y-m-d', strtotime( $start_date . ' +1 year' ) );
@@ -136,14 +136,14 @@ function renew( array $input ): array|WP_Error {
     if ( ! $membership ) {
         return new WP_Error(
             'membership_not_found',
-            __( 'Membership not found.', 'shelter-donations' ),
+            __( 'Membership not found.', 'shelterkit-donations' ),
             [ 'status' => 404 ]
         );
     }
 
     // Calculate new end date.
     $current_end = $membership['end_date'] ?? wp_date( 'Y-m-d' );
-    
+
     // If membership is still active, extend from current end date.
     // If expired, extend from today.
     if ( Helpers\is_membership_active( $current_end ) ) {
@@ -206,7 +206,7 @@ function get_status( array $input ): array|WP_Error {
         if ( ! $membership ) {
             return new WP_Error(
                 'membership_not_found',
-                __( 'Membership not found.', 'shelter-donations' ),
+                __( 'Membership not found.', 'shelterkit-donations' ),
                 [ 'status' => 404 ]
             );
         }
@@ -237,7 +237,7 @@ function get_status( array $input ): array|WP_Error {
 
     return new WP_Error(
         'invalid_input',
-        __( 'Either membership_id or donor_id is required.', 'shelter-donations' ),
+        __( 'Either membership_id or donor_id is required.', 'shelterkit-donations' ),
         [ 'status' => 400 ]
     );
 }
@@ -408,7 +408,7 @@ function cancel( array $input ): array|WP_Error {
     if ( ! $membership_id ) {
         return new WP_Error(
             'missing_membership_id',
-            __( 'Membership ID is required.', 'shelter-donations' )
+            __( 'Membership ID is required.', 'shelterkit-donations' )
         );
     }
 
@@ -417,7 +417,7 @@ function cancel( array $input ): array|WP_Error {
     if ( ! $membership ) {
         return new WP_Error(
             'membership_not_found',
-            __( 'Membership not found.', 'shelter-donations' )
+            __( 'Membership not found.', 'shelterkit-donations' )
         );
     }
 
@@ -426,7 +426,7 @@ function cancel( array $input ): array|WP_Error {
     if ( 'cancelled' === $current_status ) {
         return new WP_Error(
             'already_cancelled',
-            __( 'This membership is already cancelled.', 'shelter-donations' )
+            __( 'This membership is already cancelled.', 'shelterkit-donations' )
         );
     }
 

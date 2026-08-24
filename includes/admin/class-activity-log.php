@@ -33,7 +33,7 @@ class Activity_Log {
      *
      * @var string
      */
-    private const PAGE_SLUG = 'shelter-donations-activity';
+    private const PAGE_SLUG = 'shelterkit-donations-activity';
 
     /**
      * Closed enumeration of category keys emitted by log_X methods.
@@ -74,10 +74,10 @@ class Activity_Log {
         add_action( 'starter_shelter_logo_approved', [ self::class, 'log_logo_approved' ], 10, 3 );
         add_action( 'starter_shelter_logo_rejected', [ self::class, 'log_logo_rejected' ], 10, 3 );
         add_action( 'starter_shelter_order_processed', [ self::class, 'log_order_processed' ], 10, 3 );
-        
+
         // Email events.
         add_action( 'starter_shelter_email_sent', [ self::class, 'log_email_sent' ], 10, 4 );
-        
+
         // Settings changes.
         add_action( 'update_option_starter_shelter_options', [ self::class, 'log_settings_changed' ], 10, 2 );
 
@@ -88,7 +88,7 @@ class Activity_Log {
 
         // Cleanup old logs.
         add_action( 'sd_cleanup_activity_log', [ self::class, 'cleanup_old_logs' ] );
-        
+
         if ( ! wp_next_scheduled( 'sd_cleanup_activity_log' ) ) {
             wp_schedule_event( time(), 'daily', 'sd_cleanup_activity_log' );
         }
@@ -132,8 +132,8 @@ class Activity_Log {
     public static function add_menu_page(): void {
         self::$page_hook = (string) add_submenu_page(
             Menu::MENU_SLUG,
-            __( 'Activity Log', 'shelter-donations' ),
-            __( 'Activity Log', 'shelter-donations' ),
+            __( 'Activity Log', 'shelterkit-donations' ),
+            __( 'Activity Log', 'shelterkit-donations' ),
             'manage_options',
             self::PAGE_SLUG,
             [ self::class, 'render_page' ]
@@ -201,7 +201,7 @@ class Activity_Log {
             'donation_created',
             'donation',
             /* translators: 1: donor's display name; 2: formatted donation amount. */
-            sprintf( __( '%1$s donated %2$s', 'shelter-donations' ), $donor_name, $amount ),
+            sprintf( __( '%1$s donated %2$s', 'shelterkit-donations' ), $donor_name, $amount ),
             'sd_donation',
             $donation_id,
             [
@@ -224,7 +224,7 @@ class Activity_Log {
             'membership_created',
             'membership',
             /* translators: 1: donor's display name; 2: membership tier name; 3: membership type (e.g. individual, business). */
-            sprintf( __( '%1$s joined as %2$s %3$s member', 'shelter-donations' ), $donor_name, ucfirst( $tier ), $type ),
+            sprintf( __( '%1$s joined as %2$s %3$s member', 'shelterkit-donations' ), $donor_name, ucfirst( $tier ), $type ),
             'sd_membership',
             $membership_id,
             [
@@ -241,13 +241,13 @@ class Activity_Log {
      */
     public static function log_memorial_created( int $memorial_id, int $donor_id, array $data ): void {
         $donor_name = self::get_donor_name( $donor_id );
-        $honoree = $data['honoree_name'] ?? __( 'Unknown', 'shelter-donations' );
+        $honoree = $data['honoree_name'] ?? __( 'Unknown', 'shelterkit-donations' );
 
         self::log(
             'memorial_created',
             'donation',
             /* translators: 1: donor's display name; 2: honoree's name the memorial is for. */
-            sprintf( __( '%1$s created memorial for %2$s', 'shelter-donations' ), $donor_name, $honoree ),
+            sprintf( __( '%1$s created memorial for %2$s', 'shelterkit-donations' ), $donor_name, $honoree ),
             'sd_memorial',
             $memorial_id,
             [
@@ -269,7 +269,7 @@ class Activity_Log {
             'membership_renewed',
             'membership',
             /* translators: %s: donor's display name. */
-            sprintf( __( '%s renewed membership', 'shelter-donations' ), $donor_name ),
+            sprintf( __( '%s renewed membership', 'shelterkit-donations' ), $donor_name ),
             'sd_membership',
             $membership_id,
             [
@@ -283,14 +283,14 @@ class Activity_Log {
      * Log logo approved.
      */
     public static function log_logo_approved( int $membership_id, int $donor_id, array $data ): void {
-        $business_name = $data['business_name'] ?? __( 'Unknown Business', 'shelter-donations' );
+        $business_name = $data['business_name'] ?? __( 'Unknown Business', 'shelterkit-donations' );
         $admin_user = wp_get_current_user();
 
         self::log(
             'logo_approved',
             'admin',
             /* translators: 1: business name whose logo was approved; 2: display name of the admin who approved it. */
-            sprintf( __( 'Logo approved for %1$s by %2$s', 'shelter-donations' ), $business_name, $admin_user->display_name ),
+            sprintf( __( 'Logo approved for %1$s by %2$s', 'shelterkit-donations' ), $business_name, $admin_user->display_name ),
             'sd_membership',
             $membership_id,
             [
@@ -304,7 +304,7 @@ class Activity_Log {
      * Log logo rejected.
      */
     public static function log_logo_rejected( int $membership_id, int $donor_id, array $data ): void {
-        $business_name = $data['membership']['business_name'] ?? __( 'Unknown Business', 'shelter-donations' );
+        $business_name = $data['membership']['business_name'] ?? __( 'Unknown Business', 'shelterkit-donations' );
         $reason = $data['reason'] ?? '';
         $admin_user = wp_get_current_user();
 
@@ -312,7 +312,7 @@ class Activity_Log {
             'logo_rejected',
             'admin',
             /* translators: 1: business name whose logo was rejected; 2: display name of the admin who rejected it; 3: rejection reason. */
-            sprintf( __( 'Logo rejected for %1$s by %2$s: %3$s', 'shelter-donations' ), $business_name, $admin_user->display_name, $reason ),
+            sprintf( __( 'Logo rejected for %1$s by %2$s: %3$s', 'shelterkit-donations' ), $business_name, $admin_user->display_name, $reason ),
             'sd_membership',
             $membership_id,
             [
@@ -327,13 +327,13 @@ class Activity_Log {
      * Log order processed.
      */
     public static function log_order_processed( int $order_id, array $results, bool $has_errors ): void {
-        $status = $has_errors ? __( 'with errors', 'shelter-donations' ) : __( 'successfully', 'shelter-donations' );
+        $status = $has_errors ? __( 'with errors', 'shelterkit-donations' ) : __( 'successfully', 'shelterkit-donations' );
 
         self::log(
             'order_processed',
             'system',
             /* translators: 1: WooCommerce order ID; 2: processing outcome (e.g. successfully, with errors). */
-            sprintf( __( 'Order #%1$d processed %2$s', 'shelter-donations' ), $order_id, $status ),
+            sprintf( __( 'Order #%1$d processed %2$s', 'shelterkit-donations' ), $order_id, $status ),
             'shop_order',
             $order_id,
             [
@@ -351,7 +351,7 @@ class Activity_Log {
             'email_sent',
             'email',
             /* translators: 1: email type label (e.g. Receipt, Renewal Reminder); 2: recipient email address. */
-            sprintf( __( '%1$s email sent to %2$s', 'shelter-donations' ), ucfirst( str_replace( '_', ' ', $email_type ) ), $recipient ),
+            sprintf( __( '%1$s email sent to %2$s', 'shelterkit-donations' ), ucfirst( str_replace( '_', ' ', $email_type ) ), $recipient ),
             $data['object_type'] ?? null,
             $object_id,
             [
@@ -389,7 +389,7 @@ class Activity_Log {
                 'settings_changed',
                 'admin',
                 /* translators: 1: display name of the admin who changed settings; 2: comma-separated list of changed setting keys. */
-            sprintf( __( 'Settings updated by %1$s: %2$s', 'shelter-donations' ), $admin_user->display_name, implode( ', ', $changed ) ),
+            sprintf( __( 'Settings updated by %1$s: %2$s', 'shelterkit-donations' ), $admin_user->display_name, implode( ', ', $changed ) ),
                 null,
                 null,
                 [
@@ -406,13 +406,13 @@ class Activity_Log {
     public static function log_membership_extended( int $membership_id, string $new_end_date ): void {
         $admin_user = wp_get_current_user();
         $membership = Entity_Hydrator::get( 'sd_membership', $membership_id );
-        $donor_name = $membership['donor_id'] ? self::get_donor_name( $membership['donor_id'] ) : __( 'Unknown', 'shelter-donations' );
+        $donor_name = $membership['donor_id'] ? self::get_donor_name( $membership['donor_id'] ) : __( 'Unknown', 'shelterkit-donations' );
 
         self::log(
             'membership_extended',
             'admin',
             /* translators: 1: donor's display name; 2: new membership end date; 3: display name of the admin who extended it. */
-            sprintf( __( 'Membership for %1$s extended to %2$s by %3$s', 'shelter-donations' ), $donor_name, $new_end_date, $admin_user->display_name ),
+            sprintf( __( 'Membership for %1$s extended to %2$s by %3$s', 'shelterkit-donations' ), $donor_name, $new_end_date, $admin_user->display_name ),
             'sd_membership',
             $membership_id,
             [
@@ -427,16 +427,16 @@ class Activity_Log {
      */
     public static function log_membership_cancelled( int $membership_id, array $membership, string $reason ): void {
         $donor_id   = (int) ( $membership['donor_id'] ?? 0 );
-        $donor_name = $donor_id ? self::get_donor_name( $donor_id ) : __( 'Unknown', 'shelter-donations' );
+        $donor_name = $donor_id ? self::get_donor_name( $donor_id ) : __( 'Unknown', 'shelterkit-donations' );
 
         self::log(
             'membership_cancelled',
             'membership',
             $reason
                 /* translators: 1: donor's display name; 2: cancellation reason. */
-                ? sprintf( __( '%1$s cancelled membership: %2$s', 'shelter-donations' ), $donor_name, $reason )
+                ? sprintf( __( '%1$s cancelled membership: %2$s', 'shelterkit-donations' ), $donor_name, $reason )
                 /* translators: %s: donor's display name. */
-                : sprintf( __( '%s cancelled membership', 'shelter-donations' ), $donor_name ),
+                : sprintf( __( '%s cancelled membership', 'shelterkit-donations' ), $donor_name ),
             'sd_membership',
             $membership_id,
             [
@@ -452,13 +452,13 @@ class Activity_Log {
      */
     public static function log_family_notified( int $memorial_id, string $family_email ): void {
         $memorial = Entity_Hydrator::get( 'sd_memorial', $memorial_id );
-        $honoree = $memorial['honoree_name'] ?? __( 'Unknown', 'shelter-donations' );
+        $honoree = $memorial['honoree_name'] ?? __( 'Unknown', 'shelterkit-donations' );
 
         self::log(
             'family_notified',
             'email',
             /* translators: 1: honoree's name the memorial is for; 2: family member's email address notified. */
-            sprintf( __( 'Family notification sent for memorial of %1$s to %2$s', 'shelter-donations' ), $honoree, $family_email ),
+            sprintf( __( 'Family notification sent for memorial of %1$s to %2$s', 'shelterkit-donations' ), $honoree, $family_email ),
             'sd_memorial',
             $memorial_id,
             [
@@ -480,13 +480,14 @@ class Activity_Log {
         $table_name = $wpdb->prefix . self::TABLE_NAME;
 
         // Check if table exists.
-        if ( $wpdb->get_var( "SHOW TABLES LIKE '$table_name'" ) !== $table_name ) {
+        if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) ) !== $table_name ) {
             self::create_table();
         }
 
         // Filters.
         $category_filter = sanitize_key( $_GET['category'] ?? '' );
         $date_filter = sanitize_key( $_GET['date'] ?? '' );
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- read-only admin screen behind current_user_can(); the only interpolated parts are $wpdb table properties and a generated %d placeholder list; every user value is bound through $wpdb->prepare().
         $search = sanitize_text_field( $_GET['s'] ?? '' );
 
         // Pagination.
@@ -540,7 +541,7 @@ class Activity_Log {
 
         ?>
         <div class="wrap sd-activity-log">
-            <h1><?php esc_html_e( 'Activity Log', 'shelter-donations' ); ?></h1>
+            <h1><?php esc_html_e( 'Activity Log', 'shelterkit-donations' ); ?></h1>
 
             <!-- Filters -->
             <div class="sd-log-filters">
@@ -548,7 +549,7 @@ class Activity_Log {
                     <input type="hidden" name="page" value="<?php echo esc_attr( self::PAGE_SLUG ); ?>" />
                     
                     <select name="category">
-                        <option value=""><?php esc_html_e( 'All Categories', 'shelter-donations' ); ?></option>
+                        <option value=""><?php esc_html_e( 'All Categories', 'shelterkit-donations' ); ?></option>
                         <?php foreach ( $categories as $cat ) : ?>
                         <option value="<?php echo esc_attr( $cat ); ?>" <?php selected( $category_filter, $cat ); ?>>
                             <?php echo esc_html( ucfirst( $cat ) ); ?>
@@ -557,15 +558,15 @@ class Activity_Log {
                     </select>
 
                     <select name="date">
-                        <option value=""><?php esc_html_e( 'All Time', 'shelter-donations' ); ?></option>
-                        <option value="today" <?php selected( $date_filter, 'today' ); ?>><?php esc_html_e( 'Today', 'shelter-donations' ); ?></option>
-                        <option value="week" <?php selected( $date_filter, 'week' ); ?>><?php esc_html_e( 'Last 7 Days', 'shelter-donations' ); ?></option>
-                        <option value="month" <?php selected( $date_filter, 'month' ); ?>><?php esc_html_e( 'Last 30 Days', 'shelter-donations' ); ?></option>
+                        <option value=""><?php esc_html_e( 'All Time', 'shelterkit-donations' ); ?></option>
+                        <option value="today" <?php selected( $date_filter, 'today' ); ?>><?php esc_html_e( 'Today', 'shelterkit-donations' ); ?></option>
+                        <option value="week" <?php selected( $date_filter, 'week' ); ?>><?php esc_html_e( 'Last 7 Days', 'shelterkit-donations' ); ?></option>
+                        <option value="month" <?php selected( $date_filter, 'month' ); ?>><?php esc_html_e( 'Last 30 Days', 'shelterkit-donations' ); ?></option>
                     </select>
 
-                    <input type="search" name="s" value="<?php echo esc_attr( $search ); ?>" placeholder="<?php esc_attr_e( 'Search...', 'shelter-donations' ); ?>" />
+                    <input type="search" name="s" value="<?php echo esc_attr( $search ); ?>" placeholder="<?php esc_attr_e( 'Search...', 'shelterkit-donations' ); ?>" />
 
-                    <button type="submit" class="button"><?php esc_html_e( 'Filter', 'shelter-donations' ); ?></button>
+                    <button type="submit" class="button"><?php esc_html_e( 'Filter', 'shelterkit-donations' ); ?></button>
                 </form>
             </div>
 
@@ -574,30 +575,32 @@ class Activity_Log {
                 <?php
                 $today_count = $wpdb->get_var( "SELECT COUNT(*) FROM $table_name WHERE DATE(created_at) = CURDATE()" );
                 $week_count = $wpdb->get_var( "SELECT COUNT(*) FROM $table_name WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)" );
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
                 ?>
-                <span><strong><?php echo esc_html( $today_count ); ?></strong> <?php esc_html_e( 'today', 'shelter-donations' ); ?></span>
-                <span><strong><?php echo esc_html( $week_count ); ?></strong> <?php esc_html_e( 'this week', 'shelter-donations' ); ?></span>
-                <span><strong><?php echo esc_html( $total_items ); ?></strong> <?php esc_html_e( 'total', 'shelter-donations' ); ?></span>
+                <span><strong><?php echo esc_html( $today_count ); ?></strong> <?php esc_html_e( 'today', 'shelterkit-donations' ); ?></span>
+                <span><strong><?php echo esc_html( $week_count ); ?></strong> <?php esc_html_e( 'this week', 'shelterkit-donations' ); ?></span>
+                <span><strong><?php echo esc_html( $total_items ); ?></strong> <?php esc_html_e( 'total', 'shelterkit-donations' ); ?></span>
             </div>
 
             <!-- Log table -->
             <?php if ( empty( $logs ) ) : ?>
             <div class="sd-empty-state">
                 <span class="dashicons dashicons-list-view"></span>
-                <p><?php esc_html_e( 'No activity logged yet.', 'shelter-donations' ); ?></p>
+                <p><?php esc_html_e( 'No activity logged yet.', 'shelterkit-donations' ); ?></p>
             </div>
             <?php else : ?>
             <table class="wp-list-table widefat fixed striped sd-log-table">
                 <thead>
                     <tr>
-                        <th class="column-time"><?php esc_html_e( 'Time', 'shelter-donations' ); ?></th>
-                        <th class="column-category"><?php esc_html_e( 'Category', 'shelter-donations' ); ?></th>
-                        <th class="column-message"><?php esc_html_e( 'Activity', 'shelter-donations' ); ?></th>
-                        <th class="column-user"><?php esc_html_e( 'User', 'shelter-donations' ); ?></th>
+                        <th class="column-time"><?php esc_html_e( 'Time', 'shelterkit-donations' ); ?></th>
+                        <th class="column-category"><?php esc_html_e( 'Category', 'shelterkit-donations' ); ?></th>
+                        <th class="column-message"><?php esc_html_e( 'Activity', 'shelterkit-donations' ); ?></th>
+                        <th class="column-user"><?php esc_html_e( 'User', 'shelterkit-donations' ); ?></th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ( $logs as $log ) :
+                    <?php
+                    foreach ( $logs as $log ) :
                         // created_at is stored as the WP site's local time
                         // (`current_time('mysql')`). mysql2date with format
                         // 'U' interprets the string in the WP timezone and
@@ -630,9 +633,9 @@ class Activity_Log {
                             <?php
                             if ( $log->user_id ) {
                                 $user = get_user_by( 'id', $log->user_id );
-                                echo $user ? esc_html( $user->display_name ) : esc_html__( 'Unknown', 'shelter-donations' );
+                                echo $user ? esc_html( $user->display_name ) : esc_html__( 'Unknown', 'shelterkit-donations' );
                             } else {
-                                echo '<span class="sd-system-user">' . esc_html__( 'System', 'shelter-donations' ) . '</span>';
+                                echo '<span class="sd-system-user">' . esc_html__( 'System', 'shelterkit-donations' ) . '</span>';
                             }
                             ?>
                         </td>
@@ -642,18 +645,18 @@ class Activity_Log {
             </table>
 
             <!-- Pagination -->
-            <?php
-            $total_pages = ceil( $total_items / $per_page );
-            if ( $total_pages > 1 ) :
-                $page_links = paginate_links( [
-                    'base'      => add_query_arg( 'paged', '%#%' ),
-                    'format'    => '',
-                    'prev_text' => '&laquo;',
-                    'next_text' => '&raquo;',
-                    'total'     => $total_pages,
-                    'current'   => $current_page,
-                ] );
-            ?>
+				<?php
+				$total_pages = ceil( $total_items / $per_page );
+				if ( $total_pages > 1 ) :
+					$page_links = paginate_links( [
+						'base'      => add_query_arg( 'paged', '%#%' ),
+						'format'    => '',
+						'prev_text' => '&laquo;',
+						'next_text' => '&raquo;',
+						'total'     => $total_pages,
+						'current'   => $current_page,
+					] );
+					?>
             <div class="tablenav bottom">
                 <div class="tablenav-pages">
                     <?php echo $page_links; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- paginate_links() returns pre-escaped anchor markup. ?>
@@ -685,12 +688,12 @@ class Activity_Log {
      */
     private static function get_donor_name( int $donor_id ): string {
         $donor = Entity_Hydrator::get( 'sd_donor', $donor_id );
-        
+
         if ( ! $donor ) {
-            return __( 'Unknown Donor', 'shelter-donations' );
+            return __( 'Unknown Donor', 'shelterkit-donations' );
         }
 
-        return $donor['display_name'] ?? trim( ( $donor['first_name'] ?? '' ) . ' ' . ( $donor['last_name'] ?? '' ) ) ?: __( 'Unknown Donor', 'shelter-donations' );
+        return $donor['display_name'] ?? trim( ( $donor['first_name'] ?? '' ) . ' ' . ( $donor['last_name'] ?? '' ) ) ?: __( 'Unknown Donor', 'shelterkit-donations' );
     }
 
     /**
@@ -724,7 +727,9 @@ class Activity_Log {
      * @return string|null Validated IP, or null if none available.
      */
     private static function get_client_ip(): ?string {
+        // phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- REMOTE_ADDR is recorded in an audit log as the connection address; it is stored and compared, never rendered.
         $remote_addr = isset( $_SERVER['REMOTE_ADDR'] ) ? trim( (string) $_SERVER['REMOTE_ADDR'] ) : '';
+        // phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
         $ip          = filter_var( $remote_addr, FILTER_VALIDATE_IP ) ? $remote_addr : null;
 
         /**
@@ -750,7 +755,9 @@ class Activity_Log {
         $days_to_keep = apply_filters( 'starter_shelter_activity_log_retention_days', 90 );
 
         $wpdb->query( $wpdb->prepare(
+            // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the only interpolated parts are $wpdb table properties and a generated %d placeholder list; every user value is bound through $wpdb->prepare().
             "DELETE FROM $table_name WHERE created_at < DATE_SUB(NOW(), INTERVAL %d DAY)",
+            // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
             $days_to_keep
         ) );
     }

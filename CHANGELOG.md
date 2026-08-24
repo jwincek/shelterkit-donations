@@ -7,6 +7,106 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-08-23
+
+### Changed
+- **Renamed to ShelterKit Donations** (`shelterkit-donations`), joining
+  ShelterKit Pets in the ShelterKit family. Public identity only: the
+  plugin name, slug, text domain, directory, main file and repository. The
+  `Starter_Shelter\` namespace, `STARTER_SHELTER_*` constants and `sd_` prefix
+  are unchanged, as is every stored identifier — post types, taxonomies,
+  `_sd_*` meta, options, cron hooks, the 12 `shelter-donations/*` block names
+  and the 9 Interactivity store namespaces. Nothing in the database moves, so
+  placed blocks keep rendering. Follow `migration-scripts/MIGRATION-3.0.0.md`.
+- Author is now Jerome Wincek, matching the rest of the family.
+- The annual statement's letterhead reads the shared shelter profile first and
+  falls back to the WooCommerce store address only when that is blank.
+
+### Added
+- The shared `ShelterKit_Profile` class (`includes/shelterkit/`), carried
+  byte-identically by every ShelterKit plugin and loaded by highest version —
+  the Action Scheduler pattern. Adds a **Shelter Details** screen holding the
+  shelter's name, address, contact details and tax ID in one option
+  (`shelterkit_organization`) that every family plugin shares.
+- `tax_id` on the shared profile, taking it to 1.2.0. It reads as a Donations
+  concern because a receipt is where people see it, but it identifies the
+  shelter: schema.org carries it as `Organization.taxID`, which the
+  `AnimalShelter` emitter in ShelterKit Pets can consume, and a theme footer is
+  the other obvious consumer.
+- `Helpers\starter_shelter_tax_id()`, reading the shared profile and falling
+  back to this plugin's own `org_ein` setting for installs that filled it in
+  before the profile existed.
+
+### Fixed
+- **The emailed annual contribution statement never showed the shelter's tax
+  ID.** Both templates read `get_option( 'starter_shelter_ein' )`, an option no
+  code path ever wrote — the settings screen saves to
+  `starter_shelter_options['org_ein']`. Every emailed statement printed the
+  literal `[EIN Number]`, and no amount of configuring could change it. The
+  admin-printed receipt read the correct key, which is why the two receipt
+  paths disagreed.
+- A statement for a shelter with no tax ID recorded omits the line rather than
+  printing a placeholder.
+- ShelterKit Pets registered the shared Shelter Details screen whenever the
+  profile class existed, rather than when its own copy won the version
+  negotiation — so a site running two ShelterKit plugins would have seen one
+  menu entry per plugin, all editing the same option. Both plugins now gate on
+  `ShelterKit_Profile_Versions::winner()`, which is what the comment above that
+  code already claimed.
+
+### Added
+- `bin/build-dist.sh` builds the runtime-only distribution package from
+  `.distignore`, with a leak guard that fails the build if a development file
+  reaches the output or a runtime file goes missing. CI, the release workflow
+  and Plugin Check all consume the same package, so there is no second exclude
+  list to keep in sync.
+- `bin/check-versions.sh` verifies the version recorded in the plugin header,
+  the `STARTER_SHELTER_VERSION` constant, `readme.txt`'s `Stable tag`,
+  `CHANGELOG.md` and the `.pot` all agree, along with `Requires at least`,
+  `Requires PHP` and composer's platform floor. WordPress.org serves whatever
+  `Stable tag` names, so drift there ships the wrong version silently.
+- `bin/check-screenshots.sh` verifies `screenshot-N.png` files pair with the
+  readme's `== Screenshots ==` captions. The binding is positional, so a gap
+  fails silently on the listing page.
+- `bin/capture-screenshots.js` drives a browser over the admin screens and
+  public blocks to produce screenshot drafts.
+- `.github/workflows/release.yml` publishes on a version tag: validates version
+  metadata and screenshots, runs the same gates as `main`, builds the package,
+  deploys to WordPress.org SVN, and attaches an installable zip to the GitHub
+  release. The SVN step is skipped until the repository secrets exist.
+- CI gained a version-consistency job and a Plugin Check job. Plugin Check runs
+  against the built package rather than the repository, so it sees what users
+  receive.
+- `.wordpress-org/` for the listing assets (icon, banner, screenshots), which
+  SVN keeps as a sibling of `trunk/` rather than inside it.
+- `readme.txt` gained a `== Screenshots ==` section.
+
+### Fixed
+- Admin settings redirects use `wp_safe_redirect()` rather than
+  `wp_redirect()`.
+- The four `SHOW TABLES LIKE` existence checks in the activity log, legacy sync
+  page and order scanner go through `$wpdb->prepare()`, matching the one in
+  `uninstall-cleanup.php` that already did.
+- `readme.txt` declared `Tested up to: 7.0` against WordPress 7.1 — the only
+  error Plugin Check reported. The plugin now reports zero.
+
+### Changed
+- `phpcs.xml` was shadowing `phpcs.xml.dist`. PHPCS prefers the former, which
+  loaded only `PHPCompatibilityWP`, so `composer lint` had been passing while
+  the entire WordPress standard — including every `WordPress.Security.*` sniff
+  — was skipped. `phpcs.xml` is removed and `phpcs.xml.dist` is now a full
+  `WordPress` ruleset whose exclusions are style-only and individually
+  documented. Errors went from 17,878 under the intended ruleset to the
+  security-sniff sites listed in the repository README.
+- Roughly 520 mechanical style violations auto-fixed (trailing whitespace,
+  embedded-PHP spacing, cast spacing, inline control structures). Indentation
+  is unchanged — four spaces remains the house style and the indent sniff is
+  excluded for that reason.
+- `.distignore` matches `AUDIT-*.md` as a glob rather than listing the files by
+  name, and now also excludes `README.md`, `CHANGELOG.md`, the build directory,
+  `.wordpress-org/`, and three superseded editor assets that were never
+  enqueued. `.gitattributes` was brought back in step with it.
+
 ## [2.0.1] - 2026-07-05
 
 ### Fixed

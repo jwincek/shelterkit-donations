@@ -74,7 +74,7 @@ final class OrderProcessingTest extends WP_UnitTestCase {
     }
 
     public function test_donation_order_creates_a_donation_record(): void {
-        $order = $this->make_shelter_order( 'shelter-donations', 25.00 );
+        $order = $this->make_shelter_order( 'shelterkit-donations', 25.00 );
 
         $order->update_status( 'completed' ); // Fires the real processing flow.
 
@@ -93,7 +93,7 @@ final class OrderProcessingTest extends WP_UnitTestCase {
     public function test_paid_transition_does_not_double_count(): void {
         // processing → completed both fire the processing hook; the _sd_processed
         // guard must keep it to a single donation.
-        $order = $this->make_shelter_order( 'shelter-donations', 10.00 );
+        $order = $this->make_shelter_order( 'shelterkit-donations', 10.00 );
 
         $order->update_status( 'processing' );
         $order->update_status( 'completed' );
@@ -106,7 +106,7 @@ final class OrderProcessingTest extends WP_UnitTestCase {
         // Honoree comes from the cart/order-item meta the memorial form sets —
         // the channel that has historically drifted from what the reader expects.
         $order = $this->make_shelter_order(
-            'shelter-donations-in-memoriam',
+            'shelterkit-donations-in-memoriam',
             50.00,
             [
                 'in-memoriam-type'  => 'Pet',     // Selected attribute → memorial_type.
@@ -126,7 +126,7 @@ final class OrderProcessingTest extends WP_UnitTestCase {
     public function test_duplicate_trigger_after_completion_is_a_noop(): void {
         // A late/duplicate trigger (e.g. a repeated gateway webhook) after the
         // order already processed must not create a second donation.
-        $order = $this->make_shelter_order( 'shelter-donations', 20.00 );
+        $order = $this->make_shelter_order( 'shelterkit-donations', 20.00 );
         $order->update_status( 'completed' );
         $this->assertCount( 1, $this->entities_for_order( $order->get_id(), 'sd_donation' ) );
 
@@ -139,7 +139,7 @@ final class OrderProcessingTest extends WP_UnitTestCase {
         // The in-lock re-check reads the flag straight from the DB (HPOS-aware),
         // so a value written by a concurrent run is seen even if the order
         // object cache is stale. Exercise that reader directly.
-        $order  = $this->make_shelter_order( 'shelter-donations', 5.00 );
+        $order  = $this->make_shelter_order( 'shelterkit-donations', 5.00 );
         $method = new \ReflectionMethod( Order_Handler::class, 'is_processed_in_db' );
         $method->setAccessible( true );
 
@@ -152,7 +152,7 @@ final class OrderProcessingTest extends WP_UnitTestCase {
     }
 
     public function test_memorial_without_honoree_is_rejected_and_creates_no_record(): void {
-        $order = $this->make_shelter_order( 'shelter-donations-in-memoriam', 50.00 );
+        $order = $this->make_shelter_order( 'shelterkit-donations-in-memoriam', 50.00 );
 
         $order->update_status( 'completed' );
 

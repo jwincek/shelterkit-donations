@@ -37,7 +37,7 @@ final class CheckoutPersistenceTest extends WP_UnitTestCase {
 
     public function test_cart_item_values_are_written_to_order_item_meta(): void {
         $order   = wc_create_order();
-        $item_id = $order->add_product( wc_get_product( $this->product( 'shelter-donations-in-memoriam', 50 )->get_id() ), 1 );
+        $item_id = $order->add_product( wc_get_product( $this->product( 'shelterkit-donations-in-memoriam', 50 )->get_id() ), 1 );
         $item    = $order->get_item( $item_id );
 
         // The values ajax_add_to_cart / the form stashed on the cart item.
@@ -71,7 +71,7 @@ final class CheckoutPersistenceTest extends WP_UnitTestCase {
         $order->set_billing_last_name( 'Donor' );
         $order->set_billing_email( 'pat.donor@example.test' );
 
-        $item_id = $order->add_product( wc_get_product( $this->product( 'shelter-donations-in-memoriam', 50 )->get_id() ), 1 );
+        $item_id = $order->add_product( wc_get_product( $this->product( 'shelterkit-donations-in-memoriam', 50 )->get_id() ), 1 );
         $item    = $order->get_item( $item_id );
         $item->add_meta_data( 'in-memoriam-type', 'Pet', true ); // Selected attribute → memorial_type.
 

@@ -27,7 +27,7 @@ class Logo_Moderation {
      * @since 1.0.0
      * @var string
      */
-    private const PAGE_SLUG = 'shelter-donations-logos';
+    private const PAGE_SLUG = 'shelterkit-donations-logos';
 
     /**
      * Nonce action.
@@ -57,7 +57,7 @@ class Logo_Moderation {
         add_action( 'wp_ajax_sd_approve_logo', [ self::class, 'ajax_approve_logo' ] );
         add_action( 'wp_ajax_sd_reject_logo', [ self::class, 'ajax_reject_logo' ] );
         add_action( 'admin_post_sd_bulk_logo_action', [ self::class, 'handle_bulk_action' ] );
-        
+
         // Add pending count to menu.
         add_action( 'admin_menu', [ self::class, 'add_pending_count_bubble' ], 99 );
     }
@@ -70,8 +70,8 @@ class Logo_Moderation {
     public static function add_menu_page(): void {
         self::$page_hook = (string) add_submenu_page(
             Menu::MENU_SLUG,
-            __( 'Logo Moderation', 'shelter-donations' ),
-            __( 'Logo Moderation', 'shelter-donations' ),
+            __( 'Logo Moderation', 'shelterkit-donations' ),
+            __( 'Logo Moderation', 'shelterkit-donations' ),
             'manage_options',
             self::PAGE_SLUG,
             [ self::class, 'render_page' ]
@@ -87,10 +87,11 @@ class Logo_Moderation {
         global $submenu;
 
         $pending_count = self::get_pending_count();
-        
+
         if ( $pending_count > 0 && isset( $submenu[ Menu::MENU_SLUG ] ) ) {
             foreach ( $submenu[ Menu::MENU_SLUG ] as $key => $item ) {
                 if ( self::PAGE_SLUG === $item[2] ) {
+                    // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- appending a pending-count bubble to our own submenu entry is the documented WordPress pattern.
                     $submenu[ Menu::MENU_SLUG ][ $key ][0] .= sprintf(
                         ' <span class="awaiting-mod">%d</span>',
                         $pending_count
@@ -154,12 +155,12 @@ class Logo_Moderation {
         wp_localize_script( 'sd-logo-moderation', 'sdLogoMod', [
             'ajaxUrl'       => admin_url( 'admin-ajax.php' ),
             'nonce'         => wp_create_nonce( self::NONCE_ACTION ),
-            'confirmReject' => __( 'Are you sure you want to reject this logo?', 'shelter-donations' ),
-            'approving'     => __( 'Approving...', 'shelter-donations' ),
-            'rejecting'     => __( 'Rejecting...', 'shelter-donations' ),
-            'approved'      => __( 'Approved!', 'shelter-donations' ),
-            'rejected'      => __( 'Rejected', 'shelter-donations' ),
-            'error'         => __( 'Error occurred. Please try again.', 'shelter-donations' ),
+            'confirmReject' => __( 'Are you sure you want to reject this logo?', 'shelterkit-donations' ),
+            'approving'     => __( 'Approving...', 'shelterkit-donations' ),
+            'rejecting'     => __( 'Rejecting...', 'shelterkit-donations' ),
+            'approved'      => __( 'Approved!', 'shelterkit-donations' ),
+            'rejected'      => __( 'Rejected', 'shelterkit-donations' ),
+            'error'         => __( 'Error occurred. Please try again.', 'shelterkit-donations' ),
         ] );
 
         wp_add_inline_style( 'wp-admin', self::get_inline_styles() );
@@ -181,10 +182,10 @@ class Logo_Moderation {
 
         ?>
         <div class="wrap sd-logo-moderation">
-            <h1><?php esc_html_e( 'Logo Moderation', 'shelter-donations' ); ?></h1>
+            <h1><?php esc_html_e( 'Logo Moderation', 'shelterkit-donations' ); ?></h1>
 
             <p class="description">
-                <?php esc_html_e( 'Review and approve business membership logos before they appear on the donor wall.', 'shelter-donations' ); ?>
+                <?php esc_html_e( 'Review and approve business membership logos before they appear on the donor wall.', 'shelterkit-donations' ); ?>
             </p>
 
             <!-- Status filter tabs -->
@@ -192,21 +193,21 @@ class Logo_Moderation {
                 <li>
                     <a href="<?php echo esc_url( add_query_arg( 'status', 'pending' ) ); ?>" 
                        class="<?php echo 'pending' === $status_filter ? 'current' : ''; ?>">
-                        <?php esc_html_e( 'Pending', 'shelter-donations' ); ?>
+                        <?php esc_html_e( 'Pending', 'shelterkit-donations' ); ?>
                         <span class="count">(<?php echo esc_html( self::get_count_by_status( 'pending' ) ); ?>)</span>
                     </a> |
                 </li>
                 <li>
                     <a href="<?php echo esc_url( add_query_arg( 'status', 'approved' ) ); ?>"
                        class="<?php echo 'approved' === $status_filter ? 'current' : ''; ?>">
-                        <?php esc_html_e( 'Approved', 'shelter-donations' ); ?>
+                        <?php esc_html_e( 'Approved', 'shelterkit-donations' ); ?>
                         <span class="count">(<?php echo esc_html( self::get_count_by_status( 'approved' ) ); ?>)</span>
                     </a> |
                 </li>
                 <li>
                     <a href="<?php echo esc_url( add_query_arg( 'status', 'rejected' ) ); ?>"
                        class="<?php echo 'rejected' === $status_filter ? 'current' : ''; ?>">
-                        <?php esc_html_e( 'Rejected', 'shelter-donations' ); ?>
+                        <?php esc_html_e( 'Rejected', 'shelterkit-donations' ); ?>
                         <span class="count">(<?php echo esc_html( self::get_count_by_status( 'rejected' ) ); ?>)</span>
                     </a>
                 </li>
@@ -221,11 +222,11 @@ class Logo_Moderation {
                 <div class="tablenav top">
                     <div class="alignleft actions bulkactions">
                         <select name="bulk_action">
-                            <option value=""><?php esc_html_e( 'Bulk Actions', 'shelter-donations' ); ?></option>
-                            <option value="approve"><?php esc_html_e( 'Approve Selected', 'shelter-donations' ); ?></option>
-                            <option value="reject"><?php esc_html_e( 'Reject Selected', 'shelter-donations' ); ?></option>
+                            <option value=""><?php esc_html_e( 'Bulk Actions', 'shelterkit-donations' ); ?></option>
+                            <option value="approve"><?php esc_html_e( 'Approve Selected', 'shelterkit-donations' ); ?></option>
+                            <option value="reject"><?php esc_html_e( 'Reject Selected', 'shelterkit-donations' ); ?></option>
                         </select>
-                        <input type="submit" class="button action" value="<?php esc_attr_e( 'Apply', 'shelter-donations' ); ?>" />
+                        <input type="submit" class="button action" value="<?php esc_attr_e( 'Apply', 'shelterkit-donations' ); ?>" />
                     </div>
                 </div>
                 <?php endif; ?>
@@ -234,10 +235,10 @@ class Logo_Moderation {
                 <div class="sd-empty-state">
                     <?php if ( 'pending' === $status_filter ) : ?>
                         <span class="dashicons dashicons-yes-alt"></span>
-                        <p><?php esc_html_e( 'No logos pending review. Great job!', 'shelter-donations' ); ?></p>
+                        <p><?php esc_html_e( 'No logos pending review. Great job!', 'shelterkit-donations' ); ?></p>
                     <?php else : ?>
                         <span class="dashicons dashicons-format-image"></span>
-                        <p><?php esc_html_e( 'No logos found with this status.', 'shelter-donations' ); ?></p>
+                        <p><?php esc_html_e( 'No logos found with this status.', 'shelterkit-donations' ); ?></p>
                     <?php endif; ?>
                 </div>
                 <?php else : ?>
@@ -271,10 +272,10 @@ class Logo_Moderation {
                             </p>
                             
                             <p class="sd-upload-date">
-                                <?php 
+                                <?php
                                 printf(
                                     /* translators: %s: date */
-                                    esc_html__( 'Uploaded %s', 'shelter-donations' ),
+                                    esc_html__( 'Uploaded %s', 'shelterkit-donations' ),
                                     // upload_date is the post_date string (WP TZ);
                                     // mysql2date('U') converts to UTC epoch so the
                                     // comparison against time() is timezone-correct.
@@ -285,7 +286,7 @@ class Logo_Moderation {
 
                             <?php if ( 'rejected' === $status_filter && ! empty( $logo['rejection_reason'] ) ) : ?>
                             <p class="sd-rejection-reason">
-                                <strong><?php esc_html_e( 'Reason:', 'shelter-donations' ); ?></strong>
+                                <strong><?php esc_html_e( 'Reason:', 'shelterkit-donations' ); ?></strong>
                                 <?php echo esc_html( $logo['rejection_reason'] ); ?>
                             </p>
                             <?php endif; ?>
@@ -297,27 +298,27 @@ class Logo_Moderation {
                                     class="button button-primary sd-approve-btn" 
                                     data-id="<?php echo esc_attr( $logo['membership_id'] ); ?>">
                                 <span class="dashicons dashicons-yes"></span>
-                                <?php esc_html_e( 'Approve', 'shelter-donations' ); ?>
+                                <?php esc_html_e( 'Approve', 'shelterkit-donations' ); ?>
                             </button>
                             
                             <button type="button" 
                                     class="button sd-reject-btn" 
                                     data-id="<?php echo esc_attr( $logo['membership_id'] ); ?>">
                                 <span class="dashicons dashicons-no"></span>
-                                <?php esc_html_e( 'Reject', 'shelter-donations' ); ?>
+                                <?php esc_html_e( 'Reject', 'shelterkit-donations' ); ?>
                             </button>
                             <?php elseif ( 'approved' === $status_filter ) : ?>
                             <span class="sd-status-badge sd-status--approved">
-                                <?php esc_html_e( 'Approved', 'shelter-donations' ); ?>
+                                <?php esc_html_e( 'Approved', 'shelterkit-donations' ); ?>
                             </span>
                             <?php elseif ( 'rejected' === $status_filter ) : ?>
                             <span class="sd-status-badge sd-status--rejected">
-                                <?php esc_html_e( 'Rejected', 'shelter-donations' ); ?>
+                                <?php esc_html_e( 'Rejected', 'shelterkit-donations' ); ?>
                             </span>
                             <button type="button" 
                                     class="button sd-approve-btn" 
                                     data-id="<?php echo esc_attr( $logo['membership_id'] ); ?>">
-                                <?php esc_html_e( 'Approve', 'shelter-donations' ); ?>
+                                <?php esc_html_e( 'Approve', 'shelterkit-donations' ); ?>
                             </button>
                             <?php endif; ?>
                         </div>
@@ -331,27 +332,27 @@ class Logo_Moderation {
             <!-- Rejection reason modal -->
             <div id="sd-reject-modal" class="sd-modal" style="display:none;">
                 <div class="sd-modal-content">
-                    <h2><?php esc_html_e( 'Reject Logo', 'shelter-donations' ); ?></h2>
-                    <p><?php esc_html_e( 'Please select a reason for rejection:', 'shelter-donations' ); ?></p>
+                    <h2><?php esc_html_e( 'Reject Logo', 'shelterkit-donations' ); ?></h2>
+                    <p><?php esc_html_e( 'Please select a reason for rejection:', 'shelterkit-donations' ); ?></p>
                     
                     <select id="sd-reject-reason" class="widefat">
-                        <option value=""><?php esc_html_e( 'Select a reason...', 'shelter-donations' ); ?></option>
-                        <option value="inappropriate"><?php esc_html_e( 'Inappropriate content', 'shelter-donations' ); ?></option>
-                        <option value="low_quality"><?php esc_html_e( 'Low image quality', 'shelter-donations' ); ?></option>
-                        <option value="wrong_format"><?php esc_html_e( 'Wrong format or dimensions', 'shelter-donations' ); ?></option>
-                        <option value="copyright"><?php esc_html_e( 'Copyright concerns', 'shelter-donations' ); ?></option>
-                        <option value="other"><?php esc_html_e( 'Other (specify below)', 'shelter-donations' ); ?></option>
+                        <option value=""><?php esc_html_e( 'Select a reason...', 'shelterkit-donations' ); ?></option>
+                        <option value="inappropriate"><?php esc_html_e( 'Inappropriate content', 'shelterkit-donations' ); ?></option>
+                        <option value="low_quality"><?php esc_html_e( 'Low image quality', 'shelterkit-donations' ); ?></option>
+                        <option value="wrong_format"><?php esc_html_e( 'Wrong format or dimensions', 'shelterkit-donations' ); ?></option>
+                        <option value="copyright"><?php esc_html_e( 'Copyright concerns', 'shelterkit-donations' ); ?></option>
+                        <option value="other"><?php esc_html_e( 'Other (specify below)', 'shelterkit-donations' ); ?></option>
                     </select>
                     
                     <textarea id="sd-reject-notes" class="widefat" rows="3" 
-                              placeholder="<?php esc_attr_e( 'Additional notes (optional)...', 'shelter-donations' ); ?>"></textarea>
+                              placeholder="<?php esc_attr_e( 'Additional notes (optional)...', 'shelterkit-donations' ); ?>"></textarea>
                     
                     <div class="sd-modal-actions">
                         <button type="button" class="button sd-modal-cancel">
-                            <?php esc_html_e( 'Cancel', 'shelter-donations' ); ?>
+                            <?php esc_html_e( 'Cancel', 'shelterkit-donations' ); ?>
                         </button>
                         <button type="button" class="button button-primary sd-modal-confirm">
-                            <?php esc_html_e( 'Reject Logo', 'shelter-donations' ); ?>
+                            <?php esc_html_e( 'Reject Logo', 'shelterkit-donations' ); ?>
                         </button>
                     </div>
                     
@@ -377,10 +378,11 @@ class Logo_Moderation {
         if ( 'pending' === $status ) {
             $status_condition = "AND (pm_status.meta_value IS NULL OR pm_status.meta_value = 'pending')";
         } else {
-            $status_condition = $wpdb->prepare( "AND pm_status.meta_value = %s", $status );
+            $status_condition = $wpdb->prepare( 'AND pm_status.meta_value = %s', $status );
         }
 
         // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- table names are $wpdb->posts/$wpdb->postmeta; $status_condition is either a hardcoded literal or already prepared via $wpdb->prepare() above (the $status value is bound with %s).
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the only interpolated parts are $wpdb table properties and a generated %d placeholder list; every user value is bound through $wpdb->prepare().
         $results = $wpdb->get_results( "
             SELECT
                 p.ID as membership_id,
@@ -414,11 +416,12 @@ class Logo_Moderation {
             ORDER BY p.post_date DESC
         ", ARRAY_A );
 
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         $logos = [];
         foreach ( $results as $row ) {
             $logo_id = (int) $row['logo_id'];
             $donor = $row['donor_id'] ? Entity_Hydrator::get( 'sd_donor', (int) $row['donor_id'] ) : null;
-            
+
             $tier = $row['tier'] ?? '';
             $tiers = \Starter_Shelter\Core\Config::get_item( 'tiers', 'business', [] );
             $tier_data = $tiers[ $tier ] ?? null;
@@ -428,7 +431,7 @@ class Logo_Moderation {
                 'logo_id'          => $logo_id,
                 'logo_url'         => wp_get_attachment_image_url( $logo_id, 'medium' ),
                 'logo_url_full'    => wp_get_attachment_image_url( $logo_id, 'full' ),
-                'business_name'    => $row['business_name'] ?: __( 'Unnamed Business', 'shelter-donations' ),
+                'business_name'    => $row['business_name'] ?: __( 'Unnamed Business', 'shelterkit-donations' ),
                 'tier'             => $tier,
                 'tier_label'       => $tier_data['label'] ?? ucfirst( $tier ),
                 'donor_id'         => (int) $row['donor_id'],
@@ -483,12 +486,12 @@ class Logo_Moderation {
         check_ajax_referer( self::NONCE_ACTION, 'nonce' );
 
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Permission denied.', 'shelter-donations' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Permission denied.', 'shelterkit-donations' ) ] );
         }
 
         $membership_id = absint( $_POST['membership_id'] ?? 0 );
         if ( ! $membership_id ) {
-            wp_send_json_error( [ 'message' => __( 'Invalid membership ID.', 'shelter-donations' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Invalid membership ID.', 'shelterkit-donations' ) ] );
         }
 
         // Update logo status.
@@ -504,7 +507,7 @@ class Logo_Moderation {
         do_action( 'starter_shelter_logo_approved', $membership_id, $donor_id, $membership );
 
         wp_send_json_success( [
-            'message' => __( 'Logo approved successfully.', 'shelter-donations' ),
+            'message' => __( 'Logo approved successfully.', 'shelterkit-donations' ),
         ] );
     }
 
@@ -517,30 +520,32 @@ class Logo_Moderation {
         check_ajax_referer( self::NONCE_ACTION, 'nonce' );
 
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( [ 'message' => __( 'Permission denied.', 'shelter-donations' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Permission denied.', 'shelterkit-donations' ) ] );
         }
 
         $membership_id = absint( $_POST['membership_id'] ?? 0 );
+        // phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- check_ajax_referer() and current_user_can() run at the top of this handler.
         $reason = sanitize_text_field( $_POST['reason'] ?? '' );
         $notes = sanitize_textarea_field( $_POST['notes'] ?? '' );
+        // phpcs:enable WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 
         if ( ! $membership_id ) {
-            wp_send_json_error( [ 'message' => __( 'Invalid membership ID.', 'shelter-donations' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Invalid membership ID.', 'shelterkit-donations' ) ] );
         }
 
         if ( ! $reason ) {
-            wp_send_json_error( [ 'message' => __( 'Please select a rejection reason.', 'shelter-donations' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Please select a rejection reason.', 'shelterkit-donations' ) ] );
         }
 
         // Build full rejection reason.
         $reason_labels = [
-            'inappropriate' => __( 'Inappropriate content', 'shelter-donations' ),
-            'low_quality'   => __( 'Low image quality', 'shelter-donations' ),
-            'wrong_format'  => __( 'Wrong format or dimensions', 'shelter-donations' ),
-            'copyright'     => __( 'Copyright concerns', 'shelter-donations' ),
-            'other'         => __( 'Other', 'shelter-donations' ),
+            'inappropriate' => __( 'Inappropriate content', 'shelterkit-donations' ),
+            'low_quality'   => __( 'Low image quality', 'shelterkit-donations' ),
+            'wrong_format'  => __( 'Wrong format or dimensions', 'shelterkit-donations' ),
+            'copyright'     => __( 'Copyright concerns', 'shelterkit-donations' ),
+            'other'         => __( 'Other', 'shelterkit-donations' ),
         ];
-        
+
         $full_reason = $reason_labels[ $reason ] ?? $reason;
         if ( $notes ) {
             $full_reason .= ': ' . $notes;
@@ -563,7 +568,7 @@ class Logo_Moderation {
         ] );
 
         wp_send_json_success( [
-            'message' => __( 'Logo rejected.', 'shelter-donations' ),
+            'message' => __( 'Logo rejected.', 'shelterkit-donations' ),
         ] );
     }
 
@@ -576,7 +581,7 @@ class Logo_Moderation {
         check_admin_referer( self::NONCE_ACTION );
 
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( esc_html__( 'Permission denied.', 'shelter-donations' ) );
+            wp_die( esc_html__( 'Permission denied.', 'shelterkit-donations' ) );
         }
 
         $action = sanitize_key( $_POST['bulk_action'] ?? '' );
@@ -598,21 +603,21 @@ class Logo_Moderation {
 
                 $membership = Entity_Hydrator::get( 'sd_membership', $membership_id );
                 do_action( 'starter_shelter_logo_approved', $membership_id, $membership['donor_id'] ?? 0, $membership );
-                
-                $processed++;
+
+                ++$processed;
             } elseif ( 'reject' === $action ) {
                 update_post_meta( $membership_id, '_sd_logo_status', 'rejected' );
-                update_post_meta( $membership_id, '_sd_logo_rejection_reason', __( 'Bulk rejection', 'shelter-donations' ) );
+                update_post_meta( $membership_id, '_sd_logo_rejection_reason', __( 'Bulk rejection', 'shelterkit-donations' ) );
                 update_post_meta( $membership_id, '_sd_logo_rejected_date', current_time( 'mysql' ) );
                 update_post_meta( $membership_id, '_sd_logo_rejected_by', get_current_user_id() );
 
                 $membership = Entity_Hydrator::get( 'sd_membership', $membership_id );
                 do_action( 'starter_shelter_logo_rejected', $membership_id, $membership['donor_id'] ?? 0, [
                     'membership' => $membership,
-                    'reason'     => __( 'Bulk rejection', 'shelter-donations' ),
+                    'reason'     => __( 'Bulk rejection', 'shelterkit-donations' ),
                 ] );
-                
-                $processed++;
+
+                ++$processed;
             }
         }
 

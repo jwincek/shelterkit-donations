@@ -162,7 +162,9 @@ function get_user_candles(): array {
 
 	// Anonymous: read from cookie, but only trust IDs that are valid memorial posts.
 	if ( ! empty( $_COOKIE['sd_candles'] ) ) {
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- guard is the route's permission_callback. /candles/* is deliberately public — anonymous candle-lighting is the feature — and rate-limited per sender; the flagged reads are the visitor cookie and REMOTE_ADDR that build that rate-limit key.
 		$decoded = json_decode( wp_unslash( $_COOKIE['sd_candles'] ), true );
+		// phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		if ( is_array( $decoded ) ) {
 			// Limit to 100 IDs to prevent abuse via oversized cookies.
 			return array_map( 'intval', array_slice( $decoded, 0, 100 ) );
@@ -221,7 +223,9 @@ function save_user_candles( array $candles ): void {
  * @param bool $lit         True if lighting, false if unlighting.
  */
 function track_anonymous_candle( int $memorial_id, bool $lit ): void {
+	// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- guard is the route's permission_callback. /candles/* is deliberately public — anonymous candle-lighting is the feature — and rate-limited per sender; the flagged reads are the visitor cookie and REMOTE_ADDR that build that rate-limit key.
 	$ip_hash = wp_hash( $_SERVER['REMOTE_ADDR'] ?? 'unknown' );
+	// phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 	$key     = 'sd_anon_candle_' . $ip_hash . '_' . $memorial_id;
 
 	if ( $lit ) {
@@ -240,7 +244,9 @@ function track_anonymous_candle( int $memorial_id, bool $lit ): void {
  * @return bool True if already lit.
  */
 function has_anonymous_candle( int $memorial_id ): bool {
+	// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- guard is the route's permission_callback. /candles/* is deliberately public — anonymous candle-lighting is the feature — and rate-limited per sender; the flagged reads are the visitor cookie and REMOTE_ADDR that build that rate-limit key.
 	$ip_hash = wp_hash( $_SERVER['REMOTE_ADDR'] ?? 'unknown' );
+	// phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 	$key     = 'sd_anon_candle_' . $ip_hash . '_' . $memorial_id;
 	return false !== get_transient( $key );
 }
@@ -257,7 +263,9 @@ function get_rate_limit_key(): string {
 	if ( $user_id ) {
 		return 'user_' . $user_id;
 	}
+	// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- guard is the route's permission_callback. /candles/* is deliberately public — anonymous candle-lighting is the feature — and rate-limited per sender; the flagged reads are the visitor cookie and REMOTE_ADDR that build that rate-limit key.
 	return 'ip_' . wp_hash( $_SERVER['REMOTE_ADDR'] ?? 'unknown' );
+	// phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 }
 
 /**
@@ -280,7 +288,9 @@ function merge_anonymous_candles_on_login( string $user_login, $user ): void {
 		return;
 	}
 
+	// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- guard is the route's permission_callback. /candles/* is deliberately public — anonymous candle-lighting is the feature — and rate-limited per sender; the flagged reads are the visitor cookie and REMOTE_ADDR that build that rate-limit key.
 	$decoded = json_decode( wp_unslash( $_COOKIE['sd_candles'] ), true );
+	// phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 	if ( ! is_array( $decoded ) || empty( $decoded ) ) {
 		return;
 	}

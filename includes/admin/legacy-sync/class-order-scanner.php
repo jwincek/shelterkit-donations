@@ -134,13 +134,13 @@ class Order_Scanner {
 			$orders[] = $order_data;
 
 			// Update summary.
-			$summary['total']++;
-			$summary[ $order_data['sync_status'] ]++;
+			++$summary['total'];
+			++$summary[ $order_data['sync_status'] ];
 
 			foreach ( $order_data['items'] as $item ) {
 				$type = $item['product_type'] ?? 'unknown';
 				if ( isset( $summary['by_type'][ $type ] ) ) {
-					$summary['by_type'][ $type ]++;
+					++$summary['by_type'][ $type ];
 				}
 			}
 		}
@@ -372,25 +372,25 @@ class Order_Scanner {
 		return match ( $type ) {
 			'donation' => sprintf(
 				/* translators: 1: amount, 2: allocation */
-				__( 'Donation of %1$s to %2$s', 'shelter-donations' ),
+				__( 'Donation of %1$s to %2$s', 'shelterkit-donations' ),
 				wc_price( $input['amount'] ?? 0 ),
 				ucwords( str_replace( '-', ' ', $input['allocation'] ?? 'General Fund' ) )
 			),
 			'membership' => sprintf(
 				/* translators: 1: membership type, 2: tier */
-				__( '%1$s Membership: %2$s', 'shelter-donations' ),
+				__( '%1$s Membership: %2$s', 'shelterkit-donations' ),
 				( $input['membership_type'] ?? 'individual' ) === 'business'
-					? __( 'Business', 'shelter-donations' )
-					: __( 'Individual', 'shelter-donations' ),
+					? __( 'Business', 'shelterkit-donations' )
+					: __( 'Individual', 'shelterkit-donations' ),
 				ucwords( str_replace( '-', ' ', $input['tier'] ?? 'unknown' ) )
 			),
 			'memorial' => sprintf(
 				/* translators: 1: memorial type, 2: honoree name */
-				__( '%1$s Memorial for %2$s', 'shelter-donations' ),
+				__( '%1$s Memorial for %2$s', 'shelterkit-donations' ),
 				ucfirst( $input['memorial_type'] ?? 'person' ),
-				$input['honoree_name'] ?? __( 'Unknown', 'shelter-donations' )
+				$input['honoree_name'] ?? __( 'Unknown', 'shelterkit-donations' )
 			),
-			default => __( 'Unknown record type', 'shelter-donations' ),
+			default => __( 'Unknown record type', 'shelterkit-donations' ),
 		};
 	}
 
@@ -449,12 +449,14 @@ class Order_Scanner {
 		if ( class_exists( '\Automattic\WooCommerce\Utilities\OrderUtil' )
 			&& \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
 			$table = $wpdb->prefix . 'wc_orders';
-			if ( $wpdb->get_var( "SHOW TABLES LIKE '$table'" ) === $table ) {
+			if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) === $table ) {
 				return (int) $wpdb->get_var(
+					// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the only interpolated parts are $wpdb table properties and a generated %d placeholder list; every user value is bound through $wpdb->prepare().
 					"SELECT COUNT(DISTINCT id) FROM {$table}
 					 WHERE type = 'shop_order'
 					   AND status IN ('wc-completed', 'wc-processing')"
 				);
+					// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			}
 		}
 
@@ -483,9 +485,11 @@ class Order_Scanner {
 		if ( class_exists( '\Automattic\WooCommerce\Utilities\OrderUtil' )
 			&& \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
 			$meta_table = $wpdb->prefix . 'wc_orders_meta';
-			if ( $wpdb->get_var( "SHOW TABLES LIKE '$meta_table'" ) === $meta_table ) {
+			if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $meta_table ) ) === $meta_table ) {
 				$hpos_count = (int) $wpdb->get_var( $wpdb->prepare(
+					// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the only interpolated parts are $wpdb table properties and a generated %d placeholder list; every user value is bound through $wpdb->prepare().
 					"SELECT COUNT(DISTINCT order_id) FROM {$meta_table} WHERE meta_key = %s",
+					// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 					$meta_key
 				) );
 				$count = max( $count, $hpos_count );

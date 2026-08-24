@@ -22,14 +22,16 @@ defined( 'ABSPATH' ) || exit;
 
 use Starter_Shelter\Core\Config;
 
-/* =========================================================================
+/*
+ =========================================================================
    1. SHARED CONFIGURATION
-   ========================================================================= */
+   =========================================================================
+   */
 
 /**
  * Register Interactivity API configuration.
  *
- * Shared across every store namespace via getConfig( 'shelter-donations' ).
+ * Shared across every store namespace via getConfig( 'shelterkit-donations' ).
  *
  * @since 2.0.0
  */
@@ -43,7 +45,7 @@ function register_interactivity_config(): void {
     $currency_pos      = get_option( 'woocommerce_currency_pos', 'left' );
     $currency_decimals = (int) get_option( 'woocommerce_price_num_decimals', 2 );
 
-    wp_interactivity_config( 'shelter-donations', [
+    wp_interactivity_config( 'shelterkit-donations', [
         // API.
         'restUrl'   => rest_url( 'shelter-donations/v1/' ),
         'nonce'     => wp_create_nonce( 'wp_rest' ),
@@ -79,40 +81,40 @@ function register_interactivity_config(): void {
 
         // i18n strings shared by all stores.
         'i18n' => [
-            'loading'          => __( 'Loading...', 'shelter-donations' ),
-            'noResults'        => __( 'No results found', 'shelter-donations' ),
-            'showingOne'       => __( 'Showing 1 item', 'shelter-donations' ),
+            'loading'          => __( 'Loading...', 'shelterkit-donations' ),
+            'noResults'        => __( 'No results found', 'shelterkit-donations' ),
+            'showingOne'       => __( 'Showing 1 item', 'shelterkit-donations' ),
             /* translators: %d: number of items shown. */
-            'showingMany'      => __( 'Showing %d items', 'shelter-donations' ),
+            'showingMany'      => __( 'Showing %d items', 'shelterkit-donations' ),
             /* translators: %1$d: number of items shown; %2$d: total number of items. */
-            'paginationInfo'   => __( 'Showing %1$d of %2$d items', 'shelter-donations' ),
-            'error'            => __( 'Something went wrong. Please try again.', 'shelter-donations' ),
-            'addedToCart'      => __( 'Added to cart successfully!', 'shelter-donations' ),
-            'errorMinAmount'   => __( 'Please enter a valid donation amount.', 'shelter-donations' ),
-            'errorMaxAmount'   => __( 'Amount exceeds the maximum allowed.', 'shelter-donations' ),
-            'errorHonoreeName' => __( 'Please enter the honoree name.', 'shelter-donations' ),
-            'errorFamilyName'  => __( 'Please enter the family contact name.', 'shelter-donations' ),
-            'errorInvalidEmail'=> __( 'Please enter a valid email address.', 'shelter-donations' ),
-            'errorSelectTier'  => __( 'Please select a membership level.', 'shelter-donations' ),
-            'errorBusinessName'=> __( 'Please enter your business name.', 'shelter-donations' ),
-            'errorGeneric'     => __( 'Could not add to cart. Please try again.', 'shelter-donations' ),
-            'errorNetwork'     => __( 'Network error. Please check your connection.', 'shelter-donations' ),
-            'inHonorOf'        => __( 'In Honor Of', 'shelter-donations' ),
-            'inMemoryOf'       => __( 'In Memory Of', 'shelter-donations' ),
-            'personName'       => __( "Person's Name", 'shelter-donations' ),
-            'petName'          => __( "Pet's Name", 'shelter-donations' ),
-            'pet'              => __( 'Pet', 'shelter-donations' ),
-            'typeHuman'        => __( 'Person', 'shelter-donations' ),
-            'typePet'          => __( 'Pet', 'shelter-donations' ),
-            'processing'       => __( 'Processing...', 'shelter-donations' ),
-            'individualMembership' => __( 'Individual Membership', 'shelter-donations' ),
-            'businessMembership'   => __( 'Business Membership', 'shelter-donations' ),
-            'donor'            => __( 'Donor', 'shelter-donations' ),
-            'donorLevelNew'    => __( 'New Donor', 'shelter-donations' ),
-            'donorLevelBronze' => __( 'Bronze', 'shelter-donations' ),
-            'donorLevelSilver' => __( 'Silver', 'shelter-donations' ),
-            'donorLevelGold'   => __( 'Gold', 'shelter-donations' ),
-            'donorLevelPlatinum' => __( 'Platinum', 'shelter-donations' ),
+            'paginationInfo'   => __( 'Showing %1$d of %2$d items', 'shelterkit-donations' ),
+            'error'            => __( 'Something went wrong. Please try again.', 'shelterkit-donations' ),
+            'addedToCart'      => __( 'Added to cart successfully!', 'shelterkit-donations' ),
+            'errorMinAmount'   => __( 'Please enter a valid donation amount.', 'shelterkit-donations' ),
+            'errorMaxAmount'   => __( 'Amount exceeds the maximum allowed.', 'shelterkit-donations' ),
+            'errorHonoreeName' => __( 'Please enter the honoree name.', 'shelterkit-donations' ),
+            'errorFamilyName'  => __( 'Please enter the family contact name.', 'shelterkit-donations' ),
+            'errorInvalidEmail' => __( 'Please enter a valid email address.', 'shelterkit-donations' ),
+            'errorSelectTier'  => __( 'Please select a membership level.', 'shelterkit-donations' ),
+            'errorBusinessName' => __( 'Please enter your business name.', 'shelterkit-donations' ),
+            'errorGeneric'     => __( 'Could not add to cart. Please try again.', 'shelterkit-donations' ),
+            'errorNetwork'     => __( 'Network error. Please check your connection.', 'shelterkit-donations' ),
+            'inHonorOf'        => __( 'In Honor Of', 'shelterkit-donations' ),
+            'inMemoryOf'       => __( 'In Memory Of', 'shelterkit-donations' ),
+            'personName'       => __( "Person's Name", 'shelterkit-donations' ),
+            'petName'          => __( "Pet's Name", 'shelterkit-donations' ),
+            'pet'              => __( 'Pet', 'shelterkit-donations' ),
+            'typeHuman'        => __( 'Person', 'shelterkit-donations' ),
+            'typePet'          => __( 'Pet', 'shelterkit-donations' ),
+            'processing'       => __( 'Processing...', 'shelterkit-donations' ),
+            'individualMembership' => __( 'Individual Membership', 'shelterkit-donations' ),
+            'businessMembership'   => __( 'Business Membership', 'shelterkit-donations' ),
+            'donor'            => __( 'Donor', 'shelterkit-donations' ),
+            'donorLevelNew'    => __( 'New Donor', 'shelterkit-donations' ),
+            'donorLevelBronze' => __( 'Bronze', 'shelterkit-donations' ),
+            'donorLevelSilver' => __( 'Silver', 'shelterkit-donations' ),
+            'donorLevelGold'   => __( 'Gold', 'shelterkit-donations' ),
+            'donorLevelPlatinum' => __( 'Platinum', 'shelterkit-donations' ),
         ],
 
         // Feature flags.
@@ -124,9 +126,11 @@ function register_interactivity_config(): void {
     ] );
 }
 
-/* =========================================================================
+/*
+ =========================================================================
    2. INITIAL SERVER-SIDE STATE
-   ========================================================================= */
+   =========================================================================
+   */
 
 /**
  * Seed initial state for every store namespace.
@@ -138,7 +142,7 @@ function register_interactivity_config(): void {
  */
 function register_interactivity_stores(): void {
     // --- Shared root namespace -----------------------------------------------
-    wp_interactivity_state( 'shelter-donations', [
+    wp_interactivity_state( 'shelterkit-donations', [
         'isInitialized' => true,
     ] );
 
@@ -202,9 +206,11 @@ function register_interactivity_stores(): void {
     ] );
 }
 
-/* =========================================================================
+/*
+ =========================================================================
    3. SCRIPT MODULE REGISTRATION
-   ========================================================================= */
+   =========================================================================
+   */
 
 /**
  * Register the shared utilities module that all stores depend on.
@@ -256,7 +262,7 @@ function register_script_modules(): void {
     // - fetchpriority: 'low' — deprioritizes loading vs LCP image
     // - in_footer: true — prints after critical rendering path
     // - @wordpress/interactivity-router is 'dynamic' — avoids modulepreload since
-    //   it's only imported when user triggers navigation, not on initial load.
+    // it's only imported when user triggers navigation, not on initial load.
     //
     // The actual import happens via relative URL from blocks/memorial-wall/view.js
     // because bare specifiers require import map entries which aren't available
@@ -290,9 +296,11 @@ function register_script_modules(): void {
     );
 }
 
-/* =========================================================================
+/*
+ =========================================================================
    4. HELPER FUNCTIONS
-   ========================================================================= */
+   =========================================================================
+   */
 
 // get_current_user_donor_id() lives in register-bindings.php (single source
 // of truth with transient caching). Both files share the same namespace so
@@ -330,9 +338,11 @@ function should_enqueue_interactivity(): bool {
     return false;
 }
 
-/* =========================================================================
+/*
+ =========================================================================
    5. HOOKS
-   ========================================================================= */
+   =========================================================================
+   */
 
 // Seed server state.
 add_action( 'wp_interactivity_init', __NAMESPACE__ . '\\register_interactivity_stores' );

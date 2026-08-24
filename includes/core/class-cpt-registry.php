@@ -210,7 +210,7 @@ class CPT_Registry {
             'single'            => true,
             'show_in_rest'      => $field_config['show_in_rest'] ?? false,
             'sanitize_callback' => self::get_sanitize_callback( $field_config['type'] ?? 'string' ),
-            'auth_callback'     => function() {
+            'auth_callback'     => function () {
                 return current_user_can( 'edit_posts' );
             },
         ];

@@ -51,16 +51,16 @@ class Order_Processor {
 		$order = wc_get_order( $order_id );
 
 		if ( ! $order ) {
-			return new WP_Error( 'order_not_found', __( 'Order not found.', 'shelter-donations' ) );
+			return new WP_Error( 'order_not_found', __( 'Order not found.', 'shelterkit-donations' ) );
 		}
 
 		// Skip if already synced (unless forced).
 		if ( ! $force_resync ) {
 			if ( $order->get_meta( Order_Scanner::SYNCED_META_KEY ) ) {
-				return [ 'skipped' => true, 'reason' => __( 'Already synced.', 'shelter-donations' ) ];
+				return [ 'skipped' => true, 'reason' => __( 'Already synced.', 'shelterkit-donations' ) ];
 			}
 			if ( $order->get_meta( '_sd_processed' ) ) {
-				return [ 'skipped' => true, 'reason' => __( 'Already processed by order handler.', 'shelter-donations' ) ];
+				return [ 'skipped' => true, 'reason' => __( 'Already processed by order handler.', 'shelterkit-donations' ) ];
 			}
 		}
 
@@ -101,7 +101,7 @@ class Order_Processor {
 			if ( ! is_wp_error( $donor_result ) ) {
 				$donor_id = $donor_result['id'];
 				if ( $donor_result['created'] ) {
-					$created['donors']++;
+					++$created['donors'];
 				}
 			}
 		}
@@ -133,7 +133,7 @@ class Order_Processor {
 				if ( ! $ability_name || ! function_exists( 'wp_has_ability' ) || ! wp_has_ability( $ability_name ) ) {
 					$errors[] = sprintf(
 						/* translators: 1: ability name; 2: order item name. */
-						__( 'Ability "%1$s" not found for item "%2$s"', 'shelter-donations' ),
+						__( 'Ability "%1$s" not found for item "%2$s"', 'shelterkit-donations' ),
 						$ability_name,
 						$item_data['name']
 					);
@@ -144,7 +144,7 @@ class Order_Processor {
 					$type = $config['product_type'] ?? 'unknown';
 					$key  = $type . 's';
 					if ( isset( $created[ $key ] ) ) {
-						$created[ $key ]++;
+						++$created[ $key ];
 					}
 					continue;
 				}
@@ -201,7 +201,7 @@ class Order_Processor {
 					$ability     = wp_get_ability( $ability_name );
 					$result      = $ability ? $ability->execute( $input ) : new WP_Error(
 						'ability_not_found',
-						sprintf( /* translators: %s: ability name. */ __( 'Ability "%s" could not be loaded.', 'shelter-donations' ), $ability_name )
+						sprintf( /* translators: %s: ability name. */ __( 'Ability "%s" could not be loaded.', 'shelterkit-donations' ), $ability_name )
 					);
 					$action_type = 'created';
 				}
@@ -210,7 +210,7 @@ class Order_Processor {
 					$item_results[ $item_id ] = [ 'error' => $result->get_error_message() ];
 					$errors[] = sprintf(
 						/* translators: 1: order item name; 2: error message. */
-						__( 'Error processing "%1$s": %2$s', 'shelter-donations' ),
+						__( 'Error processing "%1$s": %2$s', 'shelterkit-donations' ),
 						$item_data['name'],
 						$result->get_error_message()
 					);
@@ -221,12 +221,12 @@ class Order_Processor {
 					);
 
 					if ( 'updated' === $action_type ) {
-						$created['updated']++;
+						++$created['updated'];
 					} else {
 						$type = $config['product_type'] ?? 'unknown';
 						$key  = $type . 's';
 						if ( isset( $created[ $key ] ) ) {
-							$created[ $key ]++;
+							++$created[ $key ];
 						}
 					}
 				}
@@ -458,7 +458,7 @@ class Order_Processor {
 
 		$note = sprintf(
 			/* translators: 1: donations, 2: memberships, 3: memorials, 4: updated */
-			__( 'Shelter Donations legacy sync completed: %1$d donation(s), %2$d membership(s), %3$d memorial(s), %4$d updated', 'shelter-donations' ),
+			__( 'Shelter Donations legacy sync completed: %1$d donation(s), %2$d membership(s), %3$d memorial(s), %4$d updated', 'shelterkit-donations' ),
 			$created['donations'],
 			$created['memberships'],
 			$created['memorials'],
@@ -466,7 +466,7 @@ class Order_Processor {
 		);
 
 		if ( ! empty( $errors ) ) {
-			$note .= "\n" . __( 'Errors:', 'shelter-donations' ) . "\n- " . implode( "\n- ", $errors );
+			$note .= "\n" . __( 'Errors:', 'shelterkit-donations' ) . "\n- " . implode( "\n- ", $errors );
 		}
 
 		$order->add_order_note( $note );

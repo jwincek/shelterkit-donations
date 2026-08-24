@@ -7,6 +7,16 @@ on:
     branches: [main]
 
 jobs:
+  # The plugin records its version in four places and its minimum requirements
+  # in three. WordPress.org serves the build named by `Stable tag`, and Plugin
+  # Check fails a header/readme requirement mismatch, so drift is caught here
+  # rather than after a release.
+  versions:
+    name: Version consistency
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bin/check-versions.sh
   lint:
     name: PHPCS Lint
     runs-on: ubuntu-latest
@@ -67,7 +77,7 @@ jobs:
         # on `php -l`'s exit 255 (parse error) and propagates that as a
         # non-zero exit, which fails the step. Parse-error lines surface
         # on stderr; success lines are discarded.
-        run: find shelter-donations.php includes/ -name '*.php' -print0 | xargs -0 -n1 php -l > /dev/null
+        run: find shelterkit-donations.php includes/ -name '*.php' -print0 | xargs -0 -n1 php -l > /dev/null
 
   unit-tests:
     name: PHP ${{ matrix.php }} Unit Tests
@@ -235,15 +245,45 @@ jobs:
       # (timestamp, generator version, version-derived Project-Id-Version) are
       # ignored — everything else, including string source references, must
       # match, so a code change that adds/moves a translatable string fails the
-      # job until languages/shelter-donations.pot is regenerated and committed.
+      # job until languages/shelterkit-donations.pot is regenerated and committed.
       - name: Regenerate POT
-        run: wp i18n make-pot . /tmp/expected.pot --domain=shelter-donations --exclude=tests,vendor,node_modules
+        run: wp i18n make-pot . /tmp/expected.pot --domain=shelterkit-donations --exclude=tests,vendor,node_modules,build,migration-scripts
 
       - name: Compare with committed POT
         run: |
           strip() { grep -vE '^"(POT-Creation-Date|X-Generator|Project-Id-Version):' "$1"; }
-          if ! diff <( strip languages/shelter-donations.pot ) <( strip /tmp/expected.pot ); then
-            echo "::error file=languages/shelter-donations.pot::POT is out of date. Run: wp i18n make-pot . languages/shelter-donations.pot --domain=shelter-donations --exclude=tests,vendor,node_modules — then commit."
+          if ! diff <( strip languages/shelterkit-donations.pot ) <( strip /tmp/expected.pot ); then
+            echo "::error file=languages/shelterkit-donations.pot::POT is out of date. Run: wp i18n make-pot . languages/shelterkit-donations.pot --domain=shelterkit-donations --exclude=tests,vendor,node_modules,build,migration-scripts — then commit."
             exit 1
           fi
           echo "POT is up to date."
+
+  plugin-check:
+    name: Plugin Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Run Plugin Check against a distribution copy with dev tooling removed,
+      # so the check sees only what ships. Checking the repository instead
+      # reports errors on files users never receive, while missing whatever
+      # packaging actually produced. bin/build-dist.sh reads .distignore, which
+      # keeps this identical to the package the release workflow publishes.
+      - name: Build distribution copy
+        run: bin/build-dist.sh build
+
+      - name: Run Plugin Check
+        uses: WordPress/plugin-check-action@v1
+        with:
+          build-dir: ./build/shelterkit-donations
+          # Pinned rather than left at `latest`: `latest` has resolved to a
+          # WordPress version whose wordpress-develop tag had not yet
+          # propagated, failing the job in a way indistinguishable from a real
+          # regression. Keep this in step with the readme's `Tested up to`.
+          wp-version: '7.1'
+          # Reporting and data-integrity read across donations, memberships and
+          # memorials with direct queries against core tables; those are
+          # warnings, not errors. Fail the job only on errors.
+          ignore-warnings: true

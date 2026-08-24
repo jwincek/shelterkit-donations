@@ -176,7 +176,7 @@ function get( array $input ): array|WP_Error {
     if ( ! $result ) {
         return new WP_Error(
             'memorial_not_found',
-            __( 'Memorial not found.', 'shelter-donations' ),
+            __( 'Memorial not found.', 'shelterkit-donations' ),
             [ 'status' => 404 ]
         );
     }

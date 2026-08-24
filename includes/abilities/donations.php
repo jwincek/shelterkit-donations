@@ -100,7 +100,7 @@ function get( array $input ): array|WP_Error {
     if ( ! $result ) {
         return new WP_Error(
             'donation_not_found',
-            __( 'Donation not found.', 'shelter-donations' ),
+            __( 'Donation not found.', 'shelterkit-donations' ),
             [ 'status' => 404 ]
         );
     }
@@ -164,6 +164,7 @@ function get_stats( array $input = [] ): array {
 
     // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- $campaign_join is built only from $wpdb->term_relationships/$wpdb->term_taxonomy table names and a hardcoded taxonomy; all user values are prepared with %d/%s.
     $stats = $wpdb->get_row( $wpdb->prepare(
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the only interpolated parts are $wpdb table properties and a generated %d placeholder list; every user value is bound through $wpdb->prepare().
         "SELECT
             COUNT(*) as donation_count,
             COALESCE(SUM(pm_amount.meta_value + 0), 0) as total_amount,
@@ -200,6 +201,7 @@ function get_stats( array $input = [] ): array {
         {$campaign_where}
         GROUP BY allocation",
         $range['start'],
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         $range['end'],
         ...$campaign_args
     ) );

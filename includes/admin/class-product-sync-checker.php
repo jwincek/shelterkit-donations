@@ -29,7 +29,7 @@ class Product_Sync_Checker {
 	 * @var array
 	 */
 	private static array $product_map = [
-		'shelter-donations' => [
+		'shelterkit-donations' => [
 			'option_key'     => 'sd_donation_product_id',
 			'attribute_name' => 'Preferred Allocation',
 			'attribute_slug' => 'preferred-allocation',
@@ -47,7 +47,7 @@ class Product_Sync_Checker {
 			'attribute_slug' => 'membership-level',
 			'config_source'  => 'tiers_business',
 		],
-		'shelter-donations-in-memoriam' => [
+		'shelterkit-donations-in-memoriam' => [
 			'option_key'     => 'sd_memorial_product_id',
 			'attribute_name' => 'In Memoriam Type',
 			'attribute_slug' => 'in-memoriam-type',
@@ -101,7 +101,7 @@ class Product_Sync_Checker {
 
 		$results['summary'] = sprintf(
 			/* translators: 1: error count, 2: warning count, 3: info count */
-			__( '%1$d errors, %2$d warnings, %3$d info', 'shelter-donations' ),
+			__( '%1$d errors, %2$d warnings, %3$d info', 'shelterkit-donations' ),
 			$error_count,
 			$warning_count,
 			$info_count
@@ -503,14 +503,14 @@ class Product_Sync_Checker {
 			$product_id = (int) get_option( $definition['option_key'], 0 );
 			if ( ! $product_id ) {
 				$result['details'][] = sprintf( '%s: skipped — product not created yet.', $sku );
-				$result['skipped']++;
+				++$result['skipped'];
 				continue;
 			}
 
 			$product = wc_get_product( $product_id );
 			if ( ! $product || ! $product->is_type( 'variable' ) ) {
 				$result['details'][] = sprintf( '%s: skipped — not a valid variable product.', $sku );
-				$result['skipped']++;
+				++$result['skipped'];
 				continue;
 			}
 
@@ -609,10 +609,10 @@ class Product_Sync_Checker {
 				// Look up image_file from the activator's product data.
 				if ( ! $image_file ) {
 					$image_map = [
-						'shelter-donations'             => 'product-donation.svg',
+						'shelterkit-donations'             => 'product-donation.svg',
 						'shelter-memberships'           => 'product-membership.svg',
 						'shelter-memberships-business'   => 'product-membership-business.svg',
-						'shelter-donations-in-memoriam' => 'product-memorial.svg',
+						'shelterkit-donations-in-memoriam' => 'product-memorial.svg',
 					];
 					$image_file = $image_map[ $sku ] ?? null;
 				}
@@ -647,9 +647,9 @@ class Product_Sync_Checker {
 			if ( $changed ) {
 				$product->save();
 				\WC_Product_Variable::sync( $product_id );
-				$result['repaired']++;
+				++$result['repaired'];
 			} else {
-				$result['skipped']++;
+				++$result['skipped'];
 			}
 		}
 
@@ -671,7 +671,7 @@ class Product_Sync_Checker {
 
 		// Only run on shelter admin pages.
 		$screen = get_current_screen();
-		if ( ! $screen || strpos( $screen->id, 'shelter-donations' ) === false ) {
+		if ( ! $screen || strpos( $screen->id, 'shelterkit-donations' ) === false ) {
 			return;
 		}
 
@@ -694,11 +694,11 @@ class Product_Sync_Checker {
 		?>
 		<div class="notice <?php echo esc_attr( $class ); ?> is-dismissible">
 			<p>
-				<strong><?php esc_html_e( 'Shelter Donations — Product Sync:', 'shelter-donations' ); ?></strong>
+				<strong><?php esc_html_e( 'Shelter Donations — Product Sync:', 'shelterkit-donations' ); ?></strong>
 				<?php echo esc_html( $results['summary'] ); ?>
 			</p>
 			<details>
-				<summary><?php printf( /* translators: %d: number of issues. */ esc_html__( 'View %d issue(s)', 'shelter-donations' ), (int) $count ); ?></summary>
+				<summary><?php printf( /* translators: %d: number of issues. */ esc_html__( 'View %d issue(s)', 'shelterkit-donations' ), (int) $count ); ?></summary>
 				<ul style="margin-left: 1.5em;">
 					<?php foreach ( $results['issues'] as $issue ) : ?>
 						<li>
@@ -710,11 +710,11 @@ class Product_Sync_Checker {
 				</ul>
 			</details>
 			<p>
-				<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=shelter-donations-settings&action=recheck-sync' ), 'sd_recheck_sync' ) ); ?>" class="button button-small">
-					<?php esc_html_e( 'Re-check Now', 'shelter-donations' ); ?>
+				<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=shelterkit-donations-settings&action=recheck-sync' ), 'sd_recheck_sync' ) ); ?>" class="button button-small">
+					<?php esc_html_e( 'Re-check Now', 'shelterkit-donations' ); ?>
 				</a>
-				<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=shelter-donations-settings&action=repair-sync' ), 'sd_repair_sync' ) ); ?>" class="button button-small button-primary" onclick="return confirm('<?php echo esc_js( __( 'This will create missing variations, set products to virtual, fix tax status, and assign default images. Continue?', 'shelter-donations' ) ); ?>');">
-					<?php esc_html_e( 'Repair Issues', 'shelter-donations' ); ?>
+				<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=shelterkit-donations-settings&action=repair-sync' ), 'sd_repair_sync' ) ); ?>" class="button button-small button-primary" onclick="return confirm('<?php echo esc_js( __( 'This will create missing variations, set products to virtual, fix tax status, and assign default images. Continue?', 'shelterkit-donations' ) ); ?>');">
+					<?php esc_html_e( 'Repair Issues', 'shelterkit-donations' ); ?>
 				</a>
 			</p>
 		</div>
@@ -727,6 +727,7 @@ class Product_Sync_Checker {
 	 * @since 2.1.0
 	 */
 	public static function handle_admin_actions(): void {
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- capability and nonce are checked before any action is taken; the flagged reads are the action name and the nonce value itself.
 		$action = $_GET['action'] ?? '';
 
 		if ( 'recheck-sync' === $action ) {
@@ -740,6 +741,7 @@ class Product_Sync_Checker {
 
 		if ( 'repair-sync' === $action ) {
 			if ( ! wp_verify_nonce( $_GET['_wpnonce'] ?? '', 'sd_repair_sync' ) ) {
+		// phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 				return;
 			}
 			if ( ! current_user_can( 'manage_woocommerce' ) ) {
@@ -772,17 +774,19 @@ class Product_Sync_Checker {
 		?>
 		<div class="notice notice-success is-dismissible">
 			<p>
-				<strong><?php esc_html_e( 'Shelter Donations — Repair Complete:', 'shelter-donations' ); ?></strong>
-				<?php printf(
+				<strong><?php esc_html_e( 'Shelter Donations — Repair Complete:', 'shelterkit-donations' ); ?></strong>
+				<?php
+                printf(
 					/* translators: 1: number of products repaired; 2: number of products skipped. */
-					esc_html__( '%1$d product(s) repaired, %2$d skipped.', 'shelter-donations' ),
+					esc_html__( '%1$d product(s) repaired, %2$d skipped.', 'shelterkit-donations' ),
 					(int) $result['repaired'],
 					(int) $result['skipped']
-				); ?>
+				);
+                ?>
 			</p>
 			<?php if ( ! empty( $result['details'] ) ) : ?>
 			<details>
-				<summary><?php esc_html_e( 'View details', 'shelter-donations' ); ?></summary>
+				<summary><?php esc_html_e( 'View details', 'shelterkit-donations' ); ?></summary>
 				<ul style="margin-left: 1.5em;">
 					<?php foreach ( $result['details'] as $detail ) : ?>
 						<li><?php echo esc_html( $detail ); ?></li>

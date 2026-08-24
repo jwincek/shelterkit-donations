@@ -96,8 +96,7 @@ class Meta_Boxes {
      *               entities only.
      */
     private static function get_hard_coded_meta_box_config(): array {
-        return [
-        ];
+        return [];
     }
 
     /**
@@ -156,7 +155,9 @@ class Meta_Boxes {
         $row_attrs = $show_when ? ' data-show-when="' . esc_attr( wp_json_encode( $show_when ) ) . '" style="display:none;"' : '';
 
         echo '<tr' . $row_attrs . '><th scope="row"><label for="sd_' . esc_attr( $field_id ) . '">' . esc_html( $label ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $row_attrs built from esc_attr() above; other interpolations escaped inline.
-        if ( $required ) echo ' <span class="required">*</span>';
+        if ( $required ) {
+			echo ' <span class="required">*</span>';
+        }
         echo '</label></th><td>';
 
         switch ( $type ) {
@@ -180,7 +181,7 @@ class Meta_Boxes {
             case 'select':
                 $options = is_string( $field['options'] ) ? Config::get_item( 'settings', $field['options'], [] ) : $field['options'];
                 echo '<select id="sd_' . esc_attr( $field_id ) . '" name="sd_' . esc_attr( $field_id ) . '">';
-                echo '<option value="">' . esc_html__( '— Select —', 'shelter-donations' ) . '</option>';
+                echo '<option value="">' . esc_html__( '— Select —', 'shelterkit-donations' ) . '</option>';
                 foreach ( $options as $opt_val => $opt_label ) {
                     printf( '<option value="%s" %s>%s</option>', esc_attr( $opt_val ), selected( $value, $opt_val, false ), esc_html( $opt_label ) );
                 }
@@ -192,7 +193,7 @@ class Meta_Boxes {
                 $tiers_config = Config::get( 'tiers' );
                 $all_tiers = $tiers_config['tiers'] ?? [];
                 echo '<select id="sd_' . esc_attr( $field_id ) . '" name="sd_' . esc_attr( $field_id ) . '" class="sd-tier-select" data-tier-select>';
-                echo '<option value="">' . esc_html__( '— Select Tier —', 'shelter-donations' ) . '</option>';
+                echo '<option value="">' . esc_html__( '— Select Tier —', 'shelterkit-donations' ) . '</option>';
                 foreach ( $all_tiers as $tier_type => $tiers ) {
                     foreach ( $tiers as $slug => $data ) {
                         $hidden = $tier_type !== $type_val ? ' style="display:none;"' : '';
@@ -212,34 +213,43 @@ class Meta_Boxes {
                 break;
 
             case 'datetime':
-                if ( ( $field['default'] ?? '' ) === 'now' && ! $value ) $value = current_time( 'mysql' );
+                if ( ( $field['default'] ?? '' ) === 'now' && ! $value ) {
+					$value = current_time( 'mysql' );
+                }
                 printf( '<input type="datetime-local" id="sd_%s" name="sd_%s" value="%s" />', esc_attr( $field_id ), esc_attr( $field_id ), esc_attr( $value ? wp_date( 'Y-m-d\TH:i', strtotime( $value ) ) : '' ) );
                 break;
 
             case 'image':
                 $img_url = $value ? wp_get_attachment_image_url( $value, 'thumbnail' ) : '';
                 echo '<div class="sd-image-upload"><div class="sd-image-preview">';
-                if ( $img_url ) echo '<img src="' . esc_url( $img_url ) . '" />';
+                if ( $img_url ) {
+					echo '<img src="' . esc_url( $img_url ) . '" />';
+                }
                 echo '</div>';
                 printf( '<input type="hidden" id="sd_%s" name="sd_%s" value="%s" />', esc_attr( $field_id ), esc_attr( $field_id ), esc_attr( $value ) );
-                echo '<button type="button" class="button sd-upload-image">' . esc_html__( 'Select Image', 'shelter-donations' ) . '</button>';
-                echo '<button type="button" class="button sd-remove-image"' . ( ! $value ? ' style="display:none;"' : '' ) . '>' . esc_html__( 'Remove', 'shelter-donations' ) . '</button></div>';
+                echo '<button type="button" class="button sd-upload-image">' . esc_html__( 'Select Image', 'shelterkit-donations' ) . '</button>';
+                echo '<button type="button" class="button sd-remove-image"' . ( ! $value ? ' style="display:none;"' : '' ) . '>' . esc_html__( 'Remove', 'shelterkit-donations' ) . '</button></div>';
                 break;
 
             case 'post_select':
                 $selected_title = $value ? get_the_title( $value ) : '';
                 printf( '<select id="sd_%s" name="sd_%s" class="sd-post-select" data-post-type="%s">', esc_attr( $field_id ), esc_attr( $field_id ), esc_attr( $field['post_type'] ?? 'post' ) );
-                if ( $value && $selected_title ) printf( '<option value="%s" selected>%s</option>', esc_attr( $value ), esc_html( $selected_title ) );
+                if ( $value && $selected_title ) {
+					printf( '<option value="%s" selected>%s</option>', esc_attr( $value ), esc_html( $selected_title ) );
+                }
                 echo '</select>';
                 break;
 
             case 'user_select':
-                wp_dropdown_users( [ 'name' => 'sd_' . $field_id, 'id' => 'sd_' . $field_id, 'selected' => $value, 'show_option_none' => __( '— No User —', 'shelter-donations' ), 'option_none_value' => 0 ] );
+                wp_dropdown_users( [ 'name' => 'sd_' . $field_id, 'id' => 'sd_' . $field_id, 'selected' => $value, 'show_option_none' => __( '— No User —', 'shelterkit-donations' ), 'option_none_value' => 0 ] );
                 break;
 
             case 'order_link':
-                if ( $value ) printf( '<a href="%s" class="button">%s #%d</a>', esc_url( admin_url( 'post.php?post=' . $value . '&action=edit' ) ), esc_html__( 'View Order', 'shelter-donations' ), (int) $value );
-                else echo '<span class="description">' . esc_html__( 'Not linked to an order', 'shelter-donations' ) . '</span>';
+                if ( $value ) {
+					printf( '<a href="%s" class="button">%s #%d</a>', esc_url( admin_url( 'post.php?post=' . $value . '&action=edit' ) ), esc_html__( 'View Order', 'shelterkit-donations' ), (int) $value );
+                } else {
+					echo '<span class="description">' . esc_html__( 'Not linked to an order', 'shelterkit-donations' ) . '</span>';
+                }
                 break;
 
             case 'currency_display':
@@ -264,14 +274,18 @@ class Meta_Boxes {
             case 'status_badge':
                 $statuses = [ 'pending' => [ 'Pending Review', 'sd-badge--warning' ], 'approved' => [ 'Approved', 'sd-badge--success' ], 'rejected' => [ 'Rejected', 'sd-badge--error' ] ];
                 $logo_id = $entity['logo_attachment_id'] ?? 0;
-                if ( ! $logo_id ) { echo '<span class="sd-badge sd-badge--muted">No Logo</span>'; break; }
+                if ( ! $logo_id ) {
+					echo '<span class="sd-badge sd-badge--muted">No Logo</span>';
+					break; }
                 $status = $value ?: 'pending';
                 $info = $statuses[ $status ] ?? $statuses['pending'];
                 echo '<span class="sd-badge ' . esc_attr( $info[1] ) . '">' . esc_html( $info[0] ) . '</span>';
                 break;
         }
 
-        if ( ! empty( $field['description'] ) ) echo '<p class="description">' . esc_html( $field['description'] ) . '</p>';
+        if ( ! empty( $field['description'] ) ) {
+			echo '<p class="description">' . esc_html( $field['description'] ) . '</p>';
+        }
         echo '</td></tr>';
     }
 
@@ -279,26 +293,40 @@ class Meta_Boxes {
      * Save meta box data.
      */
     public static function save_meta_boxes( int $post_id, \WP_Post $post ): void {
-        if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) return;
-        if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) return;
-        if ( ! current_user_can( 'edit_post', $post_id ) ) return;
+        if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+			return;
+        }
+        if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+			return;
+        }
+        if ( ! current_user_can( 'edit_post', $post_id ) ) {
+			return;
+        }
 
         $post_type = $post->post_type;
         $config    = self::get_config();
-        if ( ! isset( $config[ $post_type ] ) ) return;
+        if ( ! isset( $config[ $post_type ] ) ) {
+			return;
+        }
 
         foreach ( $config[ $post_type ]['boxes'] as $box_id => $box ) {
             $nonce_key = 'sd_meta_box_' . $box_id . '_nonce';
-            if ( ! isset( $_POST[ $nonce_key ] ) || ! wp_verify_nonce( $_POST[ $nonce_key ], 'sd_meta_box_' . $box_id ) ) continue;
+            // phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- runs on save_post behind its own nonce and capability checks; each value is sanitised by the sanitiser its field declares in the manifest, which the sniff cannot resolve.
+            if ( ! isset( $_POST[ $nonce_key ] ) || ! wp_verify_nonce( $_POST[ $nonce_key ], 'sd_meta_box_' . $box_id ) ) {
+				continue;
+            }
 
             foreach ( $box['fields'] as $field_id => $field ) {
-                if ( ! empty( $field['readonly'] ) ) continue;
+                if ( ! empty( $field['readonly'] ) ) {
+					continue;
+                }
 
                 $key = 'sd_' . $field_id;
                 $meta_key = '_sd_' . $field_id;
 
                 if ( isset( $_POST[ $key ] ) ) {
                     $value = self::sanitize_field( $_POST[ $key ], $field['type'] );
+            // phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
                     update_post_meta( $post_id, $meta_key, $value );
                 } elseif ( 'checkbox' === $field['type'] ) {
                     update_post_meta( $post_id, $meta_key, 0 );
@@ -324,7 +352,7 @@ class Meta_Boxes {
      * `country` field) isn't clobbered by admin saves.
      */
     private static function apply_composite_save( int $post_id, array $cs ): void {
-        $target_meta = $cs['meta_key']  ?? '';
+        $target_meta = $cs['meta_key'] ?? '';
         $field_map   = $cs['field_map'] ?? [];
 
         if ( '' === $target_meta || empty( $field_map ) ) {
@@ -365,10 +393,14 @@ class Meta_Boxes {
      * Enqueue admin assets for meta boxes.
      */
     public static function enqueue_assets( string $hook ): void {
-        if ( 'post.php' !== $hook && 'post-new.php' !== $hook ) return;
+        if ( 'post.php' !== $hook && 'post-new.php' !== $hook ) {
+			return;
+        }
 
         $screen = get_current_screen();
-        if ( ! $screen || ! isset( self::get_config()[ $screen->post_type ] ) ) return;
+        if ( ! $screen || ! isset( self::get_config()[ $screen->post_type ] ) ) {
+			return;
+        }
 
         wp_enqueue_media();
 
@@ -386,7 +418,7 @@ class Meta_Boxes {
 
         $deps = array_values( array_filter( [ 'jquery', $select2_handle ] ) );
         wp_enqueue_script( 'sd-meta-boxes', STARTER_SHELTER_URL . 'assets/js/admin-meta-boxes.js', $deps, STARTER_SHELTER_VERSION, true );
-        wp_localize_script( 'sd-meta-boxes', 'sdMetaBoxes', [ 'restUrl' => rest_url( 'wp/v2/' ), 'nonce' => wp_create_nonce( 'wp_rest' ), 'selectImage' => __( 'Select Image', 'shelter-donations' ), 'useImage' => __( 'Use this image', 'shelter-donations' ) ] );
+        wp_localize_script( 'sd-meta-boxes', 'sdMetaBoxes', [ 'restUrl' => rest_url( 'wp/v2/' ), 'nonce' => wp_create_nonce( 'wp_rest' ), 'selectImage' => __( 'Select Image', 'shelterkit-donations' ), 'useImage' => __( 'Use this image', 'shelterkit-donations' ) ] );
 
         wp_add_inline_style( 'wp-admin', '
             /* Meta box table layout */

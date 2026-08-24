@@ -4,11 +4,11 @@
     "name": "shelter-donations/contribution-tabs",
     "version": "2.1.0",
     "title": "Contribution Tabs",
-    "category": "shelter-donations",
+    "category": "shelterkit-donations",
     "icon": "layout",
     "description": "Tabbed container for donation, membership, and memorial form blocks. Presents multiple giving options in a single, compact interface.",
     "keywords": ["tabs", "contribute", "support", "giving", "donate", "membership", "memorial"],
-    "textdomain": "shelter-donations",
+    "textdomain": "shelterkit-donations",
     "supports": {
         "html": false,
         "align": ["wide", "full"],

@@ -69,7 +69,7 @@ class Dashboard_Widget {
 
         wp_add_dashboard_widget(
             self::WIDGET_ID,
-            __( 'Shelter Donations Overview', 'shelter-donations' ),
+            __( 'Shelter Donations Overview', 'shelterkit-donations' ),
             [ self::class, 'render_widget' ],
             [ self::class, 'render_widget_config' ],
             null,
@@ -104,7 +104,7 @@ class Dashboard_Widget {
             $ability = wp_get_ability( 'shelter-reports/dashboard-stats' );
 
             if ( ! $ability ) {
-                echo '<p>' . esc_html__( 'Unable to load statistics.', 'shelter-donations' ) . '</p>';
+                echo '<p>' . esc_html__( 'Unable to load statistics.', 'shelterkit-donations' ) . '</p>';
                 return;
             }
 
@@ -128,13 +128,13 @@ class Dashboard_Widget {
         <div class="sd-widget-tabs">
             <?php
             $periods = [
-                'today'  => __( 'Today', 'shelter-donations' ),
-                'week'   => __( 'Week', 'shelter-donations' ),
-                'month'  => __( 'Month', 'shelter-donations' ),
-                'year'   => __( 'Year', 'shelter-donations' ),
+                'today'  => __( 'Today', 'shelterkit-donations' ),
+                'week'   => __( 'Week', 'shelterkit-donations' ),
+                'month'  => __( 'Month', 'shelterkit-donations' ),
+                'year'   => __( 'Year', 'shelterkit-donations' ),
             ];
             foreach ( $periods as $key => $label ) :
-            ?>
+				?>
             <button type="button" 
                     class="sd-tab <?php echo $period === $key ? 'active' : ''; ?>" 
                     data-period="<?php echo esc_attr( $key ); ?>">
@@ -153,7 +153,7 @@ class Dashboard_Widget {
         <div class="sd-widget-actions">
             <h4>
                 <span class="dashicons dashicons-warning" style="color: #dba617;"></span>
-                <?php esc_html_e( 'Action Required', 'shelter-donations' ); ?>
+                <?php esc_html_e( 'Action Required', 'shelterkit-donations' ); ?>
             </h4>
             <ul>
                 <?php foreach ( $action_items as $item ) : ?>
@@ -170,11 +170,11 @@ class Dashboard_Widget {
 
         <!-- Recent Activity -->
         <div class="sd-widget-recent">
-            <h4><?php esc_html_e( 'Recent Activity', 'shelter-donations' ); ?></h4>
-            <?php 
+            <h4><?php esc_html_e( 'Recent Activity', 'shelterkit-donations' ); ?></h4>
+            <?php
             $recent = self::get_recent_activity( self::RECENT_ACTIVITY_COUNT );
             if ( ! empty( $recent ) ) :
-            ?>
+				?>
             <ul>
                 <?php foreach ( $recent as $activity ) : ?>
                 <li>
@@ -188,17 +188,17 @@ class Dashboard_Widget {
                 <?php endforeach; ?>
             </ul>
             <?php else : ?>
-            <p class="sd-no-activity"><?php esc_html_e( 'No recent activity.', 'shelter-donations' ); ?></p>
+            <p class="sd-no-activity"><?php esc_html_e( 'No recent activity.', 'shelterkit-donations' ); ?></p>
             <?php endif; ?>
         </div>
 
         <!-- Footer Links -->
         <div class="sd-widget-footer">
-            <a href="<?php echo esc_url( admin_url( 'admin.php?page=shelter-donations-reports' ) ); ?>" class="button button-primary">
-                <?php esc_html_e( 'View Reports', 'shelter-donations' ); ?>
+            <a href="<?php echo esc_url( admin_url( 'admin.php?page=shelterkit-donations-reports' ) ); ?>" class="button button-primary">
+                <?php esc_html_e( 'View Reports', 'shelterkit-donations' ); ?>
             </a>
             <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=sd_donation' ) ); ?>" class="button">
-                <?php esc_html_e( 'All Donations', 'shelter-donations' ); ?>
+                <?php esc_html_e( 'All Donations', 'shelterkit-donations' ); ?>
             </a>
         </div>
 
@@ -248,12 +248,12 @@ class Dashboard_Widget {
         $period = get_user_option( 'sd_dashboard_period' ) ?: 'month';
         ?>
         <p>
-            <label for="sd_dashboard_period"><?php esc_html_e( 'Default period:', 'shelter-donations' ); ?></label>
+            <label for="sd_dashboard_period"><?php esc_html_e( 'Default period:', 'shelterkit-donations' ); ?></label>
             <select name="sd_dashboard_period" id="sd_dashboard_period">
-                <option value="today" <?php selected( $period, 'today' ); ?>><?php esc_html_e( 'Today', 'shelter-donations' ); ?></option>
-                <option value="week" <?php selected( $period, 'week' ); ?>><?php esc_html_e( 'This Week', 'shelter-donations' ); ?></option>
-                <option value="month" <?php selected( $period, 'month' ); ?>><?php esc_html_e( 'This Month', 'shelter-donations' ); ?></option>
-                <option value="year" <?php selected( $period, 'year' ); ?>><?php esc_html_e( 'This Year', 'shelter-donations' ); ?></option>
+                <option value="today" <?php selected( $period, 'today' ); ?>><?php esc_html_e( 'Today', 'shelterkit-donations' ); ?></option>
+                <option value="week" <?php selected( $period, 'week' ); ?>><?php esc_html_e( 'This Week', 'shelterkit-donations' ); ?></option>
+                <option value="month" <?php selected( $period, 'month' ); ?>><?php esc_html_e( 'This Month', 'shelterkit-donations' ); ?></option>
+                <option value="year" <?php selected( $period, 'year' ); ?>><?php esc_html_e( 'This Year', 'shelterkit-donations' ); ?></option>
             </select>
         </p>
         <?php
@@ -360,9 +360,9 @@ class Dashboard_Widget {
 
         $activity = [];
         foreach ( $result['items'] ?? [] as $row ) {
-            $donor_name = __( 'Someone', 'shelter-donations' );
+            $donor_name = __( 'Someone', 'shelterkit-donations' );
             if ( ! empty( $row['is_anonymous'] ) ) {
-                $donor_name = __( 'Anonymous', 'shelter-donations' );
+                $donor_name = __( 'Anonymous', 'shelterkit-donations' );
             } elseif ( ! empty( $row['donor_name'] ) ) {
                 $donor_name = $row['donor_name'];
             }
@@ -372,14 +372,14 @@ class Dashboard_Widget {
             // comparable with time(). Falling back to strtotime(post_date)
             // would mix server-PHP-TZ with UTC.
             $ts     = (int) ( $row['created_ts'] ?? time() );
-            $time   = human_time_diff( $ts, time() ) . ' ' . __( 'ago', 'shelter-donations' );
+            $time   = human_time_diff( $ts, time() ) . ' ' . __( 'ago', 'shelterkit-donations' );
 
             switch ( $row['type'] ?? '' ) {
                 case 'sd_donation':
                     $activity[] = [
                         'icon'   => '💰',
                         /* translators: %s: donor name */
-                        'text'   => sprintf( '<strong>%s</strong> ' . esc_html__( 'donated', 'shelter-donations' ), esc_html( $donor_name ) ),
+                        'text'   => sprintf( '<strong>%s</strong> ' . esc_html__( 'donated', 'shelterkit-donations' ), esc_html( $donor_name ) ),
                         'amount' => $amount,
                         'time'   => $time,
                     ];
@@ -390,18 +390,18 @@ class Dashboard_Widget {
                     $activity[] = [
                         'icon'   => '🏅',
                         /* translators: 1: donor name 2: tier label */
-                        'text'   => sprintf( '<strong>%1$s</strong> ' . esc_html__( 'joined as', 'shelter-donations' ) . ' %2$s', esc_html( $donor_name ), esc_html( $tier_label ) ),
+                        'text'   => sprintf( '<strong>%1$s</strong> ' . esc_html__( 'joined as', 'shelterkit-donations' ) . ' %2$s', esc_html( $donor_name ), esc_html( $tier_label ) ),
                         'amount' => $amount,
                         'time'   => $time,
                     ];
                     break;
 
                 case 'sd_memorial':
-                    $honoree = $row['honoree_name'] ?? __( 'someone special', 'shelter-donations' );
+                    $honoree = $row['honoree_name'] ?? __( 'someone special', 'shelterkit-donations' );
                     $activity[] = [
                         'icon'   => '❤️',
                         /* translators: %s: honoree name */
-                        'text'   => sprintf( esc_html__( 'Memorial for', 'shelter-donations' ) . ' <strong>%s</strong>', esc_html( $honoree ) ),
+                        'text'   => sprintf( esc_html__( 'Memorial for', 'shelterkit-donations' ) . ' <strong>%s</strong>', esc_html( $honoree ) ),
                         'amount' => $amount,
                         'time'   => $time,
                     ];
@@ -432,11 +432,11 @@ class Dashboard_Widget {
         $memorial_stats   = $stats['memorials'] ?? [];
 
         $cards = [
-            [ 'class' => 'sd-stat-primary', 'icon' => '💰', 'value' => Helpers\format_currency( (float) ( $donation_stats['total'] ?? 0 ) ),         'label' => __( 'Donations', 'shelter-donations' ) ],
-            [ 'class' => '',                'icon' => '📝', 'value' => number_format( (int)   ( $donation_stats['count'] ?? 0 ) ),                   'label' => __( 'Transactions', 'shelter-donations' ) ],
-            [ 'class' => '',                'icon' => '👥', 'value' => number_format( (int)   ( $donation_stats['unique_donors'] ?? 0 ) ),           'label' => __( 'Donors', 'shelter-donations' ) ],
-            [ 'class' => '',                'icon' => '🏅', 'value' => number_format( (int)   ( $membership_stats['new'] ?? 0 ) ),                   'label' => __( 'New Members', 'shelter-donations' ) ],
-            [ 'class' => '',                'icon' => '❤️', 'value' => number_format( (int)   ( $memorial_stats['total'] ?? 0 ) ),                   'label' => __( 'Memorials', 'shelter-donations' ) ],
+            [ 'class' => 'sd-stat-primary', 'icon' => '💰', 'value' => Helpers\format_currency( (float) ( $donation_stats['total'] ?? 0 ) ), 'label' => __( 'Donations', 'shelterkit-donations' ) ],
+            [ 'class' => '', 'icon' => '📝', 'value' => number_format( (int) ( $donation_stats['count'] ?? 0 ) ), 'label' => __( 'Transactions', 'shelterkit-donations' ) ],
+            [ 'class' => '', 'icon' => '👥', 'value' => number_format( (int) ( $donation_stats['unique_donors'] ?? 0 ) ), 'label' => __( 'Donors', 'shelterkit-donations' ) ],
+            [ 'class' => '', 'icon' => '🏅', 'value' => number_format( (int) ( $membership_stats['new'] ?? 0 ) ), 'label' => __( 'New Members', 'shelterkit-donations' ) ],
+            [ 'class' => '', 'icon' => '❤️', 'value' => number_format( (int) ( $memorial_stats['total'] ?? 0 ) ), 'label' => __( 'Memorials', 'shelterkit-donations' ) ],
         ];
 
         ob_start();

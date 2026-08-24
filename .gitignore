@@ -34,3 +34,9 @@ error_log
 # === Distribution packaging ===
 /dist/
 *.zip
+
+# Distribution build output
+/build/
+
+# Screenshot drafts; keepers are copied into .wordpress-org/
+/screenshots-draft/

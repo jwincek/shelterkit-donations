@@ -4,11 +4,11 @@
     "name": "shelter-donations/campaign-card",
     "version": "1.0.0",
     "title": "Campaign Card",
-    "category": "shelter-donations",
+    "category": "shelterkit-donations",
     "icon": "megaphone",
     "description": "Display a fundraising campaign with progress bar. Can be used as a standalone block or within Query Loop.",
     "keywords": [ "campaign", "fundraiser", "goal", "progress", "donation" ],
-    "textdomain": "shelter-donations",
+    "textdomain": "shelterkit-donations",
     "usesContext": [ "postId", "postType" ],
     "supports": {
         "html": false,

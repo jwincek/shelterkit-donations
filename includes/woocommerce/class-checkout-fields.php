@@ -187,7 +187,7 @@ class Checkout_Fields {
 
         foreach ( WC()->cart->get_cart() as $cart_item ) {
             $product = $cart_item['data'];
-            
+
             if ( ! $product ) {
                 continue;
             }
@@ -197,7 +197,7 @@ class Checkout_Fields {
 
             if ( $config ) {
                 $type = $config['product_type'] ?? 'donation';
-                
+
                 // Check for business membership specifically.
                 if ( 'membership' === $type ) {
                     $sku_prefix = $config['sku_prefix'] ?? '';
@@ -263,8 +263,8 @@ class Checkout_Fields {
         // Memorial section.
         if ( in_array( 'memorial', $product_types, true ) ) {
             $sections['memorial'] = [
-                'title'       => __( 'Memorial Tribute Information', 'shelter-donations' ),
-                'description' => __( 'Please provide details about the person or pet you are honoring.', 'shelter-donations' ),
+                'title'       => __( 'Memorial Tribute Information', 'shelterkit-donations' ),
+                'description' => __( 'Please provide details about the person or pet you are honoring.', 'shelterkit-donations' ),
                 'fields'      => [],
             ];
         }
@@ -272,15 +272,15 @@ class Checkout_Fields {
         // Business membership section.
         if ( in_array( 'business_membership', $product_types, true ) ) {
             $sections['business'] = [
-                'title'       => __( 'Business Information', 'shelter-donations' ),
-                'description' => __( 'Your business will be recognized as a supporting partner.', 'shelter-donations' ),
+                'title'       => __( 'Business Information', 'shelterkit-donations' ),
+                'description' => __( 'Your business will be recognized as a supporting partner.', 'shelterkit-donations' ),
                 'fields'      => [],
             ];
         }
 
         // General donation options.
         $sections['donation_options'] = [
-            'title'  => __( 'Donation Options', 'shelter-donations' ),
+            'title'  => __( 'Donation Options', 'shelterkit-donations' ),
             'fields' => [],
         ];
 
@@ -371,7 +371,7 @@ class Checkout_Fields {
      * @return array Campaign options.
      */
     private static function get_campaign_options(): array {
-        $options = [ '' => __( '— Select a campaign (optional) —', 'shelter-donations' ) ];
+        $options = [ '' => __( '— Select a campaign (optional) —', 'shelterkit-donations' ) ];
 
         $campaigns = get_terms( [
             'taxonomy'   => 'sd_campaign',
@@ -407,7 +407,9 @@ class Checkout_Fields {
 
             // phpcs:ignore WordPress.Security.NonceVerification.Missing
             if ( isset( $_POST[ $field_name ] ) ) {
+                // phpcs:disable WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- runs on a WooCommerce checkout hook, after WooCommerce has verified its own checkout nonce; each value is sanitised by the sanitiser its field declares in the manifest.
                 $value = self::sanitize_field_value( $_POST[ $field_name ], $field );
+                // phpcs:enable WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
                 $order->update_meta_data( $meta_key, $value );
             }
         }
@@ -451,7 +453,8 @@ class Checkout_Fields {
             }
 
             $field_name = 'sd_' . $key;
-            
+
+            // phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- runs on a WooCommerce checkout hook after WooCommerce's own nonce check; this is the validation pass, so it reads raw input by definition.
             // phpcs:ignore WordPress.Security.NonceVerification.Missing
             $value = $_POST[ $field_name ] ?? '';
 
@@ -460,7 +463,8 @@ class Checkout_Fields {
                 $conditional_field = 'sd_' . $field['conditional'];
                 // phpcs:ignore WordPress.Security.NonceVerification.Missing
                 $conditional_value = $_POST[ $conditional_field ] ?? '';
-                
+            // phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+
                 if ( ! $conditional_value ) {
                     continue; // Conditional parent not checked, skip validation.
                 }
@@ -470,7 +474,7 @@ class Checkout_Fields {
                 wc_add_notice(
                     sprintf(
                         /* translators: %s: field label */
-                        __( '%s is a required field.', 'shelter-donations' ),
+                        __( '%s is a required field.', 'shelterkit-donations' ),
                         '<strong>' . esc_html( $field['label'] ) . '</strong>'
                     ),
                     'error'
@@ -488,7 +492,7 @@ class Checkout_Fields {
      */
     public static function display_admin_order_fields( \WC_Order $order ): void {
         $has_fields = false;
-        $output = '<div class="sd-admin-order-fields"><h3>' . esc_html__( 'Shelter Donation Details', 'shelter-donations' ) . '</h3>';
+        $output = '<div class="sd-admin-order-fields"><h3>' . esc_html__( 'Shelter Donation Details', 'shelterkit-donations' ) . '</h3>';
 
         foreach ( self::get_field_definitions() as $key => $field ) {
             $meta_key = $field['meta_key'] ?? '_sd_' . $key;
@@ -497,7 +501,7 @@ class Checkout_Fields {
             if ( '' !== $value && null !== $value && false !== $value ) {
                 $has_fields = true;
                 $display_value = self::format_field_display_value( $value, $field );
-                
+
                 $output .= sprintf(
                     '<p><strong>%s:</strong> %s</p>',
                     esc_html( $field['label'] ),
@@ -535,7 +539,7 @@ class Checkout_Fields {
         }
 
         if ( ! empty( $fields_output ) ) {
-            echo '<h2>' . esc_html__( 'Donation Details', 'shelter-donations' ) . '</h2>';
+            echo '<h2>' . esc_html__( 'Donation Details', 'shelterkit-donations' ) . '</h2>';
             echo '<p>' . implode( '<br>', array_map( 'esc_html', $fields_output ) ) . '</p>';
         }
     }
@@ -553,7 +557,7 @@ class Checkout_Fields {
         $type = $field['type'] ?? 'text';
 
         if ( 'checkbox' === $type ) {
-            return $value ? __( 'Yes', 'shelter-donations' ) : __( 'No', 'shelter-donations' );
+            return $value ? __( 'Yes', 'shelterkit-donations' ) : __( 'No', 'shelterkit-donations' );
         }
 
         if ( 'select' === $type && is_array( $field['options'] ?? null ) ) {

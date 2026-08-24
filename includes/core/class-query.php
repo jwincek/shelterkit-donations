@@ -636,10 +636,12 @@ class Query {
 
         // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         return (float) $wpdb->get_var( $wpdb->prepare(
+            // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the only interpolated parts are $wpdb table properties and a generated %d placeholder list; every user value is bound through $wpdb->prepare().
             "SELECT COALESCE( SUM( CAST( meta_value AS DECIMAL(15,2) ) ), 0 )
              FROM {$wpdb->postmeta}
              WHERE post_id IN ( $placeholders ) AND meta_key = %s",
             ...array_merge( $ids, [ $meta_key ] )
+            // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         ) );
     }
 

@@ -24,9 +24,9 @@ class Activator {
      * @var array
      */
     private static array $products = [
-        'shelter-donations' => [
+        'shelterkit-donations' => [
             'name'        => 'Shelter Donations',
-            'sku'         => 'shelter-donations',
+            'sku'         => 'shelterkit-donations',
             'description' => 'Support us with a donation to help care for animals in need.',
             'short_desc'  => 'Support us with a donation.',
             'category'    => 'Support Us',
@@ -91,9 +91,9 @@ class Activator {
                 ],
             ],
         ],
-        'shelter-donations-in-memoriam' => [
+        'shelterkit-donations-in-memoriam' => [
             'name'        => 'In Memoriam Donations',
-            'sku'         => 'shelter-donations-in-memoriam',
+            'sku'         => 'shelterkit-donations-in-memoriam',
             'description' => 'Honor the memory of a person or pet with a meaningful donation.',
             'short_desc'  => 'Make a donation in memory of a person or pet.',
             'category'    => 'Support Us',
@@ -119,7 +119,7 @@ class Activator {
     public static function activate(): void {
         // Schedule product creation for after WooCommerce loads.
         add_action( 'woocommerce_loaded', [ __CLASS__, 'maybe_create_products' ] );
-        
+
         // If WooCommerce is already loaded, run immediately.
         if ( class_exists( 'WooCommerce' ) ) {
             self::maybe_create_products();
@@ -176,7 +176,7 @@ class Activator {
 
         // Create the variable product.
         $product_id = self::create_variable_product( $product_data );
-        
+
         if ( $product_id ) {
             update_option( $product_data['option_key'], $product_id );
         }
@@ -193,7 +193,7 @@ class Activator {
     private static function create_variable_product( array $data ) {
         // Create the parent variable product.
         $product = new \WC_Product_Variable();
-        
+
         $product->set_name( $data['name'] );
         $product->set_sku( $data['sku'] );
         $product->set_description( $data['description'] );
@@ -203,24 +203,24 @@ class Activator {
         $product->set_sold_individually( true );
         $product->set_virtual( $data['virtual'] ?? true );
         $product->set_tax_status( 'none' );
-        
+
         // Set up the attribute.
         $attribute = new \WC_Product_Attribute();
         $attribute->set_name( $data['attribute']['name'] );
         $attribute->set_options( array_keys( $data['attribute']['options'] ) );
         $attribute->set_visible( true );
         $attribute->set_variation( true );
-        
+
         $product->set_attributes( [ $attribute ] );
-        
+
         // Assign category.
         $category_id = self::get_or_create_category( $data['category'] );
         if ( $category_id ) {
             $product->set_category_ids( [ $category_id ] );
         }
-        
+
         $product_id = $product->save();
-        
+
         if ( ! $product_id ) {
             return false;
         }
@@ -254,20 +254,20 @@ class Activator {
      */
     private static function create_variation( int $parent_id, string $attribute_name, string $option_name, float $price, bool $virtual = true ): void {
         $variation = new \WC_Product_Variation();
-        
+
         $variation->set_parent_id( $parent_id );
         $variation->set_status( 'publish' );
         $variation->set_regular_price( (string) $price );
         $variation->set_virtual( $virtual );
         $variation->set_manage_stock( false );
         $variation->set_stock_status( 'instock' );
-        
+
         // Set the attribute for this variation.
         $attribute_slug = sanitize_title( $attribute_name );
         $variation->set_attributes( [
             $attribute_slug => $option_name,
         ] );
-        
+
         $variation->save();
     }
 
@@ -329,17 +329,17 @@ class Activator {
      */
     private static function get_or_create_category( string $name ) {
         $term = get_term_by( 'name', $name, 'product_cat' );
-        
+
         if ( $term ) {
             return $term->term_id;
         }
-        
+
         $result = wp_insert_term( $name, 'product_cat' );
-        
+
         if ( is_wp_error( $result ) ) {
             return false;
         }
-        
+
         return $result['term_id'];
     }
 
@@ -378,7 +378,7 @@ class Activator {
         foreach ( self::$products as $key => $product_data ) {
             $product_id = get_option( $product_data['option_key'], 0 );
             $product = $product_id ? wc_get_product( $product_id ) : null;
-            
+
             $status[ $key ] = [
                 'name'       => $product_data['name'],
                 'option_key' => $product_data['option_key'],
@@ -398,7 +398,7 @@ class Activator {
      */
     public static function reset_product_flags(): void {
         delete_option( 'sd_products_created' );
-        
+
         foreach ( self::$products as $product_data ) {
             delete_option( $product_data['option_key'] );
         }

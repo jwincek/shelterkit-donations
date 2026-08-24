@@ -11,9 +11,8 @@ declare( strict_types = 1 );
 
 namespace Starter_Shelter\Admin;
 
-use function Starter_Shelter\Helpers\fputcsv_safe;
-
 use Starter_Shelter\Core\Config;
+use function Starter_Shelter\Helpers\fputcsv_safe;
 
 /**
  * Handles the admin reports page with donation and membership statistics.
@@ -28,7 +27,7 @@ class Reports {
      * @since 1.0.0
      * @var string
      */
-    private const PAGE_SLUG = 'shelter-donations-reports';
+    private const PAGE_SLUG = 'shelterkit-donations-reports';
 
     /**
      * Submenu page hook name returned by add_submenu_page().
@@ -61,8 +60,8 @@ class Reports {
     public static function add_reports_page(): void {
         self::$page_hook = (string) add_submenu_page(
             Menu::MENU_SLUG,
-            __( 'Shelter Donations Reports', 'shelter-donations' ),
-            __( 'Reports', 'shelter-donations' ),
+            __( 'Shelter Donations Reports', 'shelterkit-donations' ),
+            __( 'Reports', 'shelterkit-donations' ),
             'manage_options',
             self::PAGE_SLUG,
             [ self::class, 'render_reports_page' ]
@@ -144,24 +143,24 @@ class Reports {
 
         ?>
         <div class="wrap sd-reports">
-            <h1><?php esc_html_e( 'Shelter Donations Reports', 'shelter-donations' ); ?></h1>
+            <h1><?php esc_html_e( 'Shelter Donations Reports', 'shelterkit-donations' ); ?></h1>
 
             <nav class="nav-tab-wrapper">
                 <a href="<?php echo esc_url( add_query_arg( 'tab', 'donations' ) ); ?>" 
                    class="nav-tab <?php echo 'donations' === $active_tab ? 'nav-tab-active' : ''; ?>">
-                    <?php esc_html_e( 'Donations', 'shelter-donations' ); ?>
+                    <?php esc_html_e( 'Donations', 'shelterkit-donations' ); ?>
                 </a>
                 <a href="<?php echo esc_url( add_query_arg( 'tab', 'memberships' ) ); ?>" 
                    class="nav-tab <?php echo 'memberships' === $active_tab ? 'nav-tab-active' : ''; ?>">
-                    <?php esc_html_e( 'Memberships', 'shelter-donations' ); ?>
+                    <?php esc_html_e( 'Memberships', 'shelterkit-donations' ); ?>
                 </a>
                 <a href="<?php echo esc_url( add_query_arg( 'tab', 'memorials' ) ); ?>" 
                    class="nav-tab <?php echo 'memorials' === $active_tab ? 'nav-tab-active' : ''; ?>">
-                    <?php esc_html_e( 'Memorials', 'shelter-donations' ); ?>
+                    <?php esc_html_e( 'Memorials', 'shelterkit-donations' ); ?>
                 </a>
                 <a href="<?php echo esc_url( add_query_arg( 'tab', 'campaigns' ) ); ?>" 
                    class="nav-tab <?php echo 'campaigns' === $active_tab ? 'nav-tab-active' : ''; ?>">
-                    <?php esc_html_e( 'Campaigns', 'shelter-donations' ); ?>
+                    <?php esc_html_e( 'Campaigns', 'shelterkit-donations' ); ?>
                 </a>
             </nav>
 
@@ -172,40 +171,40 @@ class Reports {
                     
                     <select name="period" id="sd-period-filter" onchange="document.getElementById('sd-custom-range').style.display = this.value === 'custom' ? 'inline-flex' : 'none';">
                         <option value="today" <?php selected( $period, 'today' ); ?>>
-                            <?php esc_html_e( 'Today', 'shelter-donations' ); ?>
+                            <?php esc_html_e( 'Today', 'shelterkit-donations' ); ?>
                         </option>
                         <option value="week" <?php selected( $period, 'week' ); ?>>
-                            <?php esc_html_e( 'This Week', 'shelter-donations' ); ?>
+                            <?php esc_html_e( 'This Week', 'shelterkit-donations' ); ?>
                         </option>
                         <option value="month" <?php selected( $period, 'month' ); ?>>
-                            <?php esc_html_e( 'This Month', 'shelter-donations' ); ?>
+                            <?php esc_html_e( 'This Month', 'shelterkit-donations' ); ?>
                         </option>
                         <option value="quarter" <?php selected( $period, 'quarter' ); ?>>
-                            <?php esc_html_e( 'This Quarter', 'shelter-donations' ); ?>
+                            <?php esc_html_e( 'This Quarter', 'shelterkit-donations' ); ?>
                         </option>
                         <option value="year" <?php selected( $period, 'year' ); ?>>
-                            <?php esc_html_e( 'This Year', 'shelter-donations' ); ?>
+                            <?php esc_html_e( 'This Year', 'shelterkit-donations' ); ?>
                         </option>
                         <option value="fiscal_year" <?php selected( $period, 'fiscal_year' ); ?>>
-                            <?php esc_html_e( 'Fiscal Year', 'shelter-donations' ); ?>
+                            <?php esc_html_e( 'Fiscal Year', 'shelterkit-donations' ); ?>
                         </option>
                         <option value="all_time" <?php selected( $period, 'all_time' ); ?>>
-                            <?php esc_html_e( 'All Time', 'shelter-donations' ); ?>
+                            <?php esc_html_e( 'All Time', 'shelterkit-donations' ); ?>
                         </option>
                         <option value="custom" <?php selected( $period, 'custom' ); ?>>
-                            <?php esc_html_e( 'Custom Range', 'shelter-donations' ); ?>
+                            <?php esc_html_e( 'Custom Range', 'shelterkit-donations' ); ?>
                         </option>
                     </select>
 
                     <span id="sd-custom-range" style="display: <?php echo 'custom' === $period ? 'inline-flex' : 'none'; ?>; gap: 5px; align-items: center;">
-                        <input type="date" name="date_from" value="<?php echo esc_attr( sanitize_text_field( $_GET['date_from'] ?? '' ) ); ?>" />
+                        <input type="date" name="date_from" value="<?php echo esc_attr( sanitize_text_field( wp_unslash( $_GET['date_from'] ?? '' ) ) ); ?>" />
                         <span>—</span>
-                        <input type="date" name="date_to" value="<?php echo esc_attr( sanitize_text_field( $_GET['date_to'] ?? '' ) ); ?>" />
+                        <input type="date" name="date_to" value="<?php echo esc_attr( sanitize_text_field( wp_unslash( $_GET['date_to'] ?? '' ) ) ); ?>" />
                     </span>
 
                     <?php if ( 'campaigns' !== $active_tab && ! empty( $campaign_terms ) ) : ?>
                     <select name="campaign_id" id="sd-campaign-filter">
-                        <option value="0"><?php esc_html_e( 'All Campaigns', 'shelter-donations' ); ?></option>
+                        <option value="0"><?php esc_html_e( 'All Campaigns', 'shelterkit-donations' ); ?></option>
                         <?php foreach ( $campaign_terms as $term ) : ?>
                             <option value="<?php echo esc_attr( (string) $term->term_id ); ?>" <?php selected( $campaign_id, $term->term_id ); ?>>
                                 <?php echo esc_html( $term->name ); ?>
@@ -215,12 +214,12 @@ class Reports {
                     <?php endif; ?>
 
                     <button type="submit" class="button">
-                        <?php esc_html_e( 'Filter', 'shelter-donations' ); ?>
+                        <?php esc_html_e( 'Filter', 'shelterkit-donations' ); ?>
                     </button>
                     
                     <?php if ( 'campaigns' !== $active_tab ) : // Campaigns tab has per-row export links in the table; the top button has no campaign_id to send. ?>
                     <button type="button" class="button sd-export-btn" data-tab="<?php echo esc_attr( $active_tab ); ?>">
-                        <?php esc_html_e( 'Export CSV', 'shelter-donations' ); ?>
+                        <?php esc_html_e( 'Export CSV', 'shelterkit-donations' ); ?>
                     </button>
                     <?php endif; ?>
                 </form>
@@ -233,7 +232,7 @@ class Reports {
                         '<p class="description"><em>%s</em></p>',
                         esc_html( sprintf(
                             /* translators: %s: campaign name. */
-                            __( 'Filtered by campaign: %s. Donor totals (lifetime / new) are not campaign-scoped — they reflect the period only.', 'shelter-donations' ),
+                            __( 'Filtered by campaign: %s. Donor totals (lifetime / new) are not campaign-scoped — they reflect the period only.', 'shelterkit-donations' ),
                             $campaign_term->name
                         ) )
                     );
@@ -305,7 +304,7 @@ class Reports {
         $stats = self::fetch_stats(
             'shelter-donations/get-stats',
             $args,
-            __( 'Unable to load donation statistics.', 'shelter-donations' )
+            __( 'Unable to load donation statistics.', 'shelterkit-donations' )
         );
         if ( ! $stats ) {
             return;
@@ -314,19 +313,19 @@ class Reports {
         <div class="sd-stats-cards">
             <div class="sd-stat-card">
                 <span class="sd-stat-value"><?php echo esc_html( $stats['total_formatted'] ?? '$0.00' ); ?></span>
-                <span class="sd-stat-label"><?php esc_html_e( 'Total Donations', 'shelter-donations' ); ?></span>
+                <span class="sd-stat-label"><?php esc_html_e( 'Total Donations', 'shelterkit-donations' ); ?></span>
             </div>
             <div class="sd-stat-card">
                 <span class="sd-stat-value"><?php echo esc_html( number_format( $stats['donation_count'] ?? 0 ) ); ?></span>
-                <span class="sd-stat-label"><?php esc_html_e( 'Number of Donations', 'shelter-donations' ); ?></span>
+                <span class="sd-stat-label"><?php esc_html_e( 'Number of Donations', 'shelterkit-donations' ); ?></span>
             </div>
             <div class="sd-stat-card">
                 <span class="sd-stat-value"><?php echo esc_html( number_format( $stats['donor_count'] ?? 0 ) ); ?></span>
-                <span class="sd-stat-label"><?php esc_html_e( 'Unique Donors', 'shelter-donations' ); ?></span>
+                <span class="sd-stat-label"><?php esc_html_e( 'Unique Donors', 'shelterkit-donations' ); ?></span>
             </div>
             <div class="sd-stat-card">
                 <span class="sd-stat-value"><?php echo esc_html( '$' . number_format( $stats['average_amount'] ?? 0, 2 ) ); ?></span>
-                <span class="sd-stat-label"><?php esc_html_e( 'Average Donation', 'shelter-donations' ); ?></span>
+                <span class="sd-stat-label"><?php esc_html_e( 'Average Donation', 'shelterkit-donations' ); ?></span>
             </div>
         </div>
 
@@ -336,13 +335,13 @@ class Reports {
         ?>
 
         <?php if ( ! empty( $stats['by_allocation'] ) ) : ?>
-        <h3><?php esc_html_e( 'By Allocation', 'shelter-donations' ); ?></h3>
+        <h3><?php esc_html_e( 'By Allocation', 'shelterkit-donations' ); ?></h3>
         <table class="wp-list-table widefat fixed striped">
             <thead>
                 <tr>
-                    <th><?php esc_html_e( 'Allocation', 'shelter-donations' ); ?></th>
-                    <th><?php esc_html_e( 'Count', 'shelter-donations' ); ?></th>
-                    <th><?php esc_html_e( 'Total', 'shelter-donations' ); ?></th>
+                    <th><?php esc_html_e( 'Allocation', 'shelterkit-donations' ); ?></th>
+                    <th><?php esc_html_e( 'Count', 'shelterkit-donations' ); ?></th>
+                    <th><?php esc_html_e( 'Total', 'shelterkit-donations' ); ?></th>
                 </tr>
             </thead>
             <tbody>
@@ -383,7 +382,7 @@ class Reports {
         $result = self::fetch_stats(
             'shelter-donations/list',
             $args,
-            __( 'Unable to load recent donations.', 'shelter-donations' )
+            __( 'Unable to load recent donations.', 'shelterkit-donations' )
         );
         $items = $result['items'] ?? [];
         if ( empty( $items ) ) {
@@ -393,30 +392,31 @@ class Reports {
         $donor_map = self::batch_donor_info( array_column( $items, 'donor_id' ) );
         $total     = (int) ( $result['total'] ?? count( $items ) );
         ?>
-        <h3><?php esc_html_e( 'Recent Donations', 'shelter-donations' ); ?></h3>
+        <h3><?php esc_html_e( 'Recent Donations', 'shelterkit-donations' ); ?></h3>
         <table class="wp-list-table widefat fixed striped">
             <thead>
                 <tr>
-                    <th><?php esc_html_e( 'Date', 'shelter-donations' ); ?></th>
-                    <th><?php esc_html_e( 'Donor', 'shelter-donations' ); ?></th>
-                    <th><?php esc_html_e( 'Amount', 'shelter-donations' ); ?></th>
-                    <th><?php esc_html_e( 'Allocation', 'shelter-donations' ); ?></th>
-                    <th><?php esc_html_e( 'Campaign', 'shelter-donations' ); ?></th>
+                    <th><?php esc_html_e( 'Date', 'shelterkit-donations' ); ?></th>
+                    <th><?php esc_html_e( 'Donor', 'shelterkit-donations' ); ?></th>
+                    <th><?php esc_html_e( 'Amount', 'shelterkit-donations' ); ?></th>
+                    <th><?php esc_html_e( 'Allocation', 'shelterkit-donations' ); ?></th>
+                    <th><?php esc_html_e( 'Campaign', 'shelterkit-donations' ); ?></th>
                     <th></th>
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ( $items as $donation ) :
+                <?php
+                foreach ( $items as $donation ) :
                     $donor_id     = (int) ( $donation['donor_id'] ?? 0 );
                     $donor        = $donor_map[ $donor_id ] ?? [ 'name' => '', 'email' => '' ];
                     $display_name = $donation['is_anonymous']
-                        ? __( 'Anonymous', 'shelter-donations' )
-                        : ( $donation['donor_name'] ?: $donor['name'] ?: __( 'Unknown', 'shelter-donations' ) );
+                        ? __( 'Anonymous', 'shelterkit-donations' )
+                        : ( $donation['donor_name'] ?: $donor['name'] ?: __( 'Unknown', 'shelterkit-donations' ) );
                     $campaigns    = is_array( $donation['campaign'] ?? null )
                         ? implode( ', ', array_filter( array_map( static fn( $c ) => is_array( $c ) ? ( $c['name'] ?? '' ) : '', $donation['campaign'] ) ) )
                         : '';
                     $edit_url     = (int) ( $donation['id'] ?? 0 ) > 0 ? get_edit_post_link( (int) $donation['id'] ) : '';
-                ?>
+					?>
                 <tr>
                     <td><?php echo esc_html( $donation['date_formatted'] ?? '' ); ?></td>
                     <td><?php echo esc_html( $display_name ); ?></td>
@@ -425,7 +425,7 @@ class Reports {
                     <td><?php echo esc_html( $campaigns ); ?></td>
                     <td>
                         <?php if ( $edit_url ) : ?>
-                        <a href="<?php echo esc_url( $edit_url ); ?>"><?php esc_html_e( 'View', 'shelter-donations' ); ?></a>
+                        <a href="<?php echo esc_url( $edit_url ); ?>"><?php esc_html_e( 'View', 'shelterkit-donations' ); ?></a>
                         <?php endif; ?>
                     </td>
                 </tr>
@@ -438,7 +438,7 @@ class Reports {
                 <?php
                 printf(
                     /* translators: %d: total donation count */
-                    esc_html__( 'View all %d donations in the admin list', 'shelter-donations' ),
+                    esc_html__( 'View all %d donations in the admin list', 'shelterkit-donations' ),
                     (int) $total
                 );
                 ?>
@@ -463,7 +463,7 @@ class Reports {
         $stats = self::fetch_stats(
             'shelter-reports/dashboard-stats',
             $args,
-            __( 'Unable to load membership statistics.', 'shelter-donations' )
+            __( 'Unable to load membership statistics.', 'shelterkit-donations' )
         );
         if ( ! $stats ) {
             return;
@@ -474,19 +474,19 @@ class Reports {
         <div class="sd-stats-cards">
             <div class="sd-stat-card">
                 <span class="sd-stat-value"><?php echo esc_html( number_format( $membership_stats['active'] ?? 0 ) ); ?></span>
-                <span class="sd-stat-label"><?php esc_html_e( 'Active Memberships', 'shelter-donations' ); ?></span>
+                <span class="sd-stat-label"><?php esc_html_e( 'Active Memberships', 'shelterkit-donations' ); ?></span>
             </div>
             <div class="sd-stat-card">
                 <span class="sd-stat-value"><?php echo esc_html( number_format( $membership_stats['new'] ?? 0 ) ); ?></span>
-                <span class="sd-stat-label"><?php esc_html_e( 'New This Period', 'shelter-donations' ); ?></span>
+                <span class="sd-stat-label"><?php esc_html_e( 'New This Period', 'shelterkit-donations' ); ?></span>
             </div>
             <div class="sd-stat-card sd-stat-warning">
                 <span class="sd-stat-value"><?php echo esc_html( number_format( $membership_stats['expiring_soon'] ?? 0 ) ); ?></span>
-                <span class="sd-stat-label"><?php esc_html_e( 'Expiring Soon', 'shelter-donations' ); ?></span>
+                <span class="sd-stat-label"><?php esc_html_e( 'Expiring Soon', 'shelterkit-donations' ); ?></span>
             </div>
             <div class="sd-stat-card">
                 <span class="sd-stat-value"><?php echo esc_html( '$' . number_format( $membership_stats['revenue'] ?? 0, 2 ) ); ?></span>
-                <span class="sd-stat-label"><?php esc_html_e( 'Membership Revenue', 'shelter-donations' ); ?></span>
+                <span class="sd-stat-label"><?php esc_html_e( 'Membership Revenue', 'shelterkit-donations' ); ?></span>
             </div>
         </div>
 
@@ -496,13 +496,13 @@ class Reports {
         ?>
 
         <?php if ( ! empty( $membership_stats['by_tier'] ) ) : ?>
-        <h3><?php esc_html_e( 'By Tier', 'shelter-donations' ); ?></h3>
+        <h3><?php esc_html_e( 'By Tier', 'shelterkit-donations' ); ?></h3>
         <table class="wp-list-table widefat fixed striped">
             <thead>
                 <tr>
-                    <th><?php esc_html_e( 'Tier', 'shelter-donations' ); ?></th>
-                    <th><?php esc_html_e( 'Active', 'shelter-donations' ); ?></th>
-                    <th><?php esc_html_e( 'Revenue', 'shelter-donations' ); ?></th>
+                    <th><?php esc_html_e( 'Tier', 'shelterkit-donations' ); ?></th>
+                    <th><?php esc_html_e( 'Active', 'shelterkit-donations' ); ?></th>
+                    <th><?php esc_html_e( 'Revenue', 'shelterkit-donations' ); ?></th>
                 </tr>
             </thead>
             <tbody>
@@ -541,7 +541,7 @@ class Reports {
         $result = self::fetch_stats(
             'shelter-memberships/list',
             $args,
-            __( 'Unable to load recent memberships.', 'shelter-donations' )
+            __( 'Unable to load recent memberships.', 'shelterkit-donations' )
         );
         $items = $result['items'] ?? [];
         if ( empty( $items ) ) {
@@ -551,35 +551,36 @@ class Reports {
         $donor_map = self::batch_donor_info( array_column( $items, 'donor_id' ) );
         $total     = (int) ( $result['total'] ?? count( $items ) );
         ?>
-        <h3><?php esc_html_e( 'Recent Memberships', 'shelter-donations' ); ?></h3>
+        <h3><?php esc_html_e( 'Recent Memberships', 'shelterkit-donations' ); ?></h3>
         <table class="wp-list-table widefat fixed striped">
             <thead>
                 <tr>
-                    <th><?php esc_html_e( 'Member', 'shelter-donations' ); ?></th>
-                    <th><?php esc_html_e( 'Tier', 'shelter-donations' ); ?></th>
-                    <th><?php esc_html_e( 'Type', 'shelter-donations' ); ?></th>
-                    <th><?php esc_html_e( 'Start', 'shelter-donations' ); ?></th>
-                    <th><?php esc_html_e( 'End', 'shelter-donations' ); ?></th>
-                    <th><?php esc_html_e( 'Status', 'shelter-donations' ); ?></th>
+                    <th><?php esc_html_e( 'Member', 'shelterkit-donations' ); ?></th>
+                    <th><?php esc_html_e( 'Tier', 'shelterkit-donations' ); ?></th>
+                    <th><?php esc_html_e( 'Type', 'shelterkit-donations' ); ?></th>
+                    <th><?php esc_html_e( 'Start', 'shelterkit-donations' ); ?></th>
+                    <th><?php esc_html_e( 'End', 'shelterkit-donations' ); ?></th>
+                    <th><?php esc_html_e( 'Status', 'shelterkit-donations' ); ?></th>
                     <th></th>
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ( $items as $membership ) :
+                <?php
+                foreach ( $items as $membership ) :
                     $donor_id = (int) ( $membership['donor_id'] ?? 0 );
                     $donor    = $donor_map[ $donor_id ] ?? [ 'name' => '', 'email' => '' ];
                     $edit_url = (int) ( $membership['id'] ?? 0 ) > 0 ? get_edit_post_link( (int) $membership['id'] ) : '';
-                ?>
+					?>
                 <tr>
-                    <td><?php echo esc_html( $donor['name'] ?: __( 'Unknown', 'shelter-donations' ) ); ?></td>
+                    <td><?php echo esc_html( $donor['name'] ?: __( 'Unknown', 'shelterkit-donations' ) ); ?></td>
                     <td><?php echo esc_html( $membership['tier_label'] ?? '' ); ?></td>
                     <td><?php echo esc_html( ucfirst( $membership['membership_type'] ?? '' ) ); ?></td>
                     <td><?php echo esc_html( $membership['start_date'] ?? '' ); ?></td>
                     <td><?php echo esc_html( $membership['end_date'] ?? '' ); ?></td>
-                    <td><?php echo ! empty( $membership['is_active'] ) ? esc_html__( 'Active', 'shelter-donations' ) : esc_html__( 'Expired', 'shelter-donations' ); ?></td>
+                    <td><?php echo ! empty( $membership['is_active'] ) ? esc_html__( 'Active', 'shelterkit-donations' ) : esc_html__( 'Expired', 'shelterkit-donations' ); ?></td>
                     <td>
                         <?php if ( $edit_url ) : ?>
-                        <a href="<?php echo esc_url( $edit_url ); ?>"><?php esc_html_e( 'View', 'shelter-donations' ); ?></a>
+                        <a href="<?php echo esc_url( $edit_url ); ?>"><?php esc_html_e( 'View', 'shelterkit-donations' ); ?></a>
                         <?php endif; ?>
                     </td>
                 </tr>
@@ -592,7 +593,7 @@ class Reports {
                 <?php
                 printf(
                     /* translators: %d: total membership count */
-                    esc_html__( 'View all %d memberships in the admin list', 'shelter-donations' ),
+                    esc_html__( 'View all %d memberships in the admin list', 'shelterkit-donations' ),
                     (int) $total
                 );
                 ?>
@@ -617,7 +618,7 @@ class Reports {
         $stats = self::fetch_stats(
             'shelter-reports/dashboard-stats',
             $args,
-            __( 'Unable to load memorial statistics.', 'shelter-donations' )
+            __( 'Unable to load memorial statistics.', 'shelterkit-donations' )
         );
         if ( ! $stats ) {
             return;
@@ -628,15 +629,15 @@ class Reports {
         <div class="sd-stats-cards">
             <div class="sd-stat-card">
                 <span class="sd-stat-value"><?php echo esc_html( number_format( $memorial_stats['total'] ?? 0 ) ); ?></span>
-                <span class="sd-stat-label"><?php esc_html_e( 'Total Memorials', 'shelter-donations' ); ?></span>
+                <span class="sd-stat-label"><?php esc_html_e( 'Total Memorials', 'shelterkit-donations' ); ?></span>
             </div>
             <div class="sd-stat-card">
                 <span class="sd-stat-value"><?php echo esc_html( number_format( $memorial_stats['new'] ?? 0 ) ); ?></span>
-                <span class="sd-stat-label"><?php esc_html_e( 'New This Period', 'shelter-donations' ); ?></span>
+                <span class="sd-stat-label"><?php esc_html_e( 'New This Period', 'shelterkit-donations' ); ?></span>
             </div>
             <div class="sd-stat-card">
                 <span class="sd-stat-value"><?php echo esc_html( '$' . number_format( $memorial_stats['revenue'] ?? 0, 2 ) ); ?></span>
-                <span class="sd-stat-label"><?php esc_html_e( 'Memorial Donations', 'shelter-donations' ); ?></span>
+                <span class="sd-stat-label"><?php esc_html_e( 'Memorial Donations', 'shelterkit-donations' ); ?></span>
             </div>
         </div>
 
@@ -664,7 +665,7 @@ class Reports {
         $result = self::fetch_stats(
             'shelter-memorials/list',
             $args,
-            __( 'Unable to load recent memorials.', 'shelter-donations' )
+            __( 'Unable to load recent memorials.', 'shelterkit-donations' )
         );
         $items = $result['items'] ?? [];
         if ( empty( $items ) ) {
@@ -674,33 +675,34 @@ class Reports {
         $donor_map = self::batch_donor_info( array_column( $items, 'donor_id' ) );
         $total     = (int) ( $result['total'] ?? count( $items ) );
         ?>
-        <h3><?php esc_html_e( 'Recent Memorials', 'shelter-donations' ); ?></h3>
+        <h3><?php esc_html_e( 'Recent Memorials', 'shelterkit-donations' ); ?></h3>
         <table class="wp-list-table widefat fixed striped">
             <thead>
                 <tr>
-                    <th><?php esc_html_e( 'Honoree', 'shelter-donations' ); ?></th>
-                    <th><?php esc_html_e( 'Type', 'shelter-donations' ); ?></th>
-                    <th><?php esc_html_e( 'Donor', 'shelter-donations' ); ?></th>
-                    <th><?php esc_html_e( 'Date', 'shelter-donations' ); ?></th>
-                    <th><?php esc_html_e( 'Amount', 'shelter-donations' ); ?></th>
-                    <th><?php esc_html_e( 'Family Notified', 'shelter-donations' ); ?></th>
+                    <th><?php esc_html_e( 'Honoree', 'shelterkit-donations' ); ?></th>
+                    <th><?php esc_html_e( 'Type', 'shelterkit-donations' ); ?></th>
+                    <th><?php esc_html_e( 'Donor', 'shelterkit-donations' ); ?></th>
+                    <th><?php esc_html_e( 'Date', 'shelterkit-donations' ); ?></th>
+                    <th><?php esc_html_e( 'Amount', 'shelterkit-donations' ); ?></th>
+                    <th><?php esc_html_e( 'Family Notified', 'shelterkit-donations' ); ?></th>
                     <th></th>
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ( $items as $memorial ) :
+                <?php
+                foreach ( $items as $memorial ) :
                     $donor_id  = (int) ( $memorial['donor_id'] ?? 0 );
                     $donor     = $donor_map[ $donor_id ] ?? [ 'name' => '', 'email' => '' ];
                     $donor_lbl = $memorial['is_anonymous']
-                        ? __( 'Anonymous', 'shelter-donations' )
-                        : ( $memorial['donor_display_name'] ?? $memorial['donor_name'] ?? $donor['name'] ?? __( 'Unknown', 'shelter-donations' ) );
+                        ? __( 'Anonymous', 'shelterkit-donations' )
+                        : ( $memorial['donor_display_name'] ?? $memorial['donor_name'] ?? $donor['name'] ?? __( 'Unknown', 'shelterkit-donations' ) );
                     $edit_url  = (int) ( $memorial['id'] ?? 0 ) > 0 ? get_edit_post_link( (int) $memorial['id'] ) : '';
                     $notified  = ! empty( $memorial['family_notified_date'] )
                         ? esc_html( $memorial['family_notified_date'] )
                         : ( ! empty( $memorial['notify_family_enabled'] )
-                            ? '<em>' . esc_html__( 'Pending', 'shelter-donations' ) . '</em>'
+                            ? '<em>' . esc_html__( 'Pending', 'shelterkit-donations' ) . '</em>'
                             : '—' );
-                ?>
+					?>
                 <tr>
                     <td><?php echo esc_html( $memorial['honoree_name'] ?? '' ); ?></td>
                     <td><?php echo esc_html( $memorial['memorial_type_label'] ?? $memorial['memorial_type'] ?? '' ); ?></td>
@@ -710,7 +712,7 @@ class Reports {
                     <td><?php echo wp_kses_post( $notified ); ?></td>
                     <td>
                         <?php if ( $edit_url ) : ?>
-                        <a href="<?php echo esc_url( $edit_url ); ?>"><?php esc_html_e( 'View', 'shelter-donations' ); ?></a>
+                        <a href="<?php echo esc_url( $edit_url ); ?>"><?php esc_html_e( 'View', 'shelterkit-donations' ); ?></a>
                         <?php endif; ?>
                     </td>
                 </tr>
@@ -723,7 +725,7 @@ class Reports {
                 <?php
                 printf(
                     /* translators: %d: total memorial count */
-                    esc_html__( 'View all %d memorials in the admin list', 'shelter-donations' ),
+                    esc_html__( 'View all %d memorials in the admin list', 'shelterkit-donations' ),
                     (int) $total
                 );
                 ?>
@@ -747,31 +749,32 @@ class Reports {
         $result = self::fetch_stats(
             'shelter-reports/campaigns-progress',
             [],
-            __( 'Unable to load campaign progress.', 'shelter-donations' )
+            __( 'Unable to load campaign progress.', 'shelterkit-donations' )
         );
         $rows = $result['campaigns'] ?? [];
         if ( empty( $rows ) ) {
-            echo '<p>' . esc_html__( 'No campaigns found.', 'shelter-donations' ) . '</p>';
+            echo '<p>' . esc_html__( 'No campaigns found.', 'shelterkit-donations' ) . '</p>';
             return;
         }
         ?>
         <p class="description">
-            <em><?php esc_html_e( 'Campaigns show lifetime progress — the period selector above does not affect this tab.', 'shelter-donations' ); ?></em>
+            <em><?php esc_html_e( 'Campaigns show lifetime progress — the period selector above does not affect this tab.', 'shelterkit-donations' ); ?></em>
         </p>
         <table class="wp-list-table widefat fixed striped">
             <thead>
                 <tr>
-                    <th><?php esc_html_e( 'Campaign', 'shelter-donations' ); ?></th>
-                    <th><?php esc_html_e( 'Type', 'shelter-donations' ); ?></th>
-                    <th><?php esc_html_e( 'Goal', 'shelter-donations' ); ?></th>
-                    <th><?php esc_html_e( 'Progress', 'shelter-donations' ); ?></th>
-                    <th><?php esc_html_e( 'Ends', 'shelter-donations' ); ?></th>
-                    <th><?php esc_html_e( 'Status', 'shelter-donations' ); ?></th>
-                    <th><?php esc_html_e( 'Actions', 'shelter-donations' ); ?></th>
+                    <th><?php esc_html_e( 'Campaign', 'shelterkit-donations' ); ?></th>
+                    <th><?php esc_html_e( 'Type', 'shelterkit-donations' ); ?></th>
+                    <th><?php esc_html_e( 'Goal', 'shelterkit-donations' ); ?></th>
+                    <th><?php esc_html_e( 'Progress', 'shelterkit-donations' ); ?></th>
+                    <th><?php esc_html_e( 'Ends', 'shelterkit-donations' ); ?></th>
+                    <th><?php esc_html_e( 'Status', 'shelterkit-donations' ); ?></th>
+                    <th><?php esc_html_e( 'Actions', 'shelterkit-donations' ); ?></th>
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ( $rows as $row ) :
+                <?php
+                foreach ( $rows as $row ) :
                     $is_member_drive = 'members' === ( $row['goal_unit'] ?? 'currency' );
                     $is_active       = (bool) ( $row['is_active'] ?? true );
                     $percent         = (float) ( $row['progress'] ?? 0 );
@@ -780,27 +783,29 @@ class Reports {
                     if ( $is_member_drive ) {
                         $progress_text = sprintf(
                             /* translators: 1: members joined, 2: goal formatted (e.g. "100 members"). */
-                            __( '%1$d / %2$s', 'shelter-donations' ),
+                            __( '%1$d / %2$s', 'shelterkit-donations' ),
                             (int) ( $row['member_count'] ?? 0 ),
                             $row['goal_formatted'] ?? ''
                         );
                     } else {
                         $progress_text = sprintf(
                             /* translators: 1: dollars raised, 2: dollars goal. */
-                            __( '%1$s / %2$s', 'shelter-donations' ),
+                            __( '%1$s / %2$s', 'shelterkit-donations' ),
                             $row['raised_formatted'] ?? '$0',
-                            $row['goal_formatted']   ?? '$0'
+                            $row['goal_formatted'] ?? '$0'
                         );
                     }
-                ?>
+					?>
                 <tr>
                     <td><strong><?php echo esc_html( $row['name'] ?? '' ); ?></strong></td>
                     <td>
                         <span class="sd-pill <?php echo $is_member_drive ? 'sd-pill--membership' : 'sd-pill--donation'; ?>">
-                            <?php echo esc_html( $is_member_drive
-                                ? __( 'Membership', 'shelter-donations' )
-                                : __( 'Donation', 'shelter-donations' )
-                            ); ?>
+                            <?php
+                            echo esc_html( $is_member_drive
+                                ? __( 'Membership', 'shelterkit-donations' )
+                                : __( 'Donation', 'shelterkit-donations' )
+                            );
+                            ?>
                         </span>
                     </td>
                     <td><?php echo esc_html( $row['goal_formatted'] ?? '—' ); ?></td>
@@ -814,26 +819,34 @@ class Reports {
                         </div>
                     </td>
                     <td>
-                        <?php echo $end_date
+                        <?php
+                        echo $end_date
                             ? esc_html( \Starter_Shelter\Helpers\format_date( $end_date ) )
-                            : '—'; ?>
+                            : '—';
+						?>
                     </td>
                     <td>
                         <span class="sd-pill <?php echo $is_active ? 'sd-pill--active' : 'sd-pill--ended'; ?>">
-                            <?php echo esc_html( $is_active
-                                ? __( 'Active', 'shelter-donations' )
-                                : __( 'Ended', 'shelter-donations' )
-                            ); ?>
+                            <?php
+                            echo esc_html( $is_active
+                                ? __( 'Active', 'shelterkit-donations' )
+                                : __( 'Ended', 'shelterkit-donations' )
+                            );
+                            ?>
                         </span>
                     </td>
                     <td>
-                        <a href="<?php echo esc_url( add_query_arg( [
-                            'action'      => 'sd_export_report',
-                            'report'      => 'campaign',
-                            'campaign_id' => (int) ( $row['campaign_id'] ?? 0 ),
-                            '_wpnonce'    => wp_create_nonce( 'sd_export_report' ),
-                        ], admin_url( 'admin-ajax.php' ) ) ); ?>" class="button button-small">
-                            <?php esc_html_e( 'Export', 'shelter-donations' ); ?>
+                        <a href="
+                        <?php
+                        echo esc_url( add_query_arg( [
+							'action'      => 'sd_export_report',
+							'report'      => 'campaign',
+							'campaign_id' => (int) ( $row['campaign_id'] ?? 0 ),
+							'_wpnonce'    => wp_create_nonce( 'sd_export_report' ),
+						], admin_url( 'admin-ajax.php' ) ) );
+						?>
+                        " class="button button-small">
+                            <?php esc_html_e( 'Export', 'shelterkit-donations' ); ?>
                         </a>
                     </td>
                 </tr>
@@ -889,23 +902,25 @@ class Reports {
 
         ?>
         <div class="sd-trend-chart" style="margin: 20px 0;">
-            <h3><?php esc_html_e( 'Donation Trend', 'shelter-donations' ); ?></h3>
+            <h3><?php esc_html_e( 'Donation Trend', 'shelterkit-donations' ); ?></h3>
             <div style="overflow-x: auto;">
                 <svg viewBox="0 0 <?php echo (int) $total_w; ?> <?php echo (int) ( $chart_h + 30 ); ?>" width="<?php echo (int) min( $total_w, $chart_w ); ?>" style="font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
                     <!-- Grid lines -->
-                    <?php for ( $i = 0; $i <= 4; $i++ ) :
+                    <?php
+                    for ( $i = 0; $i <= 4; $i++ ) :
                         $y = $chart_h - ( $chart_h * $i / 4 );
-                    ?>
+						?>
                     <line x1="0" y1="<?php echo (float) $y; ?>" x2="<?php echo (int) $total_w; ?>" y2="<?php echo (float) $y; ?>" stroke="#e0e0e0" stroke-width="0.5" />
                     <?php endfor; ?>
 
                     <!-- Bars -->
-                    <?php foreach ( $buckets as $i => $bucket ) :
+                    <?php
+                    foreach ( $buckets as $i => $bucket ) :
                         $bar_h = $max_total > 0 ? ( (float) $bucket['total'] / $max_total ) * $chart_h : 0;
                         $x = $i * ( $bar_w + $bar_gap );
                         $y = $chart_h - $bar_h;
                         $label = wp_date( $label_format, strtotime( $bucket['period_start'] ) );
-                    ?>
+						?>
                     <g>
                         <rect x="<?php echo (int) $x; ?>" y="<?php echo (float) $y; ?>" width="<?php echo (int) $bar_w; ?>" height="<?php echo (float) $bar_h; ?>"
                             fill="#059669" rx="2" opacity="0.85">
@@ -960,15 +975,17 @@ class Reports {
             <div style="text-align: center;">
                 <span style="font-size: 32px; font-weight: 700; color: <?php echo esc_attr( $rate_color ); ?>;"><?php echo esc_html( $retention_rate ); ?>%</span>
                 <br>
-                <span style="font-size: 11px; text-transform: uppercase; color: #646970;"><?php esc_html_e( 'Renewal Rate', 'shelter-donations' ); ?></span>
+                <span style="font-size: 11px; text-transform: uppercase; color: #646970;"><?php esc_html_e( 'Renewal Rate', 'shelterkit-donations' ); ?></span>
             </div>
             <div style="font-size: 13px; color: #50575e;">
-                <?php printf(
+                <?php
+                printf(
                     /* translators: 1: number of renewed memberships; 2: number of expired memberships. */
-                    esc_html__( '%1$d of %2$d expired memberships renewed in the last 12 months.', 'shelter-donations' ),
+                    esc_html__( '%1$d of %2$d expired memberships renewed in the last 12 months.', 'shelterkit-donations' ),
                     (int) $renewed_count,
                     (int) $expired_count
-                ); ?>
+                );
+                ?>
             </div>
         </div>
         <?php
@@ -983,7 +1000,7 @@ class Reports {
         check_ajax_referer( 'sd_export_report', '_wpnonce' );
 
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( esc_html__( 'Permission denied.', 'shelter-donations' ) );
+            wp_die( esc_html__( 'Permission denied.', 'shelterkit-donations' ) );
         }
 
         $report      = sanitize_key( $_GET['report'] ?? 'donations' );
@@ -1033,7 +1050,7 @@ class Reports {
     /**
      * Resolve donor display name + email for a set of donor IDs in one shot.
      *
-     * The list abilities (shelter-donations / shelter-memberships /
+     * The list abilities (shelterkit-donations / shelter-memberships /
      * shelter-memorials) return `donor_id` per row but not the donor's
      * display fields. Rather than fetch each donor individually inside
      * the export loop (N+1 queries), batch-hydrate via Query.
@@ -1078,13 +1095,13 @@ class Reports {
     private static function export_donations_report( $output, string $period, int $campaign_id = 0 ): void {
         // CSV headers.
         fputcsv_safe( $output, [
-            __( 'Date', 'shelter-donations' ),
-            __( 'Donor', 'shelter-donations' ),
-            __( 'Email', 'shelter-donations' ),
-            __( 'Amount', 'shelter-donations' ),
-            __( 'Allocation', 'shelter-donations' ),
-            __( 'Campaign', 'shelter-donations' ),
-            __( 'Anonymous', 'shelter-donations' ),
+            __( 'Date', 'shelterkit-donations' ),
+            __( 'Donor', 'shelterkit-donations' ),
+            __( 'Email', 'shelterkit-donations' ),
+            __( 'Amount', 'shelterkit-donations' ),
+            __( 'Allocation', 'shelterkit-donations' ),
+            __( 'Campaign', 'shelterkit-donations' ),
+            __( 'Anonymous', 'shelterkit-donations' ),
         ] );
 
         // Use the list ability.
@@ -1123,7 +1140,7 @@ class Reports {
             $items       = $result['items'] ?? [];
             $all_items   = array_merge( $all_items, $items );
             $total_pages = (int) ( $result['total_pages'] ?? 1 );
-            $page++;
+            ++$page;
         } while ( $page <= $total_pages );
 
         // Batch-resolve donor display + email (the list ability returns
@@ -1151,7 +1168,7 @@ class Reports {
                 $donation['amount'] ?? 0,
                 $donation['allocation_label'] ?? '',
                 $campaign_names,
-                $donation['is_anonymous'] ? __( 'Yes', 'shelter-donations' ) : __( 'No', 'shelter-donations' ),
+                $donation['is_anonymous'] ? __( 'Yes', 'shelterkit-donations' ) : __( 'No', 'shelterkit-donations' ),
             ] );
         }
     }
@@ -1166,14 +1183,14 @@ class Reports {
      */
     private static function export_memberships_report( $output, string $period, int $campaign_id = 0 ): void {
         fputcsv_safe( $output, [
-            __( 'Member', 'shelter-donations' ),
-            __( 'Email', 'shelter-donations' ),
-            __( 'Tier', 'shelter-donations' ),
-            __( 'Type', 'shelter-donations' ),
-            __( 'Start Date', 'shelter-donations' ),
-            __( 'End Date', 'shelter-donations' ),
-            __( 'Status', 'shelter-donations' ),
-            __( 'Amount', 'shelter-donations' ),
+            __( 'Member', 'shelterkit-donations' ),
+            __( 'Email', 'shelterkit-donations' ),
+            __( 'Tier', 'shelterkit-donations' ),
+            __( 'Type', 'shelterkit-donations' ),
+            __( 'Start Date', 'shelterkit-donations' ),
+            __( 'End Date', 'shelterkit-donations' ),
+            __( 'Status', 'shelterkit-donations' ),
+            __( 'Amount', 'shelterkit-donations' ),
         ] );
 
         $ability = wp_get_ability( 'shelter-memberships/list' );
@@ -1207,7 +1224,7 @@ class Reports {
                 $membership['membership_type'] ?? '',
                 $membership['start_date'] ?? '',
                 $membership['end_date'] ?? '',
-                $membership['is_active'] ? __( 'Active', 'shelter-donations' ) : __( 'Expired', 'shelter-donations' ),
+                $membership['is_active'] ? __( 'Active', 'shelterkit-donations' ) : __( 'Expired', 'shelterkit-donations' ),
                 $membership['amount'] ?? 0,
             ] );
         }
@@ -1223,13 +1240,13 @@ class Reports {
      */
     private static function export_memorials_report( $output, string $period, int $campaign_id = 0 ): void {
         fputcsv_safe( $output, [
-            __( 'Honoree', 'shelter-donations' ),
-            __( 'Type', 'shelter-donations' ),
-            __( 'Donor', 'shelter-donations' ),
-            __( 'Email', 'shelter-donations' ),
-            __( 'Date', 'shelter-donations' ),
-            __( 'Amount', 'shelter-donations' ),
-            __( 'Family Notified', 'shelter-donations' ),
+            __( 'Honoree', 'shelterkit-donations' ),
+            __( 'Type', 'shelterkit-donations' ),
+            __( 'Donor', 'shelterkit-donations' ),
+            __( 'Email', 'shelterkit-donations' ),
+            __( 'Date', 'shelterkit-donations' ),
+            __( 'Amount', 'shelterkit-donations' ),
+            __( 'Family Notified', 'shelterkit-donations' ),
         ] );
 
         $ability = wp_get_ability( 'shelter-memorials/list' );
@@ -1303,19 +1320,20 @@ class Reports {
 
         // Summary block — header rows shared between types, then a type-
         // specific "Raised" or "Joined" line.
-        fputcsv_safe( $output, [ __( 'Campaign Report', 'shelter-donations' ), $campaign['name'] ?? '' ] );
-        fputcsv_safe( $output, [ __( 'Type', 'shelter-donations' ), 'donation_drive' === $type
-            ? __( 'Donation Drive', 'shelter-donations' )
-            : __( 'Membership Drive', 'shelter-donations' )
+        fputcsv_safe( $output, [ __( 'Campaign Report', 'shelterkit-donations' ), $campaign['name'] ?? '' ] );
+        fputcsv_safe( $output, [
+			__( 'Type', 'shelterkit-donations' ), 'donation_drive' === $type
+            ? __( 'Donation Drive', 'shelterkit-donations' )
+            : __( 'Membership Drive', 'shelterkit-donations' ),
         ] );
-        fputcsv_safe( $output, [ __( 'Goal', 'shelter-donations' ), $campaign['goal_formatted'] ?? '' ] );
+        fputcsv_safe( $output, [ __( 'Goal', 'shelterkit-donations' ), $campaign['goal_formatted'] ?? '' ] );
 
         if ( 'donation_drive' === $type ) {
-            fputcsv_safe( $output, [ __( 'Raised', 'shelter-donations' ), $progress['total_formatted'] ?? '' ] );
+            fputcsv_safe( $output, [ __( 'Raised', 'shelterkit-donations' ), $progress['total_formatted'] ?? '' ] );
         } else {
-            fputcsv_safe( $output, [ __( 'Joined', 'shelter-donations' ), $progress['member_count'] ?? 0 ] );
+            fputcsv_safe( $output, [ __( 'Joined', 'shelterkit-donations' ), $progress['member_count'] ?? 0 ] );
         }
-        fputcsv_safe( $output, [ __( 'Progress', 'shelter-donations' ), ( $progress['percent_of_goal'] ?? 0 ) . '%' ] );
+        fputcsv_safe( $output, [ __( 'Progress', 'shelterkit-donations' ), ( $progress['percent_of_goal'] ?? 0 ) . '%' ] );
         fputcsv_safe( $output, [] );
 
         if ( 'donation_drive' === $type ) {
@@ -1323,21 +1341,21 @@ class Reports {
             $donor_map = self::batch_donor_info( array_column( $donations, 'donor_id' ) );
 
             fputcsv_safe( $output, [
-                __( 'Date', 'shelter-donations' ),
-                __( 'Donor', 'shelter-donations' ),
-                __( 'Email', 'shelter-donations' ),
-                __( 'Amount', 'shelter-donations' ),
-                __( 'Allocation', 'shelter-donations' ),
+                __( 'Date', 'shelterkit-donations' ),
+                __( 'Donor', 'shelterkit-donations' ),
+                __( 'Email', 'shelterkit-donations' ),
+                __( 'Amount', 'shelterkit-donations' ),
+                __( 'Allocation', 'shelterkit-donations' ),
             ] );
 
             foreach ( $donations as $donation ) {
                 $donor_id = (int) ( $donation['donor_id'] ?? 0 );
                 $donor    = $donor_map[ $donor_id ] ?? [ 'name' => '', 'email' => '' ];
                 fputcsv_safe( $output, [
-                    $donation['date_formatted']    ?? '',
-                    $donation['donor_name']        ?? $donor['name'],
+                    $donation['date_formatted'] ?? '',
+                    $donation['donor_name'] ?? $donor['name'],
                     $donor['email'],
-                    $donation['amount']            ?? 0,
+                    $donation['amount'] ?? 0,
                     $donation['allocation_label'] ?? '',
                 ] );
             }
@@ -1350,14 +1368,14 @@ class Reports {
         $donor_map   = self::batch_donor_info( array_column( $memberships, 'donor_id' ) );
 
         fputcsv_safe( $output, [
-            __( 'Member', 'shelter-donations' ),
-            __( 'Email', 'shelter-donations' ),
-            __( 'Tier', 'shelter-donations' ),
-            __( 'Type', 'shelter-donations' ),
-            __( 'Start Date', 'shelter-donations' ),
-            __( 'End Date', 'shelter-donations' ),
-            __( 'Status', 'shelter-donations' ),
-            __( 'Amount', 'shelter-donations' ),
+            __( 'Member', 'shelterkit-donations' ),
+            __( 'Email', 'shelterkit-donations' ),
+            __( 'Tier', 'shelterkit-donations' ),
+            __( 'Type', 'shelterkit-donations' ),
+            __( 'Start Date', 'shelterkit-donations' ),
+            __( 'End Date', 'shelterkit-donations' ),
+            __( 'Status', 'shelterkit-donations' ),
+            __( 'Amount', 'shelterkit-donations' ),
         ] );
 
         foreach ( $memberships as $membership ) {
@@ -1366,13 +1384,13 @@ class Reports {
             fputcsv_safe( $output, [
                 $donor['name'],
                 $donor['email'],
-                $membership['tier_label']      ?? '',
+                $membership['tier_label'] ?? '',
                 $membership['membership_type'] ?? '',
-                $membership['start_date']      ?? '',
-                $membership['end_date']        ?? '',
+                $membership['start_date'] ?? '',
+                $membership['end_date'] ?? '',
                 ! empty( $membership['is_active'] )
-                    ? __( 'Active', 'shelter-donations' )
-                    : __( 'Expired', 'shelter-donations' ),
+                    ? __( 'Active', 'shelterkit-donations' )
+                    : __( 'Expired', 'shelterkit-donations' ),
                 $membership['amount'] ?? 0,
             ] );
         }

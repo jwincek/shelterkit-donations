@@ -679,7 +679,7 @@ return [
 			],
 			'entities'      => [
 				'membership' => [ 'entity' => 'sd_membership', 'id_from' => 'membership_id' ],
-				'donor'      => [ 'entity' => 'sd_donor',      'id_from' => 'donor_id' ],
+				'donor'      => [ 'entity' => 'sd_donor', 'id_from' => 'donor_id' ],
 			],
 			'recipient_type' => 'donor',
 			'subject'        => 'Welcome to the {site_name} family!',
@@ -702,7 +702,7 @@ return [
 			],
 			'entities'      => [
 				'membership' => [ 'entity' => 'sd_membership', 'id_from' => 'membership_id' ],
-				'donor'      => [ 'entity' => 'sd_donor',      'id_from' => 'donor_id' ],
+				'donor'      => [ 'entity' => 'sd_donor', 'id_from' => 'donor_id' ],
 			],
 			'recipient_type' => 'donor',
 			'subject'        => 'Your {site_name} membership expires soon',
@@ -726,7 +726,7 @@ return [
 			],
 			'entities'      => [
 				'membership' => [ 'entity' => 'sd_membership', 'id_from' => 'membership_id' ],
-				'donor'      => [ 'entity' => 'sd_donor',      'id_from' => 'donor_id' ],
+				'donor'      => [ 'entity' => 'sd_donor', 'id_from' => 'donor_id' ],
 			],
 			'recipient_type' => 'donor',
 			'subject'        => 'Your business logo has been approved - {site_name}',
@@ -749,7 +749,7 @@ return [
 			],
 			'entities'      => [
 				'membership' => [ 'entity' => 'sd_membership', 'id_from' => 'membership_id' ],
-				'donor'      => [ 'entity' => 'sd_donor',      'id_from' => 'donor_id' ],
+				'donor'      => [ 'entity' => 'sd_donor', 'id_from' => 'donor_id' ],
 			],
 			'recipient_type' => 'donor',
 			'subject'        => 'Action required: Your business logo needs attention - {site_name}',

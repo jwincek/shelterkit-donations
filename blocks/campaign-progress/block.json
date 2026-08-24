@@ -4,11 +4,11 @@
     "name": "shelter-donations/campaign-progress",
     "version": "2.0.0",
     "title": "Campaign Progress",
-    "category": "shelter-donations",
+    "category": "shelterkit-donations",
     "icon": "chart-line",
     "description": "Display fundraising campaign progress with real-time updates.",
     "keywords": ["campaign", "progress", "fundraising", "goal", "thermometer", "donation"],
-    "textdomain": "shelter-donations",
+    "textdomain": "shelterkit-donations",
     "supports": {
         "html": false,
         "align": ["wide"],

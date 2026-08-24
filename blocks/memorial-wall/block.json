@@ -4,11 +4,11 @@
     "name": "shelter-donations/memorial-wall",
     "version": "2.1.0",
     "title": "Memorial Wall",
-    "category": "shelter-donations",
+    "category": "shelterkit-donations",
     "icon": "heart",
     "description": "Display a searchable, filterable grid of memorial tributes with client-side navigation.",
     "keywords": [ "memorial", "tribute", "honor", "memory", "donation", "wall", "gallery" ],
-    "textdomain": "shelter-donations",
+    "textdomain": "shelterkit-donations",
     "supports": {
         "html": false,
         "align": [ "wide", "full" ],

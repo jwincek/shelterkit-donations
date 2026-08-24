@@ -127,16 +127,33 @@ class My_Account {
      * @return string Full HTML document.
      */
     public static function build_print_statement_html( array $summary, int $year ): string {
-        $org_name = get_bloginfo( 'name' );
-        $org_address = implode( ', ', array_filter( [
-            (string) get_option( 'woocommerce_store_address' ),
-            (string) get_option( 'woocommerce_store_address_2' ),
-            trim( (string) get_option( 'woocommerce_store_city' ) . ' ' . (string) get_option( 'woocommerce_store_postcode' ) ),
-        ] ) );
+        // The shared ShelterKit profile is the shelter's own identity. The
+        // WooCommerce store address is the fallback rather than the source:
+        // it is the address goods ship from, which matches the shelter only by
+        // coincidence, and this document is a tax receipt.
+        $org_name    = '';
+        $org_address = '';
+
+        if ( class_exists( 'ShelterKit_Profile' ) ) {
+            $org_name    = \ShelterKit_Profile::get( 'name' );
+            $org_address = \ShelterKit_Profile::address_line();
+        }
+
+        if ( '' === $org_name ) {
+            $org_name = get_bloginfo( 'name' );
+        }
+
+        if ( '' === $org_address ) {
+            $org_address = implode( ', ', array_filter( [
+                (string) get_option( 'woocommerce_store_address' ),
+                (string) get_option( 'woocommerce_store_address_2' ),
+                trim( (string) get_option( 'woocommerce_store_city' ) . ' ' . (string) get_option( 'woocommerce_store_postcode' ) ),
+            ] ) );
+        }
 
         $tax_note = (string) apply_filters(
             'starter_shelter_receipt_tax_note',
-            __( 'No goods or services were provided in exchange for these contributions. Please retain this statement for your tax records.', 'shelter-donations' ),
+            __( 'No goods or services were provided in exchange for these contributions. Please retain this statement for your tax records.', 'shelterkit-donations' ),
             $summary,
             $year
         );
@@ -153,14 +170,14 @@ class My_Account {
         foreach ( $summary['memorials']['items'] ?? [] as $m ) {
             $rows[] = [
                 'date'  => (string) ( $m['donation_date'] ?? '' ),
-                'desc'  => sprintf( /* translators: %s: honoree name */ __( 'Memorial tribute — %s', 'shelter-donations' ), (string) ( $m['honoree_name'] ?? '' ) ),
+                'desc'  => sprintf( /* translators: %s: honoree name */ __( 'Memorial tribute — %s', 'shelterkit-donations' ), (string) ( $m['honoree_name'] ?? '' ) ),
                 'amount' => (string) ( $m['amount_formatted'] ?? Helpers\format_currency( (float) ( $m['amount'] ?? 0 ) ) ),
             ];
         }
         foreach ( $summary['memberships']['items'] ?? [] as $m ) {
             $rows[] = [
                 'date'  => (string) ( $m['start_date'] ?? '' ),
-                'desc'  => sprintf( /* translators: %s: tier */ __( 'Membership — %s', 'shelter-donations' ), (string) ( $m['tier_label'] ?? $m['tier'] ?? '' ) ),
+                'desc'  => sprintf( /* translators: %s: tier */ __( 'Membership — %s', 'shelterkit-donations' ), (string) ( $m['tier_label'] ?? $m['tier'] ?? '' ) ),
                 'amount' => (string) ( $m['amount_formatted'] ?? Helpers\format_currency( (float) ( $m['amount'] ?? 0 ) ) ),
             ];
         }
@@ -173,7 +190,7 @@ class My_Account {
 <head>
     <meta charset="<?php bloginfo( 'charset' ); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?php echo esc_html( sprintf( /* translators: %1$s: organization name; %2$d: tax year. */ __( '%1$s Contribution Statement %2$d', 'shelter-donations' ), $org_name, $year ) ); ?></title>
+    <title><?php echo esc_html( sprintf( /* translators: %1$s: organization name; %2$d: tax year. */ __( '%1$s Contribution Statement %2$d', 'shelterkit-donations' ), $org_name, $year ) ); ?></title>
     <style>
         body { font-family: Georgia, "Times New Roman", serif; color: #222; max-width: 720px; margin: 32px auto; padding: 0 24px; line-height: 1.5; }
         .receipt-org { font-size: 1.4rem; font-weight: bold; margin: 0; }
@@ -192,33 +209,33 @@ class My_Account {
 </head>
 <body onload="window.print()">
     <p class="receipt-org"><?php echo esc_html( $org_name ); ?></p>
-    <?php if ( '' !== $org_address ) : ?>
+		<?php if ( '' !== $org_address ) : ?>
     <p class="receipt-org-address"><?php echo esc_html( $org_address ); ?></p>
     <?php endif; ?>
 
-    <h1><?php echo esc_html( sprintf( /* translators: %d: tax year. */ __( 'Charitable Contribution Statement — %d', 'shelter-donations' ), $year ) ); ?></h1>
+    <h1><?php echo esc_html( sprintf( /* translators: %d: tax year. */ __( 'Charitable Contribution Statement — %d', 'shelterkit-donations' ), $year ) ); ?></h1>
 
     <div class="receipt-meta">
         <strong><?php echo esc_html( (string) ( $summary['donor']['name'] ?? '' ) ); ?></strong><br>
         <?php if ( ! empty( $summary['donor']['address'] ) ) : ?>
-        <?php echo esc_html( (string) $summary['donor']['address'] ); ?><br>
+			<?php echo esc_html( (string) $summary['donor']['address'] ); ?><br>
         <?php endif; ?>
         <?php if ( ! empty( $summary['donor']['email'] ) ) : ?>
-        <?php echo esc_html( (string) $summary['donor']['email'] ); ?>
+			<?php echo esc_html( (string) $summary['donor']['email'] ); ?>
         <?php endif; ?>
     </div>
 
     <table>
         <thead>
             <tr>
-                <th><?php esc_html_e( 'Date', 'shelter-donations' ); ?></th>
-                <th><?php esc_html_e( 'Description', 'shelter-donations' ); ?></th>
-                <th class="amount"><?php esc_html_e( 'Amount', 'shelter-donations' ); ?></th>
+                <th><?php esc_html_e( 'Date', 'shelterkit-donations' ); ?></th>
+                <th><?php esc_html_e( 'Description', 'shelterkit-donations' ); ?></th>
+                <th class="amount"><?php esc_html_e( 'Amount', 'shelterkit-donations' ); ?></th>
             </tr>
         </thead>
         <tbody>
             <?php if ( empty( $rows ) ) : ?>
-            <tr><td colspan="3"><?php esc_html_e( 'No contributions recorded for this year.', 'shelter-donations' ); ?></td></tr>
+            <tr><td colspan="3"><?php esc_html_e( 'No contributions recorded for this year.', 'shelterkit-donations' ); ?></td></tr>
             <?php else : ?>
                 <?php foreach ( $rows as $row ) : ?>
                 <tr>
@@ -231,16 +248,16 @@ class My_Account {
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="2"><?php esc_html_e( 'Total contributions', 'shelter-donations' ); ?></td>
+                <td colspan="2"><?php esc_html_e( 'Total contributions', 'shelterkit-donations' ); ?></td>
                 <td class="amount"><?php echo esc_html( (string) ( $summary['grand_formatted'] ?? '' ) ); ?></td>
             </tr>
         </tfoot>
     </table>
 
     <p class="tax-note"><?php echo esc_html( $tax_note ); ?></p>
-    <p class="generated"><?php echo esc_html( sprintf( /* translators: %s: date the statement was issued. */ __( 'Issued %s', 'shelter-donations' ), Helpers\format_date( (string) ( $summary['generated_date'] ?? wp_date( 'Y-m-d' ) ) ) ) ); ?></p>
+    <p class="generated"><?php echo esc_html( sprintf( /* translators: %s: date the statement was issued. */ __( 'Issued %s', 'shelterkit-donations' ), Helpers\format_date( (string) ( $summary['generated_date'] ?? wp_date( 'Y-m-d' ) ) ) ) ); ?></p>
 
-    <p class="no-print"><button type="button" onclick="window.print()"><?php esc_html_e( 'Print / Save as PDF', 'shelter-donations' ); ?></button></p>
+    <p class="no-print"><button type="button" onclick="window.print()"><?php esc_html_e( 'Print / Save as PDF', 'shelterkit-donations' ); ?></button></p>
 </body>
 </html>
         <?php
@@ -258,11 +275,13 @@ class My_Account {
      * @since 2.2.0
      */
     public static function handle_account_actions(): void {
+        // phpcs:disable WordPress.Security.NonceVerification.Missing -- dispatcher only: reads the action name to pick a branch, and every branch verifies its own nonce through verify_action_nonce() before touching anything.
         if ( empty( $_POST['sd_account_action'] ) || ! is_user_logged_in() ) {
             return;
         }
 
         $action   = sanitize_key( wp_unslash( $_POST['sd_account_action'] ) );
+        // phpcs:enable WordPress.Security.NonceVerification.Missing
         $donor_id = self::get_current_donor_id();
         if ( ! $donor_id ) {
             return;
@@ -295,7 +314,9 @@ class My_Account {
             return;
         }
 
+        // phpcs:disable WordPress.Security.NonceVerification.Missing -- nonce verified by verify_action_nonce() on the first line; the flagged reads are inside a closure, which is its own function scope to this sniff.
         $field = static fn ( string $key ): string => isset( $_POST[ $key ] ) ? sanitize_text_field( wp_unslash( $_POST[ $key ] ) ) : '';
+        // phpcs:enable WordPress.Security.NonceVerification.Missing
 
         $profile = self::execute_ability(
             'shelter-donors/update-profile',
@@ -329,7 +350,7 @@ class My_Account {
             $error = is_wp_error( $profile ) ? $profile : $address;
             wc_add_notice( $error->get_error_message(), 'error' );
         } else {
-            wc_add_notice( __( 'Your contact details have been updated.', 'shelter-donations' ) );
+            wc_add_notice( __( 'Your contact details have been updated.', 'shelterkit-donations' ) );
         }
 
         wp_safe_redirect( wc_get_account_endpoint_url( 'donor-dashboard' ) );
@@ -360,13 +381,15 @@ class My_Account {
             return;
         }
 
+        // phpcs:disable WordPress.Security.NonceVerification.Missing -- nonce verified by verify_action_nonce() on the first line of this handler.
         $list_publicly = ! empty( $_POST['sd_list_publicly'] );
+        // phpcs:enable WordPress.Security.NonceVerification.Missing
         self::set_recognition_preference( $donor_id, $list_publicly );
 
         wc_add_notice(
             $list_publicly
-                ? __( 'Saved. Your name will be listed on the public members wall.', 'shelter-donations' )
-                : __( 'Saved. Your name will be hidden from the public members wall.', 'shelter-donations' )
+                ? __( 'Saved. Your name will be listed on the public members wall.', 'shelterkit-donations' )
+                : __( 'Saved. Your name will be hidden from the public members wall.', 'shelterkit-donations' )
         );
 
         self::redirect_to_memberships();
@@ -382,22 +405,24 @@ class My_Account {
             return;
         }
 
+        // phpcs:disable WordPress.Security.NonceVerification.Missing -- nonce verified by verify_action_nonce(), and current_user_owns_membership() is checked before any mutation.
         $membership_id = isset( $_POST['membership_id'] ) ? absint( wp_unslash( $_POST['membership_id'] ) ) : 0;
+        // phpcs:enable WordPress.Security.NonceVerification.Missing
 
         if ( ! self::current_user_owns_membership( $membership_id, $donor_id ) ) {
-            wc_add_notice( __( 'That membership could not be found on your account.', 'shelter-donations' ), 'error' );
+            wc_add_notice( __( 'That membership could not be found on your account.', 'shelterkit-donations' ), 'error' );
             self::redirect_to_memberships();
             return;
         }
 
-        $input  = [ 'membership_id' => $membership_id, 'reason' => __( 'Cancelled by member from My Account.', 'shelter-donations' ) ];
+        $input  = [ 'membership_id' => $membership_id, 'reason' => __( 'Cancelled by member from My Account.', 'shelterkit-donations' ) ];
         $ability = function_exists( 'wp_get_ability' ) ? wp_get_ability( 'shelter-memberships/cancel' ) : null;
         $result  = $ability ? $ability->execute( $input ) : \Starter_Shelter\Abilities\Memberships\cancel( $input );
 
         if ( is_wp_error( $result ) ) {
             wc_add_notice( $result->get_error_message(), 'error' );
         } else {
-            wc_add_notice( __( 'Your membership has been cancelled.', 'shelter-donations' ) );
+            wc_add_notice( __( 'Your membership has been cancelled.', 'shelterkit-donations' ) );
         }
 
         self::redirect_to_memberships();
@@ -413,21 +438,23 @@ class My_Account {
             return;
         }
 
+        // phpcs:disable WordPress.Security.NonceVerification.Missing -- nonce verified by verify_action_nonce(), and current_user_owns_membership() is checked before any mutation.
         $membership_id = isset( $_POST['membership_id'] ) ? absint( wp_unslash( $_POST['membership_id'] ) ) : 0;
 
         if ( ! self::current_user_owns_membership( $membership_id, $donor_id ) ) {
-            wc_add_notice( __( 'That membership could not be found on your account.', 'shelter-donations' ), 'error' );
+            wc_add_notice( __( 'That membership could not be found on your account.', 'shelterkit-donations' ), 'error' );
             self::redirect_to_memberships();
             return;
         }
 
         $on = ! empty( $_POST['auto_renew'] );
+        // phpcs:enable WordPress.Security.NonceVerification.Missing
         update_post_meta( $membership_id, '_sd_auto_renew', $on );
 
         wc_add_notice(
             $on
-                ? __( 'Automatic renewal is now on for this membership.', 'shelter-donations' )
-                : __( 'Automatic renewal is now off for this membership.', 'shelter-donations' )
+                ? __( 'Automatic renewal is now on for this membership.', 'shelterkit-donations' )
+                : __( 'Automatic renewal is now off for this membership.', 'shelterkit-donations' )
         );
 
         self::redirect_to_memberships();
@@ -454,7 +481,7 @@ class My_Account {
     private static function verify_action_nonce( string $field, string $action ): bool {
         $nonce = isset( $_POST[ $field ] ) ? sanitize_text_field( wp_unslash( $_POST[ $field ] ) ) : '';
         if ( ! wp_verify_nonce( $nonce, $action ) ) {
-            wc_add_notice( __( 'Security check failed. Please try again.', 'shelter-donations' ), 'error' );
+            wc_add_notice( __( 'Security check failed. Please try again.', 'shelterkit-donations' ), 'error' );
             return false;
         }
         return true;
@@ -580,7 +607,7 @@ class My_Account {
 
         foreach ( $items as $key => $label ) {
             if ( 'customer-logout' === $key ) {
-                $new_items['donor-dashboard'] = __( 'My Giving', 'shelter-donations' );
+                $new_items['donor-dashboard'] = __( 'My Giving', 'shelterkit-donations' );
             }
             $new_items[ $key ] = $label;
         }
@@ -605,12 +632,12 @@ class My_Account {
         }
 
         $endpoint_titles = [
-            'donor-dashboard'  => __( 'Donor Dashboard', 'shelter-donations' ),
-            'giving-history'   => __( 'Giving History', 'shelter-donations' ),
-            'my-memberships'   => __( 'My Memberships', 'shelter-donations' ),
-            'my-memorials'     => __( 'My Memorials', 'shelter-donations' ),
-            'my-candles'       => __( 'My Candles', 'shelter-donations' ),
-            'annual-statement' => __( 'Annual Statement', 'shelter-donations' ),
+            'donor-dashboard'  => __( 'Donor Dashboard', 'shelterkit-donations' ),
+            'giving-history'   => __( 'Giving History', 'shelterkit-donations' ),
+            'my-memberships'   => __( 'My Memberships', 'shelterkit-donations' ),
+            'my-memorials'     => __( 'My Memorials', 'shelterkit-donations' ),
+            'my-candles'       => __( 'My Candles', 'shelterkit-donations' ),
+            'annual-statement' => __( 'Annual Statement', 'shelterkit-donations' ),
         ];
 
         foreach ( $endpoint_titles as $endpoint => $endpoint_title ) {
@@ -877,9 +904,9 @@ class My_Account {
         $year = isset( $_GET['year'] ) ? absint( $_GET['year'] ) : self::default_statement_year( $donor_id );
 
         $ability = wp_get_ability( 'shelter-reports/annual-summary' );
-        
+
         if ( ! $ability ) {
-            echo '<p>' . esc_html__( 'Statement generation is temporarily unavailable.', 'shelter-donations' ) . '</p>';
+            echo '<p>' . esc_html__( 'Statement generation is temporarily unavailable.', 'shelterkit-donations' ) . '</p>';
             return;
         }
 
@@ -993,15 +1020,15 @@ class My_Account {
      */
     private static function render_account_nav( string $current ): void {
         $items = [
-            'donor-dashboard'  => __( 'Overview', 'shelter-donations' ),
-            'giving-history'   => __( 'Giving History', 'shelter-donations' ),
-            'my-memberships'   => __( 'Memberships', 'shelter-donations' ),
-            'my-memorials'     => __( 'Memorials', 'shelter-donations' ),
-            'my-candles'       => __( 'Candles', 'shelter-donations' ),
-            'annual-statement' => __( 'Annual Statement', 'shelter-donations' ),
+            'donor-dashboard'  => __( 'Overview', 'shelterkit-donations' ),
+            'giving-history'   => __( 'Giving History', 'shelterkit-donations' ),
+            'my-memberships'   => __( 'Memberships', 'shelterkit-donations' ),
+            'my-memorials'     => __( 'Memorials', 'shelterkit-donations' ),
+            'my-candles'       => __( 'Candles', 'shelterkit-donations' ),
+            'annual-statement' => __( 'Annual Statement', 'shelterkit-donations' ),
         ];
 
-        echo '<nav class="sd-account-subnav" aria-label="' . esc_attr__( 'Donor account sections', 'shelter-donations' ) . '">';
+        echo '<nav class="sd-account-subnav" aria-label="' . esc_attr__( 'Donor account sections', 'shelterkit-donations' ) . '">';
         foreach ( $items as $slug => $label ) {
             $is_current = ( $slug === $current );
             printf(
@@ -1050,9 +1077,9 @@ class My_Account {
         $donation_url = Helpers\get_donation_page_url();
         ?>
         <div class="sd-no-donor">
-            <p><?php esc_html_e( 'You don\'t have a donor profile yet. Make your first donation to get started!', 'shelter-donations' ); ?></p>
+            <p><?php esc_html_e( 'You don\'t have a donor profile yet. Make your first donation to get started!', 'shelterkit-donations' ); ?></p>
             <?php if ( $donation_url ) : ?>
-            <a href="<?php echo esc_url( $donation_url ); ?>" class="button"><?php esc_html_e( 'Donate Now', 'shelter-donations' ); ?></a>
+            <a href="<?php echo esc_url( $donation_url ); ?>" class="button"><?php esc_html_e( 'Donate Now', 'shelterkit-donations' ); ?></a>
             <?php endif; ?>
         </div>
         <?php

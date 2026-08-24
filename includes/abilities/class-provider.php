@@ -26,7 +26,7 @@ class Provider {
      * @var array<string, string>
      */
     private static array $callback_files = [
-        'shelter-donations'   => 'donations.php',
+        'shelterkit-donations'   => 'donations.php',
         'shelter-memberships' => 'memberships.php',
         'shelter-memorials'   => 'memorials.php',
         'shelter-donors'      => 'donors.php',
@@ -83,9 +83,9 @@ class Provider {
         $permission_callback = self::resolve_permission_callback( $config['permission'] ?? $config['permission_callback'] ?? 'logged_in' );
 
         $args = [
-            'label'               => __( $config['label'] ?? $name, 'shelter-donations' ), // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- ability label sourced from the ability config registry, not a literal.
-            'description'         => __( $config['description'] ?? '', 'shelter-donations' ), // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- ability description sourced from the ability config registry, not a literal.
-            'category'            => $config['category'] ?? 'shelter-donations',
+            'label'               => __( $config['label'] ?? $name, 'shelterkit-donations' ), // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- ability label sourced from the ability config registry, not a literal.
+            'description'         => __( $config['description'] ?? '', 'shelterkit-donations' ), // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- ability description sourced from the ability config registry, not a literal.
+            'category'            => $config['category'] ?? 'shelterkit-donations',
             'execute_callback'    => $execute_callback,
             'permission_callback' => $permission_callback,
         ];
@@ -190,31 +190,31 @@ class Provider {
         if ( is_string( $permission ) ) {
             return match ( $permission ) {
                 'public' => fn() => true,
-                
+
                 'logged_in' => fn() => is_user_logged_in(),
-                
+
                 'admin', 'manage_options' => fn() => current_user_can( 'manage_options' ),
-                
+
                 'edit_posts' => fn() => current_user_can( 'edit_posts' ),
-                
+
                 'edit_others_posts' => fn() => current_user_can( 'edit_others_posts' ),
-                
-                'owner_or_admin' => function( $input = [] ) {
+
+                'owner_or_admin' => function ( $input = [] ) {
                     if ( current_user_can( 'manage_options' ) ) {
                         return true;
                     }
-                    
+
                     $user_id = get_current_user_id();
                     if ( ! $user_id ) {
                         return false;
                     }
-                    
+
                     // Check for donor_id in input.
                     if ( isset( $input['donor_id'] ) ) {
                         $donor_user = get_post_meta( $input['donor_id'], '_sd_user_id', true );
                         return (int) $donor_user === $user_id;
                     }
-                    
+
                     // Check for user_id in input.
                     if ( isset( $input['user_id'] ) ) {
                         return (int) $input['user_id'] === $user_id;
@@ -237,12 +237,12 @@ class Provider {
 
                     return false;
                 },
-                
+
                 'internal' => fn() => doing_action( 'woocommerce_order_status_completed' ) ||
                     doing_action( 'woocommerce_order_status_processing' ) ||
                     Helpers\is_internal_processing() ||
                     current_user_can( 'manage_options' ),
-                
+
                 default => fn() => current_user_can( $permission ),
             };
         }

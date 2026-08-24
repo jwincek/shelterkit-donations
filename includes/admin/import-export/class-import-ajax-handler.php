@@ -26,9 +26,8 @@ declare( strict_types = 1 );
 
 namespace Starter_Shelter\Admin\Import_Export;
 
-use function Starter_Shelter\Helpers\fputcsv_safe;
-
 use Starter_Shelter\Core\Config;
+use function Starter_Shelter\Helpers\fputcsv_safe;
 
 /**
  * Registers and handles all import/export AJAX endpoints.
@@ -75,20 +74,22 @@ class Import_Ajax_Handler {
 		check_ajax_referer( 'sd_preview_import', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( __( 'Permission denied.', 'shelter-donations' ) );
+			wp_send_json_error( __( 'Permission denied.', 'shelterkit-donations' ) );
 		}
 
 		$import_type = sanitize_key( $_POST['import_type'] ?? '' );
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- check_ajax_referer() and current_user_can() run at the top; $_FILES goes to the CSV reader, not to a string sanitiser.
 		$file        = $_FILES['file'] ?? null;
+		// phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		if ( ! $file || UPLOAD_ERR_OK !== $file['error'] ) {
-			wp_send_json_error( __( 'File upload failed.', 'shelter-donations' ) );
+			wp_send_json_error( __( 'File upload failed.', 'shelterkit-donations' ) );
 		}
 
 		// Validate the entity type exists in config.
 		$config = Config::get_path( 'import-export', "entity_types.{$import_type}" );
 		if ( ! $config ) {
-			wp_send_json_error( __( 'Invalid import type.', 'shelter-donations' ) );
+			wp_send_json_error( __( 'Invalid import type.', 'shelterkit-donations' ) );
 		}
 
 		$preview = CSV_Importer::preview( $import_type, $file['tmp_name'] );
@@ -116,12 +117,14 @@ class Import_Ajax_Handler {
 		check_ajax_referer( 'sd_process_import', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( __( 'Permission denied.', 'shelter-donations' ) );
+			wp_send_json_error( __( 'Permission denied.', 'shelterkit-donations' ) );
 		}
 
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- check_ajax_referer() and current_user_can() run at the top; $_FILES goes to the CSV reader, not to a string sanitiser.
 		$file = $_FILES['file'] ?? null;
+		// phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		if ( ! $file || UPLOAD_ERR_OK !== $file['error'] ) {
-			wp_send_json_error( __( 'File upload failed.', 'shelter-donations' ) );
+			wp_send_json_error( __( 'File upload failed.', 'shelterkit-donations' ) );
 		}
 
 		// Extract entity type from the AJAX action.
@@ -131,7 +134,7 @@ class Import_Ajax_Handler {
 		// Validate entity type exists.
 		$config = Config::get_path( 'import-export', "entity_types.{$entity_type}" );
 		if ( ! $config ) {
-			wp_send_json_error( __( 'Invalid import type.', 'shelter-donations' ) );
+			wp_send_json_error( __( 'Invalid import type.', 'shelterkit-donations' ) );
 		}
 
 		// Collect options from POST data.
@@ -139,7 +142,7 @@ class Import_Ajax_Handler {
 			'create_donors'   => ! empty( $_POST['create_donors'] ),
 			'update_existing' => ! empty( $_POST['update_existing'] ),
 			'skip_errors'     => ! empty( $_POST['skip_errors'] ),
-			'skip_duplicates' => ! empty( $_POST['skip_duplicates'] )
+			'skip_duplicates' => ! empty( $_POST['skip_duplicates'] ),
 		];
 
 		$results = CSV_Importer::process( $entity_type, $file['tmp_name'], $options );
@@ -156,12 +159,14 @@ class Import_Ajax_Handler {
 		check_ajax_referer( 'sd_process_import', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( __( 'Permission denied.', 'shelter-donations' ) );
+			wp_send_json_error( __( 'Permission denied.', 'shelterkit-donations' ) );
 		}
 
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- check_ajax_referer() and current_user_can() run at the top; $_FILES goes to the CSV reader, not to a string sanitiser.
 		$file = $_FILES['file'] ?? null;
+		// phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		if ( ! $file || UPLOAD_ERR_OK !== $file['error'] ) {
-			wp_send_json_error( __( 'File upload failed.', 'shelter-donations' ) );
+			wp_send_json_error( __( 'File upload failed.', 'shelterkit-donations' ) );
 		}
 
 		$year = absint( $_POST['year'] ?? gmdate( 'Y' ) );
@@ -184,17 +189,19 @@ class Import_Ajax_Handler {
 		check_ajax_referer( 'sd_process_import', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( __( 'Permission denied.', 'shelter-donations' ) );
+			wp_send_json_error( __( 'Permission denied.', 'shelterkit-donations' ) );
 		}
 
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- check_ajax_referer() and current_user_can() run at the top; $_FILES goes to the CSV reader, not to a string sanitiser.
 		$file = $_FILES['file'] ?? null;
 		if ( ! $file || UPLOAD_ERR_OK !== $file['error'] ) {
-			wp_send_json_error( __( 'File upload failed.', 'shelter-donations' ) );
+			wp_send_json_error( __( 'File upload failed.', 'shelterkit-donations' ) );
 		}
 
 		$year            = absint( $_POST['year'] ?? gmdate( 'Y' ) );
 		$skip_duplicates = ! empty( $_POST['skip_duplicates'] );
 		$default_amount  = (float) ( $_POST['default_amount'] ?? 0 );
+		// phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 
 		$results = Legacy_Memorial_Parser::import(
 			$file['tmp_name'],
@@ -219,18 +226,20 @@ class Import_Ajax_Handler {
 		check_ajax_referer( 'sd_process_import', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( __( 'Permission denied.', 'shelter-donations' ) );
+			wp_send_json_error( __( 'Permission denied.', 'shelterkit-donations' ) );
 		}
 
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- check_ajax_referer() and current_user_can() run at the top; $_FILES goes to the CSV reader, not to a string sanitiser.
 		$file = $_FILES['file'] ?? null;
+		// phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		if ( ! $file || UPLOAD_ERR_OK !== $file['error'] ) {
-			wp_send_json_error( __( 'File upload failed.', 'shelter-donations' ) );
+			wp_send_json_error( __( 'File upload failed.', 'shelterkit-donations' ) );
 		}
 
 		$entity_type = sanitize_key( $_POST['import_type'] ?? '' );
 		$config = Config::get_path( 'import-export', "entity_types.{$entity_type}" );
 		if ( ! $config ) {
-			wp_send_json_error( __( 'Invalid import type.', 'shelter-donations' ) );
+			wp_send_json_error( __( 'Invalid import type.', 'shelterkit-donations' ) );
 		}
 
 		$options = [
@@ -258,12 +267,12 @@ class Import_Ajax_Handler {
 		check_ajax_referer( 'sd_process_import', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( __( 'Permission denied.', 'shelter-donations' ) );
+			wp_send_json_error( __( 'Permission denied.', 'shelterkit-donations' ) );
 		}
 
 		$import_key = sanitize_key( $_POST['import_key'] ?? '' );
 		if ( ! $import_key ) {
-			wp_send_json_error( __( 'Missing import key.', 'shelter-donations' ) );
+			wp_send_json_error( __( 'Missing import key.', 'shelterkit-donations' ) );
 		}
 
 		$result = CSV_Importer::process_batch( $import_key );
@@ -284,17 +293,17 @@ class Import_Ajax_Handler {
 		check_ajax_referer( 'sd_download_error_csv', '_wpnonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'Permission denied.', 'shelter-donations' ) );
+			wp_die( esc_html__( 'Permission denied.', 'shelterkit-donations' ) );
 		}
 
 		$import_key = sanitize_key( $_GET['import_key'] ?? '' );
 		if ( ! $import_key ) {
-			wp_die( esc_html__( 'Missing import key.', 'shelter-donations' ) );
+			wp_die( esc_html__( 'Missing import key.', 'shelterkit-donations' ) );
 		}
 
 		$csv = CSV_Importer::get_error_csv( $import_key );
 		if ( ! $csv ) {
-			wp_die( esc_html__( 'No error data found or session expired.', 'shelter-donations' ) );
+			wp_die( esc_html__( 'No error data found or session expired.', 'shelterkit-donations' ) );
 		}
 
 		header( 'Content-Type: text/csv; charset=utf-8' );
@@ -321,14 +330,14 @@ class Import_Ajax_Handler {
 		check_ajax_referer( 'sd_download_template', '_wpnonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'Permission denied.', 'shelter-donations' ) );
+			wp_die( esc_html__( 'Permission denied.', 'shelterkit-donations' ) );
 		}
 
 		$type = sanitize_key( $_GET['type'] ?? '' );
 
 		$import_config = Config::get_path( 'import-export', "entity_types.{$type}.import" );
 		if ( ! $import_config ) {
-			wp_die( esc_html__( 'Invalid template type.', 'shelter-donations' ) );
+			wp_die( esc_html__( 'Invalid template type.', 'shelterkit-donations' ) );
 		}
 
 		$headers = array_merge(
@@ -627,7 +636,7 @@ class Import_Ajax_Handler {
 	 * @return array Values in header order.
 	 */
 	private static function map_example( array $headers, array $data ): array {
-		return array_map( function( $col ) use ( $data ) {
+		return array_map( function ( $col ) use ( $data ) {
 			return $data[ $col ] ?? '';
 		}, $headers );
 	}

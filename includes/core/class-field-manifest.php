@@ -157,7 +157,7 @@ class Field_Manifest {
 	 * the manifest-author shape (with `$entity` refs and ability-local
 	 * fields) into a flat JSON Schema. Refs that point to unknown
 	 * entity fields are emitted with the override-only data; the
-	 * dangling ref is surfaced separately by `wp shelter-donations validate`.
+	 * dangling ref is surfaced separately by `wp shelterkit-donations validate`.
 	 *
 	 * @since 1.1.2
 	 *
@@ -285,7 +285,7 @@ class Field_Manifest {
 	 *
 	 * Emails pass through verbatim — the same shape Config_Email
 	 * consumes today. Per-email placeholder paths are validated by
-	 * `wp shelter-donations validate --check=manifests` against the
+	 * `wp shelterkit-donations validate --check=manifests` against the
 	 * referenced entities' field/computed/object-properties trees.
 	 *
 	 * @since 1.1.2
@@ -585,13 +585,13 @@ class Field_Manifest {
 	}
 
 	/**
-	 * i18n a label string if WordPress is loaded; otherwise pass through.
+	 * Translate a label string if WordPress is loaded; otherwise pass through.
 	 *
 	 * @param string $text Plain label string from the manifest.
 	 * @return string
 	 */
 	private static function translate( string $text ): string {
-		return function_exists( '__' ) ? __( $text, 'shelter-donations' ) : $text; // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- label string sourced from the field manifest config, not a literal.
+		return function_exists( '__' ) ? __( $text, 'shelterkit-donations' ) : $text; // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- label string sourced from the field manifest config, not a literal.
 	}
 
 	/**

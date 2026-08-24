@@ -4,11 +4,11 @@
     "name": "shelter-donations/membership-form",
     "version": "2.0.0",
     "title": "Membership Form",
-    "category": "shelter-donations",
+    "category": "shelterkit-donations",
     "icon": "groups",
     "description": "Membership signup form with tier selection. Supports both individual and business memberships.",
     "keywords": ["membership", "subscribe", "join", "tier", "sponsor"],
-    "textdomain": "shelter-donations",
+    "textdomain": "shelterkit-donations",
     "supports": {
         "html": false,
         "align": ["wide", "full"],

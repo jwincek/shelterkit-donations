@@ -85,7 +85,7 @@ class Legacy_Memorial_Parser {
 		if ( ! $handle ) {
 			return new \WP_Error(
 				'file_error',
-				__( 'Could not open file.', 'shelter-donations' )
+				__( 'Could not open file.', 'shelterkit-donations' )
 			);
 		}
 
@@ -97,7 +97,7 @@ class Legacy_Memorial_Parser {
 		$line_number   = 0;
 
 		while ( ( $data = fgetcsv( $handle ) ) !== false ) {
-			$line_number++;
+			++$line_number;
 
 			// Skip completely empty rows.
 			$non_empty = array_filter( $data, fn( $cell ) => '' !== trim( (string) $cell ) );
@@ -136,9 +136,9 @@ class Legacy_Memorial_Parser {
 			// Determine memorial type from column C.
 			$is_pet = ( 'pet' === $col_c );
 			if ( $is_pet ) {
-				$pet_count++;
+				++$pet_count;
 			} else {
-				$person_count++;
+				++$person_count;
 			}
 
 			// Build date from month and year.
@@ -239,7 +239,7 @@ class Legacy_Memorial_Parser {
 			$result = self::import_single_row( $row, $default_amount, $skip_duplicates );
 
 			if ( is_wp_error( $result ) ) {
-				$results['errors']++;
+				++$results['errors'];
 				$results['details'][] = [
 					'line'    => $row['line_number'],
 					'status'  => 'error',
@@ -249,7 +249,7 @@ class Legacy_Memorial_Parser {
 			}
 
 			if ( $result['skipped'] ?? false ) {
-				$results['skipped']++;
+				++$results['skipped'];
 				$results['details'][] = [
 					'line'    => $row['line_number'],
 					'status'  => 'skipped',
@@ -258,9 +258,9 @@ class Legacy_Memorial_Parser {
 				continue;
 			}
 
-			$results['created']++;
+			++$results['created'];
 			if ( $result['donor_created'] ?? false ) {
-				$results['donors_created']++;
+				++$results['donors_created'];
 			}
 			$results['details'][] = [
 				'line'        => $row['line_number'],
@@ -311,7 +311,7 @@ class Legacy_Memorial_Parser {
 					'skipped' => true,
 					'message' => sprintf(
 						/* translators: %s: honoree name */
-						__( 'Memorial for "%s" by this donor already exists.', 'shelter-donations' ),
+						__( 'Memorial for "%s" by this donor already exists.', 'shelterkit-donations' ),
 						$row['honoree_name']
 					),
 				];

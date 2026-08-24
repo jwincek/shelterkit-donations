@@ -61,15 +61,15 @@ class Item_Matcher {
 		'membership -'                 => 'memberships',
 
 		// Donations.
-		'shelter donations'            => 'shelter-donations',
-		'shelter donation'             => 'shelter-donations',
+		'shelter donations'            => 'shelterkit-donations',
+		'shelter donation'             => 'shelterkit-donations',
 
 		// In Memoriam.
-		'in memoriam donations'        => 'shelter-donations-in-memoriam',
-		'in memoriam donation'         => 'shelter-donations-in-memoriam',
-		'in memoriam'                  => 'shelter-donations-in-memoriam',
-		'memorial donation'            => 'shelter-donations-in-memoriam',
-		'memorial'                     => 'shelter-donations-in-memoriam',
+		'in memoriam donations'        => 'shelterkit-donations-in-memoriam',
+		'in memoriam donation'         => 'shelterkit-donations-in-memoriam',
+		'in memoriam'                  => 'shelterkit-donations-in-memoriam',
+		'memorial donation'            => 'shelterkit-donations-in-memoriam',
+		'memorial'                     => 'shelterkit-donations-in-memoriam',
 	];
 
 	/**
@@ -254,10 +254,10 @@ class Item_Matcher {
 			?? null;
 
 		if ( $memorial_type || str_contains( $name_lower, 'memoriam' ) || str_contains( $name_lower, 'memorial' ) ) {
-			if ( isset( $products['shelter-donations-in-memoriam'] ) ) {
+			if ( isset( $products['shelterkit-donations-in-memoriam'] ) ) {
 				return array_merge(
-					$products['shelter-donations-in-memoriam'],
-					[ 'sku_prefix' => 'shelter-donations-in-memoriam', 'legacy' => true ]
+					$products['shelterkit-donations-in-memoriam'],
+					[ 'sku_prefix' => 'shelterkit-donations-in-memoriam', 'legacy' => true ]
 				);
 			}
 		}
@@ -269,10 +269,10 @@ class Item_Matcher {
 			?? null;
 
 		if ( $allocation || str_contains( $name_lower, 'shelter donations' ) ) {
-			if ( isset( $products['shelter-donations'] ) ) {
+			if ( isset( $products['shelterkit-donations'] ) ) {
 				return array_merge(
-					$products['shelter-donations'],
-					[ 'sku_prefix' => 'shelter-donations', 'legacy' => true ]
+					$products['shelterkit-donations'],
+					[ 'sku_prefix' => 'shelterkit-donations', 'legacy' => true ]
 				);
 			}
 		}

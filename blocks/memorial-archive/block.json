@@ -4,11 +4,11 @@
     "name": "shelter-donations/memorial-archive",
     "version": "2.1.0",
     "title": "Memorial Archive (Deprecated)",
-    "category": "shelter-donations",
+    "category": "shelterkit-donations",
     "icon": "heart",
     "description": "Deprecated — use Memorial Wall instead. Existing instances render via the Memorial Wall block.",
     "keywords": [],
-    "textdomain": "shelter-donations",
+    "textdomain": "shelterkit-donations",
     "supports": {
         "inserter": false,
         "html": false

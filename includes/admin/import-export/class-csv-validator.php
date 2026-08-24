@@ -83,7 +83,7 @@ class CSV_Validator {
 			if ( ! isset( $row[ $col ] ) || '' === trim( (string) $row[ $col ] ) ) {
 				$errors[] = sprintf(
 					/* translators: %s: column name */
-					__( 'Missing required field: %s', 'shelter-donations' ),
+					__( 'Missing required field: %s', 'shelterkit-donations' ),
 					$col
 				);
 			}
@@ -106,7 +106,7 @@ class CSV_Validator {
 					if ( ( $row[ $check_field ] ?? '' ) === $check_value ) {
 						$errors[] = sprintf(
 							/* translators: 1: column name, 2: condition field, 3: condition value */
-							__( '%1$s is required when %2$s is "%3$s"', 'shelter-donations' ),
+							__( '%1$s is required when %2$s is "%3$s"', 'shelterkit-donations' ),
 							$csv_col,
 							$check_field,
 							$check_value
@@ -162,7 +162,7 @@ class CSV_Validator {
 		if ( ! is_email( $value ) ) {
 			return sprintf(
 				/* translators: %s: column name */
-				__( 'Invalid email in %s', 'shelter-donations' ),
+				__( 'Invalid email in %s', 'shelterkit-donations' ),
 				$col
 			);
 		}
@@ -180,7 +180,7 @@ class CSV_Validator {
 		if ( ! is_numeric( $value ) || (float) $value <= 0 ) {
 			return sprintf(
 				/* translators: %s: column name */
-				__( 'Invalid amount in %s (must be a positive number)', 'shelter-donations' ),
+				__( 'Invalid amount in %s (must be a positive number)', 'shelterkit-donations' ),
 				$col
 			);
 		}
@@ -198,7 +198,7 @@ class CSV_Validator {
 		if ( ! strtotime( $value ) ) {
 			return sprintf(
 				/* translators: %s: column name */
-				__( 'Invalid date in %s', 'shelter-donations' ),
+				__( 'Invalid date in %s', 'shelterkit-donations' ),
 				$col
 			);
 		}
@@ -216,7 +216,7 @@ class CSV_Validator {
 		if ( ! empty( $value ) && ! filter_var( $value, FILTER_VALIDATE_URL ) ) {
 			return sprintf(
 				/* translators: %s: column name */
-				__( 'Invalid URL in %s', 'shelter-donations' ),
+				__( 'Invalid URL in %s', 'shelterkit-donations' ),
 				$col
 			);
 		}
@@ -267,7 +267,7 @@ class CSV_Validator {
 		if ( ! in_array( $value, $allowed, true ) ) {
 			return sprintf(
 				/* translators: 1: column name, 2: the invalid value, 3: comma-separated allowed values */
-				__( 'Invalid %1$s: "%2$s" (allowed: %3$s)', 'shelter-donations' ),
+				__( 'Invalid %1$s: "%2$s" (allowed: %3$s)', 'shelterkit-donations' ),
 				$col,
 				$value,
 				implode( ', ', $allowed )

@@ -287,9 +287,9 @@ return [
 			'fields'  => [
 				'address_line_1' => [ 'label' => 'Address Line 1', 'input_type' => 'text' ],
 				'address_line_2' => [ 'label' => 'Address Line 2', 'input_type' => 'text' ],
-				'city'           => [ 'label' => 'City',           'input_type' => 'text' ],
-				'state'          => [ 'label' => 'State',          'input_type' => 'text' ],
-				'postal_code'    => [ 'label' => 'Postal Code',    'input_type' => 'text' ],
+				'city'           => [ 'label' => 'City', 'input_type' => 'text' ],
+				'state'          => [ 'label' => 'State', 'input_type' => 'text' ],
+				'postal_code'    => [ 'label' => 'Postal Code', 'input_type' => 'text' ],
 			],
 			'composite_save' => [
 				'meta_key'  => '_sd_address',
@@ -317,7 +317,7 @@ return [
 				// (stored as `_sd_donation_count` meta only); donor_level
 				// is a computed-field-derived display.
 				'donation_count' => [ 'label' => 'Total Donations', 'input_type' => 'number_display', 'readonly' => true ],
-				'donor_level'    => [ 'label' => 'Donor Level',     'input_type' => 'level_badge',    'readonly' => true ],
+				'donor_level'    => [ 'label' => 'Donor Level', 'input_type' => 'level_badge', 'readonly' => true ],
 				'first_donation_date',
 			],
 		],

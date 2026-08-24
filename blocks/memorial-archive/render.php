@@ -48,4 +48,4 @@ $attributes = [
 ];
 
 // Delegate to the memorial-wall render.php.
-include __DIR__ . '/../memorial-wall/render.php';
+require __DIR__ . '/../memorial-wall/render.php';

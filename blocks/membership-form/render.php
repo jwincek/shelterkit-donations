@@ -21,9 +21,9 @@ $layout           = $attributes['layout'] ?? 'cards';
 $columns          = $attributes['columns'] ?? 3;
 $show_benefits    = $attributes['showBenefits'] ?? true;
 $show_anonymous   = $attributes['showAnonymous'] ?? false;
-$title            = $attributes['title'] ?? __( 'Become a Member', 'shelter-donations' );
-$subtitle         = $attributes['subtitle'] ?? __( 'Join our community of animal advocates.', 'shelter-donations' );
-$submit_text      = $attributes['submitButtonText'] ?? __( 'Join Now', 'shelter-donations' );
+$title            = $attributes['title'] ?? __( 'Become a Member', 'shelterkit-donations' );
+$subtitle         = $attributes['subtitle'] ?? __( 'Join our community of animal advocates.', 'shelterkit-donations' );
+$submit_text      = $attributes['submitButtonText'] ?? __( 'Join Now', 'shelterkit-donations' );
 
 // Campaign source of truth: explicit block attribute wins; otherwise
 // auto-tag from `?campaign={id}` so a click through campaign-card
@@ -43,7 +43,7 @@ $checkout_url = function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url()
 // Check product configuration.
 $individual_product_id = (int) get_option( 'sd_membership_product_id', 0 );
 $business_product_id   = (int) get_option( 'sd_business_membership_product_id', 0 );
-$product_ok = ( $membership_type === 'business' ) 
+$product_ok = ( $membership_type === 'business' )
     ? ( $business_product_id && function_exists( 'wc_get_product' ) && wc_get_product( $business_product_id ) )
     : ( $individual_product_id && function_exists( 'wc_get_product' ) && wc_get_product( $individual_product_id ) );
 
@@ -91,16 +91,24 @@ $current_tiers = ( $membership_type === 'business' ) ? $business_tiers : $indivi
 ?>
 <div <?php echo $wrapper; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped markup from get_block_wrapper_attributes(). ?>>
     <div class="sd-form-header">
-        <?php if ( $title ) : ?><h2 class="sd-form-title"><?php echo esc_html( $title ); ?></h2><?php endif; ?>
-        <?php if ( $subtitle ) : ?><p class="sd-form-subtitle"><?php echo esc_html( $subtitle ); ?></p><?php endif; ?>
+        <?php
+        if ( $title ) :
+			?>
+            <h2 class="sd-form-title"><?php echo esc_html( $title ); ?></h2><?php endif; ?>
+        <?php
+        if ( $subtitle ) :
+			?>
+            <p class="sd-form-subtitle"><?php echo esc_html( $subtitle ); ?></p><?php endif; ?>
         <?php if ( $campaign && ! is_wp_error( $campaign ) ) : ?>
-            <div class="sd-campaign-badge"><?php
+            <div class="sd-campaign-badge">
+            <?php
                 /* translators: %s: campaign name. */
-                printf( esc_html__( 'Supporting: %s', 'shelter-donations' ), '<strong>' . esc_html( $campaign->name ) . '</strong>' );
-            ?></div>
+                printf( esc_html__( 'Supporting: %s', 'shelterkit-donations' ), '<strong>' . esc_html( $campaign->name ) . '</strong>' );
+            ?>
+            </div>
         <?php endif; ?>
         <?php if ( ! $product_ok ) : ?>
-            <div class="sd-config-warning" role="alert"><p><?php esc_html_e( 'Membership form not configured.', 'shelter-donations' ); ?></p></div>
+            <div class="sd-config-warning" role="alert"><p><?php esc_html_e( 'Membership form not configured.', 'shelterkit-donations' ); ?></p></div>
         <?php endif; ?>
     </div>
 
@@ -113,13 +121,13 @@ $current_tiers = ( $membership_type === 'business' ) ? $business_tiers : $indivi
                     <input type="radio" name="<?php echo esc_attr( $form_id ); ?>_type" value="individual"
                         data-wp-on--change="actions.setMembershipType"
                         data-wp-bind--checked="state.forms['<?php echo esc_attr( $form_id ); ?>'].membershipType === 'individual'">
-                    <span class="sd-type-label"><?php esc_html_e( 'Individual', 'shelter-donations' ); ?></span>
+                    <span class="sd-type-label"><?php esc_html_e( 'Individual', 'shelterkit-donations' ); ?></span>
                 </label>
                 <label class="sd-type-option">
                     <input type="radio" name="<?php echo esc_attr( $form_id ); ?>_type" value="business"
                         data-wp-on--change="actions.setMembershipType"
                         data-wp-bind--checked="state.forms['<?php echo esc_attr( $form_id ); ?>'].membershipType === 'business'">
-                    <span class="sd-type-label"><?php esc_html_e( 'Business', 'shelter-donations' ); ?></span>
+                    <span class="sd-type-label"><?php esc_html_e( 'Business', 'shelterkit-donations' ); ?></span>
                 </label>
             </div>
         </div>
@@ -127,7 +135,7 @@ $current_tiers = ( $membership_type === 'business' ) ? $business_tiers : $indivi
 
         <!-- Tier Selection -->
         <div class="sd-form-section sd-tiers-section">
-            <span class="sd-section-label"><?php esc_html_e( 'Select Your Level', 'shelter-donations' ); ?></span>
+            <span class="sd-section-label"><?php esc_html_e( 'Select Your Level', 'shelterkit-donations' ); ?></span>
 
             <?php
             $tier_sets = [
@@ -136,19 +144,22 @@ $current_tiers = ( $membership_type === 'business' ) ? $business_tiers : $indivi
             ];
 
             foreach ( $tier_sets as $type => $tiers ) :
-                if ( empty( $tiers ) ) continue;
+                if ( empty( $tiers ) ) {
+					continue;
+                }
                 $is_default = ( $type === $membership_type );
                 $container_class = $is_default ? '' : 'sd-collapsed';
 
                 if ( 'list' === $layout || ! $show_benefits ) :
                     // ── Compact list layout (no benefits) ──
-                ?>
+					?>
                 <div class="sd-tiers-list <?php echo esc_attr( $container_class ); ?>"
                     data-wp-class--sd-collapsed="<?php echo $type === 'individual' ? 'callbacks.isBusinessMembership' : '!callbacks.isBusinessMembership'; ?>">
-                    <?php foreach ( $tiers as $slug => $tier ) :
+                    <?php
+                    foreach ( $tiers as $slug => $tier ) :
                         $price = $tier['price'] ?? $tier['amount'] ?? 0;
                         $name = $tier['name'] ?? $tier['label'] ?? ucfirst( $slug );
-                    ?>
+						?>
                     <label class="sd-tier-option"
                         data-wp-class--selected="callbacks.isTierSelected"
                         data-wp-context='{"tierSlug":"<?php echo esc_attr( $slug ); ?>"}'>
@@ -158,14 +169,15 @@ $current_tiers = ( $membership_type === 'business' ) ? $business_tiers : $indivi
                             data-wp-bind--checked="callbacks.isTierSelected">
                         <span class="sd-tier-option-content">
                             <span class="sd-tier-option-name"><?php echo esc_html( $name ); ?></span>
-                            <span class="sd-tier-option-price">$<?php echo esc_html( number_format( $price ) ); ?><span class="sd-tier-option-period">/<?php esc_html_e( 'yr', 'shelter-donations' ); ?></span></span>
+                            <span class="sd-tier-option-price">$<?php echo esc_html( number_format( $price ) ); ?><span class="sd-tier-option-period">/<?php esc_html_e( 'yr', 'shelterkit-donations' ); ?></span></span>
                         </span>
                     </label>
                     <?php endforeach; ?>
                 </div>
-                <?php else :
+					<?php
+                else :
                     // ── Cards layout (with benefits) ──
-                ?>
+					?>
                 <div class="sd-tiers-grid sd-columns-<?php echo esc_attr( $columns ); ?> <?php echo esc_attr( $container_class ); ?>"
                     data-wp-class--sd-collapsed="<?php echo $type === 'individual' ? 'callbacks.isBusinessMembership' : '!callbacks.isBusinessMembership'; ?>">
                     <?php
@@ -177,12 +189,12 @@ $current_tiers = ( $membership_type === 'business' ) ? $business_tiers : $indivi
                         $new_benefits = array_diff( $benefits, $prev_benefits );
                         $featured = $tier['featured'] ?? false;
                         $prev_benefits = $benefits;
-                    ?>
+						?>
                         <div class="sd-tier-card <?php echo $featured ? 'sd-tier-featured' : ''; ?>"
                              data-wp-class--selected="callbacks.isTierSelected"
                              data-wp-context='{"tierSlug":"<?php echo esc_attr( $slug ); ?>"}'>
                             <?php if ( $featured ) : ?>
-                                <div class="sd-tier-badge"><?php esc_html_e( 'Most Popular', 'shelter-donations' ); ?></div>
+                                <div class="sd-tier-badge"><?php esc_html_e( 'Most Popular', 'shelterkit-donations' ); ?></div>
                             <?php endif; ?>
 
                             <button type="button" class="sd-tier-select-btn" data-wp-on--click="actions.selectTier">
@@ -190,14 +202,15 @@ $current_tiers = ( $membership_type === 'business' ) ? $business_tiers : $indivi
                                     <h3 class="sd-tier-name"><?php echo esc_html( $name ); ?></h3>
                                     <div class="sd-tier-price">
                                         <span class="sd-price-amount">$<?php echo esc_html( number_format( $price ) ); ?></span>
-                                        <span class="sd-price-period">/<?php esc_html_e( 'year', 'shelter-donations' ); ?></span>
+                                        <span class="sd-price-period">/<?php esc_html_e( 'year', 'shelterkit-donations' ); ?></span>
                                     </div>
                                 </div>
 
                                 <ul class="sd-tier-benefits">
-                                    <?php foreach ( $benefits as $benefit ) :
+                                    <?php
+                                    foreach ( $benefits as $benefit ) :
                                         $is_new = in_array( $benefit, $new_benefits, true );
-                                    ?>
+										?>
                                         <li class="<?php echo $is_new ? 'sd-benefit-new' : 'sd-benefit-inherited'; ?>">
                                             <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" fill="currentColor"/></svg>
                                             <?php echo esc_html( $benefit ); ?>
@@ -215,17 +228,17 @@ $current_tiers = ( $membership_type === 'business' ) ? $business_tiers : $indivi
         <!-- Donor / Business Name (unified field) -->
         <div class="sd-form-section sd-donor-name-section">
             <label for="<?php echo esc_attr( $form_id ); ?>-donor-name" class="sd-section-label">
-                <span data-wp-text="callbacks.getDonorNameLabel"><?php esc_html_e( 'Your Name', 'shelter-donations' ); ?></span>
+                <span data-wp-text="callbacks.getDonorNameLabel"><?php esc_html_e( 'Your Name', 'shelterkit-donations' ); ?></span>
                 <span class="sd-required" data-wp-class--sd-collapsed="!callbacks.isBusinessMembership">*</span>
             </label>
             <input type="text" id="<?php echo esc_attr( $form_id ); ?>-donor-name" class="sd-text-input" maxlength="200"
                 data-wp-bind--placeholder="callbacks.getDonorNamePlaceholder"
-                placeholder="<?php esc_attr_e( 'Enter your name...', 'shelter-donations' ); ?>"
+                placeholder="<?php esc_attr_e( 'Enter your name...', 'shelterkit-donations' ); ?>"
                 data-wp-on--input="actions.setDonorName"
                 data-wp-bind--value="state.forms['<?php echo esc_attr( $form_id ); ?>'].donorName">
-            <p class="description sd-field-help" data-wp-text="callbacks.getDonorNameHelp"><?php esc_html_e( 'How your name will appear on our membership records.', 'shelter-donations' ); ?></p>
+            <p class="description sd-field-help" data-wp-text="callbacks.getDonorNameHelp"><?php esc_html_e( 'How your name will appear on our membership records.', 'shelterkit-donations' ); ?></p>
             <p class="sd-family-tier-note sd-collapsed" data-wp-class--sd-collapsed="!callbacks.isFamilyTier" aria-live="polite">
-                <?php esc_html_e( 'Please list all family members to be included in your membership (e.g. "John & Mary Smith").', 'shelter-donations' ); ?>
+                <?php esc_html_e( 'Please list all family members to be included in your membership (e.g. "John & Mary Smith").', 'shelterkit-donations' ); ?>
             </p>
         </div>
 
@@ -234,7 +247,7 @@ $current_tiers = ( $membership_type === 'business' ) ? $business_tiers : $indivi
             data-wp-class--sd-collapsed="!callbacks.isBusinessMembership"
             data-wp-bind--aria-hidden="!callbacks.isBusinessMembership">
             <div class="sd-field-wrapper sd-logo-upload">
-                <label class="sd-section-label"><?php esc_html_e( 'Business Logo', 'shelter-donations' ); ?> <span class="sd-optional">(<?php esc_html_e( 'Optional', 'shelter-donations' ); ?>)</span></label>
+                <label class="sd-section-label"><?php esc_html_e( 'Business Logo', 'shelterkit-donations' ); ?> <span class="sd-optional">(<?php esc_html_e( 'Optional', 'shelterkit-donations' ); ?>)</span></label>
                 <div class="sd-logo-dropzone" data-wp-on--click="actions.triggerLogoInput"
                     data-wp-class--sd-has-logo="callbacks.hasLogo">
                     <input type="file" id="<?php echo esc_attr( $form_id ); ?>-logo" class="sd-logo-input"
@@ -243,15 +256,15 @@ $current_tiers = ( $membership_type === 'business' ) ? $business_tiers : $indivi
                     <div class="sd-logo-preview sd-collapsed" data-wp-class--sd-collapsed="!callbacks.hasLogo">
                         <img data-wp-bind--src="callbacks.getLogoSrc" alt="" class="sd-logo-img">
                         <div class="sd-logo-info">
-                            <span class="sd-logo-status"><?php esc_html_e( 'Logo selected', 'shelter-donations' ); ?></span>
-                            <span class="sd-logo-note"><?php esc_html_e( 'Will be reviewed by our team before publishing.', 'shelter-donations' ); ?></span>
+                            <span class="sd-logo-status"><?php esc_html_e( 'Logo selected', 'shelterkit-donations' ); ?></span>
+                            <span class="sd-logo-note"><?php esc_html_e( 'Will be reviewed by our team before publishing.', 'shelterkit-donations' ); ?></span>
                         </div>
-                        <button type="button" class="sd-logo-remove" data-wp-on--click="actions.removeLogo" aria-label="<?php esc_attr_e( 'Remove logo', 'shelter-donations' ); ?>">&times;</button>
+                        <button type="button" class="sd-logo-remove" data-wp-on--click="actions.removeLogo" aria-label="<?php esc_attr_e( 'Remove logo', 'shelterkit-donations' ); ?>">&times;</button>
                     </div>
                     <div class="sd-logo-placeholder" data-wp-class--sd-collapsed="callbacks.hasLogo">
                         <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" fill="currentColor"/></svg>
-                        <span><?php esc_html_e( 'Click to upload logo', 'shelter-donations' ); ?></span>
-                        <span class="sd-logo-formats"><?php esc_html_e( 'PNG or JPG', 'shelter-donations' ); ?></span>
+                        <span><?php esc_html_e( 'Click to upload logo', 'shelterkit-donations' ); ?></span>
+                        <span class="sd-logo-formats"><?php esc_html_e( 'PNG or JPG', 'shelterkit-donations' ); ?></span>
                     </div>
                 </div>
             </div>
@@ -261,7 +274,7 @@ $current_tiers = ( $membership_type === 'business' ) ? $business_tiers : $indivi
         // Anonymous toggle (shared partial).
         $namespace = 'shelter-donations/membership-form';
         if ( $show_anonymous ) :
-            $label = __( 'Keep my membership anonymous', 'shelter-donations' );
+            $label = __( 'Keep my membership anonymous', 'shelterkit-donations' );
             require dirname( __DIR__ ) . '/shared/partials/anonymous-toggle.php';
         endif;
         ?>
@@ -272,7 +285,7 @@ $current_tiers = ( $membership_type === 'business' ) ? $business_tiers : $indivi
                 data-wp-class--sd-collapsed="!callbacks.hasTierSelected">
                 <span class="sd-summary-tier" data-wp-text="callbacks.getSelectedTierName"></span>
                 <span class="sd-summary-value" data-wp-text="callbacks.getDisplayPrice">$0</span>
-                <span class="sd-summary-period">/<?php esc_html_e( 'year', 'shelter-donations' ); ?></span>
+                <span class="sd-summary-period">/<?php esc_html_e( 'year', 'shelterkit-donations' ); ?></span>
             </div>
 
             <button type="button" class="sd-submit-button wp-element-button" data-wp-on--click="actions.submitToCart"
@@ -280,7 +293,7 @@ $current_tiers = ( $membership_type === 'business' ) ? $business_tiers : $indivi
                 data-wp-class--is-processing="state.forms['<?php echo esc_attr( $form_id ); ?>'].isProcessing">
                 <span data-wp-bind--hidden="state.forms['<?php echo esc_attr( $form_id ); ?>'].isProcessing"><?php echo esc_html( $submit_text ); ?></span>
                 <span class="sd-button-loading" data-wp-bind--hidden="!state.forms['<?php echo esc_attr( $form_id ); ?>'].isProcessing">
-                    <span class="sd-spinner-small"></span> <?php esc_html_e( 'Processing...', 'shelter-donations' ); ?>
+                    <span class="sd-spinner-small"></span> <?php esc_html_e( 'Processing...', 'shelterkit-donations' ); ?>
                 </span>
             </button>
 
@@ -292,7 +305,7 @@ $current_tiers = ( $membership_type === 'business' ) ? $business_tiers : $indivi
     </div>
 
     <?php
-    $label = __( 'Secure payment powered by WooCommerce', 'shelter-donations' );
+    $label = __( 'Secure payment powered by WooCommerce', 'shelterkit-donations' );
     require dirname( __DIR__ ) . '/shared/partials/trust-badge.php';
     ?>
 </div>

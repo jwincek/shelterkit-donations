@@ -42,7 +42,7 @@ class Product_Mapper {
      * Find product configuration by SKU prefix.
      *
      * Products are matched by SKU prefix to allow for variable products
-     * with SKUs like "shelter-donations-monthly" matching "shelter-donations".
+     * with SKUs like "shelterkit-donations-monthly" matching "shelterkit-donations".
      *
      * @since 1.0.0
      *
@@ -144,7 +144,7 @@ class Product_Mapper {
     private static function get_donor_name( \WC_Order $order ): string {
         $first = $order->get_billing_first_name();
         $last  = $order->get_billing_last_name();
-        
+
         return trim( "$first $last" );
     }
 
@@ -269,13 +269,13 @@ class Product_Mapper {
      */
     private static function get_variation_attribute( \WC_Order_Item $item, string $key ): ?string {
         $product = $item->get_product();
-        
+
         if ( ! $product || ! $product->is_type( 'variation' ) ) {
             return null;
         }
 
         $attributes = $product->get_variation_attributes();
-        
+
         // Try exact key.
         if ( isset( $attributes[ $key ] ) ) {
             return $attributes[ $key ];
@@ -330,10 +330,10 @@ class Product_Mapper {
      */
     private static function normalize_allocation( string $allocation ): string {
         $allocation = strtolower( trim( $allocation ) );
-        
+
         // Remove price suffixes like "- $50".
         $allocation = preg_replace( '/\s*-\s*\$[\d,]+/', '', $allocation );
-        
+
         // Convert to slug format.
         return sanitize_title( $allocation );
     }
@@ -368,7 +368,7 @@ class Product_Mapper {
                 return true;
             }
         }
-        
+
         return false;
     }
 
@@ -382,7 +382,7 @@ class Product_Mapper {
      */
     public static function get_checkout_fields( string $product_type ): array {
         $field_sets = Config::get_item( 'products', 'checkout_field_sets', [] );
-        
+
         return $field_sets[ $product_type ] ?? [];
     }
 }

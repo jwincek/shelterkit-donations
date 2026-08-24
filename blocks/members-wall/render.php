@@ -50,7 +50,7 @@ if ( empty( $items ) ) {
     if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
         // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $wrapper_attributes is escaped markup from get_block_wrapper_attributes().
         echo '<div ' . $wrapper_attributes . '><p class="sd-mw-empty">'
-            . esc_html__( 'No members to recognize yet (active members who haven\'t opted out will appear here).', 'shelter-donations' )
+            . esc_html__( 'No members to recognize yet (active members who haven\'t opted out will appear here).', 'shelterkit-donations' )
             . '</p></div>';
     }
     return;
@@ -100,10 +100,11 @@ $render_tile = static function ( array $item ) use ( $show_logos ): void {
 ?>
 
 <div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped markup from get_block_wrapper_attributes(). ?>>
-    <?php foreach ( $groups as $label => $members ) :
+    <?php
+    foreach ( $groups as $label => $members ) :
         $has_title = $group_by_tier && '' !== $label;
         $title_id  = $has_title ? 'sd-mw-tier-' . sanitize_title( (string) $label ) : '';
-    ?>
+		?>
     <section class="sd-mw-tier"<?php echo $title_id ? ' aria-labelledby="' . esc_attr( $title_id ) . '"' : ''; ?>>
         <?php if ( $has_title ) : ?>
         <h3 class="sd-mw-tier-title" id="<?php echo esc_attr( $title_id ); ?>"><?php echo esc_html( $label ); ?></h3>

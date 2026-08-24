@@ -334,7 +334,7 @@ class Config_Email extends WC_Email {
         }
 
         if ( is_bool( $value ) ) {
-            return $value ? __( 'Yes', 'shelter-donations' ) : __( 'No', 'shelter-donations' );
+            return $value ? __( 'Yes', 'shelterkit-donations' ) : __( 'No', 'shelterkit-donations' );
         }
 
         if ( is_array( $value ) ) {
@@ -378,7 +378,7 @@ class Config_Email extends WC_Email {
      * @return string Email subject.
      */
     public function get_default_subject(): string {
-        return $this->config['subject'] ?? __( 'Notification from {site_name}', 'shelter-donations' );
+        return $this->config['subject'] ?? __( 'Notification from {site_name}', 'shelterkit-donations' );
     }
 
     /**
@@ -479,39 +479,39 @@ class Config_Email extends WC_Email {
 
         $this->form_fields = [
             'enabled' => [
-                'title'   => __( 'Enable/Disable', 'shelter-donations' ),
+                'title'   => __( 'Enable/Disable', 'shelterkit-donations' ),
                 'type'    => 'checkbox',
-                'label'   => __( 'Enable this email notification', 'shelter-donations' ),
+                'label'   => __( 'Enable this email notification', 'shelterkit-donations' ),
                 'default' => 'yes',
             ],
             'subject' => [
-                'title'       => __( 'Subject', 'shelter-donations' ),
+                'title'       => __( 'Subject', 'shelterkit-donations' ),
                 'type'        => 'text',
                 'desc_tip'    => true,
                 'description' => sprintf(
                     /* translators: %s: placeholder list */
-                    __( 'Available placeholders: %s', 'shelter-donations' ),
+                    __( 'Available placeholders: %s', 'shelterkit-donations' ),
                     $placeholder_text
                 ),
                 'placeholder' => $this->get_default_subject(),
                 'default'     => '',
             ],
             'heading' => [
-                'title'       => __( 'Email heading', 'shelter-donations' ),
+                'title'       => __( 'Email heading', 'shelterkit-donations' ),
                 'type'        => 'text',
                 'desc_tip'    => true,
                 'description' => sprintf(
                     /* translators: %s: placeholder list */
-                    __( 'Available placeholders: %s', 'shelter-donations' ),
+                    __( 'Available placeholders: %s', 'shelterkit-donations' ),
                     $placeholder_text
                 ),
                 'placeholder' => $this->get_default_heading(),
                 'default'     => '',
             ],
             'email_type' => [
-                'title'       => __( 'Email type', 'shelter-donations' ),
+                'title'       => __( 'Email type', 'shelterkit-donations' ),
                 'type'        => 'select',
-                'description' => __( 'Choose which format of email to send.', 'shelter-donations' ),
+                'description' => __( 'Choose which format of email to send.', 'shelterkit-donations' ),
                 'default'     => 'html',
                 'class'       => 'email_type wc-enhanced-select',
                 'options'     => $this->get_email_type_options(),

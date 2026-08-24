@@ -18,7 +18,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$legend = $legend ?? __( 'Select Amount', 'shelter-donations' );
+$legend = $legend ?? __( 'Select Amount', 'shelterkit-donations' );
 ?>
 <fieldset class="sd-form-section sd-amount-section">
 	<legend class="sd-section-label"><?php echo esc_html( $legend ); ?></legend>
@@ -32,7 +32,7 @@ $legend = $legend ?? __( 'Select Amount', 'shelter-donations' );
 		<?php endforeach; ?>
 	</div>
 	<div class="sd-custom-amount">
-		<label for="<?php echo esc_attr( $form_id ); ?>-custom" class="sd-custom-label"><?php esc_html_e( 'Or enter custom amount:', 'shelter-donations' ); ?></label>
+		<label for="<?php echo esc_attr( $form_id ); ?>-custom" class="sd-custom-label"><?php esc_html_e( 'Or enter custom amount:', 'shelterkit-donations' ); ?></label>
 		<div class="sd-input-wrapper">
 			<span class="sd-currency-symbol">$</span>
 			<input type="number" id="<?php echo esc_attr( $form_id ); ?>-custom" class="sd-custom-input"
@@ -40,6 +40,6 @@ $legend = $legend ?? __( 'Select Amount', 'shelter-donations' );
 				data-wp-on--input="actions.setCustomAmount" data-wp-on--focus="actions.clearPresetAmount"
 				data-wp-bind--value="state.forms['<?php echo esc_attr( $form_id ); ?>'].customAmount">
 		</div>
-		<p class="sd-field-help"><?php printf( /* translators: %s: minimum donation amount. */ esc_html__( '$%s minimum', 'shelter-donations' ), number_format( (int) $min_amount ) ); ?></p>
+		<p class="sd-field-help"><?php printf( /* translators: %s: minimum donation amount. */ esc_html__( '$%s minimum', 'shelterkit-donations' ), number_format( (int) $min_amount ) ); ?></p>
 	</div>
 </fieldset>

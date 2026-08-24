@@ -27,55 +27,55 @@ do_action( 'woocommerce_email_header', $heading, $email );
     <?php
     printf(
         /* translators: %s: recipient name */
-        esc_html__( 'Dear %s,', 'shelter-donations' ),
-        esc_html( $donor['first_name'] ?? __( 'Friend', 'shelter-donations' ) )
+        esc_html__( 'Dear %s,', 'shelterkit-donations' ),
+        esc_html( $donor['first_name'] ?? __( 'Friend', 'shelterkit-donations' ) )
     );
     ?>
 </p>
 
 <p>
-    <?php esc_html_e( 'Thank you for your generous donation to support our animal shelter. Your contribution makes a real difference in the lives of the animals in our care.', 'shelter-donations' ); ?>
+    <?php esc_html_e( 'Thank you for your generous donation to support our animal shelter. Your contribution makes a real difference in the lives of the animals in our care.', 'shelterkit-donations' ); ?>
 </p>
 
-<h2><?php esc_html_e( 'Donation Details', 'shelter-donations' ); ?></h2>
+<h2><?php esc_html_e( 'Donation Details', 'shelterkit-donations' ); ?></h2>
 
 <table class="td" cellspacing="0" cellpadding="6" border="1" style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
     <tbody>
         <tr>
-            <th scope="row" style="text-align: left; padding: 12px; background-color: #f8f8f8;"><?php esc_html_e( 'Amount', 'shelter-donations' ); ?></th>
+            <th scope="row" style="text-align: left; padding: 12px; background-color: #f8f8f8;"><?php esc_html_e( 'Amount', 'shelterkit-donations' ); ?></th>
             <td style="padding: 12px;"><?php echo esc_html( $donation['amount_formatted'] ?? '' ); ?></td>
         </tr>
         <tr>
-            <th scope="row" style="text-align: left; padding: 12px; background-color: #f8f8f8;"><?php esc_html_e( 'Date', 'shelter-donations' ); ?></th>
+            <th scope="row" style="text-align: left; padding: 12px; background-color: #f8f8f8;"><?php esc_html_e( 'Date', 'shelterkit-donations' ); ?></th>
             <td style="padding: 12px;"><?php echo esc_html( $donation['date_formatted'] ?? '' ); ?></td>
         </tr>
         <tr>
-            <th scope="row" style="text-align: left; padding: 12px; background-color: #f8f8f8;"><?php esc_html_e( 'Allocation', 'shelter-donations' ); ?></th>
+            <th scope="row" style="text-align: left; padding: 12px; background-color: #f8f8f8;"><?php esc_html_e( 'Allocation', 'shelterkit-donations' ); ?></th>
             <td style="padding: 12px;"><?php echo esc_html( $donation['allocation_label'] ?? $donation['allocation'] ?? '' ); ?></td>
         </tr>
         <?php if ( ! empty( $donation['dedication'] ) ) : ?>
         <tr>
-            <th scope="row" style="text-align: left; padding: 12px; background-color: #f8f8f8;"><?php esc_html_e( 'Dedication', 'shelter-donations' ); ?></th>
+            <th scope="row" style="text-align: left; padding: 12px; background-color: #f8f8f8;"><?php esc_html_e( 'Dedication', 'shelterkit-donations' ); ?></th>
             <td style="padding: 12px;"><?php echo esc_html( $donation['dedication'] ); ?></td>
         </tr>
         <?php endif; ?>
         <tr>
-            <th scope="row" style="text-align: left; padding: 12px; background-color: #f8f8f8;"><?php esc_html_e( 'Reference', 'shelter-donations' ); ?></th>
+            <th scope="row" style="text-align: left; padding: 12px; background-color: #f8f8f8;"><?php esc_html_e( 'Reference', 'shelterkit-donations' ); ?></th>
             <td style="padding: 12px;">#<?php echo esc_html( $donation['id'] ?? '' ); ?></td>
         </tr>
     </tbody>
 </table>
 
 <p style="background-color: #f0f7f0; padding: 15px; border-left: 4px solid #28a745;">
-    <?php esc_html_e( 'This donation is tax-deductible to the extent allowed by law. No goods or services were provided in exchange for this contribution.', 'shelter-donations' ); ?>
+    <?php esc_html_e( 'This donation is tax-deductible to the extent allowed by law. No goods or services were provided in exchange for this contribution.', 'shelterkit-donations' ); ?>
 </p>
 
 <p>
-    <?php esc_html_e( 'Please keep this email as your receipt for tax purposes.', 'shelter-donations' ); ?>
+    <?php esc_html_e( 'Please keep this email as your receipt for tax purposes.', 'shelterkit-donations' ); ?>
 </p>
 
 <p>
-    <?php esc_html_e( 'With gratitude,', 'shelter-donations' ); ?><br>
+    <?php esc_html_e( 'With gratitude,', 'shelterkit-donations' ); ?><br>
     <?php echo esc_html( get_bloginfo( 'name' ) ); ?>
 </p>
 

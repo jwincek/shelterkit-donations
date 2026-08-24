@@ -1,0 +1,24 @@
+# Routes the traffic that arrives once the plugin is listed on WordPress.org.
+#
+# Public GitHub Issues become a de facto support channel for a listed plugin
+# whether or not that is the intent, so the expectation is set here before the
+# first user arrives rather than after. Support belongs on the WordPress.org
+# forum: it is the official channel, it is searchable by the next person with
+# the same problem, and it is where the plugin's rating and support stats are
+# tracked. Issues stay open for bugs and feature requests.
+#
+# Note: the support URL 404s until the plugin is approved and listed. That is
+# expected — nobody can reach this repo from a plugin listing before then.
+blank_issues_enabled: true
+contact_links:
+  - name: Support & how-to questions
+    url: https://wordpress.org/support/plugin/shelterkit-donations/
+    about: Installation help, configuring allocations, membership tiers or donor levels, or "how do I …" — the WordPress.org forum is the fastest channel and other users can find the answer later.
+
+  - name: Payments, checkout, and gateways
+    url: https://woocommerce.com/document/woocommerce-payments/
+    about: Contributions go through the standard WooCommerce checkout, so gateway, tax and transactional-email behaviour is WooCommerce's. This plugin adds the fields and the records, not the payment handling.
+
+  - name: Tax and receipting rules
+    url: https://www.irs.gov/charities-non-profits/charitable-organizations/substantiating-noncash-contributions
+    about: The annual statement is a convenience for your donors, not tax advice. What a receipt must contain, and what is deductible, is between your organisation and its accountant.

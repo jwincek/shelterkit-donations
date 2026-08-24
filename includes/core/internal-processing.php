@@ -39,6 +39,7 @@ defined( 'ABSPATH' ) || exit;
  * @param bool $state Whether to enable (true) or disable (false) internal processing.
  */
 function set_internal_processing( bool $state = true ): void {
+	// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- carries the sd_ convention behind a leading underscore marking it private.
 	$GLOBALS['_sd_internal_processing'] = $state;
 }
 

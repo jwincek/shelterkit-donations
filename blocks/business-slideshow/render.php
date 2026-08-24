@@ -52,7 +52,7 @@ if ( 0 === $count ) {
     if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
         // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $wrapper_attributes is escaped markup from get_block_wrapper_attributes().
         echo '<div ' . $wrapper_attributes . '><p class="sd-bs-empty">'
-            . esc_html__( 'No business members with an approved logo yet.', 'shelter-donations' )
+            . esc_html__( 'No business members with an approved logo yet.', 'shelterkit-donations' )
             . '</p></div>';
     }
     return;
@@ -86,12 +86,13 @@ $context = [
     data-wp-on--focusout="actions.resume"
     <?php endif; ?>
     role="group"
-    aria-roledescription="<?php esc_attr_e( 'carousel', 'shelter-donations' ); ?>"
-    aria-label="<?php esc_attr_e( 'Business members', 'shelter-donations' ); ?>"
+    aria-roledescription="<?php esc_attr_e( 'carousel', 'shelterkit-donations' ); ?>"
+    aria-label="<?php esc_attr_e( 'Business members', 'shelterkit-donations' ); ?>"
 >
     <div class="sd-bs-viewport">
         <div class="sd-bs-track" data-wp-style--transform="state.trackTransform">
-            <?php foreach ( $items as $i => $item ) :
+            <?php
+            foreach ( $items as $i => $item ) :
                 $name    = (string) ( $item['business_name'] ?? '' );
                 $logo    = (string) ( $item['logo_url'] ?? '' );
                 $website = (string) ( $item['business_website'] ?? '' );
@@ -100,8 +101,8 @@ $context = [
                 class="sd-bs-slide"
                 <?php echo wp_interactivity_data_wp_context( [ 'slide' => $i ] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_interactivity_data_wp_context() returns an escaped data-wp-context attribute. ?>
                 role="group"
-                aria-roledescription="<?php esc_attr_e( 'slide', 'shelter-donations' ); ?>"
-                aria-label="<?php echo esc_attr( sprintf( /* translators: 1: slide number, 2: total slides */ __( '%1$d of %2$d', 'shelter-donations' ), $i + 1, $count ) ); ?>"
+                aria-roledescription="<?php esc_attr_e( 'slide', 'shelterkit-donations' ); ?>"
+                aria-label="<?php echo esc_attr( sprintf( /* translators: 1: slide number, 2: total slides */ __( '%1$d of %2$d', 'shelterkit-donations' ), $i + 1, $count ) ); ?>"
                 data-wp-bind--inert="state.isInactiveSlide"
                 <?php echo 0 === $i ? '' : 'inert'; ?>
             >
@@ -131,7 +132,7 @@ $context = [
             type="button"
             class="sd-bs-arrow sd-bs-prev"
             data-wp-on--click="actions.prev"
-            aria-label="<?php esc_attr_e( 'Previous business member', 'shelter-donations' ); ?>"
+            aria-label="<?php esc_attr_e( 'Previous business member', 'shelterkit-donations' ); ?>"
         >
             <span aria-hidden="true">&larr;</span>
         </button>
@@ -142,7 +143,7 @@ $context = [
             data-wp-on--click="actions.togglePlay"
             data-wp-bind--aria-pressed="state.isPlaying"
             data-wp-bind--aria-label="state.playPauseLabel"
-            aria-label="<?php esc_attr_e( 'Pause', 'shelter-donations' ); ?>"
+            aria-label="<?php esc_attr_e( 'Pause', 'shelterkit-donations' ); ?>"
         >
             <span data-wp-text="state.playPauseGlyph" aria-hidden="true">&#10073;&#10073;</span>
         </button>
@@ -151,16 +152,18 @@ $context = [
             type="button"
             class="sd-bs-arrow sd-bs-next"
             data-wp-on--click="actions.next"
-            aria-label="<?php esc_attr_e( 'Next business member', 'shelter-donations' ); ?>"
+            aria-label="<?php esc_attr_e( 'Next business member', 'shelterkit-donations' ); ?>"
         >
             <span aria-hidden="true">&rarr;</span>
         </button>
     </div>
 
-    <?php // Slide picker. A labeled group of buttons with aria-current marks the
+		<?php
+		// Slide picker. A labeled group of buttons with aria-current marks the
           // active slide — not a tablist: the slides are carousel groups, not
-          // tabpanels, and aria-selected is invalid on a plain button. ?>
-    <div class="sd-bs-dots" role="group" aria-label="<?php esc_attr_e( 'Choose business member', 'shelter-donations' ); ?>">
+          // tabpanels, and aria-selected is invalid on a plain button.
+		?>
+    <div class="sd-bs-dots" role="group" aria-label="<?php esc_attr_e( 'Choose business member', 'shelterkit-donations' ); ?>">
         <?php foreach ( $items as $i => $item ) : ?>
         <button
             type="button"
@@ -170,7 +173,7 @@ $context = [
             data-wp-class--is-active="state.isActiveDot"
             data-wp-bind--aria-current="state.isActiveDot"
             <?php echo 0 === $i ? 'aria-current="true"' : ''; ?>
-            aria-label="<?php echo esc_attr( sprintf( /* translators: %d: slide number */ __( 'Go to slide %d', 'shelter-donations' ), $i + 1 ) ); ?>"
+            aria-label="<?php echo esc_attr( sprintf( /* translators: %d: slide number */ __( 'Go to slide %d', 'shelterkit-donations' ), $i + 1 ) ); ?>"
         ></button>
         <?php endforeach; ?>
     </div>
