@@ -74,6 +74,27 @@ if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   done < <( find "$DEST" -type f )
 fi
 
+# The shared ShelterKit files must carry THIS plugin's text domain. Copying
+# them from a sibling and changing nothing is the natural instinct, and it is
+# wrong in a way neither a diff nor php -l shows: WordPress.org's Plugin Check
+# treats a foreign text domain as an error, so the plugin cannot pass review at
+# all, and `wp i18n make-pot` extracts by domain, so every label in the file is
+# silently left out of the POT and untranslatable in both plugins.
+#
+# This cost 18 Plugin Check errors on an otherwise clean plugin.
+if [ -d "${DEST}/includes/shelterkit" ]; then
+  while IFS= read -r found; do
+    if [ "$found" != "$SLUG" ]; then
+      echo "  DOMAIN  includes/shelterkit uses text domain '${found}', expected '${SLUG}'"
+      fail=1
+    fi
+  done < <(
+    grep -rhoE "(__|_e|esc_html__|esc_attr__|esc_html_e|esc_attr_e|_x|_n)\([^)]*'[a-z0-9-]+'\s*\)" \
+      "${DEST}/includes/shelterkit" 2>/dev/null \
+      | grep -oE "'[a-z0-9-]+'\s*\)$" | tr -d "') " | sort -u
+  )
+fi
+
 # ...and nothing the plugin needs at runtime may go missing. A .distignore
 # pattern that is slightly too broad silently ships a plugin that fatals on
 # activation, and that is not visible by reading the file list.
@@ -106,7 +127,7 @@ fi
 
 if [ "$fail" -ne 0 ]; then
   echo
-  echo "Build failed the leak guard. Fix .distignore before releasing."
+  echo "Build failed its checks. Fix the entries above before releasing."
   exit 1
 fi
 
