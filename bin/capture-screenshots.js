@@ -118,6 +118,11 @@ async function go( page, url, settle = '#wpbody-content' ) {
 	await go( page, `${ admin( 'shelterkit-donations-settings' ) }&tab=products` );
 	await shot( page, '#wpbody-content', 'settings-products.png' );
 
+	// The Data tab is where allocations, tiers and donor levels actually live —
+	// the General tab shows none of them.
+	await go( page, `${ admin( 'shelterkit-donations-settings' ) }&tab=data` );
+	await shot( page, '#wpbody-content', 'settings-data.png' );
+
 	await go( page, admin( 'shelterkit-donations' ) );
 	await shot( page, '#wpbody-content', 'dashboard.png' );
 

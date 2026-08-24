@@ -68,14 +68,14 @@ No — uninstall preserves all data by default. Deletion is an explicit opt-in, 
 
 == Screenshots ==
 
-1. The reports dashboard — donations, memberships and memorials for a chosen period, filterable by campaign, with revenue broken out by tier.
-2. The donation form on the front end. Givers choose an amount and an allocation, and check out through the WooCommerce checkout the site already uses.
-3. The memorial wall. Visitors search and filter tributes, light a candle on one, and open a full memorial page for any of them.
-4. The members wall, showing individual and business members at each tier. Members opt out of appearing here from their own account.
-5. Settings — allocations, membership tiers and donor levels are configured here rather than hard-coded, so the plugin fits an organisation other than the one it was built for.
-6. Campaigns are time-boxed drives with a goal. Progress is live, and every report can be narrowed to one campaign.
-7. Business member logos arrive with the membership and wait here for approval before they appear anywhere public.
-8. CSV import and export, plus a full-backup ZIP to take before uninstalling.
+1. The reports dashboard. Totals, a donation trend over time, and a breakdown by fund — filterable by period and by campaign, with a CSV export of whatever is on screen.
+2. The contribution form on the front end. One block offers giving, joining and honouring a loved one as tabs; checkout runs through the WooCommerce checkout the site already uses.
+3. The memorial wall. Visitors search and filter tributes by type, dedication and year, light a candle on one, and open a full memorial page for any of them.
+4. The members wall, grouping members by tier. Members opt out of appearing here from their own account.
+5. Campaign reporting. Each drive shows its goal, live progress and end date, and every other report can be narrowed to one campaign.
+6. Donation allocations are configured, not hard-coded — as are membership tiers and donor levels, so the plugin fits an organisation other than the one it was built for.
+7. The WooCommerce products the plugin uses are mapped here, and can be created for you if they do not exist yet.
+8. CSV export for every record type, plus a full-backup ZIP to take before uninstalling.
 
 == Changelog ==
 
