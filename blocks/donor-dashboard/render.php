@@ -22,7 +22,7 @@ $show_membership   = $attributes['showMembership'] ?? true;
 $show_donor_level  = $attributes['showDonorLevel'] ?? true;
 $recent_count      = $attributes['recentGiftsCount'] ?? 5;
 $layout            = $attributes['layout'] ?? 'cards';
-$guest_message     = $attributes['guestMessage'] ?: __( 'Please log in to view your donor dashboard.', 'shelter-donations' );
+$guest_message     = $attributes['guestMessage'] ?: __( 'Please log in to view your donor dashboard.', 'shelterkit-donations' );
 
 // Check if user is logged in.
 $is_logged_in = is_user_logged_in();
@@ -36,7 +36,7 @@ $membership = null;
 
 if ( $donor_id ) {
     $donor = Entity_Hydrator::get( 'sd_donor', $donor_id );
-    
+
     // Get stats.
     $stats = [
         'lifetime_giving' => (float) get_post_meta( $donor_id, '_sd_lifetime_giving', true ),
@@ -44,7 +44,7 @@ if ( $donor_id ) {
         'first_gift_date' => get_post_meta( $donor_id, '_sd_first_gift_date', true ),
         'last_gift_date'  => get_post_meta( $donor_id, '_sd_last_gift_date', true ),
     ];
-    
+
     // Get recent donations.
     $recent_query = new WP_Query( [
         'post_type'      => 'sd_donation',
@@ -58,8 +58,8 @@ if ( $donor_id ) {
         'orderby'        => 'date',
         'order'          => 'DESC',
     ] );
-    
-    $recent_gifts = array_map( function( $post ) {
+
+    $recent_gifts = array_map( function ( $post ) {
         return [
             'id'         => $post->ID,
             'amount'     => (float) get_post_meta( $post->ID, '_sd_amount', true ),
@@ -68,7 +68,7 @@ if ( $donor_id ) {
             'type'       => get_post_meta( $post->ID, '_sd_donation_type', true ) ?: 'general',
         ];
     }, $recent_query->posts );
-    
+
     // Get membership status.
     if ( $show_membership ) {
         $membership_query = new WP_Query( [
@@ -87,7 +87,7 @@ if ( $donor_id ) {
                 ],
             ],
         ] );
-        
+
         if ( $membership_query->have_posts() ) {
             $mem_post = $membership_query->posts[0];
             $membership = [
@@ -136,7 +136,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
         </svg>
         <p class="sd-guest-message"><?php echo esc_html( $guest_message ); ?></p>
         <a href="<?php echo esc_url( wp_login_url( get_permalink() ) ); ?>" class="sd-login-button wp-element-button">
-            <?php esc_html_e( 'Log In', 'shelter-donations' ); ?>
+            <?php esc_html_e( 'Log In', 'shelterkit-donations' ); ?>
         </a>
     </div>
 
@@ -144,7 +144,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
     <!-- Loading State -->
     <div class="sd-dashboard-loading" data-wp-bind--hidden="!state.isLoading">
         <div class="sd-spinner"></div>
-        <p><?php esc_html_e( 'Loading your dashboard...', 'shelter-donations' ); ?></p>
+        <p><?php esc_html_e( 'Loading your dashboard...', 'shelterkit-donations' ); ?></p>
     </div>
 
     <!-- Dashboard Content -->
@@ -157,23 +157,23 @@ $wrapper_attributes = get_block_wrapper_attributes( [
                     <?php
                     printf(
                         /* translators: %s: donor name */
-                        esc_html__( 'Welcome back, %s!', 'shelter-donations' ),
-                        '<span data-wp-text="state.donor.display_name">' . esc_html( $donor['display_name'] ?? __( 'Friend', 'shelter-donations' ) ) . '</span>'
+                        esc_html__( 'Welcome back, %s!', 'shelterkit-donations' ),
+                        '<span data-wp-text="state.donor.display_name">' . esc_html( $donor['display_name'] ?? __( 'Friend', 'shelterkit-donations' ) ) . '</span>'
                     );
                     ?>
                 </h2>
                 
                 <?php if ( $show_donor_level && isset( $donor['donor_level'] ) ) : ?>
                 <span class="sd-donor-level" data-wp-text="callbacks.donorLevelLabel">
-                    <?php 
+                    <?php
                     $levels = [
-                        'new' => __( 'New Donor', 'shelter-donations' ),
-                        'bronze' => __( 'Bronze', 'shelter-donations' ),
-                        'silver' => __( 'Silver', 'shelter-donations' ),
-                        'gold' => __( 'Gold', 'shelter-donations' ),
-                        'platinum' => __( 'Platinum', 'shelter-donations' ),
+                        'new' => __( 'New Donor', 'shelterkit-donations' ),
+                        'bronze' => __( 'Bronze', 'shelterkit-donations' ),
+                        'silver' => __( 'Silver', 'shelterkit-donations' ),
+                        'gold' => __( 'Gold', 'shelterkit-donations' ),
+                        'platinum' => __( 'Platinum', 'shelterkit-donations' ),
                     ];
-                    echo esc_html( $levels[ $donor['donor_level'] ] ?? __( 'Donor', 'shelter-donations' ) );
+                    echo esc_html( $levels[ $donor['donor_level'] ] ?? __( 'Donor', 'shelterkit-donations' ) );
                     ?>
                 </span>
                 <?php endif; ?>
@@ -183,21 +183,21 @@ $wrapper_attributes = get_block_wrapper_attributes( [
         <?php if ( $show_stats && $stats ) : ?>
         <!-- Stats Grid -->
         <section class="sd-dashboard-stats">
-            <h3 class="sd-section-title"><?php esc_html_e( 'Your Impact', 'shelter-donations' ); ?></h3>
+            <h3 class="sd-section-title"><?php esc_html_e( 'Your Impact', 'shelterkit-donations' ); ?></h3>
             
             <div class="sd-stats-grid">
                 <div class="sd-stat-card">
                     <span class="sd-stat-value" data-wp-text="callbacks.lifetimeGivingFormatted">
                         <?php echo esc_html( Helpers\format_currency( $stats['lifetime_giving'] ) ); ?>
                     </span>
-                    <span class="sd-stat-label"><?php esc_html_e( 'Lifetime Giving', 'shelter-donations' ); ?></span>
+                    <span class="sd-stat-label"><?php esc_html_e( 'Lifetime Giving', 'shelterkit-donations' ); ?></span>
                 </div>
                 
                 <div class="sd-stat-card">
                     <span class="sd-stat-value" data-wp-text="state.stats.donation_count">
                         <?php echo esc_html( number_format_i18n( $stats['donation_count'] ) ); ?>
                     </span>
-                    <span class="sd-stat-label"><?php esc_html_e( 'Total Gifts', 'shelter-donations' ); ?></span>
+                    <span class="sd-stat-label"><?php esc_html_e( 'Total Gifts', 'shelterkit-donations' ); ?></span>
                 </div>
                 
                 <?php if ( $stats['first_gift_date'] ) : ?>
@@ -205,7 +205,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
                     <span class="sd-stat-value">
                         <?php echo esc_html( wp_date( 'M Y', strtotime( $stats['first_gift_date'] ) ) ); ?>
                     </span>
-                    <span class="sd-stat-label"><?php esc_html_e( 'Donor Since', 'shelter-donations' ); ?></span>
+                    <span class="sd-stat-label"><?php esc_html_e( 'Donor Since', 'shelterkit-donations' ); ?></span>
                 </div>
                 <?php endif; ?>
             </div>
@@ -215,7 +215,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
         <?php if ( $show_membership ) : ?>
         <!-- Membership Status -->
         <section class="sd-dashboard-membership">
-            <h3 class="sd-section-title"><?php esc_html_e( 'Membership', 'shelter-donations' ); ?></h3>
+            <h3 class="sd-section-title"><?php esc_html_e( 'Membership', 'shelterkit-donations' ); ?></h3>
             
             <?php if ( $membership ) : ?>
             <div class="sd-membership-card is-active">
@@ -228,12 +228,12 @@ $wrapper_attributes = get_block_wrapper_attributes( [
                     </span>
                 </div>
                 <div class="sd-membership-details">
-                    <p class="sd-membership-status"><?php esc_html_e( 'Active Member', 'shelter-donations' ); ?></p>
+                    <p class="sd-membership-status"><?php esc_html_e( 'Active Member', 'shelterkit-donations' ); ?></p>
                     <p class="sd-membership-expires">
                         <?php
                         printf(
                             /* translators: %s: expiration date */
-                            esc_html__( 'Renews: %s', 'shelter-donations' ),
+                            esc_html__( 'Renews: %s', 'shelterkit-donations' ),
                             esc_html( wp_date( get_option( 'date_format' ), strtotime( $membership['end'] ) ) )
                         );
                         ?>
@@ -242,9 +242,9 @@ $wrapper_attributes = get_block_wrapper_attributes( [
             </div>
             <?php else : ?>
             <div class="sd-membership-card is-inactive">
-                <p><?php esc_html_e( 'You are not currently a member.', 'shelter-donations' ); ?></p>
+                <p><?php esc_html_e( 'You are not currently a member.', 'shelterkit-donations' ); ?></p>
                 <a href="<?php echo esc_url( home_url( '/membership/' ) ); ?>" class="sd-join-button wp-element-button">
-                    <?php esc_html_e( 'Become a Member', 'shelter-donations' ); ?>
+                    <?php esc_html_e( 'Become a Member', 'shelterkit-donations' ); ?>
                 </a>
             </div>
             <?php endif; ?>
@@ -254,7 +254,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
         <?php if ( $show_recent_gifts && ! empty( $recent_gifts ) ) : ?>
         <!-- Recent Gifts -->
         <section class="sd-dashboard-gifts">
-            <h3 class="sd-section-title"><?php esc_html_e( 'Recent Gifts', 'shelter-donations' ); ?></h3>
+            <h3 class="sd-section-title"><?php esc_html_e( 'Recent Gifts', 'shelterkit-donations' ); ?></h3>
             
             <ul class="sd-gifts-list">
                 <?php foreach ( $recent_gifts as $gift ) : ?>
@@ -267,7 +267,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
             </ul>
             
             <a href="<?php echo esc_url( wc_get_account_endpoint_url( 'donations' ) ); ?>" class="sd-view-all-link">
-                <?php esc_html_e( 'View All Gifts →', 'shelter-donations' ); ?>
+                <?php esc_html_e( 'View All Gifts →', 'shelterkit-donations' ); ?>
             </a>
         </section>
         <?php endif; ?>
@@ -277,11 +277,11 @@ $wrapper_attributes = get_block_wrapper_attributes( [
             <?php $donation_url = Helpers\get_donation_page_url(); ?>
             <?php if ( $donation_url ) : ?>
             <a href="<?php echo esc_url( $donation_url ); ?>" class="sd-action-button wp-element-button">
-                <?php esc_html_e( 'Make a Gift', 'shelter-donations' ); ?>
+                <?php esc_html_e( 'Make a Gift', 'shelterkit-donations' ); ?>
             </a>
             <?php endif; ?>
             <a href="<?php echo esc_url( wc_get_account_endpoint_url( 'edit-account' ) ); ?>" class="sd-action-button sd-action-secondary">
-                <?php esc_html_e( 'Update Profile', 'shelter-donations' ); ?>
+                <?php esc_html_e( 'Update Profile', 'shelterkit-donations' ); ?>
             </a>
         </section>
     </div>

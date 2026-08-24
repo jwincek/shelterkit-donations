@@ -50,7 +50,7 @@ function annual_summary( array $input ): array|WP_Error {
     if ( ! $donor_id ) {
         return new WP_Error(
             'invalid_donor_id',
-            __( 'Valid donor ID is required.', 'shelter-donations' ),
+            __( 'Valid donor ID is required.', 'shelterkit-donations' ),
             [ 'status' => 400 ]
         );
     }
@@ -59,7 +59,7 @@ function annual_summary( array $input ): array|WP_Error {
     if ( ! $donor ) {
         return new WP_Error(
             'donor_not_found',
-            __( 'Donor not found.', 'shelter-donations' ),
+            __( 'Donor not found.', 'shelterkit-donations' ),
             [ 'status' => 404 ]
         );
     }
@@ -107,7 +107,7 @@ function annual_summary( array $input ): array|WP_Error {
             ];
         }
         $by_allocation[ $alloc ]['amount'] += $donation['amount'];
-        $by_allocation[ $alloc ]['count']++;
+        ++$by_allocation[ $alloc ]['count'];
     }
 
     return [
@@ -158,7 +158,7 @@ function donor_summary( array $input ): array|WP_Error {
     if ( ! $donor_id ) {
         return new WP_Error(
             'invalid_donor_id',
-            __( 'Valid donor ID is required.', 'shelter-donations' ),
+            __( 'Valid donor ID is required.', 'shelterkit-donations' ),
             [ 'status' => 400 ]
         );
     }
@@ -239,6 +239,7 @@ function dashboard_stats( array $input = [] ): array {
     // Donations: count, sum, unique donors in period.
     // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- $campaign_join is built only from $wpdb->term_relationships/$wpdb->term_taxonomy table names and a hardcoded taxonomy; all user values are prepared with %d/%s.
     $donation_stats = $wpdb->get_row( $wpdb->prepare(
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the only interpolated parts are $wpdb table properties and a generated %d placeholder list; every user value is bound through $wpdb->prepare().
         "SELECT
             COUNT(*) as count,
             COALESCE(SUM(pm.meta_value + 0), 0) as total,
@@ -336,6 +337,7 @@ function dashboard_stats( array $input = [] ): array {
         AND pdt.meta_value BETWEEN %s AND %s
         {$campaign_where}",
         $range['start'],
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         $range['end'],
         ...$campaign_args
     ) );
@@ -459,6 +461,7 @@ function donation_trend( array $input = [] ): array {
 
     // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- $campaign_join is built only from $wpdb->term_relationships/$wpdb->term_taxonomy table names and a hardcoded taxonomy; all user values are prepared with %d/%s.
     $rows = $wpdb->get_results( $wpdb->prepare(
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the only interpolated parts are $wpdb table properties and a generated %d placeholder list; every user value is bound through $wpdb->prepare().
         "SELECT
             DATE_FORMAT( pm_date.meta_value, %s ) as period_key,
             MIN( pm_date.meta_value ) as period_start,
@@ -476,6 +479,7 @@ function donation_trend( array $input = [] ): array {
         GROUP BY period_key
         ORDER BY period_start ASC",
         $group_format,
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         $start,
         $end . ' 23:59:59',
         ...$campaign_args
@@ -596,9 +600,9 @@ function action_items( array $input = [] ): array {
             $items[] = [
                 'type'         => 'pending_logos',
                 'count'        => $pending_logos,
-                'label'        => __( 'logo pending review', 'shelter-donations' ),
-                'label_plural' => __( 'logos pending review', 'shelter-donations' ),
-                'url'          => admin_url( 'admin.php?page=shelter-donations-logos' ),
+                'label'        => __( 'logo pending review', 'shelterkit-donations' ),
+                'label_plural' => __( 'logos pending review', 'shelterkit-donations' ),
+                'url'          => admin_url( 'admin.php?page=shelterkit-donations-logos' ),
             ];
         }
     }
@@ -616,9 +620,9 @@ function action_items( array $input = [] ): array {
             'type'         => 'expiring_memberships',
             'count'        => $expiring,
             /* translators: %d: number of days */
-            'label'        => sprintf( __( 'membership expiring in %d days', 'shelter-donations' ), $expiring_window ),
+            'label'        => sprintf( __( 'membership expiring in %d days', 'shelterkit-donations' ), $expiring_window ),
             /* translators: %d: number of days */
-            'label_plural' => sprintf( __( 'memberships expiring in %d days', 'shelter-donations' ), $expiring_window ),
+            'label_plural' => sprintf( __( 'memberships expiring in %d days', 'shelterkit-donations' ), $expiring_window ),
             'url'          => admin_url( 'edit.php?post_type=sd_membership&expiring=' . $expiring_window ),
         ];
     }
@@ -632,8 +636,8 @@ function action_items( array $input = [] ): array {
         $items[] = [
             'type'         => 'pending_notifications',
             'count'        => $pending_notifications,
-            'label'        => __( 'family notification pending', 'shelter-donations' ),
-            'label_plural' => __( 'family notifications pending', 'shelter-donations' ),
+            'label'        => __( 'family notification pending', 'shelterkit-donations' ),
+            'label_plural' => __( 'family notifications pending', 'shelterkit-donations' ),
             'url'          => admin_url( 'edit.php?post_type=sd_memorial&notify_pending=1' ),
         ];
     }
@@ -756,7 +760,7 @@ function campaign_progress( array $input ): array|WP_Error {
     if ( ! $campaign_id ) {
         return new WP_Error(
             'invalid_campaign_id',
-            __( 'Valid campaign ID is required.', 'shelter-donations' ),
+            __( 'Valid campaign ID is required.', 'shelterkit-donations' ),
             [ 'status' => 400 ]
         );
     }
@@ -765,7 +769,7 @@ function campaign_progress( array $input ): array|WP_Error {
     if ( ! $term || is_wp_error( $term ) ) {
         return new WP_Error(
             'campaign_not_found',
-            __( 'Campaign not found.', 'shelter-donations' ),
+            __( 'Campaign not found.', 'shelterkit-donations' ),
             [ 'status' => 404 ]
         );
     }
@@ -776,7 +780,7 @@ function campaign_progress( array $input ): array|WP_Error {
     $tier     = (string) get_term_meta( $campaign_id, '_sd_membership_tier_filter', true );
 
     $date_from = $input['date_from'] ?? null;
-    $date_to   = $input['date_to']   ?? null;
+    $date_to   = $input['date_to'] ?? null;
 
     $raised       = 0.0;
     $member_count = 0;
@@ -811,7 +815,7 @@ function campaign_progress( array $input ): array|WP_Error {
         'goal_formatted'      => 'donation_drive' === $type
             ? Helpers\format_currency( $goal )
             /* translators: %d: number of members goal. */
-            : sprintf( _n( '%d member', '%d members', (int) $goal, 'shelter-donations' ), (int) $goal ),
+            : sprintf( _n( '%d member', '%d members', (int) $goal, 'shelterkit-donations' ), (int) $goal ),
         'end_date'            => $end_date,
         'tier_filter'         => $tier,
         'raised'              => $raised,
@@ -822,7 +826,7 @@ function campaign_progress( array $input ): array|WP_Error {
         'remaining_formatted' => 'donation_drive' === $type
             ? Helpers\format_currency( $remaining )
             /* translators: %d: number of members remaining to reach the goal. */
-            : sprintf( _n( '%d to go', '%d to go', (int) $remaining, 'shelter-donations' ), (int) $remaining ),
+            : sprintf( _n( '%d to go', '%d to go', (int) $remaining, 'shelterkit-donations' ), (int) $remaining ),
         'is_active'           => ! $end_date || strtotime( $end_date ) >= time(),
     ];
 }
@@ -895,6 +899,7 @@ function campaigns_progress( array $input = [] ): array {
     $placeholders = implode( ',', array_fill( 0, count( $campaign_ids ), '%d' ) );
 
     $raised_rows = $wpdb->get_results( $wpdb->prepare(
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the only interpolated parts are $wpdb table properties and a generated %d placeholder list; every user value is bound through $wpdb->prepare().
         "SELECT
             tt.term_id,
             COALESCE(SUM(pm_amount.meta_value + 0), 0) as raised
@@ -926,6 +931,7 @@ function campaigns_progress( array $input = [] ): array {
           AND tt.term_id IN ({$placeholders})
         GROUP BY tt.term_id",
         ...$campaign_ids
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
     ) );
 
     $members_by_id = [];
@@ -978,7 +984,7 @@ function campaigns_progress( array $input = [] ): array {
             'goal_formatted'      => 'donation_drive' === $type
                 ? Helpers\format_currency( $goal )
                 /* translators: %d: number of members goal. */
-                : sprintf( _n( '%d member', '%d members', (int) $goal, 'shelter-donations' ), (int) $goal ),
+                : sprintf( _n( '%d member', '%d members', (int) $goal, 'shelterkit-donations' ), (int) $goal ),
             'end_date'            => $end_date,
             'tier_filter'         => $tier,
             'raised'              => $raised,
@@ -989,7 +995,7 @@ function campaigns_progress( array $input = [] ): array {
             'remaining_formatted' => 'donation_drive' === $type
                 ? Helpers\format_currency( $remaining )
                 /* translators: %d: number of members remaining to reach the goal. */
-                : sprintf( _n( '%d to go', '%d to go', (int) $remaining, 'shelter-donations' ), (int) $remaining ),
+                : sprintf( _n( '%d to go', '%d to go', (int) $remaining, 'shelterkit-donations' ), (int) $remaining ),
             'is_active'           => $is_active,
         ];
     }
@@ -1011,7 +1017,7 @@ function campaign_report( array $input ): array|WP_Error {
     if ( ! $campaign_id ) {
         return new WP_Error(
             'invalid_campaign_id',
-            __( 'Valid campaign ID is required.', 'shelter-donations' ),
+            __( 'Valid campaign ID is required.', 'shelterkit-donations' ),
             [ 'status' => 400 ]
         );
     }
@@ -1020,7 +1026,7 @@ function campaign_report( array $input ): array|WP_Error {
     if ( ! $term || is_wp_error( $term ) ) {
         return new WP_Error(
             'campaign_not_found',
-            __( 'Campaign not found.', 'shelter-donations' ),
+            __( 'Campaign not found.', 'shelterkit-donations' ),
             [ 'status' => 404 ]
         );
     }
@@ -1046,7 +1052,7 @@ function campaign_report( array $input ): array|WP_Error {
             : ( 'donation_drive' === $type
                 ? Helpers\format_currency( $goal )
                 /* translators: %d: number of members goal. */
-                : sprintf( _n( '%d member', '%d members', (int) $goal, 'shelter-donations' ), (int) $goal ) ),
+                : sprintf( _n( '%d member', '%d members', (int) $goal, 'shelterkit-donations' ), (int) $goal ) ),
         'tier_filter'    => $tier,
     ];
 

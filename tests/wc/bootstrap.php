@@ -66,7 +66,7 @@ require_once $_tests_dir . '/includes/functions.php';
 // Load WooCommerce, then this plugin, into the test instance.
 tests_add_filter( 'muplugins_loaded', static function () use ( $_wc_dir ): void {
     require $_wc_dir . '/woocommerce.php';
-    require dirname( __DIR__, 2 ) . '/shelter-donations.php';
+    require dirname( __DIR__, 2 ) . '/shelterkit-donations.php';
 } );
 
 // Install WooCommerce's tables/options once WC has initialized (plugins_loaded

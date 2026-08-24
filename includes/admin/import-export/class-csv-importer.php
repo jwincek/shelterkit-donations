@@ -26,11 +26,10 @@ declare( strict_types = 1 );
 
 namespace Starter_Shelter\Admin\Import_Export;
 
-use function Starter_Shelter\Helpers\fputcsv_safe;
-
 use Starter_Shelter\Core\Config;
 use Starter_Shelter\Admin\Shared\Donor_Lookup;
 use Starter_Shelter\Helpers;
+use function Starter_Shelter\Helpers\fputcsv_safe;
 
 /**
  * Config-driven CSV importer.
@@ -84,7 +83,7 @@ class CSV_Importer {
 		$config = Config::get_path( 'import-export', "entity_types.{$entity_type}.import" );
 
 		if ( ! $config ) {
-			return self::error_result( __( 'Invalid import type.', 'shelter-donations' ) );
+			return self::error_result( __( 'Invalid import type.', 'shelterkit-donations' ) );
 		}
 
 		// Verify the ability exists (except for donor imports which don't use one).
@@ -96,7 +95,7 @@ class CSV_Importer {
 				return self::error_result(
 					sprintf(
 						/* translators: %s: ability name */
-						__( 'Required ability "%s" is not registered. Ensure WordPress 6.9+ and abilities are loaded.', 'shelter-donations' ),
+						__( 'Required ability "%s" is not registered. Ensure WordPress 6.9+ and abilities are loaded.', 'shelterkit-donations' ),
 						$ability_name
 					)
 				);
@@ -144,11 +143,11 @@ class CSV_Importer {
 			$row_number = 1; // Row 1 was headers.
 
 			while ( ( $data = fgetcsv( $handle ) ) !== false ) {
-				$row_number++;
+				++$row_number;
 
 				$row = @array_combine( $headers, array_pad( $data, count( $headers ), '' ) );
 				if ( false === $row ) {
-					$results['skipped']++;
+					++$results['skipped'];
 					continue;
 				}
 
@@ -163,8 +162,8 @@ class CSV_Importer {
 				if ( $skip_duplicates && ! $is_donor && ! empty( $hash_columns ) ) {
 					$hash = self::compute_row_hash( $entity_type, $row, $hash_columns );
 					if ( isset( $existing_hashes[ $hash ] ) ) {
-						$results['duplicates']++;
-						$results['skipped']++;
+						++$results['duplicates'];
+						++$results['skipped'];
 						continue;
 					}
 				}
@@ -217,7 +216,7 @@ class CSV_Importer {
 		$row_num     = 0;
 
 		while ( ( $data = fgetcsv( $handle ) ) !== false && $row_num < 100 ) {
-			$row_num++;
+			++$row_num;
 			$row = @array_combine( $headers, array_pad( $data, count( $headers ), '' ) );
 			if ( false === $row ) {
 				continue;
@@ -227,7 +226,7 @@ class CSV_Importer {
 			$is_valid = empty( $errors );
 
 			if ( $is_valid ) {
-				$valid_count++;
+				++$valid_count;
 			}
 
 			if ( count( $rows ) < $limit ) {
@@ -241,13 +240,13 @@ class CSV_Importer {
 
 		// Count remaining rows (still validate, just don't collect preview data).
 		while ( ( $data = fgetcsv( $handle ) ) !== false ) {
-			$row_num++;
+			++$row_num;
 			$row = @array_combine( $headers, array_pad( $data, count( $headers ), '' ) );
 			if ( false === $row ) {
 				continue;
 			}
 			if ( empty( $validator->validate_row( $row ) ) ) {
-				$valid_count++;
+				++$valid_count;
 			}
 		}
 
@@ -278,7 +277,7 @@ class CSV_Importer {
 	public static function start_import( string $entity_type, string $filepath, array $options = [] ): array|\WP_Error {
 		$config = Config::get_path( 'import-export', "entity_types.{$entity_type}.import" );
 		if ( ! $config ) {
-			return new \WP_Error( 'invalid_type', __( 'Invalid import type.', 'shelter-donations' ) );
+			return new \WP_Error( 'invalid_type', __( 'Invalid import type.', 'shelterkit-donations' ) );
 		}
 
 		// Move uploaded file to a persistent temp location.
@@ -287,7 +286,7 @@ class CSV_Importer {
 		$dest       = $upload_dir['basedir'] . '/' . $import_key . '.csv';
 
 		if ( ! copy( $filepath, $dest ) ) {
-			return new \WP_Error( 'file_error', __( 'Could not save uploaded file.', 'shelter-donations' ) );
+			return new \WP_Error( 'file_error', __( 'Could not save uploaded file.', 'shelterkit-donations' ) );
 		}
 
 		// Count total data rows.
@@ -295,7 +294,7 @@ class CSV_Importer {
 		fgetcsv( $handle ); // Skip header.
 		$total_rows = 0;
 		while ( fgetcsv( $handle ) !== false ) {
-			$total_rows++;
+			++$total_rows;
 		}
 		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- reading an uploaded CSV for import.
 
@@ -336,7 +335,7 @@ class CSV_Importer {
 	public static function process_batch( string $import_key ): array|\WP_Error {
 		$session = get_transient( $import_key );
 		if ( ! $session ) {
-			return new \WP_Error( 'session_expired', __( 'Import session expired. Please start again.', 'shelter-donations' ) );
+			return new \WP_Error( 'session_expired', __( 'Import session expired. Please start again.', 'shelterkit-donations' ) );
 		}
 
 		$entity_type = $session['entity_type'];
@@ -347,7 +346,7 @@ class CSV_Importer {
 
 		$config = Config::get_path( 'import-export', "entity_types.{$entity_type}.import" );
 		if ( ! $config ) {
-			return new \WP_Error( 'invalid_type', __( 'Invalid import type.', 'shelter-donations' ) );
+			return new \WP_Error( 'invalid_type', __( 'Invalid import type.', 'shelterkit-donations' ) );
 		}
 
 		$ability_name = $config['ability'] ?? null;
@@ -391,11 +390,11 @@ class CSV_Importer {
 
 			while ( $batch_processed < self::BATCH_SIZE && ( $data = fgetcsv( $handle ) ) !== false ) {
 				$row_number = $offset + $batch_processed + 2; // +2 for header + 1-indexed.
-				$batch_processed++;
+				++$batch_processed;
 
 				$row = @array_combine( $headers, array_pad( $data, count( $headers ), '' ) );
 				if ( false === $row ) {
-					$results['skipped']++;
+					++$results['skipped'];
 					continue;
 				}
 
@@ -410,8 +409,8 @@ class CSV_Importer {
 				if ( $skip_duplicates && ! $is_donor && ! empty( $hash_columns ) ) {
 					$hash = self::compute_row_hash( $entity_type, $row, $hash_columns );
 					if ( isset( $existing_hashes[ $hash ] ) ) {
-						$results['duplicates']++;
-						$results['skipped']++;
+						++$results['duplicates'];
+						++$results['skipped'];
 						continue;
 					}
 				}
@@ -490,7 +489,7 @@ class CSV_Importer {
 		$header[] = 'row_number';
 
 		if ( ! empty( $first_row ) ) {
-			fputcsv_safe( $output, [ 'Row', 'Error', ...array_map( fn( $i ) => "Column " . ( $i + 1 ), range( 0, count( $first_row ) - 1 ) ) ] );
+			fputcsv_safe( $output, [ 'Row', 'Error', ...array_map( fn( $i ) => 'Column ' . ( $i + 1 ), range( 0, count( $first_row ) - 1 ) ) ] );
 		}
 
 		foreach ( $errors as $error ) {
@@ -580,7 +579,7 @@ class CSV_Importer {
 		$ability = wp_get_ability( $ability_name );
 		$result  = $ability ? $ability->execute( $input ) : new \WP_Error(
 			'ability_not_found',
-			sprintf( /* translators: %s: ability name. */ __( 'Ability "%s" could not be loaded.', 'shelter-donations' ), $ability_name )
+			sprintf( /* translators: %s: ability name. */ __( 'Ability "%s" could not be loaded.', 'shelterkit-donations' ), $ability_name )
 		);
 
 		if ( is_wp_error( $result ) ) {
@@ -842,13 +841,13 @@ class CSV_Importer {
 	private static function open_csv( string $filepath, CSV_Validator $validator, string $entity_type = '' ): array|\WP_Error {
 		$handle = fopen( $filepath, 'r' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- reading an uploaded CSV for import.
 		if ( ! $handle ) {
-			return new \WP_Error( 'file_error', __( 'Could not open file.', 'shelter-donations' ) );
+			return new \WP_Error( 'file_error', __( 'Could not open file.', 'shelterkit-donations' ) );
 		}
 
 		$raw_headers = fgetcsv( $handle );
 		if ( ! $raw_headers ) {
 			fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- reading an uploaded CSV for import.
-			return new \WP_Error( 'empty_file', __( 'Empty file or invalid CSV.', 'shelter-donations' ) );
+			return new \WP_Error( 'empty_file', __( 'Empty file or invalid CSV.', 'shelterkit-donations' ) );
 		}
 
 		// Normalize: lowercase, trim, then spaces → underscores.
@@ -875,7 +874,7 @@ class CSV_Importer {
 				'missing_columns',
 				sprintf(
 					/* translators: %s: comma-separated list of missing column names. */
-					__( 'Missing required columns: %s', 'shelter-donations' ),
+					__( 'Missing required columns: %s', 'shelterkit-donations' ),
 					implode( ', ', $missing )
 				)
 			);
@@ -914,9 +913,9 @@ class CSV_Importer {
 	 */
 	private static function record_error( array &$results, int $row_number, string $message, bool $skip_errors ): void {
 		if ( $skip_errors ) {
-			$results['skipped']++;
+			++$results['skipped'];
 		} else {
-			$results['errors']++;
+			++$results['errors'];
 			$results['error_details'][] = [
 				'row'     => $row_number,
 				'message' => $message,
@@ -1080,20 +1079,20 @@ class CSV_Importer {
 	 *
 	 * @since 2.0.0
 	 *
-	 * @param array              $results     Results array (modified by reference).
-	 * @param array|\WP_Error    $result      The single-row result.
-	 * @param int                $row_number  The CSV row number.
-	 * @param bool               $skip_errors Whether to count errors as skips.
+	 * @param array           $results     Results array (modified by reference).
+	 * @param array|\WP_Error $result      The single-row result.
+	 * @param int             $row_number  The CSV row number.
+	 * @param bool            $skip_errors Whether to count errors as skips.
 	 */
 	private static function tally_result( array &$results, array|\WP_Error $result, int $row_number, bool $skip_errors ): void {
 		if ( is_wp_error( $result ) ) {
 			self::record_error( $results, $row_number, $result->get_error_message(), $skip_errors );
 		} elseif ( $result['skipped'] ?? false ) {
-			$results['skipped']++;
+			++$results['skipped'];
 		} elseif ( $result['updated'] ?? false ) {
-			$results['updated']++;
+			++$results['updated'];
 		} else {
-			$results['created']++;
+			++$results['created'];
 		}
 	}
 }

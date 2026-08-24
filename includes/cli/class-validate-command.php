@@ -1,6 +1,6 @@
 <?php
 /**
- * WP-CLI: shelter-donations validate
+ * WP-CLI: shelterkit-donations validate
  *
  * Static-analysis-style consistency checker for the plugin's
  * config-driven contracts. Catches the classes of bug that recurred
@@ -25,7 +25,7 @@ use Starter_Shelter\Core\Field_Manifest;
 use WP_CLI;
 
 /**
- * `wp shelter-donations validate` — config/code contract validator.
+ * `wp shelterkit-donations validate` — config/code contract validator.
  *
  * @since 1.1.2
  */
@@ -44,9 +44,9 @@ class Validate_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp shelter-donations validate
-	 *     wp shelter-donations validate --check=abilities
-	 *     wp shelter-donations validate --format=json
+	 *     wp shelterkit-donations validate
+	 *     wp shelterkit-donations validate --check=abilities
+	 *     wp shelterkit-donations validate --format=json
 	 *
 	 * @when before_wp_load
 	 *
@@ -392,7 +392,7 @@ class Validate_Command {
 			// Look forward: is this an assignment? (T_VARIABLE = ...)
 			$j = $i + 1;
 			while ( $j < $n && is_array( $tokens[ $j ] ) && in_array( $tokens[ $j ][0], $skip, true ) ) {
-				$j++;
+				++$j;
 			}
 			$is_assignment = ( $j < $n && is_string( $tokens[ $j ] ) && '=' === $tokens[ $j ]
 				// Reject `==`, `===`, `=>` (=> is T_DOUBLE_ARROW, not '=', so safe).
@@ -402,7 +402,7 @@ class Validate_Command {
 				// Parse RHS: skip to first T_VARIABLE.
 				$k = $j + 1;
 				while ( $k < $n && is_array( $tokens[ $k ] ) && in_array( $tokens[ $k ][0], $skip, true ) ) {
-					$k++;
+					++$k;
 				}
 				if ( $k < $n && is_array( $tokens[ $k ] ) && T_VARIABLE === $tokens[ $k ][0] ) {
 					$rhs_var = ltrim( $tokens[ $k ][1], '$' );
@@ -450,27 +450,27 @@ class Validate_Command {
 		while ( $i < $n ) {
 			// Skip whitespace/comments before `[`.
 			while ( $i < $n && is_array( $tokens[ $i ] ) && in_array( $tokens[ $i ][0], $skip, true ) ) {
-				$i++;
+				++$i;
 			}
 			if ( $i >= $n || ! is_string( $tokens[ $i ] ) || '[' !== $tokens[ $i ] ) {
 				break;
 			}
-			$i++;
+			++$i;
 			while ( $i < $n && is_array( $tokens[ $i ] ) && in_array( $tokens[ $i ][0], $skip, true ) ) {
-				$i++;
+				++$i;
 			}
 			if ( $i >= $n || ! is_array( $tokens[ $i ] ) || T_CONSTANT_ENCAPSED_STRING !== $tokens[ $i ][0] ) {
 				break; // Dynamic key, integer key, etc. — stop chain.
 			}
 			$key = trim( $tokens[ $i ][1], "'\"" );
-			$i++;
+			++$i;
 			while ( $i < $n && is_array( $tokens[ $i ] ) && in_array( $tokens[ $i ][0], $skip, true ) ) {
-				$i++;
+				++$i;
 			}
 			if ( $i >= $n || ! is_string( $tokens[ $i ] ) || ']' !== $tokens[ $i ] ) {
 				break;
 			}
-			$i++;
+			++$i;
 			$keys[] = $key;
 		}
 
@@ -594,13 +594,13 @@ class Validate_Command {
 	 *
 	 * @since 1.1.3
 	 *
-	 * @param array         $returned   Returned-shape tree node.
-	 * @param array         $schema     Schema-properties tree node.
-	 * @param string        $path       Dot-path of the current node ('' at top).
-	 * @param string        $ability_id The ability being checked.
-	 * @param string        $fn_name    Handler function name (for the message).
-	 * @param string        $rel_file   Relative path (for the finding).
-	 * @param int           $line       Handler line (for the finding).
+	 * @param array                          $returned   Returned-shape tree node.
+	 * @param array                          $schema     Schema-properties tree node.
+	 * @param string                         $path       Dot-path of the current node ('' at top).
+	 * @param string                         $ability_id The ability being checked.
+	 * @param string                         $fn_name    Handler function name (for the message).
+	 * @param string                         $rel_file   Relative path (for the finding).
+	 * @param int                            $line       Handler line (for the finding).
 	 * @param array<int,array<string,mixed>> $findings Findings accumulator, by reference.
 	 */
 	private function collect_tree_drift(
@@ -755,7 +755,7 @@ class Validate_Command {
 			// Function name (skip whitespace).
 			$j = $i + 1;
 			while ( $j < $n && is_array( $tokens[ $j ] ) && T_WHITESPACE === $tokens[ $j ][0] ) {
-				$j++;
+				++$j;
 			}
 			if ( $j >= $n || ! is_array( $tokens[ $j ] ) || T_STRING !== $tokens[ $j ][0] ) {
 				continue; // Anonymous function or method (after & for return-by-ref skipped).
@@ -793,9 +793,9 @@ class Validate_Command {
 
 				if ( is_string( $tk ) ) {
 					if ( '{' === $tk ) {
-						$depth++;
+						++$depth;
 					} elseif ( '}' === $tk ) {
-						$depth--;
+						--$depth;
 						if ( 0 === $depth ) {
 							break;
 						}
@@ -804,7 +804,7 @@ class Validate_Command {
 				}
 
 				if ( T_CURLY_OPEN === $tk[0] || T_DOLLAR_OPEN_CURLY_BRACES === $tk[0] ) {
-					$depth++;
+					++$depth;
 					continue;
 				}
 
@@ -816,7 +816,7 @@ class Validate_Command {
 				// Skip whitespace after `return`.
 				$r = $k + 1;
 				while ( $r < $n && is_array( $tokens[ $r ] ) && T_WHITESPACE === $tokens[ $r ][0] ) {
-					$r++;
+					++$r;
 				}
 				if ( $r >= $n ) {
 					continue;
@@ -834,7 +834,7 @@ class Validate_Command {
 							$open_idx = $p;
 							break;
 						}
-						$p++;
+						++$p;
 					}
 				}
 				if ( -1 === $open_idx ) {
@@ -904,9 +904,9 @@ class Validate_Command {
 				}
 
 				if ( '[' === $t || '(' === $t || '{' === $t ) {
-					$depth++;
+					++$depth;
 				} elseif ( ']' === $t || ')' === $t || '}' === $t ) {
-					$depth--;
+					--$depth;
 					if ( 0 === $depth ) {
 						if ( $pending_key !== null ) {
 							$tree[ $pending_key ] = null;
@@ -932,7 +932,7 @@ class Validate_Command {
 			// (or T_DOLLAR_OPEN_CURLY_BRACES) and closes with a literal `}`.
 			// Count the open as a depth increment so the close balances.
 			if ( T_CURLY_OPEN === $t[0] || T_DOLLAR_OPEN_CURLY_BRACES === $t[0] ) {
-				$depth++;
+				++$depth;
 				continue;
 			}
 
@@ -941,7 +941,7 @@ class Validate_Command {
 			if ( $pending_key !== null && 1 === $depth && T_ARRAY === $t[0] ) {
 				$p = $i + 1;
 				while ( $p < $n && is_array( $tokens[ $p ] ) && in_array( $tokens[ $p ][0], $skip_token_types, true ) ) {
-					$p++;
+					++$p;
 				}
 				if ( $p < $n && is_string( $tokens[ $p ] ) && '(' === $tokens[ $p ] ) {
 					$sub_end              = $p;
@@ -962,7 +962,7 @@ class Validate_Command {
 				// Confirm next non-skippable token is `=>`.
 				$j = $i + 1;
 				while ( $j < $n && is_array( $tokens[ $j ] ) && in_array( $tokens[ $j ][0], $skip_token_types, true ) ) {
-					$j++;
+					++$j;
 				}
 				if ( $j < $n && is_array( $tokens[ $j ] ) && T_DOUBLE_ARROW === $tokens[ $j ][0] ) {
 					$pending_key   = trim( $t[1], "'\"" );
@@ -1014,7 +1014,7 @@ class Validate_Command {
 			// Find the `(` opening the call, skipping whitespace.
 			$j = $i + 1;
 			while ( $j < $n && is_array( $tokens[ $j ] ) && T_WHITESPACE === $tokens[ $j ][0] ) {
-				$j++;
+				++$j;
 			}
 			if ( $j >= $n || ! is_string( $tokens[ $j ] ) || '(' !== $tokens[ $j ] ) {
 				continue;
@@ -1031,22 +1031,20 @@ class Validate_Command {
 
 				if ( is_string( $tk ) ) {
 					if ( '(' === $tk || '[' === $tk || '{' === $tk ) {
-						$depth++;
+						++$depth;
 					} elseif ( ')' === $tk ) {
-						$depth--;
+						--$depth;
 						if ( 0 === $depth ) {
 							break;
 						}
 					} elseif ( ']' === $tk || '}' === $tk ) {
-						$depth--;
+						--$depth;
 					} elseif ( ',' === $tk && 1 === $depth ) {
-						$arg_count++;
+						++$arg_count;
 					}
-				} else {
+				} elseif ( null === $hook_name && 1 === $depth && T_CONSTANT_ENCAPSED_STRING === $tk[0] ) {
 					// Capture the first literal string at depth 1 as the hook.
-					if ( null === $hook_name && 1 === $depth && T_CONSTANT_ENCAPSED_STRING === $tk[0] ) {
-						$hook_name = trim( $tk[1], "'\"" );
-					}
+					$hook_name = trim( $tk[1], "'\"" );
 				}
 			}
 
@@ -1089,7 +1087,8 @@ class Validate_Command {
 
 		$node = $trigger_args;
 
-		for ( $i = 1; $i < count( $parts ); $i++ ) {
+		$part_count = count( $parts );
+		for ( $i = 1; $i < $part_count; $i++ ) {
 			$key = $parts[ $i ];
 
 			if ( ! isset( $node[ $key ] ) ) {
@@ -1305,13 +1304,14 @@ class Validate_Command {
 		// Entity_Hydrator at hydration time, so they're valid first-level
 		// access keys even though they aren't in `fields`/`computed`.
 		$node = array_merge(
-			$entity_manifest['fields']    ?? [],
-			$entity_manifest['computed']  ?? [],
+			$entity_manifest['fields'] ?? [],
+			$entity_manifest['computed'] ?? [],
 			$entity_manifest['relations'] ?? [],
 			[ 'id' => [ 'type' => 'integer', 'description' => 'WordPress post ID (always present)' ] ]
 		);
 
-		for ( $i = 1; $i < count( $parts ); $i++ ) {
+		$part_count = count( $parts );
+		for ( $i = 1; $i < $part_count; $i++ ) {
 			$key = $parts[ $i ];
 			if ( ! isset( $node[ $key ] ) ) {
 				return sprintf(
@@ -1977,7 +1977,7 @@ class Validate_Command {
 	 * Emit findings and set the appropriate exit status.
 	 *
 	 * @param array<int, array{file: string, line: int, message: string}> $findings
-	 * @param string $format Output format: human or json.
+	 * @param string                                                      $format Output format: human or json.
 	 */
 	private function emit( array $findings, string $format ): void {
 		if ( 'json' === $format ) {

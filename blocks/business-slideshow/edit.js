@@ -12,21 +12,21 @@
 
         return el( Fragment, {},
             el( InspectorControls, {},
-                el( PanelBody, { title: __( 'Slideshow', 'shelter-donations' ), initialOpen: true },
+                el( PanelBody, { title: __( 'Slideshow', 'shelterkit-donations' ), initialOpen: true },
                     el( ToggleControl, {
-                        label: __( 'Show business name', 'shelter-donations' ),
+                        label: __( 'Show business name', 'shelterkit-donations' ),
                         checked: attributes.showName !== false,
                         onChange: function( value ) { setAttributes( { showName: value } ); },
-                        help: __( 'Caption each logo with the business name.', 'shelter-donations' ),
+                        help: __( 'Caption each logo with the business name.', 'shelterkit-donations' ),
                     } ),
                     el( ToggleControl, {
-                        label: __( 'Autoplay', 'shelter-donations' ),
+                        label: __( 'Autoplay', 'shelterkit-donations' ),
                         checked: attributes.autoplay !== false,
                         onChange: function( value ) { setAttributes( { autoplay: value } ); },
-                        help: __( 'Auto-advance slides. Pauses on hover/focus and respects reduced-motion settings.', 'shelter-donations' ),
+                        help: __( 'Auto-advance slides. Pauses on hover/focus and respects reduced-motion settings.', 'shelterkit-donations' ),
                     } ),
                     el( RangeControl, {
-                        label: __( 'Autoplay interval (seconds)', 'shelter-donations' ),
+                        label: __( 'Autoplay interval (seconds)', 'shelterkit-donations' ),
                         value: intervalSeconds,
                         min: 2,
                         max: 15,
@@ -34,7 +34,7 @@
                         onChange: function( value ) { setAttributes( { intervalMs: ( value || 5 ) * 1000 } ); },
                     } ),
                     el( RangeControl, {
-                        label: __( 'Maximum members shown', 'shelter-donations' ),
+                        label: __( 'Maximum members shown', 'shelterkit-donations' ),
                         value: attributes.maxItems || 50,
                         min: 1,
                         max: 100,

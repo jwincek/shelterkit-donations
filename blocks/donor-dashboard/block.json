@@ -4,11 +4,11 @@
     "name": "shelter-donations/donor-dashboard",
     "version": "2.0.0",
     "title": "Donor Dashboard",
-    "category": "shelter-donations",
+    "category": "shelterkit-donations",
     "icon": "id-alt",
     "description": "Personal dashboard showing donor's giving history, stats, and membership status.",
     "keywords": ["donor", "dashboard", "profile", "giving", "history", "member"],
-    "textdomain": "shelter-donations",
+    "textdomain": "shelterkit-donations",
     "supports": {
         "html": false,
         "align": ["wide", "full"],

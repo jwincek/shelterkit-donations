@@ -22,7 +22,7 @@
       "5473": { "parent": "5465", "tier": "benefactor" },
       
       "13177": {
-        "maps_to": "shelter-donations-in-memoriam",
+        "maps_to": "shelterkit-donations-in-memoriam",
         "type": "memorial",
         "notes": "In Memoriam Donations variable product"
       },
@@ -33,7 +33,7 @@
         "notes": "Shelter Business Memberships variable product"
       },
       "13179": {
-        "maps_to": "shelter-donations",
+        "maps_to": "shelterkit-donations",
         "type": "donation",
         "notes": "Shelter Donations variable product"
       },
@@ -73,13 +73,13 @@
       },
       {
         "pattern": "^In Memoriam Donations - (Pet|Person)",
-        "maps_to": "shelter-donations-in-memoriam",
+        "maps_to": "shelterkit-donations-in-memoriam",
         "type": "memorial",
         "memorial_type_from_match": 1
       },
       {
         "pattern": "^Shelter Donations - (.+)",
-        "maps_to": "shelter-donations",
+        "maps_to": "shelterkit-donations",
         "type": "donation",
         "allocation_from_match": 1
       }

@@ -37,7 +37,7 @@ class Import_Export_Page {
 	/**
 	 * Page slug.
 	 */
-	private const PAGE_SLUG = 'shelter-donations-import-export';
+	private const PAGE_SLUG = 'shelterkit-donations-import-export';
 
 	/**
 	 * Nonce action for exports.
@@ -71,8 +71,8 @@ class Import_Export_Page {
 	public static function add_menu_page(): void {
 		add_submenu_page(
 			Menu::MENU_SLUG,
-			__( 'Import / Export', 'shelter-donations' ),
-			__( 'Import / Export', 'shelter-donations' ),
+			__( 'Import / Export', 'shelterkit-donations' ),
+			__( 'Import / Export', 'shelterkit-donations' ),
 			'manage_options',
 			self::PAGE_SLUG,
 			[ self::class, 'render_page' ]
@@ -141,7 +141,7 @@ class Import_Export_Page {
 		check_admin_referer( self::EXPORT_NONCE );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'Permission denied.', 'shelter-donations' ) );
+			wp_die( esc_html__( 'Permission denied.', 'shelterkit-donations' ) );
 		}
 
 		$type = sanitize_key( $_POST['export_type'] ?? '' );
@@ -149,8 +149,10 @@ class Import_Export_Page {
 		$options = [
 			'date_range' => sanitize_key( $_POST['date_range'] ?? 'all' ),
 			'status'     => sanitize_key( $_POST['status'] ?? 'all' ),
+			// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- nonce and capability are checked at the top of this handler.
 			'date_from'  => sanitize_text_field( $_POST['date_from'] ?? '' ),
 			'date_to'    => sanitize_text_field( $_POST['date_to'] ?? '' ),
+			// phpcs:enable WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 		];
 
 		CSV_Exporter::export( $type, $options );
@@ -165,7 +167,7 @@ class Import_Export_Page {
 		check_admin_referer( self::EXPORT_NONCE );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'Permission denied.', 'shelter-donations' ) );
+			wp_die( esc_html__( 'Permission denied.', 'shelterkit-donations' ) );
 		}
 
 		$archive = CSV_Exporter::build_archive();
@@ -201,7 +203,7 @@ class Import_Export_Page {
 		<div class="wrap">
 			<?php self::render_backup_card(); ?>
 			<div id="sd-import-export-root">
-				<p><?php esc_html_e( 'Loading Import/Export interface...', 'shelter-donations' ); ?></p>
+				<p><?php esc_html_e( 'Loading Import/Export interface...', 'shelterkit-donations' ); ?></p>
 			</div>
 		</div>
 		<?php
@@ -216,13 +218,13 @@ class Import_Export_Page {
 	private static function render_backup_card(): void {
 		?>
 		<div class="sd-backup-card" style="background:#fff;border:1px solid #c3c4c7;border-left:4px solid #2271b1;border-radius:4px;padding:16px 20px;margin:0 0 20px;max-width:1200px;">
-			<h2 style="margin-top:0;"><?php esc_html_e( 'Full data backup', 'shelter-donations' ); ?></h2>
-			<p><?php esc_html_e( 'Download every donor, donation, membership, and memorial as a single CSV ZIP. Do this before uninstalling with "Delete all data on uninstall" enabled — deletion is permanent.', 'shelter-donations' ); ?></p>
-			<p class="description"><?php esc_html_e( 'Included: donors, donations, memberships, memorials — relinked by email, with their campaign association and logo/photo references restored on same-site re-import. Not restored automatically: campaign goals/end-dates, candle counts, the activity log, and settings.', 'shelter-donations' ); ?></p>
+			<h2 style="margin-top:0;"><?php esc_html_e( 'Full data backup', 'shelterkit-donations' ); ?></h2>
+			<p><?php esc_html_e( 'Download every donor, donation, membership, and memorial as a single CSV ZIP. Do this before uninstalling with "Delete all data on uninstall" enabled — deletion is permanent.', 'shelterkit-donations' ); ?></p>
+			<p class="description"><?php esc_html_e( 'Included: donors, donations, memberships, memorials — relinked by email, with their campaign association and logo/photo references restored on same-site re-import. Not restored automatically: campaign goals/end-dates, candle counts, the activity log, and settings.', 'shelterkit-donations' ); ?></p>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 				<input type="hidden" name="action" value="sd_export_all" />
 				<?php wp_nonce_field( self::EXPORT_NONCE ); ?>
-				<button type="submit" class="button button-secondary"><?php esc_html_e( 'Download full backup (CSV ZIP)', 'shelter-donations' ); ?></button>
+				<button type="submit" class="button button-secondary"><?php esc_html_e( 'Download full backup (CSV ZIP)', 'shelterkit-donations' ); ?></button>
 			</form>
 		</div>
 		<?php

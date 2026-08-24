@@ -5,7 +5,7 @@
       "label": "Donations",
       "icon": "💰",
       "export": {
-        "filename_prefix": "shelter-donations",
+        "filename_prefix": "shelterkit-donations",
         "orderby": "date",
         "order": "DESC",
         "columns": [

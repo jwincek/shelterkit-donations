@@ -1,13 +1,13 @@
 {
-	"name": "jwincek/shelter-donations",
+	"name": "jwincek/shelterkit-donations",
 	"description": "Animal shelter donations, memberships, and memorials management using WordPress 6.9+ Abilities API.",
 	"type": "wordpress-plugin",
 	"license": "GPL-2.0-or-later",
-	"homepage": "https://github.com/jwincek/shelter-donations",
+	"homepage": "https://github.com/jwincek/shelterkit-donations",
 	"authors": [
 		{
-			"name": "VCPA Humane Society",
-			"homepage": "https://vcpahumane.org"
+			"name": "Jerome Wincek",
+			"homepage": "https://github.com/jwincek"
 		}
 	],
 	"require": {

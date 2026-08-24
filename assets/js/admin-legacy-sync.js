@@ -54,22 +54,22 @@
         return el( 'div', { className: 'sd-stats-grid' },
             el( StatCard, { 
                 value: stats.total_orders || 0, 
-                label: __( 'Total Orders', 'shelter-donations' ),
+                label: __( 'Total Orders', 'shelterkit-donations' ),
                 type: 'total'
             }),
             el( StatCard, { 
                 value: stats.unsynced_orders || 0, 
-                label: __( 'Unsynced', 'shelter-donations' ),
+                label: __( 'Unsynced', 'shelterkit-donations' ),
                 type: 'unsynced'
             }),
             el( StatCard, { 
                 value: stats.synced_orders || 0, 
-                label: __( 'Legacy Synced', 'shelter-donations' ),
+                label: __( 'Legacy Synced', 'shelterkit-donations' ),
                 type: 'synced'
             }),
             el( StatCard, { 
                 value: stats.processed_orders || 0, 
-                label: __( 'Auto Processed', 'shelter-donations' ),
+                label: __( 'Auto Processed', 'shelterkit-donations' ),
                 type: 'processed'
             })
         );
@@ -81,34 +81,34 @@
     function Filters( { filters, onChange, onScan, isScanning } ) {
         return el( 'div', { className: 'sd-filters' },
             el( 'div', { className: 'sd-filter-group' },
-                el( 'label', null, __( 'Order Status', 'shelter-donations' ) ),
+                el( 'label', null, __( 'Order Status', 'shelterkit-donations' ) ),
                 el( SelectControl, {
                     value: filters.status,
                     options: [
-                        { label: __( 'All', 'shelter-donations' ), value: 'all' },
-                        { label: __( 'Completed', 'shelter-donations' ), value: 'completed' },
-                        { label: __( 'Processing', 'shelter-donations' ), value: 'processing' },
+                        { label: __( 'All', 'shelterkit-donations' ), value: 'all' },
+                        { label: __( 'Completed', 'shelterkit-donations' ), value: 'completed' },
+                        { label: __( 'Processing', 'shelterkit-donations' ), value: 'processing' },
                     ],
                     onChange: ( value ) => onChange( { ...filters, status: value } ),
                     __nextHasNoMarginBottom: true,
                 })
             ),
             el( 'div', { className: 'sd-filter-group' },
-                el( 'label', null, __( 'Product Type', 'shelter-donations' ) ),
+                el( 'label', null, __( 'Product Type', 'shelterkit-donations' ) ),
                 el( SelectControl, {
                     value: filters.product_type,
                     options: [
-                        { label: __( 'All Types', 'shelter-donations' ), value: 'all' },
-                        { label: __( 'Donations', 'shelter-donations' ), value: 'donation' },
-                        { label: __( 'Memberships', 'shelter-donations' ), value: 'membership' },
-                        { label: __( 'Memorials', 'shelter-donations' ), value: 'memorial' },
+                        { label: __( 'All Types', 'shelterkit-donations' ), value: 'all' },
+                        { label: __( 'Donations', 'shelterkit-donations' ), value: 'donation' },
+                        { label: __( 'Memberships', 'shelterkit-donations' ), value: 'membership' },
+                        { label: __( 'Memorials', 'shelterkit-donations' ), value: 'memorial' },
                     ],
                     onChange: ( value ) => onChange( { ...filters, product_type: value } ),
                     __nextHasNoMarginBottom: true,
                 })
             ),
             el( 'div', { className: 'sd-filter-group' },
-                el( 'label', null, __( 'Date From', 'shelter-donations' ) ),
+                el( 'label', null, __( 'Date From', 'shelterkit-donations' ) ),
                 el( TextControl, {
                     type: 'date',
                     value: filters.date_from,
@@ -117,7 +117,7 @@
                 })
             ),
             el( 'div', { className: 'sd-filter-group' },
-                el( 'label', null, __( 'Date To', 'shelter-donations' ) ),
+                el( 'label', null, __( 'Date To', 'shelterkit-donations' ) ),
                 el( TextControl, {
                     type: 'date',
                     value: filters.date_to,
@@ -127,7 +127,7 @@
             ),
             el( 'div', { className: 'sd-filter-group', style: { alignSelf: 'flex-end' } },
                 el( CheckboxControl, {
-                    label: __( 'Include already synced', 'shelter-donations' ),
+                    label: __( 'Include already synced', 'shelterkit-donations' ),
                     checked: filters.include_synced,
                     onChange: ( value ) => onChange( { ...filters, include_synced: value } ),
                     __nextHasNoMarginBottom: true,
@@ -140,7 +140,7 @@
                     isBusy: isScanning,
                     disabled: isScanning,
                 },
-                    isScanning ? __( 'Scanning...', 'shelter-donations' ) : __( 'Scan Orders', 'shelter-donations' )
+                    isScanning ? __( 'Scanning...', 'shelterkit-donations' ) : __( 'Scan Orders', 'shelterkit-donations' )
                 )
             )
         );
@@ -160,9 +160,9 @@
      */
     function SyncStatusBadge( { status } ) {
         const labels = {
-            unsynced: __( 'Unsynced', 'shelter-donations' ),
-            synced: __( 'Synced', 'shelter-donations' ),
-            processed: __( 'Processed', 'shelter-donations' ),
+            unsynced: __( 'Unsynced', 'shelterkit-donations' ),
+            synced: __( 'Synced', 'shelterkit-donations' ),
+            processed: __( 'Processed', 'shelterkit-donations' ),
         };
         
         return el( 'span', { 
@@ -191,13 +191,13 @@
                             __nextHasNoMarginBottom: true,
                         })
                     ),
-                    el( 'th', null, __( 'Order', 'shelter-donations' ) ),
-                    el( 'th', null, __( 'Date', 'shelter-donations' ) ),
-                    el( 'th', null, __( 'Customer', 'shelter-donations' ) ),
-                    el( 'th', null, __( 'Items', 'shelter-donations' ) ),
-                    el( 'th', null, __( 'Total', 'shelter-donations' ) ),
-                    el( 'th', null, __( 'Status', 'shelter-donations' ) ),
-                    el( 'th', null, __( 'Actions', 'shelter-donations' ) )
+                    el( 'th', null, __( 'Order', 'shelterkit-donations' ) ),
+                    el( 'th', null, __( 'Date', 'shelterkit-donations' ) ),
+                    el( 'th', null, __( 'Customer', 'shelterkit-donations' ) ),
+                    el( 'th', null, __( 'Items', 'shelterkit-donations' ) ),
+                    el( 'th', null, __( 'Total', 'shelterkit-donations' ) ),
+                    el( 'th', null, __( 'Status', 'shelterkit-donations' ) ),
+                    el( 'th', null, __( 'Actions', 'shelterkit-donations' ) )
                 )
             ),
             el( 'tbody', null,
@@ -243,7 +243,7 @@
                                 variant: 'link',
                                 onClick: () => onPreview( order.order_id ),
                                 isSmall: true,
-                            }, __( 'Preview', 'shelter-donations' ) )
+                            }, __( 'Preview', 'shelterkit-donations' ) )
                         )
                     );
                 })
@@ -277,11 +277,11 @@
                 if ( data.success ) {
                     setPreview( data.data );
                 } else {
-                    setError( data.data || __( 'Failed to load preview.', 'shelter-donations' ) );
+                    setError( data.data || __( 'Failed to load preview.', 'shelterkit-donations' ) );
                 }
             })
             .catch( () => {
-                setError( __( 'Failed to load preview.', 'shelter-donations' ) );
+                setError( __( 'Failed to load preview.', 'shelterkit-donations' ) );
             })
             .finally( () => {
                 setIsLoading( false );
@@ -289,16 +289,16 @@
         }, [ orderId ] );
 
         return el( Modal, {
-            title: __( 'Sync Preview', 'shelter-donations' ) + ` - Order #${ orderId }`,
+            title: __( 'Sync Preview', 'shelterkit-donations' ) + ` - Order #${ orderId }`,
             onRequestClose: onClose,
         },
             isLoading && el( 'div', { style: { textAlign: 'center', padding: '40px' } },
                 el( Spinner ),
-                el( 'p', null, __( 'Loading preview...', 'shelter-donations' ) )
+                el( 'p', null, __( 'Loading preview...', 'shelterkit-donations' ) )
             ),
             error && el( Notice, { status: 'error', isDismissible: false }, error ),
             preview && el( Fragment, null,
-                el( 'h4', null, __( 'Donor', 'shelter-donations' ) ),
+                el( 'h4', null, __( 'Donor', 'shelterkit-donations' ) ),
                 el( 'p', null,
                     preview.donor.name,
                     el( 'br' ),
@@ -311,11 +311,11 @@
                                 fontSize: '12px' 
                             } 
                         }, 
-                            __( '✓ Existing donor record', 'shelter-donations' )
+                            __( '✓ Existing donor record', 'shelterkit-donations' )
                         )
                     )
                 ),
-                el( 'h4', null, __( 'Records to Create', 'shelter-donations' ) ),
+                el( 'h4', null, __( 'Records to Create', 'shelterkit-donations' ) ),
                 preview.items.map( ( item, idx ) =>
                     el( Card, { key: idx, size: 'small', style: { marginBottom: '12px' } },
                         el( CardBody, null,
@@ -347,32 +347,32 @@
      */
     function SyncResults( { results } ) {
         return el( Card, null,
-            el( CardHeader, null, __( 'Sync Results', 'shelter-donations' ) ),
+            el( CardHeader, null, __( 'Sync Results', 'shelterkit-donations' ) ),
             el( CardBody, null,
                 el( 'div', { className: 'sd-stats-grid' },
                     el( StatCard, { 
                         value: results.processed, 
-                        label: __( 'Processed', 'shelter-donations' ),
+                        label: __( 'Processed', 'shelterkit-donations' ),
                         type: 'synced'
                     }),
                     el( StatCard, { 
                         value: results.created.donations, 
-                        label: __( 'Donations', 'shelter-donations' ),
+                        label: __( 'Donations', 'shelterkit-donations' ),
                         type: 'total'
                     }),
                     el( StatCard, { 
                         value: results.created.memberships, 
-                        label: __( 'Memberships', 'shelter-donations' ),
+                        label: __( 'Memberships', 'shelterkit-donations' ),
                         type: 'total'
                     }),
                     el( StatCard, { 
                         value: results.created.memorials, 
-                        label: __( 'Memorials', 'shelter-donations' ),
+                        label: __( 'Memorials', 'shelterkit-donations' ),
                         type: 'total'
                     }),
                     ( results.created.updated > 0 ) && el( StatCard, { 
                         value: results.created.updated, 
-                        label: __( 'Updated', 'shelter-donations' ),
+                        label: __( 'Updated', 'shelterkit-donations' ),
                         type: 'processed'
                     })
                 ),
@@ -382,7 +382,7 @@
                 }, 
                     sprintf(
                         // translators: %d: number of orders skipped because they were already synced.
-                        __( '%d order(s) skipped (already synced).', 'shelter-donations' ),
+                        __( '%d order(s) skipped (already synced).', 'shelterkit-donations' ),
                         results.skipped
                     )
                 ),
@@ -392,7 +392,7 @@
                 },
                     sprintf(
                         // translators: %d: number of errors that occurred during sync.
-                        __( '%d error(s) occurred during sync.', 'shelter-donations' ),
+                        __( '%d error(s) occurred during sync.', 'shelterkit-donations' ),
                         results.errors
                     )
                 )
@@ -476,21 +476,21 @@
                         status: 'success',
                         message: sprintf(
                             // translators: %d: number of orders found containing shelter products.
-                            __( 'Found %d order(s) with shelter products.', 'shelter-donations' ),
+                            __( 'Found %d order(s) with shelter products.', 'shelterkit-donations' ),
                             data.data.summary.total
                         ),
                     });
                 } else {
                     setNotice({
                         status: 'error',
-                        message: data.data || __( 'Scan failed.', 'shelter-donations' ),
+                        message: data.data || __( 'Scan failed.', 'shelterkit-donations' ),
                     });
                 }
             })
             .catch( () => {
                 setNotice({
                     status: 'error',
-                    message: __( 'Scan failed.', 'shelter-donations' ),
+                    message: __( 'Scan failed.', 'shelterkit-donations' ),
                 });
             })
             .finally( () => {
@@ -513,13 +513,13 @@
             if ( selectedOrders.length === 0 ) {
                 setNotice({
                     status: 'warning',
-                    message: __( 'Please select orders to sync.', 'shelter-donations' ),
+                    message: __( 'Please select orders to sync.', 'shelterkit-donations' ),
                 });
                 return;
             }
 
             const confirmMessage = forceResync 
-                ? __( 'Are you sure you want to re-sync these orders? This may create DUPLICATE records if the orders were previously synced.', 'shelter-donations' )
+                ? __( 'Are you sure you want to re-sync these orders? This may create DUPLICATE records if the orders were previously synced.', 'shelterkit-donations' )
                 : config.strings.confirmSync;
 
             if ( ! confirm( confirmMessage ) ) {
@@ -559,21 +559,21 @@
                         status: 'success',
                         message: sprintf(
                             // translators: %d: number of orders successfully synced.
-                            __( 'Synced %d order(s) successfully.', 'shelter-donations' ),
+                            __( 'Synced %d order(s) successfully.', 'shelterkit-donations' ),
                             data.data.processed
                         ),
                     });
                 } else {
                     setNotice({
                         status: 'error',
-                        message: data.data || __( 'Sync failed.', 'shelter-donations' ),
+                        message: data.data || __( 'Sync failed.', 'shelterkit-donations' ),
                     });
                 }
             })
             .catch( () => {
                 setNotice({
                     status: 'error',
-                    message: __( 'Sync failed.', 'shelter-donations' ),
+                    message: __( 'Sync failed.', 'shelterkit-donations' ),
                 });
             })
             .finally( () => {
@@ -584,8 +584,8 @@
         // Sync all matching orders with batching
         const handleSyncAll = useCallback( () => {
             const confirmMessage = forceResync 
-                ? __( 'Are you sure you want to re-sync ALL matching orders? This may create DUPLICATE records.', 'shelter-donations' )
-                : __( 'Are you sure you want to sync ALL matching orders? This may take a while for large datasets.', 'shelter-donations' );
+                ? __( 'Are you sure you want to re-sync ALL matching orders? This may create DUPLICATE records.', 'shelterkit-donations' )
+                : __( 'Are you sure you want to sync ALL matching orders? This may take a while for large datasets.', 'shelterkit-donations' );
 
             if ( ! confirm( confirmMessage ) ) {
                 return;
@@ -655,7 +655,7 @@
                                 status: 'success',
                                 message: sprintf(
                                     // translators: %d: total number of orders processed.
-                                    __( 'Sync complete! Processed %d order(s).', 'shelter-donations' ),
+                                    __( 'Sync complete! Processed %d order(s).', 'shelterkit-donations' ),
                                     cumulativeResults.processed
                                 ),
                             });
@@ -667,7 +667,7 @@
                         setIsSyncing( false );
                         setNotice({
                             status: 'error',
-                            message: data.data || __( 'Sync failed.', 'shelter-donations' ),
+                            message: data.data || __( 'Sync failed.', 'shelterkit-donations' ),
                         });
                     }
                 })
@@ -675,7 +675,7 @@
                     setIsSyncing( false );
                     setNotice({
                         status: 'error',
-                        message: __( 'Sync failed.', 'shelter-donations' ),
+                        message: __( 'Sync failed.', 'shelterkit-donations' ),
                     });
                 });
             };
@@ -711,7 +711,7 @@
                 } else {
                     setNotice({
                         status: 'error',
-                        message: data.data || __( 'Reset failed.', 'shelter-donations' ),
+                        message: data.data || __( 'Reset failed.', 'shelterkit-donations' ),
                     });
                 }
             });
@@ -729,13 +729,13 @@
             el( Card, { style: { marginBottom: '20px' } },
                 el( CardHeader, null,
                     el( Flex, { justify: 'space-between', align: 'center' },
-                        el( FlexItem, null, __( 'Overview', 'shelter-donations' ) ),
+                        el( FlexItem, null, __( 'Overview', 'shelterkit-donations' ) ),
                         el( FlexItem, null,
                             el( Button, {
                                 variant: 'link',
                                 onClick: refreshStats,
                                 isSmall: true,
-                            }, __( 'Refresh', 'shelter-donations' ) )
+                            }, __( 'Refresh', 'shelterkit-donations' ) )
                         )
                     )
                 ),
@@ -749,14 +749,14 @@
                         } 
                     }, 
                         // translators: %s: date/time of the last scan.
-                        sprintf( __( 'Last scan: %s', 'shelter-donations' ), stats.last_scan )
+                        sprintf( __( 'Last scan: %s', 'shelterkit-donations' ), stats.last_scan )
                     )
                 )
             ),
 
             // Filters & Scan Card
             el( Card, { style: { marginBottom: '20px' } },
-                el( CardHeader, null, __( 'Scan Orders', 'shelter-donations' ) ),
+                el( CardHeader, null, __( 'Scan Orders', 'shelterkit-donations' ) ),
                 el( CardBody, null,
                     el( Filters, {
                         filters,
@@ -789,14 +789,14 @@
                         el( FlexItem, null,
                             sprintf(
                                 // translators: %d: number of orders found.
-                                __( '%d Order(s) Found (showing first 50)', 'shelter-donations' ),
+                                __( '%d Order(s) Found (showing first 50)', 'shelterkit-donations' ),
                                 orders.length
                             )
                         ),
                         el( FlexItem, null,
                             el( Flex, { gap: 3, align: 'center' },
                                 el( CheckboxControl, {
-                                    label: __( 'Force re-sync (creates duplicates!)', 'shelter-donations' ),
+                                    label: __( 'Force re-sync (creates duplicates!)', 'shelterkit-donations' ),
                                     checked: forceResync,
                                     onChange: ( value ) => {
                                         setForceResync( value );
@@ -811,8 +811,8 @@
                                     isBusy: isSyncing,
                                 },
                                     forceResync
-                                        ? __( 'Re-Sync All Matching', 'shelter-donations' )
-                                        : __( 'Sync All Matching', 'shelter-donations' )
+                                        ? __( 'Re-Sync All Matching', 'shelterkit-donations' )
+                                        : __( 'Sync All Matching', 'shelterkit-donations' )
                                 ),
                                 el( Button, {
                                     variant: 'secondary',
@@ -821,14 +821,14 @@
                                     isBusy: isSyncing,
                                 },
                                     // translators: %d: number of selected orders.
-                                    sprintf( __( 'Sync Selected (%d)', 'shelter-donations' ), selectedOrders.length )
+                                    sprintf( __( 'Sync Selected (%d)', 'shelterkit-donations' ), selectedOrders.length )
                                 ),
                                 el( Button, {
                                     variant: 'tertiary',
                                     onClick: handleReset,
                                     disabled: isSyncing,
                                     isDestructive: true,
-                                }, __( 'Reset All', 'shelter-donations' ) )
+                                }, __( 'Reset All', 'shelterkit-donations' ) )
                             )
                         )
                     )
@@ -859,13 +859,13 @@
                         } 
                     },
                     // translators: %d: percent of the sync completed (0-100).
-                    sprintf( __( '%d%% complete', 'shelter-donations' ), syncProgress ) )
+                    sprintf( __( '%d%% complete', 'shelterkit-donations' ), syncProgress ) )
                 ),
                 forceResync && el( Notice, {
                     status: 'warning',
                     isDismissible: false,
                     style: { margin: '0 16px' }
-                }, __( 'Warning: Force re-sync is enabled. This will create new records even for already-synced orders, potentially creating duplicates. Use with caution!', 'shelter-donations' ) ),
+                }, __( 'Warning: Force re-sync is enabled. This will create new records even for already-synced orders, potentially creating duplicates. Use with caution!', 'shelterkit-donations' ) ),
                 el( CardBody, null,
                     el( OrdersTable, {
                         orders,
@@ -882,7 +882,7 @@
             ! isScanning && orders.length === 0 && el( Card, null,
                 el( CardBody, null,
                     el( 'p', { style: { textAlign: 'center', margin: '40px 0' } },
-                        __( 'Click "Scan Orders" to find orders with shelter products.', 'shelter-donations' )
+                        __( 'Click "Scan Orders" to find orders with shelter products.', 'shelterkit-donations' )
                     )
                 )
             ),

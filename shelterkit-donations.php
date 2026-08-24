@@ -1,18 +1,20 @@
 <?php
 /**
- * Plugin Name: Shelter Donations
- * Plugin URI: https://github.com/jwincek/shelter-donations
+ * Plugin Name: ShelterKit Donations
+ * Plugin URI: https://github.com/jwincek/shelterkit-donations
  * Description: Animal shelter donations, memberships, and memorials management using WordPress 6.9+ Abilities API.
- * Version: 2.0.1
+ * Version: 3.0.0
  * Requires at least: 6.9
  * Requires PHP: 8.1
  * Requires Plugins: woocommerce
- * Author: VCPA Humane Society
- * Author URI: https://vcpahumane.org
+ * Author: Jerome Wincek
+ * Author URI: https://github.com/jwincek
  * License: GPL-2.0+
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: shelter-donations
+ * Text Domain: shelterkit-donations
  * Domain Path: /languages
+ *
+ * @package Starter_Shelter
  */
 
 declare( strict_types = 1 );
@@ -20,7 +22,7 @@ declare( strict_types = 1 );
 defined( 'ABSPATH' ) || exit;
 
 // Plugin constants.
-define( 'STARTER_SHELTER_VERSION', '2.0.1' );
+define( 'STARTER_SHELTER_VERSION', '3.0.0' );
 define( 'STARTER_SHELTER_FILE', __FILE__ );
 define( 'STARTER_SHELTER_PATH', plugin_dir_path( __FILE__ ) );
 define( 'STARTER_SHELTER_URL', plugin_dir_url( __FILE__ ) );
@@ -39,15 +41,15 @@ spl_autoload_register( function ( string $class ): void {
     $relative_class = substr( $class, $len );
     $parts = explode( '\\', $relative_class );
     $class_name = array_pop( $parts );
-    
+
     // Convert namespace parts to directory path.
     $path = strtolower( str_replace( '_', '-', implode( '/', $parts ) ) );
-    
+
     // Convert class name to file name.
     $file_name = 'class-' . strtolower( str_replace( '_', '-', $class_name ) ) . '.php';
-    
+
     $file = $base_dir . ( $path ? $path . '/' : '' ) . $file_name;
-    
+
     if ( file_exists( $file ) ) {
         require $file;
     }
@@ -61,10 +63,10 @@ spl_autoload_register( function ( string $class ): void {
 function starter_shelter_init(): void {
     // Check WordPress version.
     if ( version_compare( get_bloginfo( 'version' ), '6.9', '<' ) ) {
-        add_action( 'admin_notices', function(): void {
+        add_action( 'admin_notices', function (): void {
             printf(
                 '<div class="error"><p>%s</p></div>',
-                esc_html__( 'Shelter Donations requires WordPress 6.9 or higher.', 'shelter-donations' )
+                esc_html__( 'Shelter Donations requires WordPress 6.9 or higher.', 'shelterkit-donations' )
             );
         } );
         return;
@@ -98,29 +100,29 @@ add_action( 'plugins_loaded', 'starter_shelter_init', 10 );
  * @since 1.0.0
  */
 function starter_shelter_register_ability_categories(): void {
-    wp_register_ability_category( 'shelter-donations', [
-        'label'       => __( 'Shelter Donations', 'shelter-donations' ),
-        'description' => __( 'Abilities for managing animal shelter donations.', 'shelter-donations' ),
+    wp_register_ability_category( 'shelterkit-donations', [
+        'label'       => __( 'Shelter Donations', 'shelterkit-donations' ),
+        'description' => __( 'Abilities for managing animal shelter donations.', 'shelterkit-donations' ),
     ] );
 
     wp_register_ability_category( 'shelter-memberships', [
-        'label'       => __( 'Shelter Memberships', 'shelter-donations' ),
-        'description' => __( 'Abilities for managing shelter memberships.', 'shelter-donations' ),
+        'label'       => __( 'Shelter Memberships', 'shelterkit-donations' ),
+        'description' => __( 'Abilities for managing shelter memberships.', 'shelterkit-donations' ),
     ] );
 
     wp_register_ability_category( 'shelter-memorials', [
-        'label'       => __( 'Shelter Memorials', 'shelter-donations' ),
-        'description' => __( 'Abilities for managing memorial donations.', 'shelter-donations' ),
+        'label'       => __( 'Shelter Memorials', 'shelterkit-donations' ),
+        'description' => __( 'Abilities for managing memorial donations.', 'shelterkit-donations' ),
     ] );
 
     wp_register_ability_category( 'shelter-donors', [
-        'label'       => __( 'Shelter Donors', 'shelter-donations' ),
-        'description' => __( 'Abilities for managing donor profiles.', 'shelter-donations' ),
+        'label'       => __( 'Shelter Donors', 'shelterkit-donations' ),
+        'description' => __( 'Abilities for managing donor profiles.', 'shelterkit-donations' ),
     ] );
 
     wp_register_ability_category( 'shelter-reports', [
-        'label'       => __( 'Shelter Reports', 'shelter-donations' ),
-        'description' => __( 'Abilities for generating shelter reports.', 'shelter-donations' ),
+        'label'       => __( 'Shelter Reports', 'shelterkit-donations' ),
+        'description' => __( 'Abilities for generating shelter reports.', 'shelterkit-donations' ),
     ] );
 }
 add_action( 'wp_abilities_api_categories_init', 'starter_shelter_register_ability_categories' );
@@ -196,7 +198,7 @@ function starter_shelter_emails_init(): void {
     if ( ! class_exists( 'WooCommerce' ) ) {
         return;
     }
-    
+
     // Initialize email factory (registers all emails from config).
     // Note: class-config-email.php is loaded by the factory when WC_Email is available.
     Starter_Shelter\Emails\Email_Factory::init();
@@ -237,6 +239,20 @@ function starter_shelter_admin_init(): void {
 
     // Initialize main admin menu (must be first).
     Starter_Shelter\Admin\Menu::init();
+
+    // Host the shared Shelter Details screen, but only if THIS plugin's copy of
+    // the profile class is the one that won the version negotiation. Testing
+    // class_exists() instead would be true in every plugin carrying a copy, so
+    // each would register the screen and the shelter would see one "Shelter
+    // Details" entry per installed ShelterKit plugin — all editing the same
+    // option. Comparing against winner() is what makes exactly one host it.
+    if ( class_exists( 'ShelterKit_Profile_Versions' )
+        && ShelterKit_Profile_Versions::winner() === STARTER_SHELTER_PATH . 'includes/shelterkit/class-shelterkit-profile.php'
+    ) {
+        add_action( 'admin_menu', static function (): void {
+            ShelterKit_Profile::add_settings_page( Starter_Shelter\Admin\Menu::MENU_SLUG );
+        } );
+    }
 
     // Initialize settings page.
     Starter_Shelter\Admin\Settings::init();
@@ -294,12 +310,12 @@ add_action( 'plugins_loaded', 'starter_shelter_cron_init', 25 );
  */
 function starter_shelter_register_blocks(): void {
     // Register block category.
-    add_filter( 'block_categories_all', function( array $categories ): array {
+    add_filter( 'block_categories_all', function ( array $categories ): array {
         return array_merge(
             [
                 [
-                    'slug'  => 'shelter-donations',
-                    'title' => __( 'Shelter Donations', 'shelter-donations' ),
+                    'slug'  => 'shelterkit-donations',
+                    'title' => __( 'Shelter Donations', 'shelterkit-donations' ),
                     'icon'  => 'heart',
                 ],
             ],
@@ -330,7 +346,7 @@ function starter_shelter_register_blocks(): void {
     // Add shared feedback styles as dependency for form blocks.
     $form_blocks = [ 'donation-form', 'memorial-form', 'membership-form' ];
     foreach ( $form_blocks as $block ) {
-        $handle = 'shelter-donations-' . $block . '-style';
+        $handle = 'shelterkit-donations-' . $block . '-style';
         $style = wp_styles()->query( $handle );
         if ( $style ) {
             $style->deps[] = 'sd-form-feedback';
@@ -370,7 +386,7 @@ function starter_shelter_maybe_setup_products(): void {
     if ( ! class_exists( 'WooCommerce' ) ) {
         return;
     }
-    
+
     Starter_Shelter\Core\Activator::maybe_create_products();
 }
 add_action( 'admin_init', 'starter_shelter_maybe_setup_products' );
@@ -393,13 +409,13 @@ function starter_shelter_product_setup_notice(): void {
         return;
     }
 
-    $setup_url = admin_url( 'admin.php?page=shelter-donations-settings&tab=products' );
+    $setup_url = admin_url( 'admin.php?page=shelterkit-donations-settings&tab=products' );
     ?>
     <div class="notice notice-warning is-dismissible">
         <p>
-            <strong><?php esc_html_e( 'Shelter Donations:', 'shelter-donations' ); ?></strong>
-            <?php esc_html_e( 'Some donation products need to be created.', 'shelter-donations' ); ?>
-            <a href="<?php echo esc_url( $setup_url ); ?>"><?php esc_html_e( 'Set up products', 'shelter-donations' ); ?></a>
+            <strong><?php esc_html_e( 'Shelter Donations:', 'shelterkit-donations' ); ?></strong>
+            <?php esc_html_e( 'Some donation products need to be created.', 'shelterkit-donations' ); ?>
+            <a href="<?php echo esc_url( $setup_url ); ?>"><?php esc_html_e( 'Set up products', 'shelterkit-donations' ); ?></a>
         </p>
     </div>
     <?php
@@ -416,11 +432,19 @@ function starter_shelter_deactivate(): void {
 }
 register_deactivation_hook( __FILE__, 'starter_shelter_deactivate' );
 
-// Register the WP-CLI `wp shelter-donations validate` contract-checker.
+// The shelter profile is a SHARED class, carried byte-identically by every
+// ShelterKit plugin — the Action Scheduler pattern. Registering at file scope
+// (not on a hook) is what lets the registry see every plugin's copy before it
+// picks the highest on plugins_loaded. Nothing here depends on a sibling plugin
+// being installed: alone, this copy simply wins.
+require_once STARTER_SHELTER_PATH . 'includes/shelterkit/class-shelterkit-profile-versions.php';
+ShelterKit_Profile_Versions::register( '1.2.0', STARTER_SHELTER_PATH . 'includes/shelterkit/class-shelterkit-profile.php' );
+
+// Register the WP-CLI `wp shelterkit-donations validate` contract-checker.
 // Loaded only when WP-CLI is active to keep production overhead at zero.
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
     \WP_CLI::add_command(
-        'shelter-donations validate',
+        'shelterkit-donations validate',
         \Starter_Shelter\Cli\Validate_Command::class
     );
 }

@@ -69,11 +69,11 @@ final class BackupExportTest extends WP_UnitTestCase {
         for ( $i = 0; $i < $zip->numFiles; $i++ ) {
             $names[] = $zip->getNameIndex( $i );
         }
-        $donations_csv = (string) $zip->getFromName( 'shelter-donations.csv' );
+        $donations_csv = (string) $zip->getFromName( 'shelterkit-donations.csv' );
         $zip->close();
         wp_delete_file( $path );
 
-        foreach ( [ 'shelter-donors.csv', 'shelter-donations.csv', 'shelter-memberships.csv', 'shelter-memorials.csv', 'README.txt' ] as $entry ) {
+        foreach ( [ 'shelter-donors.csv', 'shelterkit-donations.csv', 'shelter-memberships.csv', 'shelter-memorials.csv', 'README.txt' ] as $entry ) {
             $this->assertContains( $entry, $names, "{$entry} is in the backup." );
         }
         $this->assertStringContainsString( 'zip@example.test', $donations_csv, 'Bundled CSV carries the data.' );

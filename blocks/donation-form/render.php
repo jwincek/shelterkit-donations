@@ -29,9 +29,9 @@ $show_anonymous   = $attributes['showAnonymous'] ?? true;
 // donation is attached to the originating campaign.
 $campaign_id      = (int) ( $attributes['campaignId'] ?? 0 ) ?: Helpers\resolve_campaign_id_from_request();
 $campaign_id      = $campaign_id ?: null;
-$title            = $attributes['title'] ?? __( 'Make a Donation', 'shelter-donations' );
-$subtitle         = $attributes['subtitle'] ?? __( 'Your gift helps animals in need.', 'shelter-donations' );
-$submit_text      = $attributes['submitButtonText'] ?? __( 'Add to Cart', 'shelter-donations' );
+$title            = $attributes['title'] ?? __( 'Make a Donation', 'shelterkit-donations' );
+$subtitle         = $attributes['subtitle'] ?? __( 'Your gift helps animals in need.', 'shelterkit-donations' );
+$submit_text      = $attributes['submitButtonText'] ?? __( 'Add to Cart', 'shelterkit-donations' );
 $show_secure      = $attributes['showSecureBadge'] ?? true;
 $min_amount       = $attributes['minAmount'] ?? 1;
 $max_amount       = $attributes['maxAmount'] ?? 100000;
@@ -43,8 +43,8 @@ if ( class_exists( '\Starter_Shelter\Core\Config' ) ) {
 }
 if ( empty( $allocations ) ) {
     $allocations = [
-        'general-fund' => __( 'General Fund', 'shelter-donations' ),
-        'medical-care' => __( 'Medical Care', 'shelter-donations' ),
+        'general-fund' => __( 'General Fund', 'shelterkit-donations' ),
+        'medical-care' => __( 'Medical Care', 'shelterkit-donations' ),
     ];
 }
 
@@ -98,27 +98,33 @@ $partials = dirname( __DIR__ ) . '/shared/partials';
 ?>
 <div <?php echo $wrapper; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped markup from get_block_wrapper_attributes(). ?>>
     <div class="sd-form-header">
-        <?php if ( $title ) : ?><h2 class="sd-form-title"><?php echo esc_html( $title ); ?></h2><?php endif; ?>
-        <?php if ( $subtitle ) : ?><p class="sd-form-subtitle"><?php echo esc_html( $subtitle ); ?></p><?php endif; ?>
+        <?php
+        if ( $title ) :
+			?>
+            <h2 class="sd-form-title"><?php echo esc_html( $title ); ?></h2><?php endif; ?>
+        <?php
+        if ( $subtitle ) :
+			?>
+            <p class="sd-form-subtitle"><?php echo esc_html( $subtitle ); ?></p><?php endif; ?>
         <?php if ( $campaign && ! is_wp_error( $campaign ) ) : ?>
-            <div class="sd-campaign-badge"><?php printf( /* translators: %s: campaign name. */ esc_html__( 'Supporting: %s', 'shelter-donations' ), '<strong>' . esc_html( $campaign->name ) . '</strong>' ); ?></div>
+            <div class="sd-campaign-badge"><?php printf( /* translators: %s: campaign name. */ esc_html__( 'Supporting: %s', 'shelterkit-donations' ), '<strong>' . esc_html( $campaign->name ) . '</strong>' ); ?></div>
         <?php endif; ?>
         <?php if ( ! $product_ok ) : ?>
-            <div class="sd-config-warning" role="alert"><p><?php esc_html_e( 'Donation form not configured.', 'shelter-donations' ); ?></p></div>
+            <div class="sd-config-warning" role="alert"><p><?php esc_html_e( 'Donation form not configured.', 'shelterkit-donations' ); ?></p></div>
         <?php endif; ?>
     </div>
 
     <div class="sd-donation-form-inner">
         <?php
         // Amount selector (shared partial).
-        $legend = __( 'Select Amount', 'shelter-donations' );
+        $legend = __( 'Select Amount', 'shelterkit-donations' );
         require $partials . '/amount-selector.php';
         ?>
 
         <?php if ( $show_allocation ) : ?>
         <div class="sd-form-section sd-allocation-section">
             <label class="sd-section-label" for="<?php echo esc_attr( $form_id ); ?>-alloc">
-                <?php esc_html_e( 'Direct Your Gift', 'shelter-donations' ); ?>
+                <?php esc_html_e( 'Direct Your Gift', 'shelterkit-donations' ); ?>
             </label>
             <div class="sd-select-wrapper">
                 <select id="<?php echo esc_attr( $form_id ); ?>-alloc" class="sd-select" data-wp-on--change="actions.setAllocation">
@@ -133,7 +139,7 @@ $partials = dirname( __DIR__ ) . '/shared/partials';
         <?php
         // Anonymous toggle (shared partial).
         if ( $show_anonymous ) :
-            $label = __( 'Make my donation anonymous', 'shelter-donations' );
+            $label = __( 'Make my donation anonymous', 'shelterkit-donations' );
             require $partials . '/anonymous-toggle.php';
         endif;
         ?>
@@ -141,7 +147,7 @@ $partials = dirname( __DIR__ ) . '/shared/partials';
         <!-- Summary & Submit -->
         <div class="sd-form-section sd-summary-section">
             <div class="sd-donation-summary">
-                <span class="sd-summary-label"><?php esc_html_e( 'Your Gift:', 'shelter-donations' ); ?></span>
+                <span class="sd-summary-label"><?php esc_html_e( 'Your Gift:', 'shelterkit-donations' ); ?></span>
                 <span class="sd-summary-amount" data-wp-text="callbacks.getDisplayAmount">
                     $<?php echo number_format( (int) $default_amount ); ?>
                 </span>
@@ -155,7 +161,7 @@ $partials = dirname( __DIR__ ) . '/shared/partials';
                     <?php echo esc_html( $submit_text ); ?>
                 </span>
                 <span class="sd-button-loading" data-wp-bind--hidden="!state.forms['<?php echo esc_attr( $form_id ); ?>'].isProcessing">
-                    <span class="sd-spinner-small"></span> <?php esc_html_e( 'Adding...', 'shelter-donations' ); ?>
+                    <span class="sd-spinner-small"></span> <?php esc_html_e( 'Adding...', 'shelterkit-donations' ); ?>
                 </span>
             </button>
 
@@ -165,7 +171,7 @@ $partials = dirname( __DIR__ ) . '/shared/partials';
 
     <?php
     if ( $show_secure ) :
-        $label = __( 'Secure donation powered by WooCommerce', 'shelter-donations' );
+        $label = __( 'Secure donation powered by WooCommerce', 'shelterkit-donations' );
         require $partials . '/trust-badge.php';
     endif;
     ?>

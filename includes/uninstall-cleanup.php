@@ -55,7 +55,7 @@ function starter_shelter_purge_site_data(): void {
     global $wpdb;
 
     // 1. CPT posts + their meta and term relationships. The post_type strings
-    //    work even though the CPTs aren't registered at uninstall time.
+    // work even though the CPTs aren't registered at uninstall time.
     $ids = $wpdb->get_col(
         "SELECT ID FROM {$wpdb->posts}
          WHERE post_type IN ('sd_donation','sd_membership','sd_memorial','sd_donor')"
@@ -65,21 +65,21 @@ function starter_shelter_purge_site_data(): void {
     }
 
     // 2. Taxonomy terms (taxonomies aren't registered at uninstall, so operate
-    //    on the tables directly).
+    // on the tables directly).
     foreach ( [ 'sd_campaign', 'sd_memorial_year', 'sd_donation_allocation' ] as $taxonomy ) {
         starter_shelter_delete_taxonomy_terms( $taxonomy );
     }
 
     // 3. Activity-log table. Guarded by a (non-DDL) existence check so we don't
-    //    issue a DROP — which implicitly commits — when there's nothing to drop.
+    // issue a DROP — which implicitly commits — when there's nothing to drop.
     $table = $wpdb->prefix . 'sd_activity_log';
     if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) === $table ) {
         $wpdb->query( "DROP TABLE `{$table}`" ); // phpcs:ignore WordPress.DB.PreparedSQL
     }
 
     // 4. Options: the settings blob plus every sd_-prefixed option (cached
-    //    config, product-id pointers, sync bookkeeping). `\_` escapes the LIKE
-    //    wildcard to match a literal underscore.
+    // config, product-id pointers, sync bookkeeping). `\_` escapes the LIKE
+    // wildcard to match a literal underscore.
     $wpdb->query(
         "DELETE FROM {$wpdb->options}
          WHERE option_name = 'starter_shelter_options' OR option_name LIKE 'sd\\_%'"

@@ -159,7 +159,7 @@ function get_donor_display_name( int $donor_id, ?bool $is_anonymous = null ): st
  */
 function get_memorial_donor_name( bool $is_anonymous, string $donor_display_name, int $donor_id ): string {
     if ( $is_anonymous ) {
-        return __( 'Anonymous Donor', 'shelter-donations' );
+        return __( 'Anonymous Donor', 'shelterkit-donations' );
     }
 
     if ( ! empty( $donor_display_name ) ) {
@@ -171,7 +171,7 @@ function get_memorial_donor_name( bool $is_anonymous, string $donor_display_name
     // Never return empty — use a friendly fallback.
     return ! empty( $name ) && 'Anonymous' !== $name
         ? $name
-        : __( 'A Friend', 'shelter-donations' );
+        : __( 'A Friend', 'shelterkit-donations' );
 }
 
 /**
@@ -403,8 +403,8 @@ function get_attachment_url( int $attachment_id, string $size = 'full' ): string
  */
 function get_memorial_type_label( string $type ): string {
     return match ( normalize_memorial_type( $type ) ) {
-        'pet'   => __( 'Pet', 'shelter-donations' ),
-        default => __( 'Person', 'shelter-donations' ),
+        'pet'   => __( 'Pet', 'shelterkit-donations' ),
+        default => __( 'Person', 'shelterkit-donations' ),
     };
 }
 
@@ -459,8 +459,8 @@ function normalize_dedication_type( string $raw ): string {
  */
 function get_dedication_type_label( string $type ): string {
     return match ( normalize_dedication_type( $type ) ) {
-        'honor' => __( 'In Honor Of', 'shelter-donations' ),
-        default => __( 'In Memory Of', 'shelter-donations' ),
+        'honor' => __( 'In Honor Of', 'shelterkit-donations' ),
+        default => __( 'In Memory Of', 'shelterkit-donations' ),
     };
 }
 
@@ -577,7 +577,7 @@ function get_date_range_for_period(
         ],
         'custom' => [
             'start' => validate_ymd_or_null( $date_from ) ?? "$year-01-01",
-            'end'   => validate_ymd_or_null( $date_to )   ?? wp_date( 'Y-m-d' ),
+            'end'   => validate_ymd_or_null( $date_to ) ?? wp_date( 'Y-m-d' ),
         ],
         'all_time' => [
             'start' => '2000-01-01',
@@ -680,7 +680,7 @@ function normalize_tier( string $tier ): string {
  */
 function get_or_create_donor( string $email, string $name = '', array $extra_meta = [] ) {
     if ( empty( $email ) || ! is_email( $email ) ) {
-        return new \WP_Error( 'invalid_email', __( 'A valid email address is required.', 'shelter-donations' ) );
+        return new \WP_Error( 'invalid_email', __( 'A valid email address is required.', 'shelterkit-donations' ) );
     }
 
     $email = sanitize_email( $email );
@@ -701,7 +701,7 @@ function get_or_create_donor( string $email, string $name = '', array $extra_met
 
     if ( ! empty( $existing ) ) {
         $donor_id = $existing[0];
-        
+
         // Ensure display_name is set (might be missing on older records).
         $current_display_name = get_post_meta( $donor_id, '_sd_display_name', true );
         if ( empty( $current_display_name ) && ! empty( $name ) ) {
@@ -711,7 +711,7 @@ function get_or_create_donor( string $email, string $name = '', array $extra_met
                 \Starter_Shelter\Admin\Shared\Donor_Lookup::sanitize_display_name( $name )
             );
         }
-        
+
         return $donor_id;
     }
 
@@ -957,18 +957,18 @@ function process_memorial_save( int $memorial_id, array $context = [] ): void {
  */
 function get_allocation_label( string $allocation ): string {
     $allocations = Config::get_item( 'settings', 'allocations', [] );
-    
+
     if ( isset( $allocations[ $allocation ] ) ) {
         return $allocations[ $allocation ];
     }
 
     // Default labels.
     return match ( $allocation ) {
-        'general-fund'      => __( 'General Fund', 'shelter-donations' ),
-        'medical-care'      => __( 'Medical Care', 'shelter-donations' ),
-        'food-supplies'     => __( 'Food & Supplies', 'shelter-donations' ),
-        'facility'          => __( 'Facility Improvements', 'shelter-donations' ),
-        'rescue-operations' => __( 'Rescue Operations', 'shelter-donations' ),
+        'general-fund'      => __( 'General Fund', 'shelterkit-donations' ),
+        'medical-care'      => __( 'Medical Care', 'shelterkit-donations' ),
+        'food-supplies'     => __( 'Food & Supplies', 'shelterkit-donations' ),
+        'facility'          => __( 'Facility Improvements', 'shelterkit-donations' ),
+        'rescue-operations' => __( 'Rescue Operations', 'shelterkit-donations' ),
         default             => ucwords( str_replace( [ '-', '_' ], ' ', $allocation ) ),
     };
 }
@@ -990,7 +990,9 @@ function get_allocation_label( string $allocation ): string {
  * @return int Validated term ID, or 0.
  */
 function resolve_campaign_id_from_request(): int {
+    // phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- read-only: resolves a campaign id from the query string to scope a public listing. Nothing is written, so a nonce would add nothing, and the value is cast to int.
     $raw = $_GET['campaign'] ?? '';
+    // phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
     if ( '' === $raw ) {
         return 0;
     }
@@ -1089,4 +1091,28 @@ function fputcsv_safe( $handle, array $row ): void {
     // relying on fputcsv()'s default $escape, and routing every export through
     // this wrapper fixes that everywhere at once. "\\" preserves prior output.
     \fputcsv( $handle, array_map( __NAMESPACE__ . '\\esc_csv_field', $row ), ',', '"', '\\' );
+}
+
+/**
+ * The shelter's registration number for a receipt.
+ *
+ * Reads the shared ShelterKit profile, falling back to this plugin's own
+ * settings field for installs that filled that in before the profile existed.
+ * Until 3.0.0 these templates read a `starter_shelter_ein` option that nothing
+ * ever wrote, so every emailed annual statement printed the literal
+ * "[EIN Number]" while the admin-printed receipt showed the real value.
+ *
+ * @since 3.0.0
+ *
+ * @return string Tax ID, or '' when the shelter has not recorded one.
+ */
+function starter_shelter_tax_id(): string {
+    if ( class_exists( 'ShelterKit_Profile' ) ) {
+        $from_profile = \ShelterKit_Profile::get( 'tax_id' );
+        if ( '' !== $from_profile ) {
+            return $from_profile;
+        }
+    }
+
+    return (string) \Starter_Shelter\Admin\Settings::get( 'org_ein', '' );
 }

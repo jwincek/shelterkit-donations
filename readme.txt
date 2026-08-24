@@ -1,9 +1,9 @@
-=== Shelter Donations ===
+=== ShelterKit Donations ===
 Contributors: jeromewincek
 Tags: donations, memberships, memorials, animal-shelter, nonprofit
 Requires at least: 6.9
-Tested up to: 7.0
-Stable tag: 2.0.1
+Tested up to: 7.1
+Stable tag: 3.0.0
 Requires PHP: 8.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -12,7 +12,7 @@ Donations, memberships, and memorials for animal shelters, built on WooCommerce 
 
 == Description ==
 
-Shelter Donations gives an animal shelter (or any small nonprofit with similar needs) a complete contribution system on top of the WooCommerce checkout it may already use:
+ShelterKit Donations gives an animal shelter (or any small nonprofit with similar needs) a complete contribution system on top of the WooCommerce checkout it may already use:
 
 * **Donations** — allocation-based giving tiers (general fund, medical fund, etc.) plus "In Memoriam" tribute donations, all processed through standard WooCommerce checkout, so every payment gateway you already have keeps working.
 * **Memberships** — tiered annual memberships for individuals and businesses, with renewal reminders, self-service auto-renew and cancellation, and an opt-out public recognition wall. Business members can submit a logo (admin-moderated) and appear in a rotating showcase.
@@ -29,9 +29,9 @@ Twelve blocks, all server-rendered with no build step: Donation Form, Membership
 
 The plugin requires WordPress 6.9 because its operations are registered through the Abilities API with JSON Schema validation — every create/list/report operation is a discrete, schema-checked ability, which is also what makes the plugin's data layer scriptable and testable. It declares WooCommerce HPOS compatibility and honors donor anonymity everywhere names could appear.
 
-= Part of the Shelter plugin family =
+= Part of ShelterKit =
 
-Shelter Donations belongs to a family of shelter-management plugins (alongside Shelter Pet Sync and Shelter Events Wrapper). The family was originally built for and battle-tested on [vcpahumane.org](https://vcpahumane.org), the Venango County Humane Society — and is designed so any shelter can use it.
+ShelterKit is a family of plugins for animal shelters. **ShelterKit Pets** puts your adoptable animals on your own site; **ShelterKit Donations** handles contributions, memberships and memorials; a companion plugin covers events. Each one works on its own, and they share a single "Shelter Details" screen — your shelter's name, address, contact details and tax ID are entered once and used by whichever of them is installed. The family was originally built for and battle-tested on [vcpahumane.org](https://vcpahumane.org), the Venango County Humane Society, and is designed so any shelter can use it.
 
 = Privacy =
 
@@ -40,8 +40,8 @@ Donor data lives in your WordPress database as private custom post types; nothin
 == Installation ==
 
 1. Install and activate **WooCommerce** (9.0 or newer) — Shelter Donations processes contributions through WooCommerce checkout.
-2. Install and activate **Shelter Donations**. On activation it creates four WooCommerce products: General Donations, In Memoriam Donations, Individual Memberships, and Business Memberships.
-3. Visit **Shelter Donations → Settings** to configure allocations, membership tiers, and donor levels.
+2. Install and activate **ShelterKit Donations**. On activation it creates four WooCommerce products: General Donations, In Memoriam Donations, Individual Memberships, and Business Memberships.
+3. Visit **ShelterKit Donations → Settings** to configure allocations, membership tiers, and donor levels.
 4. Add the Donation Form, Membership Form, or Memorial Form block (or the all-in-one Contribution Tabs block) to a page.
 
 == Frequently Asked Questions ==
@@ -66,7 +66,25 @@ Everything is stored locally as private custom post types (donations, donors, me
 
 No — uninstall preserves all data by default. Deletion is an explicit opt-in, and the admin tools include a full-backup CSV ZIP export you can take first.
 
+== Screenshots ==
+
+1. The reports dashboard — donations, memberships and memorials for a chosen period, filterable by campaign, with revenue broken out by tier.
+2. The donation form on the front end. Givers choose an amount and an allocation, and check out through the WooCommerce checkout the site already uses.
+3. The memorial wall. Visitors search and filter tributes, light a candle on one, and open a full memorial page for any of them.
+4. The members wall, showing individual and business members at each tier. Members opt out of appearing here from their own account.
+5. Settings — allocations, membership tiers and donor levels are configured here rather than hard-coded, so the plugin fits an organisation other than the one it was built for.
+6. Campaigns are time-boxed drives with a goal. Progress is live, and every report can be narrowed to one campaign.
+7. Business member logos arrive with the membership and wait here for approval before they appear anywhere public.
+8. CSV import and export, plus a full-backup ZIP to take before uninstalling.
+
 == Changelog ==
+
+= 3.0.0 =
+* Renamed to **ShelterKit Donations**, joining ShelterKit Pets in the ShelterKit family. Your data is unaffected — donations, donors, memberships, memorials, settings and every placed block carry over untouched.
+* New shared **Shelter Details** screen holding your shelter's name, address, contact details and tax ID. Enter them once; every ShelterKit plugin you install reads the same record.
+* Fixed: the emailed annual contribution statement printed the literal text "[EIN Number]" instead of your tax ID. It read a setting that nothing ever saved, so no configuration could correct it. The printed receipt was unaffected, which is why the two disagreed.
+* Fixed: the annual statement's letterhead took its address from your WooCommerce store settings — the address goods ship from, which matches the shelter only by coincidence. It now uses the Shelter Details address, falling back to the store address when that is blank.
+* A statement for a shelter with no tax ID recorded now omits the line entirely rather than printing a placeholder.
 
 = 2.0.1 =
 * Fixed a WordPress 6.7+ "translation loading triggered too early" notice on admin pages: meta-box configuration (which translates field labels) is now built lazily after the `init` action instead of at `plugins_loaded`.
@@ -82,9 +100,12 @@ No — uninstall preserves all data by default. Deletion is an explicit opt-in, 
 * New Members Wall and Business Member Slideshow blocks; memorial Dedication filter.
 * Full-backup CSV ZIP export, uninstall.php with preserve-by-default retention, HPOS compatibility declaration.
 
-Full changelog: https://github.com/jwincek/shelter-donations/blob/main/CHANGELOG.md
+Full changelog: https://github.com/jwincek/shelterkit-donations/blob/main/CHANGELOG.md
 
 == Upgrade Notice ==
+
+= 3.0.0 =
+Renamed to ShelterKit Donations. Your data carries over untouched and placed blocks keep working. Fixes an emailed annual statement that printed "[EIN Number]" in place of your tax ID — re-enter it under Shelter Details after upgrading. Existing installs: follow migration-scripts/MIGRATION-3.0.0.md.
 
 = 2.0.0 =
 Breaking rename release (folder, main file, text domain, block namespace). Existing pre-2.0.0 installs must follow the migration guide in the GitHub repository; fresh installs are unaffected.

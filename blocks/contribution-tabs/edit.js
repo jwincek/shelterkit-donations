@@ -34,11 +34,11 @@
 
 		return el( Fragment, {},
 			el( InspectorControls, {},
-				el( PanelBody, { title: __( 'Tab Settings', 'shelter-donations' ), initialOpen: true },
+				el( PanelBody, { title: __( 'Tab Settings', 'shelterkit-donations' ), initialOpen: true },
 					tabLabels.map( function( label, i ) {
 						return el( TextControl, {
 							key: i,
-							label: __( 'Tab', 'shelter-donations' ) + ' ' + ( i + 1 ) + ' ' + __( 'Label', 'shelter-donations' ),
+							label: __( 'Tab', 'shelterkit-donations' ) + ' ' + ( i + 1 ) + ' ' + __( 'Label', 'shelterkit-donations' ),
 							value: label,
 							onChange: function( value ) {
 								var newLabels = tabLabels.slice();
@@ -49,7 +49,7 @@
 						} );
 					} ),
 					el( SelectControl, {
-						label: __( 'Default Tab', 'shelter-donations' ),
+						label: __( 'Default Tab', 'shelterkit-donations' ),
 						value: String( attributes.defaultTab || 0 ),
 						options: tabLabels.map( function( label, i ) {
 							return { value: String( i ), label: label };

@@ -27,12 +27,18 @@ namespace Starter_Shelter\Admin;
 use Starter_Shelter\Core\{ Config, Entity_Hydrator };
 use Starter_Shelter\Helpers;
 
+/**
+ * Admin screen that scans stored entities for missing or inconsistent meta
+ * and offers batched backfills.
+ *
+ * @since 2.0.0
+ */
 class Data_Integrity {
 
 	/**
 	 * Page slug.
 	 */
-	private const SLUG = 'shelter-donations-data-tools';
+	private const SLUG = 'shelterkit-donations-data-tools';
 
 	/**
 	 * Nonce action.
@@ -71,8 +77,8 @@ class Data_Integrity {
 	public static function add_menu_page(): void {
 		$hook = add_submenu_page(
 			Menu::MENU_SLUG,
-			__( 'Data Tools', 'shelter-donations' ),
-			__( 'Data Tools', 'shelter-donations' ),
+			__( 'Data Tools', 'shelterkit-donations' ),
+			__( 'Data Tools', 'shelterkit-donations' ),
 			'manage_options',
 			self::SLUG,
 			[ self::class, 'render_page' ]
@@ -99,15 +105,15 @@ class Data_Integrity {
 			'batchSize'  => self::BATCH_SIZE,
 			'entityTypes' => self::ENTITY_TYPES,
 			'i18n'       => [
-				'scanning'        => __( 'Scanning…', 'shelter-donations' ),
-				'backfilling'     => __( 'Backfilling…', 'shelter-donations' ),
-				'purging'         => __( 'Deleting…', 'shelter-donations' ),
-				'recalculating'   => __( 'Recalculating…', 'shelter-donations' ),
-				'complete'        => __( 'Complete!', 'shelter-donations' ),
-				'confirmPurge'    => __( 'Type the post type slug to confirm:', 'shelter-donations' ),
+				'scanning'        => __( 'Scanning…', 'shelterkit-donations' ),
+				'backfilling'     => __( 'Backfilling…', 'shelterkit-donations' ),
+				'purging'         => __( 'Deleting…', 'shelterkit-donations' ),
+				'recalculating'   => __( 'Recalculating…', 'shelterkit-donations' ),
+				'complete'        => __( 'Complete!', 'shelterkit-donations' ),
+				'confirmPurge'    => __( 'Type the post type slug to confirm:', 'shelterkit-donations' ),
 				/* translators: %s: record type label. */
-				'purgeWarning'    => __( 'This will permanently delete ALL %s records. This cannot be undone.', 'shelter-donations' ),
-				'noIssues'        => __( 'All records look good — no missing fields found.', 'shelter-donations' ),
+				'purgeWarning'    => __( 'This will permanently delete ALL %s records. This cannot be undone.', 'shelterkit-donations' ),
+				'noIssues'        => __( 'All records look good — no missing fields found.', 'shelterkit-donations' ),
 			],
 		] );
 	}
@@ -122,12 +128,12 @@ class Data_Integrity {
 	public static function render_page(): void {
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'Data Tools', 'shelter-donations' ); ?></h1>
+			<h1><?php esc_html_e( 'Data Tools', 'shelterkit-donations' ); ?></h1>
 
 			<nav class="nav-tab-wrapper" id="sd-data-tools-tabs">
-				<a href="#backfill" class="nav-tab nav-tab-active"><?php esc_html_e( 'Backfill &amp; Repair', 'shelter-donations' ); ?></a>
-				<a href="#purge" class="nav-tab"><?php esc_html_e( 'Purge Records', 'shelter-donations' ); ?></a>
-				<a href="#recalc" class="nav-tab"><?php esc_html_e( 'Recalculate', 'shelter-donations' ); ?></a>
+				<a href="#backfill" class="nav-tab nav-tab-active"><?php esc_html_e( 'Backfill &amp; Repair', 'shelterkit-donations' ); ?></a>
+				<a href="#purge" class="nav-tab"><?php esc_html_e( 'Purge Records', 'shelterkit-donations' ); ?></a>
+				<a href="#recalc" class="nav-tab"><?php esc_html_e( 'Recalculate', 'shelterkit-donations' ); ?></a>
 			</nav>
 
 			<?php self::render_backfill_tab(); ?>
@@ -164,17 +170,19 @@ class Data_Integrity {
 	private static function render_backfill_tab(): void {
 		?>
 		<div id="tab-backfill" class="sd-tool-section active">
-			<h2><?php esc_html_e( 'Backfill Missing Fields', 'shelter-donations' ); ?></h2>
+			<h2><?php esc_html_e( 'Backfill Missing Fields', 'shelterkit-donations' ); ?></h2>
 			<p class="description">
-				<?php esc_html_e(
+				<?php
+                esc_html_e(
 					'Scans all records and reports missing or empty meta fields based on the entity schema. You can then backfill defaults, denormalized fields, and taxonomy terms in batches.',
-					'shelter-donations'
-				); ?>
+					'shelterkit-donations'
+				);
+                ?>
 			</p>
 
 			<p>
 				<button type="button" id="sd-scan-btn" class="button button-primary">
-					<?php esc_html_e( 'Scan All Records', 'shelter-donations' ); ?>
+					<?php esc_html_e( 'Scan All Records', 'shelterkit-donations' ); ?>
 				</button>
 			</p>
 
@@ -182,10 +190,10 @@ class Data_Integrity {
 
 			<p id="sd-backfill-actions" style="display:none;">
 				<button type="button" id="sd-backfill-btn" class="button button-primary">
-					<?php esc_html_e( 'Backfill All Issues', 'shelter-donations' ); ?>
+					<?php esc_html_e( 'Backfill All Issues', 'shelterkit-donations' ); ?>
 				</button>
 				<span class="description" style="margin-left: 10px;">
-					<?php esc_html_e( 'Fills in missing defaults, display names, and taxonomy terms. Does not overwrite existing values.', 'shelter-donations' ); ?>
+					<?php esc_html_e( 'Fills in missing defaults, display names, and taxonomy terms. Does not overwrite existing values.', 'shelterkit-donations' ); ?>
 				</span>
 			</p>
 		</div>
@@ -198,15 +206,17 @@ class Data_Integrity {
 	private static function render_purge_tab(): void {
 		?>
 		<div id="tab-purge" class="sd-tool-section">
-			<h2><?php esc_html_e( 'Purge Records', 'shelter-donations' ); ?></h2>
+			<h2><?php esc_html_e( 'Purge Records', 'shelterkit-donations' ); ?></h2>
 
 			<div class="notice notice-warning inline" style="margin: 10px 0 20px;">
 				<p>
-					<strong><?php esc_html_e( 'Warning:', 'shelter-donations' ); ?></strong>
-					<?php esc_html_e(
+					<strong><?php esc_html_e( 'Warning:', 'shelterkit-donations' ); ?></strong>
+					<?php
+                    esc_html_e(
 						'This permanently deletes posts and their meta. Use this to start fresh before re-running Legacy Order Sync or CSV imports. WooCommerce orders and donor records are not affected unless you explicitly choose them.',
-						'shelter-donations'
-					); ?>
+						'shelterkit-donations'
+					);
+                    ?>
 				</p>
 			</div>
 
@@ -221,11 +231,13 @@ class Data_Integrity {
 						<span class="sd-count-badge"><?php echo esc_html( number_format( $total ) ); ?></span>
 					</h3>
 					<p class="description">
-						<?php printf(
+						<?php
+                        printf(
 							/* translators: %s: post type slug */
-							esc_html__( 'Post type: %s', 'shelter-donations' ),
+							esc_html__( 'Post type: %s', 'shelterkit-donations' ),
 							'<code>' . esc_html( $post_type ) . '</code>'
-						); ?>
+						);
+                        ?>
 					</p>
 					<p style="margin-top: 10px;">
 						<button type="button"
@@ -235,11 +247,13 @@ class Data_Integrity {
 							data-count="<?php echo esc_attr( (string) $total ); ?>"
 							<?php echo $total === 0 ? 'disabled' : ''; ?>
 						>
-							<?php printf(
+							<?php
+                            printf(
 								/* translators: %s: record type label */
-								esc_html__( 'Delete All %s', 'shelter-donations' ),
+								esc_html__( 'Delete All %s', 'shelterkit-donations' ),
 								esc_html( $label )
-							); ?>
+							);
+                            ?>
 						</button>
 					</p>
 				</div>
@@ -247,16 +261,18 @@ class Data_Integrity {
 
 			<?php if ( function_exists( 'wc_get_orders' ) ) : ?>
 			<div class="sd-entity-card" style="border-left: 4px solid #2271b1; margin-top: 20px;">
-				<h3><?php esc_html_e( 'Reset Legacy Sync Flags', 'shelter-donations' ); ?></h3>
+				<h3><?php esc_html_e( 'Reset Legacy Sync Flags', 'shelterkit-donations' ); ?></h3>
 				<p class="description">
-					<?php esc_html_e(
+					<?php
+                    esc_html_e(
 						'Clears the "_sd_legacy_synced" flag on all WooCommerce orders so they can be re-processed by the Legacy Order Sync tool. Does NOT delete any records.',
-						'shelter-donations'
-					); ?>
+						'shelterkit-donations'
+					);
+                    ?>
 				</p>
 				<p style="margin-top: 10px;">
 					<button type="button" id="sd-reset-sync-flags" class="button">
-						<?php esc_html_e( 'Reset Sync Flags', 'shelter-donations' ); ?>
+						<?php esc_html_e( 'Reset Sync Flags', 'shelterkit-donations' ); ?>
 					</button>
 				</p>
 			</div>
@@ -271,16 +287,18 @@ class Data_Integrity {
 	private static function render_recalc_tab(): void {
 		?>
 		<div id="tab-recalc" class="sd-tool-section">
-			<h2><?php esc_html_e( 'Recalculate Donor Stats', 'shelter-donations' ); ?></h2>
+			<h2><?php esc_html_e( 'Recalculate Donor Stats', 'shelterkit-donations' ); ?></h2>
 			<p class="description">
-				<?php esc_html_e(
+				<?php
+                esc_html_e(
 					'Recalculates lifetime_giving for every donor by summing their donations, memorials, and memberships. Use this after bulk imports or if stats look incorrect.',
-					'shelter-donations'
-				); ?>
+					'shelterkit-donations'
+				);
+                ?>
 			</p>
 			<p>
 				<button type="button" id="sd-recalc-btn" class="button button-primary">
-					<?php esc_html_e( 'Recalculate All Donors', 'shelter-donations' ); ?>
+					<?php esc_html_e( 'Recalculate All Donors', 'shelterkit-donations' ); ?>
 				</button>
 			</p>
 		</div>
@@ -370,11 +388,13 @@ class Data_Integrity {
 		// Posts where meta key doesn't exist or value is empty string.
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$sql = $wpdb->prepare(
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the only interpolated parts are $wpdb table properties and a generated %d placeholder list; every user value is bound through $wpdb->prepare().
 			"SELECT COUNT(*) FROM {$wpdb->posts} p
 			 LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = %s
 			 WHERE p.ID IN ($id_placeholders)
 			 AND (pm.meta_value IS NULL OR pm.meta_value = '')",
 			array_merge( [ $meta_key ], $post_ids )
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		);
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
@@ -395,12 +415,14 @@ class Data_Integrity {
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$sql = $wpdb->prepare(
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the only interpolated parts are $wpdb table properties and a generated %d placeholder list; every user value is bound through $wpdb->prepare().
 			"SELECT p.ID FROM {$wpdb->posts} p
 			 LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = %s
 			 WHERE p.ID IN ($id_placeholders)
 			 AND (pm.meta_value IS NULL OR pm.meta_value = '')
 			 LIMIT %d",
 			array_merge( [ $meta_key ], $post_ids, [ $limit ] )
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		);
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
@@ -423,7 +445,7 @@ class Data_Integrity {
 			foreach ( $post_ids as $id ) {
 				$terms = get_the_terms( $id, 'sd_memorial_year' );
 				if ( ! $terms || is_wp_error( $terms ) ) {
-					$missing_year++;
+					++$missing_year;
 				}
 			}
 			if ( $missing_year > 0 ) {
@@ -491,7 +513,9 @@ class Data_Integrity {
 		}
 
 		$post_type = sanitize_key( $_POST['post_type'] ?? '' );
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- check_ajax_referer() and current_user_can() run at the top of this handler.
 		$offset    = max( 0, (int) ( $_POST['offset'] ?? 0 ) );
+		// phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 
 		if ( ! isset( self::ENTITY_TYPES[ $post_type ] ) ) {
 			wp_send_json_error( 'Invalid post type.' );
@@ -521,7 +545,7 @@ class Data_Integrity {
 		$fixed     = 0;
 
 		foreach ( $posts as $post ) {
-			$processed++;
+			++$processed;
 			$all_meta = get_post_meta( $post->ID );
 
 			// Fill missing meta fields with defaults.
@@ -536,7 +560,7 @@ class Data_Integrity {
 				$default = self::get_backfill_value( $post_type, $field_name, $field_config, $post, $all_meta );
 				if ( null !== $default && '' !== $default ) {
 					update_post_meta( $post->ID, $meta_key, $default );
-					$fixed++;
+					++$fixed;
 				}
 			}
 
@@ -640,11 +664,13 @@ class Data_Integrity {
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		return (int) $wpdb->get_var( $wpdb->prepare(
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the only interpolated parts are $wpdb table properties and a generated %d placeholder list; every user value is bound through $wpdb->prepare().
 			"SELECT COUNT(*) FROM {$wpdb->postmeta}
 			 WHERE post_id IN ($id_placeholders)
 			   AND meta_key = '_sd_donor_display_name'
 			   AND meta_value LIKE %s",
 			array_merge( $post_ids, [ '%@%.%' ] )
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		) );
 	}
 
@@ -679,11 +705,13 @@ class Data_Integrity {
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		return (int) $wpdb->get_var( $wpdb->prepare(
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the only interpolated parts are $wpdb table properties and a generated %d placeholder list; every user value is bound through $wpdb->prepare().
 			"SELECT COUNT(*) FROM {$wpdb->postmeta}
 			 WHERE post_id IN ($id_placeholders)
 			   AND meta_key = '_sd_display_name'
 			   AND meta_value LIKE %s",
 			array_merge( $post_ids, [ '%@%.%' ] )
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		) );
 	}
 
@@ -714,6 +742,7 @@ class Data_Integrity {
 		// Get memorials that have a non-zero order ID.
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$order_linked = $wpdb->get_results( $wpdb->prepare(
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the only interpolated parts are $wpdb table properties and a generated %d placeholder list; every user value is bound through $wpdb->prepare().
 			"SELECT p.ID as memorial_id, p.post_date, pm.meta_value as order_id
 			 FROM {$wpdb->posts} p
 			 INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
@@ -721,6 +750,7 @@ class Data_Integrity {
 			   AND pm.meta_key = '_sd_wc_order_id'
 			   AND pm.meta_value > 0",
 			$post_ids
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		) );
 
 		$mismatches = 0;
@@ -735,7 +765,7 @@ class Data_Integrity {
 			$memorial_date = $row->post_date;
 
 			if ( abs( strtotime( $memorial_date ) - strtotime( $order_date ) ) > 60 ) {
-				$mismatches++;
+				++$mismatches;
 			}
 		}
 
@@ -758,7 +788,7 @@ class Data_Integrity {
 				$year = wp_date( 'Y', strtotime( $date ) );
 				if ( $year ) {
 					wp_set_object_terms( $post->ID, [ $year ], 'sd_memorial_year' );
-					$fixed++;
+					++$fixed;
 				}
 			}
 
@@ -790,7 +820,7 @@ class Data_Integrity {
 
 					if ( ! empty( $corrected ) && ! self::looks_like_email( $corrected ) ) {
 						update_post_meta( $post->ID, '_sd_donor_display_name', $corrected );
-						$fixed++;
+						++$fixed;
 					}
 				}
 			}
@@ -813,7 +843,7 @@ class Data_Integrity {
 							'post_date_gmt' => get_gmt_from_date( $order_date ),
 						] );
 						update_post_meta( $post->ID, '_sd_donation_date', $order_date );
-						$fixed++;
+						++$fixed;
 					}
 				}
 			}
@@ -837,7 +867,7 @@ class Data_Integrity {
 
 				if ( ! empty( $name ) && ! self::looks_like_email( $name ) ) {
 					update_post_meta( $post->ID, '_sd_display_name', $name );
-					$fixed++;
+					++$fixed;
 
 					// Also fix post_title if it's the same email.
 					if ( self::looks_like_email( $post->post_title ) ) {
@@ -854,7 +884,7 @@ class Data_Integrity {
 				$hash = self::compute_backfill_hash( $post_type, $post->ID );
 				if ( $hash ) {
 					update_post_meta( $post->ID, \Starter_Shelter\Admin\Import_Export\CSV_Importer::HASH_META_KEY, $hash );
-					$fixed++;
+					++$fixed;
 				}
 			}
 		}
@@ -925,7 +955,7 @@ class Data_Integrity {
 
 		// Double-check confirmation matches.
 		if ( $confirmation !== $post_type ) {
-			wp_send_json_error( __( 'Confirmation does not match. Type the exact post type slug.', 'shelter-donations' ) );
+			wp_send_json_error( __( 'Confirmation does not match. Type the exact post type slug.', 'shelterkit-donations' ) );
 		}
 
 		// Get a batch of posts to delete.
@@ -939,7 +969,7 @@ class Data_Integrity {
 		$deleted = 0;
 		foreach ( $posts as $post_id ) {
 			wp_delete_post( $post_id, true ); // Force delete, skip trash.
-			$deleted++;
+			++$deleted;
 		}
 
 		// Check remaining.
@@ -973,7 +1003,9 @@ class Data_Integrity {
 			wp_send_json_error( 'Unauthorized', 403 );
 		}
 
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- check_ajax_referer() and current_user_can() run at the top of this handler.
 		$offset = max( 0, (int) ( $_POST['offset'] ?? 0 ) );
+		// phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 
 		$donors = get_posts( [
 			'post_type'      => 'sd_donor',
@@ -991,7 +1023,7 @@ class Data_Integrity {
 		$updated   = 0;
 
 		foreach ( $donors as $donor_id ) {
-			$processed++;
+			++$processed;
 
 			// Sum amounts across all three entity types in a single query.
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
@@ -1011,7 +1043,7 @@ class Data_Integrity {
 
 			if ( abs( $total - $current ) > 0.005 ) {
 				update_post_meta( $donor_id, '_sd_lifetime_giving', $total );
-				$updated++;
+				++$updated;
 			}
 		}
 

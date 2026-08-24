@@ -34,10 +34,10 @@ class Cart_Handler {
 
         // Modify cart item data.
         add_filter( 'woocommerce_add_cart_item_data', [ self::class, 'add_cart_item_data' ], 10, 3 );
-        
+
         // Display custom data in cart.
         add_filter( 'woocommerce_get_item_data', [ self::class, 'display_cart_item_data' ], 10, 2 );
-        
+
         // Save custom data to order.
         add_action( 'woocommerce_checkout_create_order_line_item', [ self::class, 'save_cart_item_to_order' ], 10, 4 );
 
@@ -57,10 +57,12 @@ class Cart_Handler {
         check_ajax_referer( 'sd_add_to_cart', 'nonce' );
 
         // Rate limit: 1 add-to-cart per 3 seconds per user/IP.
+        // phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- check_ajax_referer( 'sd_add_to_cart' ) runs on the first line; the flagged read is REMOTE_ADDR, hashed into a rate-limit key rather than rendered or stored as text.
         $rate_key = 'sd_cart_rate_' . ( get_current_user_id() ?: wp_hash( $_SERVER['REMOTE_ADDR'] ?? '' ) );
+        // phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
         if ( false !== get_transient( $rate_key ) ) {
             wp_send_json_error( [
-                'message' => __( 'Please wait a moment before adding another item.', 'shelter-donations' ),
+                'message' => __( 'Please wait a moment before adding another item.', 'shelterkit-donations' ),
             ] );
         }
         set_transient( $rate_key, 1, 3 );
@@ -70,7 +72,7 @@ class Cart_Handler {
 
         if ( $amount < 1 ) {
             wp_send_json_error( [
-                'message' => __( 'Please enter a valid amount.', 'shelter-donations' ),
+                'message' => __( 'Please enter a valid amount.', 'shelterkit-donations' ),
             ] );
         }
 
@@ -79,7 +81,7 @@ class Cart_Handler {
 
         if ( ! $product_id ) {
             wp_send_json_error( [
-                'message' => __( 'Donation product not configured. Please contact the site administrator.', 'shelter-donations' ),
+                'message' => __( 'Donation product not configured. Please contact the site administrator.', 'shelterkit-donations' ),
             ] );
         }
 
@@ -87,7 +89,7 @@ class Cart_Handler {
 
         if ( ! $product ) {
             wp_send_json_error( [
-                'message' => __( 'Product not found.', 'shelter-donations' ),
+                'message' => __( 'Product not found.', 'shelterkit-donations' ),
             ] );
         }
 
@@ -113,7 +115,7 @@ class Cart_Handler {
 
         if ( $product->is_type( 'variable' ) ) {
             $variation_data = self::find_variation( $product, $_POST, $product_type );
-            
+
             if ( is_wp_error( $variation_data ) ) {
                 wp_send_json_error( [
                     'message' => $variation_data->get_error_message(),
@@ -140,12 +142,12 @@ class Cart_Handler {
 
         if ( ! $cart_item_key ) {
             wp_send_json_error( [
-                'message' => __( 'Could not add to cart. Please try again.', 'shelter-donations' ),
+                'message' => __( 'Could not add to cart. Please try again.', 'shelterkit-donations' ),
             ] );
         }
 
         wp_send_json_success( [
-            'message'      => __( 'Added to cart successfully.', 'shelter-donations' ),
+            'message'      => __( 'Added to cart successfully.', 'shelterkit-donations' ),
             'cart_url'     => wc_get_cart_url(),
             'checkout_url' => wc_get_checkout_url(),
             'cart_count'   => WC()->cart->get_cart_contents_count(),
@@ -170,7 +172,7 @@ class Cart_Handler {
         ];
 
         $option_key = $option_keys[ $type ] ?? $option_keys['donation'];
-        
+
         return (int) get_option( $option_key, 0 );
     }
 
@@ -209,7 +211,7 @@ class Cart_Handler {
         // Dedication fields.
         if ( ! empty( $post_data['dedication_enabled'] ) ) {
             $data['sd_dedication_enabled'] = true;
-            
+
             if ( ! empty( $post_data['dedication_type'] ) ) {
                 $data['sd_dedication_type'] = sanitize_key( $post_data['dedication_type'] );
             }
@@ -291,9 +293,9 @@ class Cart_Handler {
         if ( ! $attribute_value ) {
             // If no specific attribute needed, get the first available variation.
             $variations = $product->get_available_variations();
-            
+
             if ( empty( $variations ) ) {
-                return new WP_Error( 'no_variations', __( 'No variations available for this product.', 'shelter-donations' ) );
+                return new WP_Error( 'no_variations', __( 'No variations available for this product.', 'shelterkit-donations' ) );
             }
 
             return [
@@ -304,7 +306,7 @@ class Cart_Handler {
 
         // Find variation matching the attribute.
         $data_store = \WC_Data_Store::load( 'product' );
-        
+
         // Try different attribute formats.
         $attribute_formats = [
             $attribute_key => $attribute_value,
@@ -315,7 +317,7 @@ class Cart_Handler {
 
         foreach ( $attribute_formats as $attr_name => $attr_value ) {
             $variation_id = $data_store->find_matching_product_variation( $product, [ $attr_name => $attr_value ] );
-            
+
             if ( $variation_id ) {
                 return [
                     'variation_id' => $variation_id,
@@ -330,8 +332,8 @@ class Cart_Handler {
                 // Normalize for comparison.
                 $normalized_attr = strtolower( trim( $attr_val ) );
                 $normalized_search = strtolower( trim( $attribute_value ) );
-                
-                if ( $normalized_attr === $normalized_search || 
+
+                if ( $normalized_attr === $normalized_search ||
                      sanitize_title( $attr_val ) === sanitize_title( $attribute_value ) ) {
                     return [
                         'variation_id' => $variation['variation_id'],
@@ -343,7 +345,7 @@ class Cart_Handler {
 
         // Fallback: use first variation.
         $variations = $product->get_available_variations();
-        
+
         if ( ! empty( $variations ) ) {
             return [
                 'variation_id' => $variations[0]['variation_id'],
@@ -351,7 +353,7 @@ class Cart_Handler {
             ];
         }
 
-        return new WP_Error( 'variation_not_found', __( 'Could not find a matching product variation.', 'shelter-donations' ) );
+        return new WP_Error( 'variation_not_found', __( 'Could not find a matching product variation.', 'shelterkit-donations' ) );
     }
 
     /**
@@ -386,14 +388,14 @@ class Cart_Handler {
         switch ( $product_type ) {
             case 'donation':
                 return sanitize_text_field( $post_data['allocation'] ?? 'general-fund' );
-            
+
             case 'membership':
             case 'business_membership':
                 return sanitize_text_field( $post_data['tier'] ?? '' );
-            
+
             case 'memorial':
                 return sanitize_text_field( $post_data['honoree_type'] ?? 'person' );
-            
+
             default:
                 return '';
         }
@@ -412,7 +414,7 @@ class Cart_Handler {
     public static function add_cart_item_data( array $cart_item_data, int $product_id, int $variation_id ): array {
         // This is called for standard add-to-cart; our AJAX handler adds data directly.
         // Handle URL parameter add-to-cart for backwards compatibility.
-        
+
         if ( isset( $_REQUEST['sd_allocation'] ) ) {
             $cart_item_data['sd_allocation'] = sanitize_key( $_REQUEST['sd_allocation'] );
         }
@@ -450,9 +452,9 @@ class Cart_Handler {
         if ( ! empty( $cart_item['sd_allocation'] ) ) {
             $allocations = \Starter_Shelter\Core\Config::get_item( 'settings', 'allocations', [] );
             $allocation_label = $allocations[ $cart_item['sd_allocation'] ] ?? ucwords( str_replace( '-', ' ', $cart_item['sd_allocation'] ) );
-            
+
             $item_data[] = [
-                'key'   => __( 'Allocation', 'shelter-donations' ),
+                'key'   => __( 'Allocation', 'shelterkit-donations' ),
                 'value' => $allocation_label,
             ];
         }
@@ -462,7 +464,7 @@ class Cart_Handler {
             $campaign = get_term( $cart_item['sd_campaign_id'], 'sd_campaign' );
             if ( $campaign && ! is_wp_error( $campaign ) ) {
                 $item_data[] = [
-                    'key'   => __( 'Campaign', 'shelter-donations' ),
+                    'key'   => __( 'Campaign', 'shelterkit-donations' ),
                     'value' => $campaign->name,
                 ];
             }
@@ -472,31 +474,31 @@ class Cart_Handler {
         if ( ! empty( $cart_item['sd_dedication_enabled'] ) ) {
             $dedication_type = $cart_item['sd_dedication_type'] ?? 'honor';
             $type_labels = [
-                'honor'  => __( 'In Honor Of', 'shelter-donations' ),
-                'memory' => __( 'In Memory Of', 'shelter-donations' ),
+                'honor'  => __( 'In Honor Of', 'shelterkit-donations' ),
+                'memory' => __( 'In Memory Of', 'shelterkit-donations' ),
             ];
 
             if ( ! empty( $cart_item['sd_honoree_name'] ) ) {
                 $item_data[] = [
-                    'key'   => $type_labels[ $dedication_type ] ?? __( 'Dedication', 'shelter-donations' ),
+                    'key'   => $type_labels[ $dedication_type ] ?? __( 'Dedication', 'shelterkit-donations' ),
                     'value' => $cart_item['sd_honoree_name'],
                 ];
             }
 
             if ( ! empty( $cart_item['sd_honoree_type'] ) ) {
                 $honoree_types = [
-                    'person' => __( 'Person', 'shelter-donations' ),
-                    'pet'    => __( 'Pet', 'shelter-donations' ),
+                    'person' => __( 'Person', 'shelterkit-donations' ),
+                    'pet'    => __( 'Pet', 'shelterkit-donations' ),
                 ];
                 $item_data[] = [
-                    'key'   => __( 'Honoree Type', 'shelter-donations' ),
+                    'key'   => __( 'Honoree Type', 'shelterkit-donations' ),
                     'value' => $honoree_types[ $cart_item['sd_honoree_type'] ] ?? $cart_item['sd_honoree_type'],
                 ];
             }
 
             if ( ! empty( $cart_item['sd_tribute_message'] ) ) {
                 $item_data[] = [
-                    'key'   => __( 'Tribute Message', 'shelter-donations' ),
+                    'key'   => __( 'Tribute Message', 'shelterkit-donations' ),
                     'value' => wp_trim_words( $cart_item['sd_tribute_message'], 20 ),
                 ];
             }
@@ -505,7 +507,7 @@ class Cart_Handler {
         // Donor name.
         if ( ! empty( $cart_item['sd_donor_name'] ) ) {
             $item_data[] = [
-                'key'   => __( 'Donor Name', 'shelter-donations' ),
+                'key'   => __( 'Donor Name', 'shelterkit-donations' ),
                 'value' => $cart_item['sd_donor_name'],
             ];
         }
@@ -513,15 +515,15 @@ class Cart_Handler {
         // Anonymous.
         if ( ! empty( $cart_item['sd_is_anonymous'] ) ) {
             $item_data[] = [
-                'key'   => __( 'Anonymous', 'shelter-donations' ),
-                'value' => __( 'Yes', 'shelter-donations' ),
+                'key'   => __( 'Anonymous', 'shelterkit-donations' ),
+                'value' => __( 'Yes', 'shelterkit-donations' ),
             ];
         }
 
         // Membership tier.
         if ( ! empty( $cart_item['sd_membership_tier'] ) ) {
             $item_data[] = [
-                'key'   => __( 'Membership Level', 'shelter-donations' ),
+                'key'   => __( 'Membership Level', 'shelterkit-donations' ),
                 'value' => ucwords( str_replace( '-', ' ', $cart_item['sd_membership_tier'] ) ),
             ];
         }
@@ -529,7 +531,7 @@ class Cart_Handler {
         // Business name.
         if ( ! empty( $cart_item['sd_business_name'] ) ) {
             $item_data[] = [
-                'key'   => __( 'Business Name', 'shelter-donations' ),
+                'key'   => __( 'Business Name', 'shelterkit-donations' ),
                 'value' => $cart_item['sd_business_name'],
             ];
         }
@@ -539,10 +541,10 @@ class Cart_Handler {
             $logo_url = wp_get_attachment_image_url( $cart_item['sd_logo_attachment_id'], 'thumbnail' );
             if ( $logo_url ) {
                 $item_data[] = [
-                    'key'     => __( 'Business Logo', 'shelter-donations' ),
-                    'value'   => __( 'Uploaded (pending review)', 'shelter-donations' ),
+                    'key'     => __( 'Business Logo', 'shelterkit-donations' ),
+                    'value'   => __( 'Uploaded (pending review)', 'shelterkit-donations' ),
                     'display' => '<img src="' . esc_url( $logo_url ) . '" alt="" style="max-width:60px;max-height:40px;vertical-align:middle;"> '
-                        . esc_html__( 'Pending review', 'shelter-donations' ),
+                        . esc_html__( 'Pending review', 'shelterkit-donations' ),
                 ];
             }
         }
@@ -639,8 +641,9 @@ class Cart_Handler {
         // and are a known XSS vector. Only raster formats are safe for
         // user-uploaded content served inline.
         $file_check = wp_check_filetype_and_ext(
+            // phpcs:disable WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- private, reachable only from ajax_add_to_cart(), which verifies the nonce and rate-limits first. $_FILES entries go to wp_check_filetype_and_ext() and media_handle_upload(), which is what validates an upload; sanitize_text_field() on a tmp path would corrupt it.
             $_FILES['business_logo']['tmp_name'] ?? '',
-            $_FILES['business_logo']['name']     ?? '',
+            $_FILES['business_logo']['name'] ?? '',
             [
                 'png'      => 'image/png',
                 'jpg|jpeg' => 'image/jpeg',
@@ -649,15 +652,16 @@ class Cart_Handler {
         if ( empty( $file_check['ext'] ) || empty( $file_check['type'] ) ) {
             return new \WP_Error(
                 'invalid_file_type',
-                __( 'Logo must be a PNG or JPG file.', 'shelter-donations' )
+                __( 'Logo must be a PNG or JPG file.', 'shelterkit-donations' )
             );
         }
 
         // Validate file size (2MB).
         if ( ( $_FILES['business_logo']['size'] ?? 0 ) > 2 * 1024 * 1024 ) {
+            // phpcs:enable WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
             return new \WP_Error(
                 'file_too_large',
-                __( 'Logo must be under 2MB.', 'shelter-donations' )
+                __( 'Logo must be under 2MB.', 'shelterkit-donations' )
             );
         }
 
@@ -667,7 +671,7 @@ class Cart_Handler {
         if ( is_wp_error( $attachment_id ) ) {
             return new \WP_Error(
                 'upload_failed',
-                __( 'Logo upload failed. Please try again.', 'shelter-donations' )
+                __( 'Logo upload failed. Please try again.', 'shelterkit-donations' )
             );
         }
 
@@ -682,17 +686,17 @@ class Cart_Handler {
      *
      * @since 2.0.0
      *
-     * @param bool $passed     Validation passed.
-     * @param int  $product_id Product ID.
-     * @param int  $quantity   Quantity.
-     * @param int  $variation_id Variation ID.
+     * @param bool  $passed     Validation passed.
+     * @param int   $product_id Product ID.
+     * @param int   $quantity   Quantity.
+     * @param int   $variation_id Variation ID.
      * @param array $variations Variations.
      * @return bool Validation result.
      */
     public static function validate_add_to_cart( $passed, $product_id, $quantity, $variation_id = 0, $variations = [] ): bool {
         // Check if this is a shelter product.
         $product = wc_get_product( $product_id );
-        
+
         if ( ! $product ) {
             return $passed;
         }
@@ -707,22 +711,22 @@ class Cart_Handler {
         // Validate custom amount if provided.
         if ( isset( $_REQUEST['sd_amount'] ) ) {
             $amount = floatval( $_REQUEST['sd_amount'] );
-            
+
             if ( $amount < 1 ) {
-                wc_add_notice( __( 'Please enter a valid donation amount.', 'shelter-donations' ), 'error' );
+                wc_add_notice( __( 'Please enter a valid donation amount.', 'shelterkit-donations' ), 'error' );
                 return false;
             }
 
             $max_amount = apply_filters( 'starter_shelter_max_donation_amount', 100000 );
-            
+
             if ( $amount > $max_amount ) {
-                wc_add_notice( 
-                    sprintf( 
+                wc_add_notice(
+                    sprintf(
                         /* translators: %s: maximum amount */
-                        __( 'The maximum donation amount is %s.', 'shelter-donations' ), 
-                        wc_price( $max_amount ) 
-                    ), 
-                    'error' 
+                        __( 'The maximum donation amount is %s.', 'shelterkit-donations' ),
+                        wc_price( $max_amount )
+                    ),
+                    'error'
                 );
                 return false;
             }

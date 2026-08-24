@@ -1,4 +1,4 @@
-# Shelter Donations
+# ShelterKit Donations
 
 Animal shelter donations, memberships, and memorials management for WordPress 6.9+ using the Abilities API, Block Bindings, and the Interactivity API.
 
@@ -10,7 +10,7 @@ Animal shelter donations, memberships, and memorials management for WordPress 6.
 
 ## Installation
 
-1. Clone or download this repository into `wp-content/plugins/shelter-donations/` (the directory name must match the `shelter-donations` slug/textdomain).
+1. Clone or download this repository into `wp-content/plugins/shelter-donations/` (the directory name must match the `shelterkit-donations` slug/textdomain).
 2. Run `composer install --no-dev` for production, or `composer install` to include dev dependencies (PHPCS, PHPCompatibility, PHPUnit polyfills).
 3. Activate the plugin in **Plugins → Installed Plugins**.
 4. Activate WooCommerce if not already active.
@@ -31,7 +31,7 @@ composer lint
 composer lint:fix
 
 # Run the config/code contract validator (13 checks; see "Validator" below)
-wp shelter-donations validate
+wp shelterkit-donations validate
 ```
 
 CI runs the syntax check on PHP 8.1/8.2/8.3 plus the PHPCS lint on every push to `main`.
@@ -80,7 +80,7 @@ The `$entity` ref convention lets ability/product/email/checkout-field schemas r
 
 ### Validator
 
-`wp shelter-donations validate` runs 13 static checks against the manifests + PHP source: ability references, manifest coverage of every layer, producer arg-counts vs declared `trigger_args`, ability return-shape vs `output_schema`, template field references through the entity walker, and more. The validator never executes plugin code — it's pure JSON + PHP-token analysis, fast enough to run on every change. Expect 0 findings on a healthy tree.
+`wp shelterkit-donations validate` runs 13 static checks against the manifests + PHP source: ability references, manifest coverage of every layer, producer arg-counts vs declared `trigger_args`, ability return-shape vs `output_schema`, template field references through the entity walker, and more. The validator never executes plugin code — it's pure JSON + PHP-token analysis, fast enough to run on every change. Expect 0 findings on a healthy tree.
 
 ### Key Directories
 
@@ -123,7 +123,7 @@ The plugin creates four variable products on activation, mapped from `config/pro
 1. Add a post type to `config/post-types.json` (and any taxonomies to `config/taxonomies.json`).
 2. Create `config/manifests/<post_type>.php` returning an array with `entity`, `abilities`, `products`, `meta_boxes`, `checkout_fields`, and `emails` sections as needed. Use `$entity` refs in ability/product schemas to reuse field declarations.
 3. Write the ability callbacks (typically ~50 lines per entity) in `includes/abilities/<entity>.php`.
-4. Run `wp shelter-donations validate` — fix any findings before considering the entity done.
+4. Run `wp shelterkit-donations validate` — fix any findings before considering the entity done.
 
 ### Adding a new email
 
@@ -132,6 +132,19 @@ The plugin creates four variable products on activation, mapped from `config/pro
 3. The producer (the code that does `do_action( 'starter_shelter_…' )`) must pass exactly the args declared in `trigger_args` — the validator's `check_producer_arg_counts` will catch mismatches.
 
 For cross-cutting patterns (autoloader, security, REST routes, block development, etc.) the family of plugins this one belongs to shares a common style guide. In a full development site checkout it lives at `PLUGIN-DEVELOPMENT-GUIDE.md` next to `wp-content/`.
+
+## Part of ShelterKit
+
+ShelterKit is a family of plugins for animal shelters — Pets, Donations, and
+Events. Each works standalone. They share the shelter's own identity (name,
+address, contact details, tax ID) through `includes/shelterkit/`, a small class
+copied into each plugin and loaded by highest version. See
+[RELEASING.md](RELEASING.md) for the rules that govern those copies.
+
+## Releasing
+
+See [RELEASING.md](RELEASING.md) for the WordPress.org release process, the
+gate scripts, and the hand-checked security-sniff baseline.
 
 ## License
 

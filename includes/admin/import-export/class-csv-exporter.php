@@ -15,10 +15,9 @@ declare( strict_types = 1 );
 
 namespace Starter_Shelter\Admin\Import_Export;
 
-use function Starter_Shelter\Helpers\fputcsv_safe;
-
 use Starter_Shelter\Core\{ Config, Entity_Hydrator };
 use Starter_Shelter\Helpers;
+use function Starter_Shelter\Helpers\fputcsv_safe;
 
 /**
  * Generic config-driven CSV exporter.
@@ -48,8 +47,8 @@ class CSV_Exporter {
 
 		if ( ! $type_config ) {
 			wp_die(
-				esc_html__( 'Invalid export type.', 'shelter-donations' ),
-				esc_html__( 'Export Error', 'shelter-donations' ),
+				esc_html__( 'Invalid export type.', 'shelterkit-donations' ),
+				esc_html__( 'Export Error', 'shelterkit-donations' ),
 				[ 'response' => 400 ]
 			);
 		}
@@ -127,7 +126,7 @@ class CSV_Exporter {
 	 */
 	public static function build_archive( array $entity_types = [], array $options = [] ) {
 		if ( ! class_exists( '\ZipArchive' ) ) {
-			return new \WP_Error( 'no_zip', __( 'The ZipArchive PHP extension is required to download a full backup.', 'shelter-donations' ) );
+			return new \WP_Error( 'no_zip', __( 'The ZipArchive PHP extension is required to download a full backup.', 'shelterkit-donations' ) );
 		}
 
 		if ( empty( $entity_types ) ) {
@@ -137,7 +136,7 @@ class CSV_Exporter {
 		$tmp = wp_tempnam( 'sd-backup.zip' );
 		$zip = new \ZipArchive();
 		if ( true !== $zip->open( $tmp, \ZipArchive::CREATE | \ZipArchive::OVERWRITE ) ) {
-			return new \WP_Error( 'zip_open', __( 'Could not create the backup archive.', 'shelter-donations' ) );
+			return new \WP_Error( 'zip_open', __( 'Could not create the backup archive.', 'shelterkit-donations' ) );
 		}
 
 		foreach ( $entity_types as $type ) {
@@ -397,9 +396,9 @@ class CSV_Exporter {
 	 *
 	 * @since 2.0.0
 	 *
-	 * @param int    $post_id The post ID for meta fallback lookups (0 to skip).
-	 * @param mixed  $value   The hydrated field value (may be array/object).
-	 * @param array  $col     Column definition with 'subfield' and optional 'meta_fallback'.
+	 * @param int   $post_id The post ID for meta fallback lookups (0 to skip).
+	 * @param mixed $value   The hydrated field value (may be array/object).
+	 * @param array $col     Column definition with 'subfield' and optional 'meta_fallback'.
 	 * @return string The extracted value.
 	 */
 	private static function extract_subfield( int $post_id, $value, array $col ): string {

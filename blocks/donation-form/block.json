@@ -4,11 +4,11 @@
     "name": "shelter-donations/donation-form",
     "version": "2.0.0",
     "title": "Donation Form",
-    "category": "shelter-donations",
+    "category": "shelterkit-donations",
     "icon": "money-alt",
     "description": "Interactive donation form with preset amounts, allocation selection, and WooCommerce checkout integration.",
     "keywords": ["donate", "giving", "form", "payment", "contribution", "charity"],
-    "textdomain": "shelter-donations",
+    "textdomain": "shelterkit-donations",
     "supports": {
         "html": false,
         "align": ["wide"],

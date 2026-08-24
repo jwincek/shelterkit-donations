@@ -170,7 +170,7 @@ class Donor_Lookup {
 	 *     @type string $import_source Source identifier for auditing (e.g. 'legacy_memorial_csv').
 	 *     @type array  $extra_meta    Additional meta to set on creation.
 	 * }
-	 * @param bool $create_if_missing Whether to create a new donor if not found.
+	 * @param bool  $create_if_missing Whether to create a new donor if not found.
 	 * @return array{ id: int, created: bool }|\WP_Error
 	 */
 	public static function find_or_create( array $data, bool $create_if_missing = true ): array|\WP_Error {
@@ -197,7 +197,7 @@ class Donor_Lookup {
 					'donor_not_found',
 					sprintf(
 						/* translators: %s: email address or name searched for */
-						__( 'Donor not found: %s', 'shelter-donations' ),
+						__( 'Donor not found: %s', 'shelterkit-donations' ),
 						$email
 					)
 				);
@@ -220,7 +220,7 @@ class Donor_Lookup {
 					'donor_not_found',
 					sprintf(
 						/* translators: %s: email address or name searched for */
-						__( 'Donor not found: %s', 'shelter-donations' ),
+						__( 'Donor not found: %s', 'shelterkit-donations' ),
 						$display_name
 					)
 				);
@@ -231,7 +231,7 @@ class Donor_Lookup {
 
 		return new \WP_Error(
 			'insufficient_data',
-			__( 'Either email or display_name is required to find or create a donor.', 'shelter-donations' )
+			__( 'Either email or display_name is required to find or create a donor.', 'shelterkit-donations' )
 		);
 	}
 
@@ -395,7 +395,7 @@ class Donor_Lookup {
 		if ( empty( $display_name ) ) {
 			return new \WP_Error(
 				'empty_name',
-				__( 'Donor display name is empty after sanitization.', 'shelter-donations' )
+				__( 'Donor display name is empty after sanitization.', 'shelterkit-donations' )
 			);
 		}
 
@@ -568,9 +568,9 @@ class Donor_Lookup {
 			// Turn "john.doe" or "john_doe" into "John Doe".
 			$local = str_replace( [ '.', '_', '-' ], ' ', $local );
 			$humanized = mb_convert_case( trim( $local ), MB_CASE_TITLE, 'UTF-8' );
-			return $humanized ?: __( 'Anonymous Donor', 'shelter-donations' );
+			return $humanized ?: __( 'Anonymous Donor', 'shelterkit-donations' );
 		}
 
-		return $fallback ?: __( 'Anonymous Donor', 'shelter-donations' );
+		return $fallback ?: __( 'Anonymous Donor', 'shelterkit-donations' );
 	}
 }

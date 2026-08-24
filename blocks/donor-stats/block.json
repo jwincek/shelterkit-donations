@@ -4,11 +4,11 @@
     "name": "shelter-donations/donor-stats",
     "version": "1.0.0",
     "title": "Donor Statistics",
-    "category": "shelter-donations",
+    "category": "shelterkit-donations",
     "icon": "chart-bar",
     "description": "Display donation statistics with real-time updates. Uses core blocks with block bindings.",
     "keywords": [ "stats", "statistics", "donations", "counter", "total" ],
-    "textdomain": "shelter-donations",
+    "textdomain": "shelterkit-donations",
     "supports": {
         "html": false,
         "align": [ "wide", "full" ],

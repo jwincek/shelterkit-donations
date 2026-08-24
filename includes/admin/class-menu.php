@@ -24,7 +24,7 @@ class Menu {
      * @since 1.0.0
      * @var string
      */
-    public const MENU_SLUG = 'shelter-donations';
+    public const MENU_SLUG = 'shelterkit-donations';
 
     /**
      * Initialize the admin menu.
@@ -50,8 +50,8 @@ class Menu {
      */
     public static function register_menu(): void {
         add_menu_page(
-            __( 'Shelter Donations', 'shelter-donations' ),
-            __( 'Shelter Donations', 'shelter-donations' ),
+            __( 'Shelter Donations', 'shelterkit-donations' ),
+            __( 'Shelter Donations', 'shelterkit-donations' ),
             'manage_options',
             self::MENU_SLUG,
             [ self::class, 'render_dashboard_page' ],
@@ -62,8 +62,8 @@ class Menu {
         // Add "Dashboard" as first submenu (replaces the duplicate parent link).
         add_submenu_page(
             self::MENU_SLUG,
-            __( 'Dashboard', 'shelter-donations' ),
-            __( 'Dashboard', 'shelter-donations' ),
+            __( 'Dashboard', 'shelterkit-donations' ),
+            __( 'Dashboard', 'shelterkit-donations' ),
             'manage_options',
             self::MENU_SLUG,
             [ self::class, 'render_dashboard_page' ]
@@ -78,7 +78,7 @@ class Menu {
     public static function render_dashboard_page(): void {
         // Get stats using the dashboard-stats ability.
         $ability = function_exists( 'wp_get_ability' ) ? wp_get_ability( 'shelter-reports/dashboard-stats' ) : null;
-        
+
         $stats = null;
         if ( $ability ) {
             $stats = $ability->execute( [ 'period' => 'month' ] );
@@ -89,7 +89,7 @@ class Menu {
 
         ?>
         <div class="wrap">
-            <h1><?php esc_html_e( 'Shelter Donations', 'shelter-donations' ); ?></h1>
+            <h1><?php esc_html_e( 'Shelter Donations', 'shelterkit-donations' ); ?></h1>
             
             <div class="sd-admin-dashboard">
                 <?php if ( $stats ) : ?>
@@ -97,16 +97,16 @@ class Menu {
                     
                     <div class="sd-dashboard-card" style="background: #fff; padding: 20px; border: 1px solid #c3c4c7; border-left: 4px solid #00a32a;">
                         <h3 style="margin: 0 0 10px; font-size: 14px; color: #646970;">
-                            <?php esc_html_e( 'Donations This Month', 'shelter-donations' ); ?>
+                            <?php esc_html_e( 'Donations This Month', 'shelterkit-donations' ); ?>
                         </h3>
                         <p style="margin: 0; font-size: 28px; font-weight: 600;">
                             <?php echo esc_html( '$' . number_format( $stats['donations']['total'] ?? 0, 2 ) ); ?>
                         </p>
                         <p style="margin: 5px 0 0; color: #646970;">
-                            <?php 
+                            <?php
                             printf(
                                 /* translators: %d: donation count */
-                                esc_html__( '%d donations', 'shelter-donations' ),
+                                esc_html__( '%d donations', 'shelterkit-donations' ),
                                 (int) ( $stats['donations']['count'] ?? 0 )
                             );
                             ?>
@@ -115,16 +115,16 @@ class Menu {
 
                     <div class="sd-dashboard-card" style="background: #fff; padding: 20px; border: 1px solid #c3c4c7; border-left: 4px solid #2271b1;">
                         <h3 style="margin: 0 0 10px; font-size: 14px; color: #646970;">
-                            <?php esc_html_e( 'Active Members', 'shelter-donations' ); ?>
+                            <?php esc_html_e( 'Active Members', 'shelterkit-donations' ); ?>
                         </h3>
                         <p style="margin: 0; font-size: 28px; font-weight: 600;">
                             <?php echo esc_html( number_format( $stats['memberships']['active'] ?? 0 ) ); ?>
                         </p>
                         <p style="margin: 5px 0 0; color: #646970;">
-                            <?php 
+                            <?php
                             printf(
                                 /* translators: %d: number of new records this month */
-                                esc_html__( '%d new this month', 'shelter-donations' ),
+                                esc_html__( '%d new this month', 'shelterkit-donations' ),
                                 (int) ( $stats['memberships']['new'] ?? 0 )
                             );
                             ?>
@@ -133,28 +133,28 @@ class Menu {
 
                     <div class="sd-dashboard-card" style="background: #fff; padding: 20px; border: 1px solid #c3c4c7; border-left: 4px solid <?php echo ( $stats['memberships']['expiring_soon'] ?? 0 ) > 0 ? '#dba617' : '#c3c4c7'; ?>;">
                         <h3 style="margin: 0 0 10px; font-size: 14px; color: #646970;">
-                            <?php esc_html_e( 'Expiring Soon', 'shelter-donations' ); ?>
+                            <?php esc_html_e( 'Expiring Soon', 'shelterkit-donations' ); ?>
                         </h3>
                         <p style="margin: 0; font-size: 28px; font-weight: 600;">
                             <?php echo esc_html( number_format( $stats['memberships']['expiring_soon'] ?? 0 ) ); ?>
                         </p>
                         <p style="margin: 5px 0 0; color: #646970;">
-                            <?php esc_html_e( 'within 30 days', 'shelter-donations' ); ?>
+                            <?php esc_html_e( 'within 30 days', 'shelterkit-donations' ); ?>
                         </p>
                     </div>
 
                     <div class="sd-dashboard-card" style="background: #fff; padding: 20px; border: 1px solid #c3c4c7; border-left: 4px solid #8c6db8;">
                         <h3 style="margin: 0 0 10px; font-size: 14px; color: #646970;">
-                            <?php esc_html_e( 'Total Donors', 'shelter-donations' ); ?>
+                            <?php esc_html_e( 'Total Donors', 'shelterkit-donations' ); ?>
                         </h3>
                         <p style="margin: 0; font-size: 28px; font-weight: 600;">
                             <?php echo esc_html( number_format( $stats['donors']['total'] ?? 0 ) ); ?>
                         </p>
                         <p style="margin: 5px 0 0; color: #646970;">
-                            <?php 
+                            <?php
                             printf(
                                 /* translators: %d: number of new records this month */
-                                esc_html__( '%d new this month', 'shelter-donations' ),
+                                esc_html__( '%d new this month', 'shelterkit-donations' ),
                                 (int) ( $stats['donors']['new'] ?? 0 )
                             );
                             ?>
@@ -163,23 +163,23 @@ class Menu {
 
                 </div>
                 <?php else : ?>
-                <p><?php esc_html_e( 'Welcome to Shelter Donations! Statistics will appear here once you start receiving donations.', 'shelter-donations' ); ?></p>
+                <p><?php esc_html_e( 'Welcome to Shelter Donations! Statistics will appear here once you start receiving donations.', 'shelterkit-donations' ); ?></p>
                 <?php endif; ?>
 
                 <div class="sd-quick-links" style="margin-top: 30px;">
-                    <h2><?php esc_html_e( 'Quick Links', 'shelter-donations' ); ?></h2>
+                    <h2><?php esc_html_e( 'Quick Links', 'shelterkit-donations' ); ?></h2>
                     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                         <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=sd_donation' ) ); ?>" class="button">
-                            <?php esc_html_e( 'View Donations', 'shelter-donations' ); ?>
+                            <?php esc_html_e( 'View Donations', 'shelterkit-donations' ); ?>
                         </a>
                         <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=sd_membership' ) ); ?>" class="button">
-                            <?php esc_html_e( 'View Memberships', 'shelter-donations' ); ?>
+                            <?php esc_html_e( 'View Memberships', 'shelterkit-donations' ); ?>
                         </a>
                         <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=sd_memorial' ) ); ?>" class="button">
-                            <?php esc_html_e( 'View Memorials', 'shelter-donations' ); ?>
+                            <?php esc_html_e( 'View Memorials', 'shelterkit-donations' ); ?>
                         </a>
-                        <a href="<?php echo esc_url( admin_url( 'admin.php?page=shelter-donations-reports' ) ); ?>" class="button button-primary">
-                            <?php esc_html_e( 'View Reports', 'shelter-donations' ); ?>
+                        <a href="<?php echo esc_url( admin_url( 'admin.php?page=shelterkit-donations-reports' ) ); ?>" class="button button-primary">
+                            <?php esc_html_e( 'View Reports', 'shelterkit-donations' ); ?>
                         </a>
                     </div>
                 </div>

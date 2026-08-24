@@ -11,26 +11,26 @@
 
         return el( Fragment, {},
             el( InspectorControls, {},
-                el( PanelBody, { title: __( 'Form Settings', 'shelter-donations' ), initialOpen: true },
+                el( PanelBody, { title: __( 'Form Settings', 'shelterkit-donations' ), initialOpen: true },
                     el( TextControl, {
-                        label: __( 'Title', 'shelter-donations' ),
+                        label: __( 'Title', 'shelterkit-donations' ),
                         value: attributes.title || '',
                         onChange: function( value ) { setAttributes( { title: value } ); },
                     } ),
                     el( TextControl, {
-                        label: __( 'Subtitle', 'shelter-donations' ),
+                        label: __( 'Subtitle', 'shelterkit-donations' ),
                         value: attributes.subtitle || '',
                         onChange: function( value ) { setAttributes( { subtitle: value } ); },
                     } ),
                     el( TextControl, {
-                        label: __( 'Submit Button Text', 'shelter-donations' ),
+                        label: __( 'Submit Button Text', 'shelterkit-donations' ),
                         value: attributes.submitButtonText || '',
                         onChange: function( value ) { setAttributes( { submitButtonText: value } ); },
                     } )
                 ),
-                el( PanelBody, { title: __( 'Amount Options', 'shelter-donations' ), initialOpen: false },
+                el( PanelBody, { title: __( 'Amount Options', 'shelterkit-donations' ), initialOpen: false },
                     el( TextControl, {
-                        label: __( 'Preset Amounts (comma-separated)', 'shelter-donations' ),
+                        label: __( 'Preset Amounts (comma-separated)', 'shelterkit-donations' ),
                         value: ( attributes.presetAmounts || [] ).join( ', ' ),
                         onChange: function( value ) {
                             var amounts = value.split( ',' ).map( function( n ) {
@@ -40,53 +40,53 @@
                         },
                     } ),
                     el( RangeControl, {
-                        label: __( 'Default Amount', 'shelter-donations' ),
+                        label: __( 'Default Amount', 'shelterkit-donations' ),
                         value: attributes.defaultAmount || 50,
                         onChange: function( value ) { setAttributes( { defaultAmount: value } ); },
                         min: 1,
                         max: 1000,
                     } ),
                     el( RangeControl, {
-                        label: __( 'Minimum Amount', 'shelter-donations' ),
+                        label: __( 'Minimum Amount', 'shelterkit-donations' ),
                         value: attributes.minAmount || 10,
                         onChange: function( value ) { setAttributes( { minAmount: value } ); },
                         min: 1,
                         max: 100,
                     } )
                 ),
-                el( PanelBody, { title: __( 'Default Values', 'shelter-donations' ), initialOpen: false },
+                el( PanelBody, { title: __( 'Default Values', 'shelterkit-donations' ), initialOpen: false },
                     el( SelectControl, {
-                        label: __( 'Default Dedication Type', 'shelter-donations' ),
+                        label: __( 'Default Dedication Type', 'shelterkit-donations' ),
                         value: attributes.defaultDedicationType || 'memory',
                         options: [
-                            { value: 'memory', label: __( 'In Memory Of', 'shelter-donations' ) },
-                            { value: 'honor', label: __( 'In Honor Of', 'shelter-donations' ) },
+                            { value: 'memory', label: __( 'In Memory Of', 'shelterkit-donations' ) },
+                            { value: 'honor', label: __( 'In Honor Of', 'shelterkit-donations' ) },
                         ],
                         onChange: function( value ) { setAttributes( { defaultDedicationType: value } ); },
                     } ),
                     el( SelectControl, {
-                        label: __( 'Default Honoree Type', 'shelter-donations' ),
+                        label: __( 'Default Honoree Type', 'shelterkit-donations' ),
                         value: attributes.defaultHonoreeType || 'person',
                         options: [
-                            { value: 'person', label: __( 'Person', 'shelter-donations' ) },
-                            { value: 'pet', label: __( 'Pet', 'shelter-donations' ) },
+                            { value: 'person', label: __( 'Person', 'shelterkit-donations' ) },
+                            { value: 'pet', label: __( 'Pet', 'shelterkit-donations' ) },
                         ],
                         onChange: function( value ) { setAttributes( { defaultHonoreeType: value } ); },
                     } )
                 ),
-                el( PanelBody, { title: __( 'Display Options', 'shelter-donations' ), initialOpen: false },
+                el( PanelBody, { title: __( 'Display Options', 'shelterkit-donations' ), initialOpen: false },
                     el( ToggleControl, {
-                        label: __( 'Show Anonymous Option', 'shelter-donations' ),
+                        label: __( 'Show Anonymous Option', 'shelterkit-donations' ),
                         checked: attributes.showAnonymous,
                         onChange: function( value ) { setAttributes( { showAnonymous: value } ); },
                     } ),
                     el( ToggleControl, {
-                        label: __( 'Show Family Notification', 'shelter-donations' ),
+                        label: __( 'Show Family Notification', 'shelterkit-donations' ),
                         checked: attributes.showFamilyNotification,
                         onChange: function( value ) { setAttributes( { showFamilyNotification: value } ); },
                     } ),
                     el( ToggleControl, {
-                        label: __( 'Show Send Card Option', 'shelter-donations' ),
+                        label: __( 'Show Send Card Option', 'shelterkit-donations' ),
                         checked: attributes.showSendCard,
                         onChange: function( value ) { setAttributes( { showSendCard: value } ); },
                     } )

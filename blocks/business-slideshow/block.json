@@ -4,11 +4,11 @@
     "name": "shelter-donations/business-slideshow",
     "version": "1.0.0",
     "title": "Business Member Slideshow",
-    "category": "shelter-donations",
+    "category": "shelterkit-donations",
     "icon": "slides",
     "description": "Rotating slideshow of active business members with approved logos.",
     "keywords": [ "business", "member", "logo", "slideshow", "sponsor", "carousel" ],
-    "textdomain": "shelter-donations",
+    "textdomain": "shelterkit-donations",
     "supports": {
         "html": false,
         "align": [ "wide", "full" ],

@@ -1,12 +1,27 @@
-# Files excluded from the distributed plugin build (`wp dist-archive`, and the
+# Files excluded from the distributed plugin build (bin/build-dist.sh, and the
 # WordPress.org deploy). Mirrors .gitattributes export-ignore. Runtime needs
 # none of these — the plugin autoloads its own classes and requires helpers
 # directly, so there is no Composer dependency to ship.
+#
+# bin/build-dist.sh enforces this list in both directions: it fails if anything
+# below reaches the build, and fails if a runtime file goes missing.
+
+# Source control and CI
 /.git
 /.github
 /.gitignore
 /.gitattributes
 /.distignore
+/.editorconfig
+/.wp-env.json
+
+# WordPress.org listing assets live beside trunk/ in SVN, never inside it.
+# Shipping them here would send banners and screenshots to every user and
+# still leave the listing page blank.
+/.wordpress-org
+/screenshots-draft
+
+# Development toolchain
 /tests
 /bin
 /node_modules
@@ -16,14 +31,29 @@
 /phpunit.xml.dist
 /phpunit-integration.xml.dist
 /phpunit-wc.xml.dist
-/phpcs.xml
 /phpcs.xml.dist
-/.editorconfig
-/.wp-env.json
 /.phpunit.cache
 /.phpunit.result.cache
-/AUDIT-admin-dashboard-reports.md
-/AUDIT-campaigns.md
-/AUDIT-pattern-sweep.md
-/AUDIT-wc-integration.md
+/.phpcs-cache
+/build
+
+# Developer documentation. WordPress.org renders readme.txt; these are for
+# people working on the repository. Glob rather than a list of names, so a
+# new audit note does not have to be remembered here.
+/README.md
+/CHANGELOG.md
+/RELEASING.md
+AUDIT-*.md
+
+# One-shot upgrade scripts, run from a checkout, never from an install.
 /migration-scripts
+
+# Superseded editor experiments, kept in the repository for reference but
+# never enqueued: each block registers its own edit.js via block.json, and
+# memorial-panel.js is the parked block-editor alternative to the classic
+# meta boxes (see the note in includes/blocks/register-editor.php).
+/assets/js/block-editor.js
+/assets/css/block-editor.css
+/assets/js/memorial-panel.js
+
+.DS_Store

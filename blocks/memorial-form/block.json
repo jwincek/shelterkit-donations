@@ -4,11 +4,11 @@
     "name": "shelter-donations/memorial-form",
     "version": "2.0.0",
     "title": "Memorial Tribute Form",
-    "category": "shelter-donations",
+    "category": "shelterkit-donations",
     "icon": "heart",
     "description": "Dedicated form for In Memory Of and In Honor Of tribute gifts with honoree details and family notification.",
     "keywords": ["memorial", "tribute", "honor", "memory", "dedication", "gift"],
-    "textdomain": "shelter-donations",
+    "textdomain": "shelterkit-donations",
     "supports": {
         "html": false,
         "align": ["wide"],

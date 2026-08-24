@@ -19,7 +19,7 @@
  *   uses a `$ref` to `schemas/notify-family.json`. The manifest
  *   passes the ref through; Config::resolve_refs resolves it after
  *   the manifest merge.
- * - `products.shelter-donations-in-memoriam.input_mapping.notify_family`
+ * - `products.shelterkit-donations-in-memoriam.input_mapping.notify_family`
  *   uses `source: composite` to combine the five flat meta keys into
  *   one structured value for the ability call. Mapping shape is a
  *   verbatim copy — Cart_Handler / Product_Mapper consume it natively.
@@ -435,7 +435,7 @@ return [
 	],
 
 	'products' => [
-		'shelter-donations-in-memoriam' => [
+		'shelterkit-donations-in-memoriam' => [
 			'ability'       => 'shelter-memorials/create',
 			'product_type'  => 'memorial',
 			'description'   => 'In memoriam donations',
@@ -688,7 +688,7 @@ return [
 			],
 			'entities'      => [
 				'memorial' => [ 'entity' => 'sd_memorial', 'id_from' => 'memorial_id' ],
-				'donor'    => [ 'entity' => 'sd_donor',    'id_from' => 'donor_id' ],
+				'donor'    => [ 'entity' => 'sd_donor', 'id_from' => 'donor_id' ],
 			],
 			'recipient_type' => 'donor',
 			'subject'        => 'Your memorial for {honoree_name} has been created',
@@ -711,7 +711,7 @@ return [
 			],
 			'entities'        => [
 				'memorial' => [ 'entity' => 'sd_memorial', 'id_from' => 'memorial_id' ],
-				'donor'    => [ 'entity' => 'sd_donor',    'id_from' => 'donor_id' ],
+				'donor'    => [ 'entity' => 'sd_donor', 'id_from' => 'donor_id' ],
 			],
 			'condition'       => 'memorial.notify_family.enabled',
 			'recipient_type'  => 'custom',

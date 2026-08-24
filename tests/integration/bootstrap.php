@@ -49,7 +49,7 @@ if ( ! function_exists( 'wc_get_account_endpoint_url' ) ) {
 
 // Load the plugin into the test WordPress instance.
 tests_add_filter( 'muplugins_loaded', static function (): void {
-    require dirname( __DIR__, 2 ) . '/shelter-donations.php';
+    require dirname( __DIR__, 2 ) . '/shelterkit-donations.php';
 } );
 
 require $_tests_dir . '/includes/bootstrap.php';

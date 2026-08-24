@@ -4,11 +4,11 @@
     "name": "shelter-donations/members-wall",
     "version": "1.0.0",
     "title": "Members Wall",
-    "category": "shelter-donations",
+    "category": "shelterkit-donations",
     "icon": "groups",
     "description": "Tiered recognition wall of active members who haven't opted out, grouped by membership level.",
     "keywords": [ "members", "supporters", "recognition", "wall", "tier", "donors" ],
-    "textdomain": "shelter-donations",
+    "textdomain": "shelterkit-donations",
     "supports": {
         "html": false,
         "align": [ "wide", "full" ],

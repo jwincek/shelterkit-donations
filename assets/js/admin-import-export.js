@@ -67,7 +67,7 @@
                             count.toLocaleString() 
                         ),
                         el( 'div', { style: { fontSize: '11px', color: '#757575', textTransform: 'uppercase' } }, 
-                            __( 'records', 'shelter-donations' ) 
+                            __( 'records', 'shelterkit-donations' ) 
                         )
                     )
                 )
@@ -95,7 +95,7 @@
                     disabled: count === 0 || isExporting,
                     isBusy: isExporting,
                     onClick: function() { onExport( selectedOption ); }
-                }, __( 'Export CSV', 'shelter-donations' ) )
+                }, __( 'Export CSV', 'shelterkit-donations' ) )
             )
         );
     }
@@ -139,7 +139,7 @@
                     variant: 'link',
                     isDestructive: true,
                     onClick: function() { onFileSelect( null ); }
-                }, __( 'Remove', 'shelter-donations' ) )
+                }, __( 'Remove', 'shelterkit-donations' ) )
             );
         }
 
@@ -152,7 +152,7 @@
             el( DropZone, { onFilesDrop: handleDrop } ),
             el( 'div', { style: { fontSize: '32px', marginBottom: '8px' } }, '📤' ),
             el( 'p', { style: { margin: '0 0 8px' } }, 
-                __( 'Drag and drop a CSV file here', 'shelter-donations' ) 
+                __( 'Drag and drop a CSV file here', 'shelterkit-donations' ) 
             ),
             el( FormFileUpload, {
                 accept: '.csv',
@@ -162,7 +162,7 @@
                     }
                 }
             }, 
-                el( Button, { variant: 'secondary' }, __( 'Select File', 'shelter-donations' ) )
+                el( Button, { variant: 'secondary' }, __( 'Select File', 'shelterkit-donations' ) )
             )
         );
     }
@@ -191,7 +191,7 @@
                             displayHeaders.map( function( header, i ) {
                                 return el( 'th', { key: 'h' + i }, header );
                             })
-                        ).concat( [ el( 'th', { key: 'status' }, __( 'Status', 'shelter-donations' ) ) ] )
+                        ).concat( [ el( 'th', { key: 'status' }, __( 'Status', 'shelterkit-donations' ) ) ] )
                     )
                 ),
                 el( 'tbody', {},
@@ -218,7 +218,7 @@
             ),
             rows.length > 5 ? el( 'p', { style: { color: '#757575', marginTop: '8px', fontSize: '13px' } },
                 // translators: %d: number of additional rows not shown.
-                sprintf( __( '... and %d more rows', 'shelter-donations' ), rows.length - 5 )
+                sprintf( __( '... and %d more rows', 'shelterkit-donations' ), rows.length - 5 )
             ) : null
         );
     }
@@ -418,7 +418,7 @@
                 progress && isImporting ? el( 'div', { style: { marginBottom: '16px' } },
                     el( 'div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: '4px', fontSize: '13px' } },
                         // translators: %1$d: current row number being processed; %2$d: total number of rows.
-                        el( 'span', {}, sprintf( __( 'Processing row %1$d of %2$d...', 'shelter-donations' ), progress.processed, progress.total ) ),
+                        el( 'span', {}, sprintf( __( 'Processing row %1$d of %2$d...', 'shelterkit-donations' ), progress.processed, progress.total ) ),
                         el( 'span', { style: { fontWeight: '600' } }, progress.percent + '%' )
                     ),
                     el( 'div', { style: { background: '#e0e0e0', borderRadius: '4px', height: '8px', overflow: 'hidden' } },
@@ -439,7 +439,7 @@
                     onRemove: function() { setResults( null ); setImportKey( null ); setProgress( null ); }
                 },
                     el( 'div', {},
-                        el( 'strong', {}, __( 'Import Complete!', 'shelter-donations' ) + ' ' ),
+                        el( 'strong', {}, __( 'Import Complete!', 'shelterkit-donations' ) + ' ' ),
                         results.created > 0 ? el( 'span', { style: { color: '#00a32a' } }, results.created + ' created ' ) : null,
                         results.updated > 0 ? el( 'span', { style: { color: '#0073aa' } }, results.updated + ' updated ' ) : null,
                         results.skipped > 0 ? el( 'span', { style: { color: '#996800' } }, results.skipped + ' skipped ' ) : null,
@@ -449,7 +449,7 @@
                                 href: sdImportExport.ajaxUrl + '?action=sd_download_error_csv&import_key=' + importKey + '&_wpnonce=' + sdImportExport.errorCsvNonce,
                                 className: 'button button-small',
                                 style: { textDecoration: 'none' }
-                            }, __( 'Download Error Report (CSV)', 'shelter-donations' ) )
+                            }, __( 'Download Error Report (CSV)', 'shelterkit-donations' ) )
                         ) : null
                     )
                 ) : null,
@@ -467,11 +467,11 @@
                     }
                 },
                     el( 'div', {},
-                        el( 'strong', {}, __( 'Required: ', 'shelter-donations' ) ),
+                        el( 'strong', {}, __( 'Required: ', 'shelterkit-donations' ) ),
                         requiredColumns.join( ', ' )
                     ),
                     optionalColumns && optionalColumns.length > 0 ? el( 'div', { style: { marginTop: '4px' } },
-                        el( 'strong', {}, __( 'Optional: ', 'shelter-donations' ) ),
+                        el( 'strong', {}, __( 'Optional: ', 'shelterkit-donations' ) ),
                         optionalColumns.join( ', ' )
                     ) : null
                 ),
@@ -485,7 +485,7 @@
                 // Loading
                 isLoading ? el( 'div', { style: { textAlign: 'center', padding: '16px' } },
                     el( Spinner ),
-                    el( 'span', { style: { marginLeft: '8px' } }, __( 'Analyzing file...', 'shelter-donations' ) )
+                    el( 'span', { style: { marginLeft: '8px' } }, __( 'Analyzing file...', 'shelterkit-donations' ) )
                 ) : null,
 
                 // Preview
@@ -493,7 +493,7 @@
                     el( 'p', { style: { fontWeight: '500', marginBottom: '8px' } }, 
                         sprintf(
                             // translators: %1$d: total number of rows found; %2$d: number of valid rows.
-                            __( 'Preview: %1$d rows found, %2$d valid', 'shelter-donations' ),
+                            __( 'Preview: %1$d rows found, %2$d valid', 'shelterkit-donations' ),
                             preview.totalRows || 0,
                             validRows
                         )
@@ -522,17 +522,17 @@
                     el( Button, {
                         variant: 'secondary',
                         href: templateUrl
-                    }, __( 'Download Template', 'shelter-donations' ) ),
+                    }, __( 'Download Template', 'shelterkit-donations' ) ),
                     el( Button, {
                         variant: 'primary',
                         disabled: validRows === 0 || isImporting,
                         isBusy: isImporting,
                         onClick: handleImport
                     }, isImporting
-                        ? __( 'Importing...', 'shelter-donations' )
+                        ? __( 'Importing...', 'shelterkit-donations' )
                         : sprintf(
                             // translators: %d: number of rows to import.
-                            __( 'Import %d Rows', 'shelter-donations' ),
+                            __( 'Import %d Rows', 'shelterkit-donations' ),
                             validRows
                         )
                     )
@@ -623,7 +623,7 @@
 
             if ( ! confirm( sprintf(
                 // translators: %1$d: number of memorials to import; %2$d: target year.
-                __( 'Import %1$d memorials for year %2$d?', 'shelter-donations' ),
+                __( 'Import %1$d memorials for year %2$d?', 'shelterkit-donations' ),
                 preview.total_rows,
                 year
             ) ) ) {
@@ -675,7 +675,7 @@
                 el( Flex, { justify: 'space-between', align: 'center' },
                     el( FlexItem, {},
                         el( 'span', { style: { fontSize: '24px', marginRight: '8px' } }, '📋' ),
-                        el( 'span', { style: { fontWeight: '600' } }, __( 'Legacy Memorial Import', 'shelter-donations' ) )
+                        el( 'span', { style: { fontWeight: '600' } }, __( 'Legacy Memorial Import', 'shelterkit-donations' ) )
                     ),
                     el( FlexItem, {},
                         el( 'span', { 
@@ -687,19 +687,19 @@
                                 fontSize: '11px',
                                 fontWeight: '500'
                             } 
-                        }, __( 'Shelter Format', 'shelter-donations' ) )
+                        }, __( 'Shelter Format', 'shelterkit-donations' ) )
                     )
                 )
             ),
             el( CardBody, {},
                 el( 'p', { style: { color: '#757575', marginBottom: '16px' } },
-                    __( 'Import memorials from the shelter\'s legacy CSV format (In Memory Of, By, pet columns with month headers).', 'shelter-donations' )
+                    __( 'Import memorials from the shelter\'s legacy CSV format (In Memory Of, By, pet columns with month headers).', 'shelterkit-donations' )
                 ),
 
                 // Settings
                 el( 'div', { style: { marginBottom: '16px', display: 'flex', gap: '16px', flexWrap: 'wrap' } },
                     el( SelectControl, {
-                        label: __( 'Year', 'shelter-donations' ),
+                        label: __( 'Year', 'shelterkit-donations' ),
                         value: year.toString(),
                         options: yearOptions,
                         onChange: function( val ) { setYear( parseInt( val, 10 ) ); },
@@ -708,7 +708,7 @@
                     el( 'div', {},
                         el( 'label', { 
                             style: { display: 'block', marginBottom: '8px', fontWeight: '500' } 
-                        }, __( 'Default Amount ($)', 'shelter-donations' ) ),
+                        }, __( 'Default Amount ($)', 'shelterkit-donations' ) ),
                         el( 'input', {
                             type: 'number',
                             min: '0',
@@ -721,7 +721,7 @@
                 ),
 
                 el( CheckboxControl, {
-                    label: __( 'Skip duplicate honoree/donor combinations', 'shelter-donations' ),
+                    label: __( 'Skip duplicate honoree/donor combinations', 'shelterkit-donations' ),
                     checked: skipDuplicates,
                     onChange: setSkipDuplicates
                 }),
@@ -735,18 +735,18 @@
 
                 isLoading && el( 'div', { style: { textAlign: 'center', padding: '20px' } },
                     el( Spinner ),
-                    el( 'p', {}, __( 'Parsing file...', 'shelter-donations' ) )
+                    el( 'p', {}, __( 'Parsing file...', 'shelterkit-donations' ) )
                 ),
 
                 preview && el( 'div', { style: { marginTop: '16px' } },
                     el( Notice, { status: 'info', isDismissible: false },
                         el( 'div', {},
                             // translators: %d: number of memorials found in the file.
-                            el( 'strong', {}, sprintf( __( 'Found %d memorials', 'shelter-donations' ), preview.total_rows ) ),
+                            el( 'strong', {}, sprintf( __( 'Found %d memorials', 'shelterkit-donations' ), preview.total_rows ) ),
                             el( 'div', { style: { fontSize: '13px', marginTop: '4px' } },
                                 sprintf(
                                     // translators: %1$d: number of people; %2$d: number of pets; %3$s: comma-separated list of months found.
-                                    __( '%1$d people, %2$d pets • Months: %3$s', 'shelter-donations' ),
+                                    __( '%1$d people, %2$d pets • Months: %3$s', 'shelterkit-donations' ),
                                     preview.person_count,
                                     preview.pet_count,
                                     preview.months_found.join( ', ' )
@@ -762,10 +762,10 @@
                         el( 'table', { className: 'widefat', style: { fontSize: '13px' } },
                             el( 'thead', {},
                                 el( 'tr', {},
-                                    el( 'th', {}, __( 'In Memory Of', 'shelter-donations' ) ),
-                                    el( 'th', {}, __( 'By', 'shelter-donations' ) ),
-                                    el( 'th', {}, __( 'Type', 'shelter-donations' ) ),
-                                    el( 'th', {}, __( 'Month', 'shelter-donations' ) )
+                                    el( 'th', {}, __( 'In Memory Of', 'shelterkit-donations' ) ),
+                                    el( 'th', {}, __( 'By', 'shelterkit-donations' ) ),
+                                    el( 'th', {}, __( 'Type', 'shelterkit-donations' ) ),
+                                    el( 'th', {}, __( 'Month', 'shelterkit-donations' ) )
                                 )
                             ),
                             el( 'tbody', {},
@@ -793,7 +793,7 @@
                             style: { textAlign: 'center', color: '#757575', marginTop: '8px' }
                         }, sprintf(
                             // translators: %d: number of additional rows not shown.
-                            __( '... and %d more', 'shelter-donations' ),
+                            __( '... and %d more', 'shelterkit-donations' ),
                             preview.total_rows - 20
                         ) )
                     )
@@ -805,17 +805,17 @@
                         isDismissible: false 
                     },
                         el( 'div', {},
-                            el( 'strong', {}, __( 'Import Complete!', 'shelter-donations' ) ),
+                            el( 'strong', {}, __( 'Import Complete!', 'shelterkit-donations' ) ),
                             el( 'div', { style: { marginTop: '8px' } },
                                 // translators: %d: number of memorials created.
-                                el( 'div', {}, sprintf( __( 'Created: %d memorials', 'shelter-donations' ), results.created ) ),
+                                el( 'div', {}, sprintf( __( 'Created: %d memorials', 'shelterkit-donations' ), results.created ) ),
                                 // translators: %d: number of duplicate memorials skipped.
-                                el( 'div', {}, sprintf( __( 'Skipped: %d duplicates', 'shelter-donations' ), results.skipped ) ),
+                                el( 'div', {}, sprintf( __( 'Skipped: %d duplicates', 'shelterkit-donations' ), results.skipped ) ),
                                 // translators: %d: number of new donor records created.
-                                el( 'div', {}, sprintf( __( 'New donors created: %d', 'shelter-donations' ), results.donors_created ) ),
+                                el( 'div', {}, sprintf( __( 'New donors created: %d', 'shelterkit-donations' ), results.donors_created ) ),
                                 results.errors > 0 && el( 'div', { style: { color: '#d63638' } },
                                     // translators: %d: number of errors encountered during import.
-                                    sprintf( __( 'Errors: %d', 'shelter-donations' ), results.errors )
+                                    sprintf( __( 'Errors: %d', 'shelterkit-donations' ), results.errors )
                                 )
                             )
                         )
@@ -831,17 +831,17 @@
                             setPreview( null ); 
                         },
                         disabled: isImporting
-                    }, __( 'Cancel', 'shelter-donations' ) ),
+                    }, __( 'Cancel', 'shelterkit-donations' ) ),
                     el( Button, {
                         variant: 'primary',
                         onClick: handleImport,
                         isBusy: isImporting,
                         disabled: isImporting
                     }, isImporting
-                        ? __( 'Importing...', 'shelter-donations' )
+                        ? __( 'Importing...', 'shelterkit-donations' )
                         : sprintf(
                             // translators: %d: number of memorials to import.
-                            __( 'Import %d Memorials', 'shelter-donations' ),
+                            __( 'Import %d Memorials', 'shelterkit-donations' ),
                             preview.total_rows
                         )
                     )
@@ -881,12 +881,12 @@
         }
 
         var tabs = [
-            { name: 'export', title: __( 'Export Data', 'shelter-donations' ) },
-            { name: 'import', title: __( 'Import Data', 'shelter-donations' ) }
+            { name: 'export', title: __( 'Export Data', 'shelterkit-donations' ) },
+            { name: 'import', title: __( 'Import Data', 'shelterkit-donations' ) }
         ];
 
         return el( 'div', { className: 'sd-import-export-app' },
-            el( 'h1', { className: 'wp-heading-inline' }, __( 'Import / Export', 'shelter-donations' ) ),
+            el( 'h1', { className: 'wp-heading-inline' }, __( 'Import / Export', 'shelterkit-donations' ) ),
             el( 'hr', { className: 'wp-header-end' } ),
             
             el( TabPanel, {
@@ -897,7 +897,7 @@
                 if ( tab.name === 'export' ) {
                     return el( 'div', { style: { marginTop: '20px' } },
                         el( 'p', { style: { color: '#757575', marginBottom: '20px' } },
-                            __( 'Export your shelter data to CSV files.', 'shelter-donations' )
+                            __( 'Export your shelter data to CSV files.', 'shelterkit-donations' )
                         ),
                         el( 'div', { 
                             style: { 
@@ -908,34 +908,34 @@
                         },
                             el( ExportCard, {
                                 icon: '💰',
-                                title: __( 'Donations', 'shelter-donations' ),
-                                description: __( 'All donation records.', 'shelter-donations' ),
+                                title: __( 'Donations', 'shelterkit-donations' ),
+                                description: __( 'All donation records.', 'shelterkit-donations' ),
                                 count: counts.donations || 0,
                                 options: [
-                                    { value: 'all', label: __( 'All Time', 'shelter-donations' ) },
-                                    { value: 'this_year', label: __( 'This Year', 'shelter-donations' ) },
-                                    { value: 'last_year', label: __( 'Last Year', 'shelter-donations' ) }
+                                    { value: 'all', label: __( 'All Time', 'shelterkit-donations' ) },
+                                    { value: 'this_year', label: __( 'This Year', 'shelterkit-donations' ) },
+                                    { value: 'last_year', label: __( 'Last Year', 'shelterkit-donations' ) }
                                 ],
                                 onExport: function( opt ) { handleExport( 'donations', opt ); },
                                 isExporting: false
                             }),
                             el( ExportCard, {
                                 icon: '🏅',
-                                title: __( 'Memberships', 'shelter-donations' ),
-                                description: __( 'Membership records.', 'shelter-donations' ),
+                                title: __( 'Memberships', 'shelterkit-donations' ),
+                                description: __( 'Membership records.', 'shelterkit-donations' ),
                                 count: counts.memberships || 0,
                                 options: [
-                                    { value: 'all', label: __( 'All', 'shelter-donations' ), count: counts.memberships },
-                                    { value: 'active', label: __( 'Active', 'shelter-donations' ), count: counts.memberships_active },
-                                    { value: 'expired', label: __( 'Expired', 'shelter-donations' ), count: counts.memberships_expired }
+                                    { value: 'all', label: __( 'All', 'shelterkit-donations' ), count: counts.memberships },
+                                    { value: 'active', label: __( 'Active', 'shelterkit-donations' ), count: counts.memberships_active },
+                                    { value: 'expired', label: __( 'Expired', 'shelterkit-donations' ), count: counts.memberships_expired }
                                 ],
                                 onExport: function( opt ) { handleExport( 'memberships', opt ); },
                                 isExporting: false
                             }),
                             el( ExportCard, {
                                 icon: '👥',
-                                title: __( 'Donors', 'shelter-donations' ),
-                                description: __( 'Donor profiles.', 'shelter-donations' ),
+                                title: __( 'Donors', 'shelterkit-donations' ),
+                                description: __( 'Donor profiles.', 'shelterkit-donations' ),
                                 count: counts.donors || 0,
                                 options: [],
                                 onExport: function() { handleExport( 'donors' ); },
@@ -943,8 +943,8 @@
                             }),
                             el( ExportCard, {
                                 icon: '❤️',
-                                title: __( 'Memorials', 'shelter-donations' ),
-                                description: __( 'Memorial tributes.', 'shelter-donations' ),
+                                title: __( 'Memorials', 'shelterkit-donations' ),
+                                description: __( 'Memorial tributes.', 'shelterkit-donations' ),
                                 count: counts.memorials || 0,
                                 options: [],
                                 onExport: function() { handleExport( 'memorials' ); },
@@ -955,7 +955,7 @@
                 } else {
                     return el( 'div', { style: { marginTop: '20px' } },
                         el( 'p', { style: { color: '#757575', marginBottom: '20px' } },
-                            __( 'Import data from CSV files.', 'shelter-donations' )
+                            __( 'Import data from CSV files.', 'shelterkit-donations' )
                         ),
                         el( 'div', { 
                             style: { 
@@ -966,54 +966,54 @@
                         },
                             el( ImportCard, {
                                 icon: '👥',
-                                title: __( 'Import Donors', 'shelter-donations' ),
-                                description: __( 'Import donor records.', 'shelter-donations' ),
+                                title: __( 'Import Donors', 'shelterkit-donations' ),
+                                description: __( 'Import donor records.', 'shelterkit-donations' ),
                                 requiredColumns: [ 'email', 'first_name', 'last_name' ],
                                 optionalColumns: [ 'phone', 'address_line_1', 'city', 'state' ],
                                 templateUrl: sdImportExport.templateUrls.donors,
                                 importAction: 'donors',
                                 options: [
-                                    { key: 'update_existing', label: __( 'Update existing donors', 'shelter-donations' ), default: true },
-                                    { key: 'skip_errors', label: __( 'Skip rows with errors', 'shelter-donations' ), default: true }
+                                    { key: 'update_existing', label: __( 'Update existing donors', 'shelterkit-donations' ), default: true },
+                                    { key: 'skip_errors', label: __( 'Skip rows with errors', 'shelterkit-donations' ), default: true }
                                 ]
                             }),
                             el( ImportCard, {
                                 icon: '💰',
-                                title: __( 'Import Donations', 'shelter-donations' ),
-                                description: __( 'Import donation records.', 'shelter-donations' ),
+                                title: __( 'Import Donations', 'shelterkit-donations' ),
+                                description: __( 'Import donation records.', 'shelterkit-donations' ),
                                 requiredColumns: [ 'email', 'amount', 'date' ],
                                 optionalColumns: [ 'first_name', 'last_name', 'allocation' ],
                                 templateUrl: sdImportExport.templateUrls.donations,
                                 importAction: 'donations',
                                 options: [
-                                    { key: 'create_donors', label: __( 'Create donors if not found', 'shelter-donations' ), default: true },
-                                    { key: 'skip_errors', label: __( 'Skip rows with errors', 'shelter-donations' ), default: true }
+                                    { key: 'create_donors', label: __( 'Create donors if not found', 'shelterkit-donations' ), default: true },
+                                    { key: 'skip_errors', label: __( 'Skip rows with errors', 'shelterkit-donations' ), default: true }
                                 ]
                             }),
                             el( ImportCard, {
                                 icon: '❤️',
-                                title: __( 'Import Memorials', 'shelter-donations' ),
-                                description: __( 'Import memorial donations (in memory/honor).', 'shelter-donations' ),
+                                title: __( 'Import Memorials', 'shelterkit-donations' ),
+                                description: __( 'Import memorial donations (in memory/honor).', 'shelterkit-donations' ),
                                 requiredColumns: [ 'email', 'honoree_name', 'amount', 'date' ],
                                 optionalColumns: [ 'memorial_type', 'tribute_message', 'pet_species', 'notify_family_email' ],
                                 templateUrl: sdImportExport.templateUrls.memorials,
                                 importAction: 'memorials',
                                 options: [
-                                    { key: 'create_donors', label: __( 'Create donors if not found', 'shelter-donations' ), default: true },
-                                    { key: 'skip_errors', label: __( 'Skip rows with errors', 'shelter-donations' ), default: true }
+                                    { key: 'create_donors', label: __( 'Create donors if not found', 'shelterkit-donations' ), default: true },
+                                    { key: 'skip_errors', label: __( 'Skip rows with errors', 'shelterkit-donations' ), default: true }
                                 ]
                             }),
                             el( ImportCard, {
                                 icon: '🏅',
-                                title: __( 'Import Memberships', 'shelter-donations' ),
-                                description: __( 'Import membership records (individual, family, business).', 'shelter-donations' ),
+                                title: __( 'Import Memberships', 'shelterkit-donations' ),
+                                description: __( 'Import membership records (individual, family, business).', 'shelterkit-donations' ),
                                 requiredColumns: [ 'email', 'membership_type', 'tier', 'amount', 'start_date', 'end_date' ],
                                 optionalColumns: [ 'business_name', 'business_website', 'business_description' ],
                                 templateUrl: sdImportExport.templateUrls.memberships,
                                 importAction: 'memberships',
                                 options: [
-                                    { key: 'create_donors', label: __( 'Create donors if not found', 'shelter-donations' ), default: true },
-                                    { key: 'skip_errors', label: __( 'Skip rows with errors', 'shelter-donations' ), default: true }
+                                    { key: 'create_donors', label: __( 'Create donors if not found', 'shelterkit-donations' ), default: true },
+                                    { key: 'skip_errors', label: __( 'Skip rows with errors', 'shelterkit-donations' ), default: true }
                                 ]
                             }),
                             el( LegacyMemorialImport )

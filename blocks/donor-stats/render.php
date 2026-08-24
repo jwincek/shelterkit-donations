@@ -114,7 +114,7 @@ if ( $animate_numbers ) {
             >
                 <?php echo esc_html( $total_formatted ); ?>
             </span>
-            <span class="sd-stat-label"><?php esc_html_e( 'Total Donations', 'shelter-donations' ); ?></span>
+            <span class="sd-stat-label"><?php esc_html_e( 'Total Donations', 'shelterkit-donations' ); ?></span>
         </div>
     </div>
     <?php endif; ?>
@@ -135,7 +135,7 @@ if ( $animate_numbers ) {
             >
                 <?php echo esc_html( number_format( $count ) ); ?>
             </span>
-            <span class="sd-stat-label"><?php esc_html_e( 'Donations Made', 'shelter-donations' ); ?></span>
+            <span class="sd-stat-label"><?php esc_html_e( 'Donations Made', 'shelterkit-donations' ); ?></span>
         </div>
     </div>
     <?php endif; ?>
@@ -156,7 +156,7 @@ if ( $animate_numbers ) {
             >
                 <?php echo esc_html( number_format( $donors ) ); ?>
             </span>
-            <span class="sd-stat-label"><?php esc_html_e( 'Generous Donors', 'shelter-donations' ); ?></span>
+            <span class="sd-stat-label"><?php esc_html_e( 'Generous Donors', 'shelterkit-donations' ); ?></span>
         </div>
     </div>
     <?php endif; ?>
@@ -177,7 +177,7 @@ if ( $animate_numbers ) {
             >
                 <?php echo esc_html( number_format( $members ) ); ?>
             </span>
-            <span class="sd-stat-label"><?php esc_html_e( 'Active Members', 'shelter-donations' ); ?></span>
+            <span class="sd-stat-label"><?php esc_html_e( 'Active Members', 'shelterkit-donations' ); ?></span>
         </div>
     </div>
     <?php endif; ?>

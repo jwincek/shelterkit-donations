@@ -50,14 +50,16 @@ $show_donor       = $attributes['showDonorName'] ?? true;
 $show_date        = $attributes['showDate'] ?? true;
 $show_image       = $attributes['showImage'] ?? true;
 $truncate_length  = (int) ( $attributes['truncateTribute'] ?? 100 );
-$empty_message    = $attributes['emptyMessage'] ?: __( 'No memorials found.', 'shelter-donations' );
+$empty_message    = $attributes['emptyMessage'] ?: __( 'No memorials found.', 'shelterkit-donations' );
 
 // ─── URL parameters (for SSR + bookmarkable URLs) ────────────────────
 $current_page = max( 1, absint( $_GET['memorial-page'] ?? 1 ) );
+// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- block render callback: reads query-string filters to scope a public, read-only listing. Nothing is written.
 $search_term  = sanitize_text_field( $_GET['memorial-search'] ?? '' );
 $type_filter  = sanitize_key( $_GET['memorial-type'] ?? $default_type );
 $dedication_filter = sanitize_key( $_GET['memorial-dedication'] ?? 'all' );
 $year_filter  = sanitize_text_field( $_GET['memorial-year'] ?? '' );
+// phpcs:enable WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 
 $has_active_filters = $search_term
     || ( $type_filter && 'all' !== $type_filter )
@@ -244,7 +246,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
 
     <?php // ─── Controls: Search + Filters ─────────────────────────── ?>
     <?php if ( $show_search || $show_filters ) : ?>
-    <div class="sd-memorial-controls" role="search" aria-label="<?php esc_attr_e( 'Filter memorials', 'shelter-donations' ); ?>" data-wp-class--sd-controls--busy="context.isLoading">
+    <div class="sd-memorial-controls" role="search" aria-label="<?php esc_attr_e( 'Filter memorials', 'shelterkit-donations' ); ?>" data-wp-class--sd-controls--busy="context.isLoading">
 
         <?php if ( $show_search ) : ?>
         <div class="sd-search-box">
@@ -252,7 +254,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
                 type="search"
                 class="sd-search-input"
                 name="memorial-search"
-                placeholder="<?php esc_attr_e( 'Search tributes…', 'shelter-donations' ); ?>"
+                placeholder="<?php esc_attr_e( 'Search tributes…', 'shelterkit-donations' ); ?>"
                 value="<?php echo esc_attr( $search_term ); ?>"
                 data-wp-on--keydown="actions.handleSearchKeydown"
                 data-wp-bind--disabled="context.isLoading"
@@ -262,7 +264,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
                 class="sd-search-button"
                 data-wp-on--click="actions.submitSearch"
                 data-wp-bind--disabled="context.isLoading"
-                aria-label="<?php esc_attr_e( 'Search', 'shelter-donations' ); ?>"
+                aria-label="<?php esc_attr_e( 'Search', 'shelterkit-donations' ); ?>"
             >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
@@ -281,9 +283,9 @@ $wrapper_attributes = get_block_wrapper_attributes( [
                 data-wp-on--change="actions.handleFilterChange"
                 data-wp-bind--disabled="context.isLoading"
             >
-                <option value="all" <?php selected( $type_filter, 'all' ); ?>><?php esc_html_e( 'All Types', 'shelter-donations' ); ?></option>
-                <option value="person" <?php selected( $type_filter, 'person' ); ?>><?php esc_html_e( 'People', 'shelter-donations' ); ?></option>
-                <option value="pet" <?php selected( $type_filter, 'pet' ); ?>><?php esc_html_e( 'Pets', 'shelter-donations' ); ?></option>
+                <option value="all" <?php selected( $type_filter, 'all' ); ?>><?php esc_html_e( 'All Types', 'shelterkit-donations' ); ?></option>
+                <option value="person" <?php selected( $type_filter, 'person' ); ?>><?php esc_html_e( 'People', 'shelterkit-donations' ); ?></option>
+                <option value="pet" <?php selected( $type_filter, 'pet' ); ?>><?php esc_html_e( 'Pets', 'shelterkit-donations' ); ?></option>
             </select>
 
             <select
@@ -292,11 +294,11 @@ $wrapper_attributes = get_block_wrapper_attributes( [
                 data-wp-bind--value="context.filters.dedication"
                 data-wp-on--change="actions.handleFilterChange"
                 data-wp-bind--disabled="context.isLoading"
-                aria-label="<?php esc_attr_e( 'Filter by dedication', 'shelter-donations' ); ?>"
+                aria-label="<?php esc_attr_e( 'Filter by dedication', 'shelterkit-donations' ); ?>"
             >
-                <option value="all" <?php selected( $dedication_filter, 'all' ); ?>><?php esc_html_e( 'All Dedications', 'shelter-donations' ); ?></option>
-                <option value="memory" <?php selected( $dedication_filter, 'memory' ); ?>><?php esc_html_e( 'In Memory Of', 'shelter-donations' ); ?></option>
-                <option value="honor" <?php selected( $dedication_filter, 'honor' ); ?>><?php esc_html_e( 'In Honor Of', 'shelter-donations' ); ?></option>
+                <option value="all" <?php selected( $dedication_filter, 'all' ); ?>><?php esc_html_e( 'All Dedications', 'shelterkit-donations' ); ?></option>
+                <option value="memory" <?php selected( $dedication_filter, 'memory' ); ?>><?php esc_html_e( 'In Memory Of', 'shelterkit-donations' ); ?></option>
+                <option value="honor" <?php selected( $dedication_filter, 'honor' ); ?>><?php esc_html_e( 'In Honor Of', 'shelterkit-donations' ); ?></option>
             </select>
 
             <?php if ( $show_year_filter && ! empty( $years ) ) : ?>
@@ -307,7 +309,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
                 data-wp-on--change="actions.handleFilterChange"
                 data-wp-bind--disabled="context.isLoading"
             >
-                <option value=""><?php esc_html_e( 'All Years', 'shelter-donations' ); ?></option>
+                <option value=""><?php esc_html_e( 'All Years', 'shelterkit-donations' ); ?></option>
                 <?php foreach ( $years as $year ) : ?>
                 <option value="<?php echo esc_attr( $year ); ?>" <?php selected( $year_filter, $year ); ?>>
                     <?php echo esc_html( $year ); ?>
@@ -324,7 +326,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
                 data-wp-bind--aria-hidden="!state.hasActiveFilters"
                 data-wp-bind--disabled="context.isLoading"
             >
-                <?php esc_html_e( 'Clear', 'shelter-donations' ); ?>
+                <?php esc_html_e( 'Clear', 'shelterkit-donations' ); ?>
             </button>
         </div>
         <?php endif; ?>
@@ -338,7 +340,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
             <?php
             printf(
                 /* translators: %d: number of memorials */
-                esc_html( _n( '%d memorial', '%d memorials', $total, 'shelter-donations' ) ),
+                esc_html( _n( '%d memorial', '%d memorials', $total, 'shelterkit-donations' ) ),
                 (int) $total
             );
             ?>
@@ -349,7 +351,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
     <div
         class="sd-memorial-grid"
         role="list"
-        aria-label="<?php esc_attr_e( 'Memorials', 'shelter-donations' ); ?>"
+        aria-label="<?php esc_attr_e( 'Memorials', 'shelterkit-donations' ); ?>"
         data-wp-class--is-loading="context.isLoading"
         data-wp-bind--aria-busy="context.isLoading"
         data-wp-watch--highlight="callbacks.applyHighlights"
@@ -362,7 +364,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
             aria-hidden="true"
         >
             <span class="sd-spinner"></span>
-            <?php esc_html_e( 'Loading…', 'shelter-donations' ); ?>
+            <?php esc_html_e( 'Loading…', 'shelterkit-donations' ); ?>
         </div>
 
         <?php // ─── Client-side template (data-wp-each) ─────────── ?>
@@ -453,13 +455,14 @@ $wrapper_attributes = get_block_wrapper_attributes( [
         </template>
 
         <?php // ─── Server-rendered fallback children ────────────── ?>
-        <?php foreach ( $items as $item ) :
+        <?php
+        foreach ( $items as $item ) :
             $is_pet   = 'pet' === ( $item['memorial_type'] ?? '' );
             $has_photo = ! empty( $item['photo_url'] );
             $tribute   = ! empty( $item['tribute_message'] )
                 ? wp_trim_words( $item['tribute_message'], 15, '…' )
                 : '';
-        ?>
+			?>
         <article class="sd-memorial-card" role="listitem" data-wp-each-child>
             <a href="<?php echo esc_url( get_permalink( $item['id'] ) ); ?>" class="sd-memorial-link">
 
@@ -477,7 +480,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
                         <svg class="sd-badge-icon sd-icon-paw" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                             <path d="M4.5 12.5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5-2.5-1.12-2.5-2.5zm10-2.5c1.38 0 2.5 1.12 2.5 2.5s-1.12 2.5-2.5 2.5-2.5-1.12-2.5-2.5 1.12-2.5 2.5-2.5zM5 7c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-1c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm8 1c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM12 19c-2.76 0-5-1.79-5-4s2.24-4 5-4 5 1.79 5 4-2.24 4-5 4z"/>
                         </svg>
-                        <span class="sd-badge-text"><?php echo $is_pet ? esc_html__( 'Pet', 'shelter-donations' ) : esc_html__( 'Person', 'shelter-donations' ); ?></span>
+                        <span class="sd-badge-text"><?php echo $is_pet ? esc_html__( 'Pet', 'shelterkit-donations' ) : esc_html__( 'Person', 'shelterkit-donations' ); ?></span>
                     </span>
                 </div>
                 <?php endif; ?>
@@ -491,7 +494,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
                         <svg class="sd-badge-icon sd-icon-paw" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                             <path d="M4.5 12.5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5-2.5-1.12-2.5-2.5zm10-2.5c1.38 0 2.5 1.12 2.5 2.5s-1.12 2.5-2.5 2.5-2.5-1.12-2.5-2.5 1.12-2.5 2.5-2.5zM5 7c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-1c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm8 1c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM12 19c-2.76 0-5-1.79-5-4s2.24-4 5-4 5 1.79 5 4-2.24 4-5 4z"/>
                         </svg>
-                        <span class="sd-badge-text"><?php echo $is_pet ? esc_html__( 'Pet', 'shelter-donations' ) : esc_html__( 'Person', 'shelter-donations' ); ?></span>
+                        <span class="sd-badge-text"><?php echo $is_pet ? esc_html__( 'Pet', 'shelterkit-donations' ) : esc_html__( 'Person', 'shelterkit-donations' ); ?></span>
                     </span>
                     <?php endif; ?>
                     <p class="sd-memorial-dedication"><?php echo esc_html( $item['dedication_type_label'] ?? '' ); ?></p>
@@ -506,7 +509,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
                             <svg class="sd-meta-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                 <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                             </svg>
-                            <?php echo esc_html( $item['donor_name'] ?? __( 'A Friend', 'shelter-donations' ) ); ?>
+                            <?php echo esc_html( $item['donor_name'] ?? __( 'A Friend', 'shelterkit-donations' ) ); ?>
                         </span>
                         <?php endif; ?>
                         <?php if ( $show_date ) : ?>
@@ -539,15 +542,17 @@ $wrapper_attributes = get_block_wrapper_attributes( [
                         <path d="M12 2C12 2 9 7 9 10C9 11.66 10.34 13 12 13C13.66 13 15 11.66 15 10C15 7 12 2 12 2Z" class="sd-candle-flame"/>
                         <rect x="11" y="13" width="2" height="9" rx="1" fill="currentColor" opacity="0.6"/>
                     </svg>
-                    <span class="sd-candle-count"><?php
-                        if ( $candle_count === 0 ) {
-                            esc_html_e( 'Light a candle', 'shelter-donations' );
-                        } elseif ( $candle_count === 1 ) {
-                            esc_html_e( '1 candle', 'shelter-donations' );
-                        } else {
-                            printf( /* translators: %d: number of candles lit. */ esc_html__( '%d candles', 'shelter-donations' ), (int) $candle_count );
-                        }
-                    ?></span>
+                    <span class="sd-candle-count">
+                    <?php
+					if ( $candle_count === 0 ) {
+						esc_html_e( 'Light a candle', 'shelterkit-donations' );
+					} elseif ( $candle_count === 1 ) {
+						esc_html_e( '1 candle', 'shelterkit-donations' );
+					} else {
+						printf( /* translators: %d: number of candles lit. */ esc_html__( '%d candles', 'shelterkit-donations' ), (int) $candle_count );
+					}
+                    ?>
+                    </span>
                 </button>
             </div>
         </article>
@@ -562,7 +567,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
             <p><?php echo esc_html( $empty_message ); ?></p>
             <?php if ( $search_term || 'all' !== $type_filter || 'all' !== $dedication_filter || $year_filter ) : ?>
             <a href="<?php echo esc_url( $base_url ); ?>" class="sd-clear-filters wp-element-button">
-                <?php esc_html_e( 'Clear Filters', 'shelter-donations' ); ?>
+                <?php esc_html_e( 'Clear Filters', 'shelterkit-donations' ); ?>
             </a>
             <?php endif; ?>
         </div>
@@ -570,15 +575,17 @@ $wrapper_attributes = get_block_wrapper_attributes( [
     </div>
 
     <?php // ─── Pagination ─────────────────────────────────────────── ?>
-    <?php // Render whenever pagination is enabled (not only when the
+    <?php
+    // Render whenever pagination is enabled (not only when the
           // initial result set spans >1 page) so client-side filtering can
           // reveal/hide it as the page count changes — e.g. broadening a
           // shared filtered URL. Visibility is driven by the hidden binding;
-          // the SSR `hidden` attribute sets the correct pre-hydration state. ?>
+          // the SSR `hidden` attribute sets the correct pre-hydration state.
+	?>
     <?php if ( $show_pagination ) : ?>
 
-    <?php if ( 'load-more' === $pagination_style ) : ?>
-    <?php // ─── Load More style ──────────────────────────────────── ?>
+		<?php if ( 'load-more' === $pagination_style ) : ?>
+			<?php // ─── Load More style ──────────────────────────────────── ?>
     <nav class="sd-pagination sd-pagination--load-more" data-wp-bind--hidden="!state.hasMore" <?php echo $current_page < $total_pages ? '' : 'hidden'; ?>>
         <button
             type="button"
@@ -587,21 +594,21 @@ $wrapper_attributes = get_block_wrapper_attributes( [
             data-wp-bind--disabled="context.isLoading"
         >
             <span data-wp-bind--hidden="context.isLoading">
-                <?php esc_html_e( 'Load More', 'shelter-donations' ); ?>
+                <?php esc_html_e( 'Load More', 'shelterkit-donations' ); ?>
             </span>
             <span data-wp-bind--hidden="!context.isLoading">
                 <span class="sd-spinner"></span>
-                <?php esc_html_e( 'Loading…', 'shelter-donations' ); ?>
+                <?php esc_html_e( 'Loading…', 'shelterkit-donations' ); ?>
             </span>
         </button>
         <p class="sd-pagination-info" data-wp-text="state.paginationInfo"></p>
     </nav>
 
     <?php else : ?>
-    <?php // ─── Paged style ──────────────────────────────────────── ?>
+		<?php // ─── Paged style ──────────────────────────────────────── ?>
     <nav
         class="sd-pagination sd-pagination--paged"
-        aria-label="<?php esc_attr_e( 'Memorial pagination', 'shelter-donations' ); ?>"
+        aria-label="<?php esc_attr_e( 'Memorial pagination', 'shelterkit-donations' ); ?>"
         data-wp-bind--hidden="!state.showPagedPagination"
         <?php echo $total_pages > 1 ? '' : 'hidden'; ?>
     >
@@ -614,14 +621,14 @@ $wrapper_attributes = get_block_wrapper_attributes( [
             data-wp-on--click="actions.handlePagination"
         >
             <span aria-hidden="true">←</span>
-            <?php esc_html_e( 'Previous', 'shelter-donations' ); ?>
+            <?php esc_html_e( 'Previous', 'shelterkit-donations' ); ?>
         </a>
 
         <span class="sd-pagination-info" data-wp-text="state.pagedInfo">
             <?php
             printf(
                 /* translators: 1: current page number, 2: total pages */
-                esc_html__( 'Page %1$d of %2$d', 'shelter-donations' ),
+                esc_html__( 'Page %1$d of %2$d', 'shelterkit-donations' ),
                 (int) $current_page,
                 (int) $total_pages
             );
@@ -636,14 +643,14 @@ $wrapper_attributes = get_block_wrapper_attributes( [
             data-wp-bind--aria-disabled="!state.hasNext"
             data-wp-on--click="actions.handlePagination"
         >
-            <?php esc_html_e( 'Next', 'shelter-donations' ); ?>
+            <?php esc_html_e( 'Next', 'shelterkit-donations' ); ?>
             <span aria-hidden="true">→</span>
         </a>
     </nav>
     <?php endif; ?>
 
-    <?php // ─── No-JS fallback ───────────────────────────────────── ?>
-    <?php if ( $total_pages > 1 ) : ?>
+		<?php // ─── No-JS fallback ───────────────────────────────────── ?>
+		<?php if ( $total_pages > 1 ) : ?>
     <noscript>
         <nav class="sd-noscript-pagination">
             <?php

@@ -17,8 +17,8 @@ defined( 'ABSPATH' ) || exit;
 
 $membership       = $data['membership'] ?? [];
 $donor            = $data['donor'] ?? [];
-$business_name    = $membership['business_name'] ?? __( 'Your business', 'shelter-donations' );
-$rejection_reason = $args['reason'] ?? __( 'The logo did not meet our display requirements.', 'shelter-donations' );
+$business_name    = $membership['business_name'] ?? __( 'Your business', 'shelterkit-donations' );
+$rejection_reason = $args['reason'] ?? __( 'The logo did not meet our display requirements.', 'shelterkit-donations' );
 
 do_action( 'woocommerce_email_header', $heading, $email );
 ?>
@@ -27,8 +27,8 @@ do_action( 'woocommerce_email_header', $heading, $email );
     <?php
     printf(
         /* translators: %s: recipient name */
-        esc_html__( 'Dear %s,', 'shelter-donations' ),
-        esc_html( $donor['first_name'] ?? $donor['full_name'] ?? __( 'Valued Member', 'shelter-donations' ) )
+        esc_html__( 'Dear %s,', 'shelterkit-donations' ),
+        esc_html( $donor['first_name'] ?? $donor['full_name'] ?? __( 'Valued Member', 'shelterkit-donations' ) )
     );
     ?>
 </p>
@@ -37,38 +37,38 @@ do_action( 'woocommerce_email_header', $heading, $email );
     <?php
     printf(
         /* translators: %s: business name */
-        esc_html__( 'Thank you for submitting your logo for %s. Unfortunately, we were unable to approve the logo in its current form.', 'shelter-donations' ),
+        esc_html__( 'Thank you for submitting your logo for %s. Unfortunately, we were unable to approve the logo in its current form.', 'shelterkit-donations' ),
         '<strong>' . esc_html( $business_name ) . '</strong>'
     );
     ?>
 </p>
 
 <div style="background: #f8f8f8; border-left: 4px solid #dba617; padding: 15px; margin: 20px 0;">
-    <strong><?php esc_html_e( 'Reason:', 'shelter-donations' ); ?></strong><br>
+    <strong><?php esc_html_e( 'Reason:', 'shelterkit-donations' ); ?></strong><br>
     <?php echo wp_kses_post( $rejection_reason ); ?>
 </div>
 
 <p>
-    <?php esc_html_e( 'To update your logo, please ensure it meets the following requirements:', 'shelter-donations' ); ?>
+    <?php esc_html_e( 'To update your logo, please ensure it meets the following requirements:', 'shelterkit-donations' ); ?>
 </p>
 
 <ul>
-    <li><?php esc_html_e( 'High resolution (minimum 300x300 pixels)', 'shelter-donations' ); ?></li>
-    <li><?php esc_html_e( 'PNG or JPG format with transparent or white background preferred', 'shelter-donations' ); ?></li>
-    <li><?php esc_html_e( 'Clear, legible design without offensive content', 'shelter-donations' ); ?></li>
-    <li><?php esc_html_e( 'You must have rights to use the logo', 'shelter-donations' ); ?></li>
+    <li><?php esc_html_e( 'High resolution (minimum 300x300 pixels)', 'shelterkit-donations' ); ?></li>
+    <li><?php esc_html_e( 'PNG or JPG format with transparent or white background preferred', 'shelterkit-donations' ); ?></li>
+    <li><?php esc_html_e( 'Clear, legible design without offensive content', 'shelterkit-donations' ); ?></li>
+    <li><?php esc_html_e( 'You must have rights to use the logo', 'shelterkit-donations' ); ?></li>
 </ul>
 
 <p>
-    <?php esc_html_e( 'You can upload a new logo through your My Account page, or reply to this email with an updated version attached.', 'shelter-donations' ); ?>
+    <?php esc_html_e( 'You can upload a new logo through your My Account page, or reply to this email with an updated version attached.', 'shelterkit-donations' ); ?>
 </p>
 
 <p>
-    <?php esc_html_e( 'If you have any questions or need assistance, please don\'t hesitate to contact us.', 'shelter-donations' ); ?>
+    <?php esc_html_e( 'If you have any questions or need assistance, please don\'t hesitate to contact us.', 'shelterkit-donations' ); ?>
 </p>
 
 <p>
-    <?php esc_html_e( 'Best regards,', 'shelter-donations' ); ?><br>
+    <?php esc_html_e( 'Best regards,', 'shelterkit-donations' ); ?><br>
     <?php echo esc_html( get_bloginfo( 'name' ) ); ?>
 </p>
 

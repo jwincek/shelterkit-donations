@@ -1,54 +1,235 @@
 <?xml version="1.0"?>
 <ruleset name="Shelter Donations">
-	<description>PHPCS ruleset for Shelter Donations plugin.</description>
+	<description>WordPress coding standards for Shelter Donations.</description>
 
-	<!-- Scan these files -->
-	<file>shelter-donations.php</file>
-	<file>includes/</file>
-
-	<!-- Exclude third-party code -->
+	<file>.</file>
 	<exclude-pattern>vendor/*</exclude-pattern>
 	<exclude-pattern>node_modules/*</exclude-pattern>
+	<!-- Build output is a copy of the source; scanning it reports everything twice. -->
+	<exclude-pattern>build/*</exclude-pattern>
+	<!-- Tests use stub globals and PHPUnit's FooTest.php naming, not WPCS. -->
+	<exclude-pattern>tests/*</exclude-pattern>
+	<!-- One-shot upgrade scripts, not shipped (see .distignore). -->
+	<exclude-pattern>migration-scripts/*</exclude-pattern>
 
-	<!-- Use WordPress coding standards -->
+	<arg name="extensions" value="php"/>
+	<arg name="basepath" value="."/>
+	<arg name="colors"/>
+	<arg value="sp"/>
+
 	<rule ref="WordPress">
-		<!-- Allow short array syntax -->
-		<exclude name="Generic.Arrays.DisallowShortArraySyntax"/>
-		<!-- Allow PSR-4 filenames alongside WP class- prefix convention -->
+		<!--
+			Style exclusions only. Every WordPress.Security.* sniff stays
+			enabled — those are what a WordPress.org reviewer reads the code
+			for, and they are the reason this ruleset exists.
+		-->
+
+		<!--
+			The plugin is indented with four spaces throughout. Converting to
+			tabs would rewrite ~14,500 lines and bury git blame for no
+			functional gain, so the indent sniff is off and the existing style
+			is the house style. Alignment sniffs go with it, since they only
+			make sense once indentation is canonical.
+		-->
+		<exclude name="Generic.WhiteSpace.DisallowSpaceIndent"/>
+		<exclude name="Universal.WhiteSpace.PrecisionAlignment"/>
+		<exclude name="WordPress.Arrays.MultipleStatementAlignment"/>
+		<exclude name="Generic.Formatting.MultipleStatementAlignment"/>
+
+		<!-- Short array syntax [] is used throughout by design. -->
+		<exclude name="Universal.Arrays.DisallowShortArraySyntax"/>
+		<exclude name="WordPress.Arrays.ArrayDeclarationSpacing"/>
+		<!-- Compact multi-line calls (autoloader, hook registration, $wpdb). -->
+		<exclude name="PEAR.Functions.FunctionCallSignature"/>
+
+		<!--
+			Documentation strictness. Every file has a file-level docblock and
+			every method a summary; with PHP 8.1 typed signatures the
+			per-parameter @param tags are redundant. Not security sniffs.
+		-->
+		<exclude name="Squiz.Commenting.FunctionComment.Missing"/>
+		<exclude name="Squiz.Commenting.FunctionComment.MissingParamTag"/>
+		<exclude name="Squiz.Commenting.FunctionComment.MissingParamComment"/>
+		<exclude name="Squiz.Commenting.VariableComment.MissingVar"/>
+		<exclude name="Squiz.Commenting.InlineComment.InvalidEndChar"/>
+
+		<!-- $default and $class match WordPress-core parameter conventions. -->
+		<exclude name="Universal.NamingConventions.NoReservedKeywordParameterNames"/>
+
+		<!--
+			Reporting and data-integrity aggregate across donations,
+			memberships and memorials in one pass; the equivalent WP_Query
+			loops would be N queries per report. Every one of these is a
+			read against core tables with user values bound through
+			$wpdb->prepare(). The injection-focused WordPress.DB.PreparedSQL*
+			sniffs stay enabled — only the "you used $wpdb at all" and
+			"cache this" sniffs are off.
+		-->
+		<exclude name="WordPress.DB.DirectDatabaseQuery"/>
+
+		<!--
+			PSR-4 autoloading maps Starter_Shelter\Foo\Bar to
+			includes/foo/class-bar.php, which satisfies the WordPress
+			file-naming convention but not this sniff's class-name check.
+		-->
 		<exclude name="WordPress.Files.FileName.InvalidClassFileName"/>
-		<exclude name="WordPress.Files.FileName.NotHyphenatedLowercase"/>
 	</rule>
 
-	<!-- Check PHP 8.1+ compatibility -->
-	<rule ref="PHPCompatibilityWP"/>
-	<config name="testVersion" value="8.1-"/>
-
-	<!-- WordPress version -->
-	<config name="minimum_wp_version" value="6.9"/>
-
-	<!-- Text domain -->
-	<rule ref="WordPress.WP.I18n">
-		<properties>
-			<property name="text_domain" type="array">
-				<element value="shelter-donations"/>
-			</property>
-		</properties>
+	<!--
+		WooCommerce email templates fire woocommerce_email_header/footer by
+		design — that is the documented integration point, and prefixing them
+		would mean not integrating at all.
+	-->
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound">
+		<exclude-pattern>templates/emails/*</exclude-pattern>
 	</rule>
 
-	<!-- Prefixes -->
+	<!--
+		Template files run in the including scope and legitimately use
+		unprefixed locals; the prefix rule targets globals.
+	-->
 	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
 		<properties>
 			<property name="prefixes" type="array">
 				<element value="starter_shelter"/>
 				<element value="Starter_Shelter"/>
 				<element value="STARTER_SHELTER"/>
+				<element value="shelter_donations"/>
+				<element value="shelterkit_donations"/>
 				<element value="sd_"/>
+				<!-- Not this plugin's prefix, deliberately. includes/shelterkit/
+				     holds files copied byte-identically into the sibling
+				     ShelterKit plugins, so their classes must carry a shared
+				     name rather than this plugin's — the class_exists() guard
+				     that decides which copy wins depends on it. -->
+				<element value="shelterkit"/>
+				<element value="ShelterKit"/>
 			</property>
 		</properties>
 	</rule>
 
-	<!-- Show progress and use colors -->
-	<arg value="ps"/>
-	<arg name="colors"/>
-	<arg name="extensions" value="php"/>
+	<!--
+		My_Account routes every self-service form through verify_action_nonce(),
+		a wrapper that checks the nonce and adds a WooCommerce notice on
+		failure. The sniff only recognises the core nonce functions by name, so
+		without this every handler behind the wrapper reports as unguarded.
+	-->
+	<rule ref="WordPress.Security.NonceVerification">
+		<properties>
+			<property name="customNonceVerificationFunctions" type="array">
+				<element value="verify_action_nonce"/>
+			</property>
+		</properties>
+	</rule>
+
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="shelterkit-donations"/>
+			</property>
+		</properties>
+	</rule>
+
+	<!--
+		Style choices the plugin makes deliberately and consistently.
+	-->
+	<rule ref="WordPress">
+		<exclude name="Universal.Operators.DisallowShortTernary"/>
+		<exclude name="WordPress.PHP.YodaConditions"/>
+		<exclude name="Squiz.PHP.DisallowMultipleAssignments"/>
+	</rule>
+
+	<!--
+		Block render callbacks and template parts are included from inside a
+		function (render_callback / wc_get_template), so their assignments are
+		function-scoped locals, not globals. The prefix and global-override
+		sniffs read them as top-level scope and misreport every one.
+	-->
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound">
+		<exclude-pattern>blocks/*/render.php</exclude-pattern>
+		<exclude-pattern>blocks/shared/partials/*</exclude-pattern>
+		<exclude-pattern>templates/*</exclude-pattern>
+	</rule>
+
+	<!--
+		sd_ is three characters where this sniff wants four, but it is the
+		prefix already persisted in the database: post types (sd_donation),
+		taxonomies (sd_campaign) and meta keys (_sd_amount) all carry it, and
+		renaming them would orphan every existing install's data.
+	-->
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals.ShortPrefixPassed">
+		<severity>0</severity>
+	</rule>
+	<rule ref="WordPress.WP.GlobalVariablesOverride">
+		<exclude-pattern>blocks/*/render.php</exclude-pattern>
+		<exclude-pattern>templates/*</exclude-pattern>
+	</rule>
+
+	<!--
+		Query is a fluent builder; its chained methods read as one expression
+		(->whereIn()->orderBy()->pluckIds()) and are camelCase by design. The
+		WordPress snake_case convention is for hooks and free functions.
+	-->
+	<rule ref="WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid">
+		<exclude-pattern>includes/core/class-query.php</exclude-pattern>
+	</rule>
+
+	<!--
+		Manifest filenames mirror their post-type slug (sd_donation.php) and
+		single-sd_memorial-classic.php follows the WordPress template
+		hierarchy. Both are named by something other than this convention.
+	-->
+	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
+		<exclude-pattern>config/manifests/*</exclude-pattern>
+		<exclude-pattern>includes/templates/*</exclude-pattern>
+	</rule>
+
+	<!--
+		The WP-CLI validate command and the config loader read plugin-local
+		PHP/JSON files off disk at a known path. WP_Filesystem exists for
+		writes to arbitrary paths under varying host permissions; it is not
+		the right tool for reading a file the plugin ships.
+	-->
+	<rule ref="WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents">
+		<exclude-pattern>includes/cli/*</exclude-pattern>
+		<exclude-pattern>includes/core/class-config.php</exclude-pattern>
+	</rule>
+
+	<!--
+		includes/shelterkit/ is carried byte-identically by every ShelterKit
+		plugin — editing it here would fork it. Its own conventions therefore
+		apply to it rather than this plugin's.
+
+		The text domain is the one thing that MUST differ between copies: it
+		has to be the host plugin's slug, or Plugin Check errors and make-pot
+		skips the strings. Everything else is copied unchanged.
+	-->
+	<rule ref="Squiz.Commenting.ClassComment.Missing">
+		<exclude-pattern>includes/shelterkit/*</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound">
+		<exclude-pattern>includes/shelterkit/*</exclude-pattern>
+	</rule>
+	<rule ref="Generic.Commenting.DocComment.LongNotCapital">
+		<exclude-pattern>includes/shelterkit/*</exclude-pattern>
+	</rule>
+	<rule ref="Generic.Commenting.DocComment.MissingShort">
+		<exclude-pattern>includes/shelterkit/*</exclude-pattern>
+	</rule>
+	<rule ref="Squiz.Commenting.VariableComment.Missing">
+		<exclude-pattern>includes/shelterkit/*</exclude-pattern>
+	</rule>
+
+	<!--
+		Fail the build on errors, report warnings without failing it. Warnings
+		here are advisory sniffs — object-cache hints, meta_query cost, unused
+		callback parameters required by a hook signature — not defects, and the
+		Plugin Check job already runs with ignore-warnings for the same reason.
+		Errors still block, so a real regression fails CI.
+	-->
+	<config name="ignore_warnings_on_exit" value="1"/>
+
+	<config name="minimum_wp_version" value="6.9"/>
+	<config name="testVersion" value="8.1-"/>
+	<rule ref="PHPCompatibilityWP"/>
 </ruleset>

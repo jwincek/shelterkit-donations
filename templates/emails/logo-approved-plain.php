@@ -10,34 +10,34 @@ defined( 'ABSPATH' ) || exit;
 
 $membership   = $data['membership'] ?? [];
 $donor        = $data['donor'] ?? [];
-$business_name = $membership['business_name'] ?? __( 'Your business', 'shelter-donations' );
+$business_name = $membership['business_name'] ?? __( 'Your business', 'shelterkit-donations' );
 
-echo "= " . esc_html( $heading ) . " =\n\n";
+echo '= ' . esc_html( $heading ) . " =\n\n";
 
 printf(
     /* translators: %s: recipient name */
-    esc_html__( 'Dear %s,', 'shelter-donations' ),
-    esc_html( $donor['first_name'] ?? $donor['full_name'] ?? __( 'Valued Member', 'shelter-donations' ) )
+    esc_html__( 'Dear %s,', 'shelterkit-donations' ),
+    esc_html( $donor['first_name'] ?? $donor['full_name'] ?? __( 'Valued Member', 'shelterkit-donations' ) )
 );
 echo "\n\n";
 
 printf(
     /* translators: %s: business name */
-    esc_html__( 'Great news! The logo for %s has been approved and is now visible on our website.', 'shelter-donations' ),
+    esc_html__( 'Great news! The logo for %s has been approved and is now visible on our website.', 'shelterkit-donations' ),
     esc_html( $business_name )
 );
 echo "\n\n";
 
-echo esc_html__( 'Your business logo will appear on:', 'shelter-donations' ) . "\n";
-echo "- " . esc_html__( 'Our Business Sponsors page', 'shelter-donations' ) . "\n";
-echo "- " . esc_html__( 'The Donor Wall (if applicable to your membership tier)', 'shelter-donations' ) . "\n";
-echo "- " . esc_html__( 'Our annual report and promotional materials', 'shelter-donations' ) . "\n\n";
+echo esc_html__( 'Your business logo will appear on:', 'shelterkit-donations' ) . "\n";
+echo '- ' . esc_html__( 'Our Business Sponsors page', 'shelterkit-donations' ) . "\n";
+echo '- ' . esc_html__( 'The Donor Wall (if applicable to your membership tier)', 'shelterkit-donations' ) . "\n";
+echo '- ' . esc_html__( 'Our annual report and promotional materials', 'shelterkit-donations' ) . "\n\n";
 
-echo esc_html__( 'Thank you for your generous support of our shelter and the animals in our care. Your business partnership makes a real difference!', 'shelter-donations' ) . "\n\n";
+echo esc_html__( 'Thank you for your generous support of our shelter and the animals in our care. Your business partnership makes a real difference!', 'shelterkit-donations' ) . "\n\n";
 
-echo esc_html__( 'If you have any questions about your business membership benefits, please don\'t hesitate to contact us.', 'shelter-donations' ) . "\n\n";
+echo esc_html__( 'If you have any questions about your business membership benefits, please don\'t hesitate to contact us.', 'shelterkit-donations' ) . "\n\n";
 
-echo esc_html__( 'With gratitude,', 'shelter-donations' ) . "\n";
+echo esc_html__( 'With gratitude,', 'shelterkit-donations' ) . "\n";
 echo esc_html( get_bloginfo( 'name' ) ) . "\n";
 
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";

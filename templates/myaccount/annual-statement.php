@@ -25,27 +25,27 @@ defined( 'ABSPATH' ) || exit;
 <div class="sd-annual-statement">
     <div class="sd-statement-header">
         <form method="get" class="sd-year-selector">
-            <label for="statement-year"><?php esc_html_e( 'Select Year:', 'shelter-donations' ); ?></label>
+            <label for="statement-year"><?php esc_html_e( 'Select Year:', 'shelterkit-donations' ); ?></label>
             <select name="year" id="statement-year" onchange="this.form.submit()">
                 <?php foreach ( $years as $y ) : ?>
                 <option value="<?php echo esc_attr( $y ); ?>" <?php selected( $year, $y ); ?>><?php echo esc_html( $y ); ?></option>
                 <?php endforeach; ?>
             </select>
         </form>
-        <a href="<?php echo esc_url( $print_url ); ?>" class="button" target="_blank" rel="noopener"><?php esc_html_e( 'Print / Save as PDF', 'shelter-donations' ); ?></a>
+        <a href="<?php echo esc_url( $print_url ); ?>" class="button" target="_blank" rel="noopener"><?php esc_html_e( 'Print / Save as PDF', 'shelterkit-donations' ); ?></a>
     </div>
 
     <div class="sd-statement-content">
         <h2><?php echo esc_html( get_bloginfo( 'name' ) ); ?></h2>
-        <h3><?php esc_html_e( 'Charitable Contribution Statement', 'shelter-donations' ); ?></h3>
+        <h3><?php esc_html_e( 'Charitable Contribution Statement', 'shelterkit-donations' ); ?></h3>
         <p><strong><?php echo esc_html( $summary['donor']['name'] ); ?></strong></p>
-        <p><?php echo esc_html( sprintf( /* translators: %d: year */ __( 'Year: %d', 'shelter-donations' ), $year ) ); ?></p>
+        <p><?php echo esc_html( sprintf( /* translators: %d: year */ __( 'Year: %d', 'shelterkit-donations' ), $year ) ); ?></p>
 
         <table class="sd-statement-summary">
-            <tr><td><?php esc_html_e( 'Donations', 'shelter-donations' ); ?></td><td><?php echo esc_html( $summary['donations']['formatted'] ); ?></td></tr>
-            <tr><td><?php esc_html_e( 'Memorials', 'shelter-donations' ); ?></td><td><?php echo esc_html( $summary['memorials']['formatted'] ); ?></td></tr>
-            <tr><td><?php esc_html_e( 'Memberships', 'shelter-donations' ); ?></td><td><?php echo esc_html( $summary['memberships']['formatted'] ); ?></td></tr>
-            <tr class="sd-total"><td><strong><?php esc_html_e( 'Total', 'shelter-donations' ); ?></strong></td><td><strong><?php echo esc_html( $summary['grand_formatted'] ); ?></strong></td></tr>
+            <tr><td><?php esc_html_e( 'Donations', 'shelterkit-donations' ); ?></td><td><?php echo esc_html( $summary['donations']['formatted'] ); ?></td></tr>
+            <tr><td><?php esc_html_e( 'Memorials', 'shelterkit-donations' ); ?></td><td><?php echo esc_html( $summary['memorials']['formatted'] ); ?></td></tr>
+            <tr><td><?php esc_html_e( 'Memberships', 'shelterkit-donations' ); ?></td><td><?php echo esc_html( $summary['memberships']['formatted'] ); ?></td></tr>
+            <tr class="sd-total"><td><strong><?php esc_html_e( 'Total', 'shelterkit-donations' ); ?></strong></td><td><strong><?php echo esc_html( $summary['grand_formatted'] ); ?></strong></td></tr>
         </table>
     </div>
 </div>
