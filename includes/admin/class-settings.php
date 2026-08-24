@@ -136,10 +136,6 @@ class Settings {
             echo '<p>' . esc_html__( 'Configure general plugin settings.', 'shelterkit-donations' ) . '</p>';
         }, self::PAGE_SLUG . '_general' );
 
-        add_settings_section( 'sd_organization', __( 'Organization Information', 'shelterkit-donations' ), function () {
-            echo '<p>' . esc_html__( 'Your organization details for receipts and communications.', 'shelterkit-donations' ) . '</p>';
-        }, self::PAGE_SLUG . '_general' );
-
         add_settings_section( 'sd_pages', __( 'Pages', 'shelterkit-donations' ), function () {
             echo '<p>' . esc_html__( 'Map donate and join CTAs to specific pages on your site. When unset, those buttons are hidden rather than emit broken /donate/ links.', 'shelterkit-donations' ) . '</p>';
         }, self::PAGE_SLUG . '_general' );
@@ -171,19 +167,9 @@ class Settings {
             'default' => 30, 'min' => 7, 'max' => 90,
         ], 'general' );
 
-        self::add_field( 'org_name', __( 'Organization Name', 'shelterkit-donations' ), 'sd_organization', 'text', [
-            'default' => get_bloginfo( 'name' ),
-        ], 'general' );
 
-        self::add_field( 'org_ein', __( 'EIN (Tax ID)', 'shelterkit-donations' ), 'sd_organization', 'text', [
-            'placeholder' => 'XX-XXXXXXX',
-        ], 'general' );
 
-        self::add_field( 'org_address', __( 'Mailing Address', 'shelterkit-donations' ), 'sd_organization', 'textarea', [
-            'rows' => 3,
-        ], 'general' );
 
-        self::add_field( 'org_phone', __( 'Phone Number', 'shelterkit-donations' ), 'sd_organization', 'text', [], 'general' );
 
         // Page mappings.
         self::add_field( 'donation_page', __( 'Donation Page', 'shelterkit-donations' ), 'sd_pages', 'page', [
@@ -282,13 +268,26 @@ class Settings {
     public static function sanitize_settings( array $input ): array {
         $sanitized = [];
 
-        foreach ( [ 'org_name', 'org_ein', 'org_phone', 'email_from_name' ] as $f ) {
+        foreach ( [ 'email_from_name' ] as $f ) {
             $sanitized[ $f ] = sanitize_text_field( $input[ $f ] ?? '' );
+        }
+
+        // The organisation fields moved to the shared Shelter Details screen in
+        // 3.1.0 and are no longer on this form. Carry the stored values forward
+        // rather than reading $input: sanitise() rebuilds the option from
+        // scratch, so anything not carried is deleted, and the receipt helpers
+        // still fall back to these for installs that filled them in before the
+        // profile existed.
+        $existing = get_option( self::OPTION_NAME, [] );
+        $existing = is_array( $existing ) ? $existing : [];
+        foreach ( [ 'org_name', 'org_ein', 'org_phone', 'org_address' ] as $f ) {
+            if ( isset( $existing[ $f ] ) ) {
+                $sanitized[ $f ] = $existing[ $f ];
+            }
         }
         foreach ( [ 'email_from_address', 'logo_moderation_email' ] as $f ) {
             $sanitized[ $f ] = sanitize_email( $input[ $f ] ?? '' );
         }
-        $sanitized['org_address'] = sanitize_textarea_field( $input['org_address'] ?? '' );
         $sanitized['fiscal_year_start_month'] = absint( $input['fiscal_year_start_month'] ?? 7 );
         $sanitized['renewal_reminder_days'] = min( 90, max( 7, absint( $input['renewal_reminder_days'] ?? 30 ) ) );
         $sanitized['donation_page']   = absint( $input['donation_page'] ?? 0 );
@@ -886,6 +885,74 @@ class Settings {
             $result[] = [ 'id' => $product->get_id(), 'name' => $product->get_name(), 'sku' => $product->get_sku() ];
         }
         return $result;
+    }
+
+    /**
+     * Move the organisation fields into the shared ShelterKit profile, once.
+     *
+     * 3.0.0 adopted the shared Shelter Details screen but left this plugin's
+     * own Organization fields in place beside it, so the same information had
+     * two homes and nothing said which the receipts read. The fields are gone
+     * from the form as of 3.1.0; this carries what an install already had.
+     *
+     * Only fills profile fields that are empty, so a shelter that has already
+     * filled in Shelter Details is never overwritten. The source values are
+     * left in place: the receipt helpers still fall back to them, and keeping
+     * them makes this safe to re-run.
+     *
+     * @since 3.1.0
+     */
+    public static function maybe_migrate_organization_to_profile(): void {
+        if ( get_option( 'sd_org_profile_migrated' ) ) {
+            return;
+        }
+        if ( ! class_exists( 'ShelterKit_Profile' ) ) {
+            return; // Profile not loaded yet; try again on the next request.
+        }
+
+        $legacy = [
+            'name'   => (string) self::get( 'org_name', '' ),
+            'phone'  => (string) self::get( 'org_phone', '' ),
+            'tax_id' => (string) self::get( 'org_ein', '' ),
+        ];
+
+        // org_address is one free-text textarea and the profile stores a
+        // structured address, so it cannot be split reliably. Put it in
+        // street_address only when the whole profile address is empty — the
+        // shelter can then break it apart by hand. Discarding it would be
+        // worse: it is the only copy.
+        // The RAW stored option, not ShelterKit_Profile::all(): all() substitutes
+        // the site title for an unset name, so an "is this already filled in?"
+        // test against it would never see name as empty and would skip it.
+        $profile = get_option( \ShelterKit_Profile::OPTION, [] );
+        $profile = is_array( $profile ) ? $profile : [];
+
+        $address_empty = '' === trim(
+            ( $profile['street_address'] ?? '' ) . ( $profile['locality'] ?? '' )
+            . ( $profile['region'] ?? '' ) . ( $profile['postal_code'] ?? '' )
+        );
+        if ( $address_empty ) {
+            $legacy['street_address'] = (string) self::get( 'org_address', '' );
+        }
+
+        $to_write = [];
+        foreach ( $legacy as $field => $value ) {
+            if ( '' !== trim( $value ) && '' === trim( $profile[ $field ] ?? '' ) ) {
+                $to_write[ $field ] = $value;
+            }
+        }
+
+        // The site title is ShelterKit_Profile::all()'s fallback for an unset
+        // name, so an org_name equal to it carries no information.
+        if ( isset( $to_write['name'] ) && $to_write['name'] === get_bloginfo( 'name' ) ) {
+            unset( $to_write['name'] );
+        }
+
+        if ( $to_write ) {
+            \ShelterKit_Profile::save( $to_write );
+        }
+
+        update_option( 'sd_org_profile_migrated', 1 );
     }
 
     public static function get( string $key, $default = null ) {

@@ -300,7 +300,7 @@ class Quick_Actions {
         </head>
         <body>
             <div class="receipt-header">
-                <h1><?php echo esc_html( Settings::get( 'org_name', get_bloginfo( 'name' ) ) ); ?></h1>
+                <h1><?php echo esc_html( \Starter_Shelter\Helpers\starter_shelter_org_name() ); ?></h1>
                 <p><?php esc_html_e( 'Donation Receipt', 'shelterkit-donations' ); ?></p>
             </div>
 
@@ -343,7 +343,7 @@ class Quick_Actions {
 
             <div class="receipt-footer">
                 <?php
-                $ein = Settings::get( 'org_ein', '' );
+                $ein = \Starter_Shelter\Helpers\starter_shelter_tax_id();
                 if ( $ein ) {
                     printf(
                         /* translators: %s: EIN number */
