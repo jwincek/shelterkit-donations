@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 772 250" width="772" height="250" role="img" aria-label="ShelterKit Donations">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#17A398"/>
+      <stop offset="55%" stop-color="#0E7E76"/>
+      <stop offset="100%" stop-color="#095B55"/>
+    </linearGradient>
+    <linearGradient id="badge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FBBF3C"/>
+      <stop offset="100%" stop-color="#EE9613"/>
+    </linearGradient>
+    <path id="heartmark" d="M112 181
+             C 112 181 42 141 42 100
+             C 42 76 60 59 82 59
+             C 96 59 107 67 112 77
+             C 117 67 128 59 142 59
+             C 164 59 182 76 182 100
+             C 182 141 112 181 112 181 Z"/>
+  </defs>
+
+  <rect width="772" height="250" fill="url(#bg)"/>
+
+  <!-- Oversized hearts as background texture, faint and clipped by the edge —
+       the same device Pets uses with its paw. -->
+  <g fill="#FFFFFF" opacity="0.055">
+    <use href="#heartmark" transform="translate(596,-30) scale(1.5)"/>
+    <use href="#heartmark" transform="translate(452,98) scale(0.85)"/>
+  </g>
+
+  <!-- Icon mark, same placement and scale as the Pets banner. -->
+  <g transform="translate(46,44) scale(0.72)">
+    <use href="#heartmark" fill="#FFFFFF"/>
+    <circle cx="192" cy="192" r="56" fill="#0B6E67"/>
+    <circle cx="192" cy="192" r="46" fill="url(#badge)"/>
+    <g fill="#FFFFFF" transform="translate(192,192)">
+      <rect x="-6.5" y="-24" width="13" height="48" rx="3"/>
+      <rect x="-24" y="-6.5" width="48" height="13" rx="3"/>
+    </g>
+  </g>
+
+  <g font-family="Helvetica Neue, Helvetica, Arial, sans-serif">
+    <!-- 50px, not the 58px Pets uses: "ShelterKit Donations" is five characters
+         longer and overruns the canvas at that size. -->
+    <text x="248" y="116" fill="#FFFFFF" font-size="50" font-weight="700" letter-spacing="-0.8">ShelterKit Donations</text>
+    <text x="250" y="156" fill="#BFF0EA" font-size="19" font-weight="400">Every gift, membership and tribute in one place</text>
+    <g font-size="16" font-weight="600" fill="#0B5F59">
+      <rect x="250" y="176" width="186" height="30" rx="15" fill="#BFF0EA" opacity="0.95"/>
+      <text x="343" y="196" text-anchor="middle">Runs on WooCommerce</text>
+      <rect x="446" y="176" width="134" height="30" rx="15" fill="#BFF0EA" opacity="0.95"/>
+      <text x="513" y="196" text-anchor="middle">Memorial wall</text>
+      <rect x="590" y="176" width="99" height="30" rx="15" fill="#BFF0EA" opacity="0.95"/>
+      <text x="639" y="196" text-anchor="middle">12 blocks</text>
+    </g>
+  </g>
+</svg>

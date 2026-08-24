@@ -12,6 +12,7 @@
 /.editorconfig      export-ignore
 /.wp-env.json       export-ignore
 /.wordpress-org     export-ignore
+/assets-src         export-ignore
 /screenshots-draft  export-ignore
 /tests              export-ignore
 /bin                export-ignore
