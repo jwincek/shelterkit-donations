@@ -7,9 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [3.0.0] - 2026-08-23
+## [3.0.0] - 2026-08-24
 
 ### Changed
+- Two superseded editor assets removed (`block-editor.js`, `block-editor.css`);
+  nothing referenced them. `memorial-panel.js` is kept as the record of a
+  documented decision and is excluded from the build.
 - **Renamed to ShelterKit Donations** (`shelterkit-donations`), joining
   ShelterKit Pets in the ShelterKit family. Public identity only: the
   plugin name, slug, text domain, directory, main file and repository. The
@@ -23,6 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   falls back to the WooCommerce store address only when that is blank.
 
 ### Added
+- Eight screenshots, an icon and a banner for the WordPress.org listing.
+- The build fails if the shared ShelterKit files carry a sibling plugin's text
+  domain, and its leak guard is an allowlist of what may ship rather than a
+  list of what may not.
 - The shared `ShelterKit_Profile` class (`includes/shelterkit/`), carried
   byte-identically by every ShelterKit plugin and loaded by highest version —
   the Action Scheduler pattern. Adds a **Shelter Details** screen holding the
@@ -38,6 +45,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   before the profile existed.
 
 ### Fixed
+- **The shelter's details could be entered in two places.** Adopting the shared
+  Shelter Details screen left this plugin's own Organization fields beside it,
+  so name, address, phone and EIN each had two homes and nothing said which the
+  receipts read. The fields are gone from the settings screen and a one-time
+  migration carries what an install already had, filling only profile fields
+  that are empty.
+- **Every admin screen still said "Shelter Donations".** The rename was applied
+  to the hyphenated slug, a pattern that cannot match the spaced display name,
+  so the menu, page titles, dashboard widget and order meta boxes were all left
+  on the old brand. 42 strings. The WooCommerce product name is deliberately
+  unchanged: its title is copied into every order line item and the legacy-sync
+  matcher keys off it.
+- `ShelterKit_Profile::save()` merged into the stored option rather than
+  replacing it, so an older copy of the shared class winning the version
+  negotiation can no longer drop fields it does not declare.
 - **The emailed annual contribution statement never showed the shelter's tax
   ID.** Both templates read `get_option( 'starter_shelter_ein' )`, an option no
   code path ever wrote — the settings screen saves to
