@@ -2,7 +2,7 @@
 /**
  * Data Integrity — Admin tool for backfilling missing meta and purging records.
  *
- * Adds a "Data Tools" submenu under Shelter Donations with two tabs:
+ * Adds a "Data Tools" submenu under ShelterKit Donations with two tabs:
  *
  * 1. BACKFILL — Scans existing records against entities.json, reports
  *    missing/empty meta fields, and fills them in batches. Also handles:

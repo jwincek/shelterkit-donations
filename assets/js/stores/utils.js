@@ -1,5 +1,5 @@
 /**
- * Shelter Donations - Shared Utilities
+ * ShelterKit Donations - Shared Utilities
  *
  * Common functions used across all stores.
  * Uses ES modules for WordPress 6.9 Script Modules.

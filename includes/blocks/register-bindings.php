@@ -1,6 +1,6 @@
 <?php
 /**
- * Block Bindings - Register custom binding sources for Shelter Donations.
+ * Block Bindings - Register custom binding sources for ShelterKit Donations.
  *
  * @package Starter_Shelter
  * @subpackage Blocks

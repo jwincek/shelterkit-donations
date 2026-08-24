@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin Menu - Registers the top-level Shelter Donations admin menu.
+ * Admin Menu - Registers the top-level ShelterKit Donations admin menu.
  *
  * @package Starter_Shelter
  * @subpackage Admin
@@ -50,8 +50,8 @@ class Menu {
      */
     public static function register_menu(): void {
         add_menu_page(
-            __( 'Shelter Donations', 'shelterkit-donations' ),
-            __( 'Shelter Donations', 'shelterkit-donations' ),
+            __( 'ShelterKit Donations', 'shelterkit-donations' ),
+            __( 'ShelterKit Donations', 'shelterkit-donations' ),
             'manage_options',
             self::MENU_SLUG,
             [ self::class, 'render_dashboard_page' ],
@@ -89,7 +89,7 @@ class Menu {
 
         ?>
         <div class="wrap">
-            <h1><?php esc_html_e( 'Shelter Donations', 'shelterkit-donations' ); ?></h1>
+            <h1><?php esc_html_e( 'ShelterKit Donations', 'shelterkit-donations' ); ?></h1>
             
             <div class="sd-admin-dashboard">
                 <?php if ( $stats ) : ?>
@@ -163,7 +163,7 @@ class Menu {
 
                 </div>
                 <?php else : ?>
-                <p><?php esc_html_e( 'Welcome to Shelter Donations! Statistics will appear here once you start receiving donations.', 'shelterkit-donations' ); ?></p>
+                <p><?php esc_html_e( 'Welcome to ShelterKit Donations! Statistics will appear here once you start receiving donations.', 'shelterkit-donations' ); ?></p>
                 <?php endif; ?>
 
                 <div class="sd-quick-links" style="margin-top: 30px;">
@@ -193,7 +193,7 @@ class Menu {
      *
      * Shows the total number of items needing attention (pending logos,
      * expiring memberships, pending family notifications) as a red
-     * bubble on the Shelter Donations menu — same pattern as
+     * bubble on the ShelterKit Donations menu — same pattern as
      * WooCommerce's order count badge.
      *
      * @since 2.1.0

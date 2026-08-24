@@ -1,5 +1,5 @@
 /**
- * Shelter Donations - Store Index
+ * ShelterKit Donations - Store Index
  *
  * Re-exports all stores for convenience.
  * Import individual stores for better code splitting.

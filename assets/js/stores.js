@@ -1,5 +1,5 @@
 /**
- * Shelter Donations - Legacy stores entry point.
+ * ShelterKit Donations - Legacy stores entry point.
  *
  * This file is a compatibility shim. All store logic now lives in
  * individual modules under assets/js/stores/.

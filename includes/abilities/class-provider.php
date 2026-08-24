@@ -166,7 +166,7 @@ class Provider {
         // Log warning for missing callback.
         if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
             // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-            error_log( sprintf( 'Shelter Donations: Missing callback for ability "%s" (tried: %s)', $name, $callable ) );
+            error_log( sprintf( 'ShelterKit Donations: Missing callback for ability "%s" (tried: %s)', $name, $callable ) );
         }
 
         return null;

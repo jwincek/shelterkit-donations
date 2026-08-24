@@ -2,7 +2,7 @@
  * Legacy Order Sync Admin UI
  *
  * React-based interface for syncing legacy WooCommerce orders to the
- * Shelter Donations system.
+ * ShelterKit Donations system.
  *
  * @package Starter_Shelter
  * @since 1.0.0

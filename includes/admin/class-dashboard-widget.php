@@ -69,7 +69,7 @@ class Dashboard_Widget {
 
         wp_add_dashboard_widget(
             self::WIDGET_ID,
-            __( 'Shelter Donations Overview', 'shelterkit-donations' ),
+            __( 'ShelterKit Donations Overview', 'shelterkit-donations' ),
             [ self::class, 'render_widget' ],
             [ self::class, 'render_widget_config' ],
             null,

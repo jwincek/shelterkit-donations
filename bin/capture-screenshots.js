@@ -1,5 +1,5 @@
 /**
- * Capture WordPress.org screenshots for Shelter Donations.
+ * Capture WordPress.org screenshots for ShelterKit Donations.
  *
  * Conventions that cost time to rediscover:
  *   - channel:'chrome', because the cached chromium can predate this Playwright
@@ -69,8 +69,17 @@ async function shot( page, selector, file ) {
 	return true;
 }
 
-async function go( page, url ) {
-	await page.goto( url, { waitUntil: 'networkidle' } );
+// 'load', not 'networkidle'. WordPress admin runs the Heartbeat API, which
+// polls on a timer forever, so the network is never idle and every admin
+// navigation times out. Wait for the document instead, then for the element
+// the shot actually needs.
+async function go( page, url, settle = '#wpbody-content' ) {
+	await page.goto( url, { waitUntil: 'load', timeout: 60000 } );
+	if ( settle ) {
+		await page.waitForSelector( settle, { timeout: 30000 } ).catch( () => {} );
+	}
+	// Let webfonts and any lazy images paint before capturing.
+	await page.waitForTimeout( 800 );
 }
 
 ( async () => {
@@ -86,14 +95,13 @@ async function go( page, url ) {
 	} );
 
 	// --- log in ---------------------------------------------------------------
-	await go( page, `${ SITE }/wp-login.php` );
+	await go( page, `${ SITE }/wp-login.php`, '#user_login' );
 	await page.fill( '#user_login', USER );
 	await page.fill( '#user_pass', PASS );
 	await page.click( '#wp-submit' );
 	// The administration-email interstitial can intercept the redirect; going
 	// to /wp-admin/ directly steps past it. Assert on the admin bar, not the URL.
-	await go( page, `${ SITE }/wp-admin/` );
-	await page.waitForSelector( '#wpadminbar', { timeout: 15000 } );
+	await go( page, `${ SITE }/wp-admin/`, '#wpadminbar' );
 
 	// --- admin screens --------------------------------------------------------
 	const admin = ( slug ) => `${ SITE }/wp-admin/admin.php?page=${ slug }`;
@@ -133,7 +141,8 @@ async function go( page, url ) {
 		[ MEMORIAL_PAGE, 'memorial-wall.png', 'main, .wp-site-blocks, body' ],
 		[ MEMBERS_PAGE, 'members-wall.png', 'main, .wp-site-blocks, body' ],
 	] ) {
-		await pub.goto( `${ SITE }/${ slug }/`, { waitUntil: 'networkidle' } ).catch( () => {} );
+		await pub.goto( `${ SITE }/${ slug }/`, { waitUntil: 'load', timeout: 60000 } ).catch( () => {} );
+		await pub.waitForTimeout( 1200 );
 		await shot( pub, sel.split( ',' )[ 0 ].trim(), file );
 	}
 
