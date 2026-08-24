@@ -55,6 +55,25 @@ while IFS= read -r entry; do
   esac
 done < <( find "$DEST" -mindepth 1 -maxdepth 1 )
 
+# The allowlist above only sees the top level. A stray file nested inside
+# includes/ or blocks/ would pass it — which is how ShelterKit Pets once swept
+# eleven megabytes of untracked working files into a build minutes before a
+# release, because .distignore had never heard of the directory.
+#
+# Every file this plugin ships is committed, so "tracked by git" is the correct
+# invariant, and unlike any list it holds for paths nobody has invented yet.
+# Borrowed from shelterkit-pets, where it was learned the hard way.
+if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  tracked=$( mktemp )
+  trap 'rm -f "$tracked"' EXIT
+  git ls-files > "$tracked"
+
+  while IFS= read -r f; do
+    rel="${f#"${DEST}/"}"
+    grep -Fxq "$rel" "$tracked" || { echo "  UNTRACKED ${rel}"; fail=1; }
+  done < <( find "$DEST" -type f )
+fi
+
 # ...and nothing the plugin needs at runtime may go missing. A .distignore
 # pattern that is slightly too broad silently ships a plugin that fatals on
 # activation, and that is not visible by reading the file list.
