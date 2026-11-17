@@ -11,6 +11,7 @@ declare( strict_types = 1 );
 
 namespace Starter_Shelter\Admin;
 
+use Starter_Shelter\Admin\Import_Export\CSV_Exporter;
 use Starter_Shelter\Core\Entity_Hydrator;
 use Starter_Shelter\Emails\Email_Factory;
 use Starter_Shelter\Helpers;
@@ -366,20 +367,62 @@ class Quick_Actions {
     }
 
     /**
+     * Bulk-action value for Export Selected. Markup, not storage: it keeps its
+     * sd_ name (see the prefix guard test).
+     *
+     * @var string
+     */
+    private const EXPORT_SELECTED = 'sd_export_selected';
+
+    /**
+     * Offer Export Selected only to users who may export: the list screens
+     * are open to anyone who can edit posts, the Export page is not (#31).
+     *
+     * @param array<string, string> $actions Bulk actions.
+     * @return array<string, string>
+     */
+    private static function add_export_selected( array $actions ): array {
+        if ( current_user_can( 'manage_options' ) ) {
+            $actions[ self::EXPORT_SELECTED ] = __( 'Export Selected', 'shelterkit-donations' );
+        }
+        return $actions;
+    }
+
+    /**
+     * Stream the selected records as the same CSV the Export page produces,
+     * limited to those records (#31). Runs before the list screen sends any
+     * output, so the download headers can still be set; the exporter exits.
+     *
+     * @param string $entity_type  import-export.json entity type.
+     * @param int[]  $post_ids     Selected records.
+     * @param string $redirect_url Where to go when the user may not export.
+     * @return string
+     */
+    private static function export_selected( string $entity_type, array $post_ids, string $redirect_url ): string {
+        if ( ! current_user_can( 'manage_options' ) || ! $post_ids ) {
+            return $redirect_url;
+        }
+        CSV_Exporter::export( $entity_type, [ 'ids' => $post_ids ] );
+        return $redirect_url; // Not reached: export() exits.
+    }
+
+    /**
      * Register bulk actions for memberships.
      */
     public static function register_membership_bulk_actions( array $actions ): array {
         $actions['sd_send_reminders'] = __( 'Send Renewal Reminders', 'shelterkit-donations' );
         $actions['sd_extend_30_days'] = __( 'Extend 30 Days', 'shelterkit-donations' );
-        $actions['sd_export_selected'] = __( 'Export Selected', 'shelterkit-donations' );
-        return $actions;
+        return self::add_export_selected( $actions );
     }
 
     /**
      * Handle bulk actions for memberships.
      */
     public static function handle_membership_bulk_actions( string $redirect_url, string $action, array $post_ids ): string {
-        if ( ! in_array( $action, [ 'sd_send_reminders', 'sd_extend_30_days', 'sd_export_selected' ], true ) ) {
+        if ( self::EXPORT_SELECTED === $action ) {
+            return self::export_selected( 'memberships', $post_ids, $redirect_url );
+        }
+        if ( ! in_array( $action, [ 'sd_send_reminders', 'sd_extend_30_days' ], true ) ) {
             return $redirect_url;
         }
 
@@ -410,11 +453,6 @@ class Quick_Actions {
                     ++$count;
                 }
                 return add_query_arg( [ 'sd_action' => 'memberships_extended', 'sd_count' => $count ], $redirect_url );
-
-            case 'sd_export_selected':
-                // Store IDs in transient and redirect to export.
-                set_transient( 'skdon_export_membership_ids_' . get_current_user_id(), $post_ids, HOUR_IN_SECONDS );
-                return admin_url( 'admin-ajax.php?action=skdon_export_selected_memberships&_wpnonce=' . wp_create_nonce( 'sd_export_memberships' ) );
         }
 
         return $redirect_url;
@@ -425,14 +463,16 @@ class Quick_Actions {
      */
     public static function register_memorial_bulk_actions( array $actions ): array {
         $actions['sd_notify_families'] = __( 'Send Family Notifications', 'shelterkit-donations' );
-        $actions['sd_export_selected'] = __( 'Export Selected', 'shelterkit-donations' );
-        return $actions;
+        return self::add_export_selected( $actions );
     }
 
     /**
      * Handle bulk actions for memorials.
      */
     public static function handle_memorial_bulk_actions( string $redirect_url, string $action, array $post_ids ): string {
+        if ( self::EXPORT_SELECTED === $action ) {
+            return self::export_selected( 'memorials', $post_ids, $redirect_url );
+        }
         if ( 'sd_notify_families' !== $action ) {
             return $redirect_url;
         }
@@ -460,14 +500,16 @@ class Quick_Actions {
      */
     public static function register_donation_bulk_actions( array $actions ): array {
         $actions['sd_resend_receipts'] = __( 'Resend Receipts', 'shelterkit-donations' );
-        $actions['sd_export_selected'] = __( 'Export Selected', 'shelterkit-donations' );
-        return $actions;
+        return self::add_export_selected( $actions );
     }
 
     /**
      * Handle bulk actions for donations.
      */
     public static function handle_donation_bulk_actions( string $redirect_url, string $action, array $post_ids ): string {
+        if ( self::EXPORT_SELECTED === $action ) {
+            return self::export_selected( 'donations', $post_ids, $redirect_url );
+        }
         if ( 'sd_resend_receipts' !== $action ) {
             return $redirect_url;
         }
