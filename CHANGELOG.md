@@ -24,6 +24,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   fields in place of the single nested value nothing else reads. (#30)
 
 ### Fixed
+- **Export Selected did nothing on Donations and Memorials, and opened a
+  blank "0" page on Memberships.** It now downloads the same CSV as the
+  Export page, limited to the checked records. Like that page, it is
+  offered only to administrators; editors can see the lists but not export
+  donors' details. (#31)
+- **Data Tools → Reset Sync Flags always said "Request failed."** It posted
+  an action nothing handled. It now has a handler, and both it and the
+  Legacy Order Sync screen use one shared reset. Resetting chosen orders no
+  longer turns a negative id into a real order's. (#32)
+- **Amounts follow the store's currency everywhere.** Server-rendered
+  amounts used to be US dollars with US separators whatever the store was
+  set to, and Donor Statistics' counter switched from "$50.00" to "$50" as
+  it animated. Both now use WooCommerce's symbol, position, decimals and
+  separators. (#28)
+- **The blocks' shared settings never reached the page.** They were
+  registered on an action WordPress never fires, so the client formatted
+  money as "$" and the Campaign and Donor Dashboard stores requested
+  `undefined…` instead of the REST API. (#28)
+- **Donor Statistics' auto-refresh never ran.** Each refresh threw before
+  its request. It now runs, asks for the block's own period, and keeps any
+  figure the server doesn't send instead of dropping it to 0.
 - **Uninstalling with "Delete all data" removed other plugins' settings.**
   It deleted every option and transient whose name began with `sd_`. It now
   deletes the plugin's own options by name, and also those still under the

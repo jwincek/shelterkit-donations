@@ -40,6 +40,9 @@ class CSV_Exporter {
 	 *     @type string $date_to     Custom date range end (Y-m-d).
 	 *     @type string $status      Status filter for memberships: all, active, expired.
 	 *     @type bool   $include_stats Include optional column groups for donors.
+	 *     @type int[]  $ids         Export only these records, whatever their status
+	 *                               (the list screens' Export Selected). Date and
+	 *                               status filters still apply on top.
 	 * }
 	 */
 	public static function export( string $entity_type, array $options = [] ): void {
@@ -445,6 +448,15 @@ class CSV_Exporter {
 			'orderby'        => $export_config['orderby'] ?? 'date',
 			'order'          => $export_config['order'] ?? 'DESC',
 		];
+
+		// Export Selected: exactly the chosen records. intval rather than absint,
+		// so a negative id is dropped instead of becoming a real record's id.
+		if ( isset( $options['ids'] ) ) {
+			$ids = array_values( array_filter( array_map( 'intval', (array) $options['ids'] ), static fn ( int $id ): bool => $id > 0 ) );
+
+			$args['post__in']    = $ids ?: [ 0 ];
+			$args['post_status'] = 'any';
+		}
 
 		// Apply date range filter.
 		$date_range = $options['date_range'] ?? 'all';

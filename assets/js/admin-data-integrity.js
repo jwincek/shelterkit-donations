@@ -298,7 +298,6 @@
 			return;
 		}
 
-		// Reuse the existing Legacy Sync reset endpoint if available.
 		var $btn = $( this ).prop( 'disabled', true );
 
 		$.ajax( {
@@ -307,14 +306,13 @@
 			data: {
 				action: 'skdon_legacy_sync_reset',
 				nonce: config.nonce,
-				scope: 'all',
 			},
 		} ).done( function( response ) {
 			$btn.prop( 'disabled', false );
 			if ( response.success ) {
-				$results.html( '<div class="notice notice-success"><p>Sync flags reset. You can now re-run Legacy Order Sync.</p></div>' );
+				$results.empty().append( $( '<div class="notice notice-success"><p></p></div>' ).find( 'p' ).text( response.data.message ).end() );
 			} else {
-				$results.html( '<div class="notice notice-error"><p>' + ( response.data || 'Failed.' ) + '</p></div>' );
+				$results.empty().append( $( '<div class="notice notice-error"><p></p></div>' ).find( 'p' ).text( response.data || 'Failed.' ).end() );
 			}
 		} ).fail( function() {
 			$btn.prop( 'disabled', false );

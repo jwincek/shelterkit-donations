@@ -69,6 +69,37 @@ class Data_Integrity {
 		add_action( 'wp_ajax_skdon_integrity_backfill', [ self::class, 'ajax_backfill' ] );
 		add_action( 'wp_ajax_skdon_integrity_purge', [ self::class, 'ajax_purge' ] );
 		add_action( 'wp_ajax_skdon_integrity_recalc_donors', [ self::class, 'ajax_recalc_donors' ] );
+		add_action( 'wp_ajax_skdon_legacy_sync_reset', [ self::class, 'ajax_reset_sync_flags' ] );
+	}
+
+	/**
+	 * Purge tab → Reset Sync Flags. The button had no handler, so it always
+	 * failed (#32). Legacy Order Sync's own reset takes a different nonce and
+	 * different fields, so this screen gets its own handler over the shared
+	 * reset.
+	 */
+	public static function ajax_reset_sync_flags(): void {
+		check_ajax_referer( self::NONCE, 'nonce' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( __( 'Permission denied.', 'shelterkit-donations' ), 403 );
+		}
+
+		$count = \Starter_Shelter\Admin\Legacy_Sync\Order_Scanner::reset_sync_flags();
+
+		wp_send_json_success( [
+			'count'   => $count,
+			'message' => sprintf(
+				/* translators: %d: number of WooCommerce orders. */
+				_n(
+					'Sync flags reset on %d order. Run Legacy Order Sync to process it again.',
+					'Sync flags reset on %d orders. Run Legacy Order Sync to process them again.',
+					$count,
+					'shelterkit-donations'
+				),
+				$count
+			),
+		] );
 	}
 
 	/**

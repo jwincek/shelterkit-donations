@@ -42,6 +42,63 @@ class Order_Scanner {
 	public const SYNCED_META_KEY = '_skdon_legacy_synced';
 
 	/**
+	 * Meta key holding each synced order's per-line results.
+	 *
+	 * @var string
+	 */
+	public const RESULTS_META_KEY = '_skdon_legacy_sync_results';
+
+	/**
+	 * Clear the synced flag and stored results, so Legacy Order Sync
+	 * processes the orders again. The records a sync created are untouched.
+	 *
+	 * Shared by the Legacy Order Sync screen and Data Tools → Reset Sync
+	 * Flags, which had no working handler of its own (#32).
+	 *
+	 * @param int[]|null $order_ids Orders to reset, or null for every order.
+	 * @return int Orders reset.
+	 */
+	public static function reset_sync_flags( ?array $order_ids = null ): int {
+		global $wpdb;
+
+		if ( null === $order_ids ) {
+			$count = self::count_by_meta( $wpdb, self::SYNCED_META_KEY );
+
+			$tables = [ $wpdb->postmeta ];
+			if ( class_exists( '\Automattic\WooCommerce\Utilities\OrderUtil' )
+				&& \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
+				$meta_table = $wpdb->prefix . 'wc_orders_meta';
+				if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $meta_table ) ) === $meta_table ) {
+					$tables[] = $meta_table;
+				}
+			}
+			foreach ( $tables as $table ) {
+				foreach ( [ self::SYNCED_META_KEY, self::RESULTS_META_KEY ] as $key ) {
+					$wpdb->delete( $table, [ 'meta_key' => $key ] ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- a one-off admin reset.
+				}
+			}
+			if ( wp_cache_supports( 'flush_group' ) ) {
+				wp_cache_flush_group( 'orders' );
+			}
+			return $count;
+		}
+
+		// intval, not absint: a negative id is dropped rather than turned
+		// into a real, unrelated order's id.
+		$count = 0;
+		foreach ( array_filter( array_map( 'intval', $order_ids ), static fn ( int $id ): bool => $id > 0 ) as $order_id ) {
+			$order = wc_get_order( $order_id );
+			if ( $order ) {
+				$order->delete_meta_data( self::SYNCED_META_KEY );
+				$order->delete_meta_data( self::RESULTS_META_KEY );
+				$order->save();
+				++$count;
+			}
+		}
+		return $count;
+	}
+
+	/**
 	 * Get sync statistics.
 	 *
 	 * @since 2.0.0

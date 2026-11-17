@@ -7,7 +7,10 @@
  * @since 1.0.0
  */
 
-import { store, getContext, getElement } from '@wordpress/interactivity';
+import { store, getContext, getElement, withScope } from '@wordpress/interactivity';
+// The shared formatter, so the counter matches the server's first render and
+// follows the store's currency (#28). Relative, like the other stores' imports.
+import { formatCurrency, getSharedConfig } from '../../assets/js/stores/utils.js';
 
 // Animation frame ID for cleanup.
 let animationFrameId = null;
@@ -85,31 +88,32 @@ const { state, actions } = store( 'shelter-donations/donor-stats', {
         },
 
         /**
-         * Refresh stats from the server.
+         * Refresh stats from the server, for the block's own period.
+         *
+         * The endpoint returns total_donations and donor_count. A figure it
+         * doesn't send keeps its current value instead of dropping to 0.
          */
         *refreshStats() {
-            const context = getContext();
-            
+            const { period } = getContext();
+
             try {
-                const response = yield fetch( '/wp-json/shelter-donations/v1/stats', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                } );
-                
+                const url = new URL( `${ getSharedConfig().restUrl || '/wp-json/shelter-donations/v1/' }stats`, window.location.href );
+                url.searchParams.set( 'period', period || 'all_time' );
+
+                const response = yield fetch( url, { headers: { Accept: 'application/json' } } );
+
                 if ( ! response.ok ) {
                     throw new Error( 'Failed to fetch stats' );
                 }
-                
+
                 const data = yield response.json();
-                
-                // Update stats.
-                state.stats.total = data.total_donations || 0;
-                state.stats.count = data.donation_count || 0;
-                state.stats.donors = data.donor_count || 0;
-                state.stats.members = data.active_members || 0;
-                
+                const fields = { total: 'total_donations', count: 'donation_count', donors: 'donor_count', members: 'active_members' };
+                for ( const [ key, field ] of Object.entries( fields ) ) {
+                    if ( typeof data[ field ] === 'number' ) {
+                        state.stats[ key ] = data[ field ];
+                    }
+                }
+
                 // Update formatted values without animation.
                 state.formatted.total = formatCurrency( state.stats.total );
                 state.formatted.count = formatNumber( state.stats.count );
@@ -129,9 +133,11 @@ const { state, actions } = store( 'shelter-donations/donor-stats', {
             const context = getContext();
             
             // Set up auto-refresh if configured.
+            // withScope: a timer runs outside the block's scope, where
+            // getContext() throws, and auto-refresh never ran.
             if ( context.refreshInterval > 0 ) {
                 refreshIntervalId = setInterval(
-                    () => actions.refreshStats(),
+                    withScope( () => actions.refreshStats() ),
                     context.refreshInterval * 1000
                 );
             }
@@ -179,17 +185,6 @@ const { state, actions } = store( 'shelter-donations/donor-stats', {
         },
     },
 } );
-
-/**
- * Format a number as currency.
- */
-function formatCurrency( value ) {
-    // Use simple formatting - in production, get from config.
-    return '$' + value.toLocaleString( 'en-US', {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-    } );
-}
 
 /**
  * Format a number with thousands separators.

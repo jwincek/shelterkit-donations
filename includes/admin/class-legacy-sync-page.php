@@ -363,40 +363,19 @@ class Legacy_Sync_Page {
 			wp_send_json_error( __( 'Permission denied.', 'shelterkit-donations' ) );
 		}
 
-		$order_ids = isset( $_POST['order_ids'] ) ? array_map( 'absint', (array) $_POST['order_ids'] ) : [];
+		$order_ids = isset( $_POST['order_ids'] ) ? (array) wp_unslash( $_POST['order_ids'] ) : []; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- reset_sync_flags() casts each id with intval and drops anything not positive.
 		$reset_all = ! empty( $_POST['reset_all'] );
 
 		if ( $reset_all ) {
-			global $wpdb;
-
-			$wpdb->delete( $wpdb->postmeta, [ 'meta_key' => Order_Scanner::SYNCED_META_KEY ] );
-			$wpdb->delete( $wpdb->postmeta, [ 'meta_key' => '_skdon_legacy_sync_results' ] );
-
-			// HPOS support.
-			if ( class_exists( '\Automattic\WooCommerce\Utilities\OrderUtil' )
-				&& \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
-				$meta_table = $wpdb->prefix . 'wc_orders_meta';
-				if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $meta_table ) ) === $meta_table ) {
-					$wpdb->delete( $meta_table, [ 'meta_key' => Order_Scanner::SYNCED_META_KEY ] );
-					$wpdb->delete( $meta_table, [ 'meta_key' => '_skdon_legacy_sync_results' ] );
-				}
-			}
-
+			Order_Scanner::reset_sync_flags();
 			wp_send_json_success( [ 'message' => __( 'All sync status has been reset.', 'shelterkit-donations' ) ] );
 		} elseif ( ! empty( $order_ids ) ) {
-			foreach ( $order_ids as $order_id ) {
-				$order = wc_get_order( $order_id );
-				if ( $order ) {
-					$order->delete_meta_data( Order_Scanner::SYNCED_META_KEY );
-					$order->delete_meta_data( '_skdon_legacy_sync_results' );
-					$order->save();
-				}
-			}
+			$count = Order_Scanner::reset_sync_flags( $order_ids );
 			wp_send_json_success( [
 				'message' => sprintf(
 					/* translators: %d: number of orders. */
 					__( 'Sync status reset for %d order(s).', 'shelterkit-donations' ),
-					count( $order_ids )
+					$count
 				),
 			] );
 		} else {
