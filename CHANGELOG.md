@@ -23,6 +23,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   missing from the import map unless something else on the page (a block
   theme's Navigation block, WooCommerce's mini-cart) happened to add it.
   Each block now ships a `view.asset.php`. (#18)
+- **The donation, membership and memorial forms showed a success tick,
+  "Proceed to Checkout" and an empty error box before anything was
+  clicked.** The stylesheet that hides them until needed was attached by a
+  handle the 3.0.0 rename had changed, so it never loaded. (#19)
 
 ## [3.0.0] - 2026-08-24
 

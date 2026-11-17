@@ -348,9 +348,14 @@ function starter_shelter_register_blocks(): void {
     }
 
     // Add shared feedback styles as dependency for form blocks.
+    //
+    // Core derives the style handle from the block name, which is frozen as
+    // shelter-donations/<block>, so this prefix is frozen with it. 3.0.0
+    // renamed it with the plugin, the lookup matched nothing, and the
+    // stylesheet that hides the success and error boxes never loaded (#19).
     $form_blocks = [ 'donation-form', 'memorial-form', 'membership-form' ];
     foreach ( $form_blocks as $block ) {
-        $handle = 'shelterkit-donations-' . $block . '-style';
+        $handle = 'shelter-donations-' . $block . '-style';
         $style = wp_styles()->query( $handle );
         if ( $style ) {
             $style->deps[] = 'sd-form-feedback';
