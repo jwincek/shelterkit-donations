@@ -29,7 +29,7 @@ class Product_Sync_Checker {
 	 * @var array
 	 */
 	private static array $product_map = [
-		'shelterkit-donations' => [
+		'shelter-donations' => [
 			'option_key'     => 'sd_donation_product_id',
 			'attribute_name' => 'Preferred Allocation',
 			'attribute_slug' => 'preferred-allocation',
@@ -47,7 +47,7 @@ class Product_Sync_Checker {
 			'attribute_slug' => 'membership-level',
 			'config_source'  => 'tiers_business',
 		],
-		'shelterkit-donations-in-memoriam' => [
+		'shelter-donations-in-memoriam' => [
 			'option_key'     => 'sd_memorial_product_id',
 			'attribute_name' => 'In Memoriam Type',
 			'attribute_slug' => 'in-memoriam-type',
@@ -609,10 +609,10 @@ class Product_Sync_Checker {
 				// Look up image_file from the activator's product data.
 				if ( ! $image_file ) {
 					$image_map = [
-						'shelterkit-donations'             => 'product-donation.svg',
+						'shelter-donations'             => 'product-donation.svg',
 						'shelter-memberships'           => 'product-membership.svg',
-						'shelter-memberships-business'   => 'product-membership-business.svg',
-						'shelterkit-donations-in-memoriam' => 'product-memorial.svg',
+						'shelter-memberships-business'  => 'product-membership-business.svg',
+						'shelter-donations-in-memoriam' => 'product-memorial.svg',
 					];
 					$image_file = $image_map[ $sku ] ?? null;
 				}

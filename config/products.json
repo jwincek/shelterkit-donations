@@ -11,10 +11,10 @@
   },
 
   "sku_attribute_mapping": {
-    "shelterkit-donations": "preferred-allocation",
+    "shelter-donations": "preferred-allocation",
     "shelter-memberships": "membership-level",
     "shelter-memberships-business": "membership-level",
-    "shelterkit-donations-in-memoriam": "in-memoriam-type",
+    "shelter-donations-in-memoriam": "in-memoriam-type",
     "memberships": "membership-level"
   },
 

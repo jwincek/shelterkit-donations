@@ -853,10 +853,10 @@ class Settings {
                 </thead>
                 <tbody>
                     <?php // The product's real name, which is frozen — see Activator::$products. ?>
-                    <tr><td>Shelter Donations</td><td><code>shelterkit-donations</code></td><td>Preferred Allocation</td><td>General Fund, Medical Care, etc.</td></tr>
+                    <tr><td>Shelter Donations</td><td><code>shelter-donations</code></td><td>Preferred Allocation</td><td>General Fund, Medical Care, etc.</td></tr>
                     <tr><td>Individual Memberships</td><td><code>shelter-memberships</code></td><td>Membership Level</td><td>Single ($10) - Benefactor ($1000)</td></tr>
                     <tr><td>Business Memberships</td><td><code>shelter-memberships-business</code></td><td>Membership Level</td><td>Contributing ($50) - Benefactor ($1000)</td></tr>
-                    <tr><td>Memorial Donations</td><td><code>shelterkit-donations-in-memoriam</code></td><td>In Memoriam Type</td><td>Person, Pet</td></tr>
+                    <tr><td>Memorial Donations</td><td><code>shelter-donations-in-memoriam</code></td><td>In Memoriam Type</td><td>Person, Pet</td></tr>
                 </tbody>
             </table>
         </div>
@@ -865,10 +865,10 @@ class Settings {
 
     private static function get_product_description( string $key ): string {
         return [
-            'shelterkit-donations'             => __( 'General donations with allocation options.', 'shelterkit-donations' ),
+            'shelter-donations'             => __( 'General donations with allocation options.', 'shelterkit-donations' ),
             'shelter-memberships'           => __( 'Individual membership tiers.', 'shelterkit-donations' ),
             'shelter-memberships-business'  => __( 'Business/corporate membership tiers.', 'shelterkit-donations' ),
-            'shelterkit-donations-in-memoriam' => __( 'Memorial donations for people or pets.', 'shelterkit-donations' ),
+            'shelter-donations-in-memoriam' => __( 'Memorial donations for people or pets.', 'shelterkit-donations' ),
         ][ $key ] ?? '';
     }
 

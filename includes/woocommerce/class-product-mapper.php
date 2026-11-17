@@ -42,7 +42,7 @@ class Product_Mapper {
      * Find product configuration by SKU prefix.
      *
      * Products are matched by SKU prefix to allow for variable products
-     * with SKUs like "shelterkit-donations-monthly" matching "shelterkit-donations".
+     * with SKUs like "shelter-donations-monthly" matching "shelter-donations".
      *
      * @since 1.0.0
      *

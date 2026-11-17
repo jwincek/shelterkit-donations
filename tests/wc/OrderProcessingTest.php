@@ -19,7 +19,9 @@ declare( strict_types = 1 );
 namespace Starter_Shelter\Tests\WC;
 
 use WP_UnitTestCase;
+use Starter_Shelter\Core\Activator;
 use Starter_Shelter\WooCommerce\Order_Handler;
+use Starter_Shelter\WooCommerce\Product_Mapper;
 
 final class OrderProcessingTest extends WP_UnitTestCase {
 
@@ -74,7 +76,7 @@ final class OrderProcessingTest extends WP_UnitTestCase {
     }
 
     public function test_donation_order_creates_a_donation_record(): void {
-        $order = $this->make_shelter_order( 'shelterkit-donations', 25.00 );
+        $order = $this->make_shelter_order( 'shelter-donations', 25.00 );
 
         $order->update_status( 'completed' ); // Fires the real processing flow.
 
@@ -93,7 +95,7 @@ final class OrderProcessingTest extends WP_UnitTestCase {
     public function test_paid_transition_does_not_double_count(): void {
         // processing → completed both fire the processing hook; the _sd_processed
         // guard must keep it to a single donation.
-        $order = $this->make_shelter_order( 'shelterkit-donations', 10.00 );
+        $order = $this->make_shelter_order( 'shelter-donations', 10.00 );
 
         $order->update_status( 'processing' );
         $order->update_status( 'completed' );
@@ -106,7 +108,7 @@ final class OrderProcessingTest extends WP_UnitTestCase {
         // Honoree comes from the cart/order-item meta the memorial form sets —
         // the channel that has historically drifted from what the reader expects.
         $order = $this->make_shelter_order(
-            'shelterkit-donations-in-memoriam',
+            'shelter-donations-in-memoriam',
             50.00,
             [
                 'in-memoriam-type'  => 'Pet',     // Selected attribute → memorial_type.
@@ -126,7 +128,7 @@ final class OrderProcessingTest extends WP_UnitTestCase {
     public function test_duplicate_trigger_after_completion_is_a_noop(): void {
         // A late/duplicate trigger (e.g. a repeated gateway webhook) after the
         // order already processed must not create a second donation.
-        $order = $this->make_shelter_order( 'shelterkit-donations', 20.00 );
+        $order = $this->make_shelter_order( 'shelter-donations', 20.00 );
         $order->update_status( 'completed' );
         $this->assertCount( 1, $this->entities_for_order( $order->get_id(), 'sd_donation' ) );
 
@@ -139,7 +141,7 @@ final class OrderProcessingTest extends WP_UnitTestCase {
         // The in-lock re-check reads the flag straight from the DB (HPOS-aware),
         // so a value written by a concurrent run is seen even if the order
         // object cache is stale. Exercise that reader directly.
-        $order  = $this->make_shelter_order( 'shelterkit-donations', 5.00 );
+        $order  = $this->make_shelter_order( 'shelter-donations', 5.00 );
         $method = new \ReflectionMethod( Order_Handler::class, 'is_processed_in_db' );
         $method->setAccessible( true );
 
@@ -152,7 +154,7 @@ final class OrderProcessingTest extends WP_UnitTestCase {
     }
 
     public function test_memorial_without_honoree_is_rejected_and_creates_no_record(): void {
-        $order = $this->make_shelter_order( 'shelterkit-donations-in-memoriam', 50.00 );
+        $order = $this->make_shelter_order( 'shelter-donations-in-memoriam', 50.00 );
 
         $order->update_status( 'completed' );
 
@@ -165,5 +167,44 @@ final class OrderProcessingTest extends WP_UnitTestCase {
             (bool) array_filter( (array) $results, static fn ( $r ) => is_wp_error( $r ) ),
             'A WP_Error result is stored for the rejected item.'
         );
+    }
+
+    /**
+     * Every product an existing site has carries the SKU it was created with,
+     * and Product_Mapper recognises order items by SKU prefix. These strings are
+     * therefore data, not branding: 3.0.0 renamed two of them with the plugin,
+     * and every donation and memorial order on an upgraded site was silently
+     * skipped (#16).
+     *
+     * @dataProvider frozen_skus
+     */
+    public function test_frozen_skus_still_resolve( string $sku, string $ability ): void {
+        $config = Product_Mapper::find_by_sku( $sku );
+
+        $this->assertNotNull( $config, "SKU {$sku} no longer resolves, so existing products' orders would be skipped." );
+        $this->assertSame( $sku, $config['sku_prefix'], 'Resolved to the exact entry, not a shorter prefix.' );
+        $this->assertSame( $ability, $config['ability'] );
+    }
+
+    /**
+     * @return array<string, array{0: string, 1: string}>
+     */
+    public function frozen_skus(): array {
+        return [
+            'donation'            => [ 'shelter-donations', 'shelter-donations/create' ],
+            'memorial'            => [ 'shelter-donations-in-memoriam', 'shelter-memorials/create' ],
+            'membership'          => [ 'shelter-memberships', 'shelter-memberships/create' ],
+            'business membership' => [ 'shelter-memberships-business', 'shelter-memberships/create' ],
+        ];
+    }
+
+    public function test_activator_creates_products_the_mapper_recognises(): void {
+        $products = ( new \ReflectionClass( Activator::class ) )->getProperty( 'products' )->getValue();
+
+        foreach ( $products as $key => $definition ) {
+            $config = Product_Mapper::find_by_sku( $definition['sku'] );
+            $this->assertNotNull( $config, "The activator creates {$key} with SKU {$definition['sku']}, which Product_Mapper does not recognise." );
+            $this->assertSame( $definition['sku'], $config['sku_prefix'] );
+        }
     }
 }

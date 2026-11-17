@@ -24,7 +24,7 @@ class Activator {
      * @var array
      */
     private static array $products = [
-        'shelterkit-donations' => [
+        'shelter-donations' => [
             // FROZEN — not renamed with the plugin. WooCommerce copies a
             // product's title into every order line item, and the legacy-sync
             // matcher in config/sync.json keys off it with
@@ -32,8 +32,14 @@ class Activator {
             // future orders unmatched by that pattern while historical ones
             // still carry the old name. The customer-facing name is a donor's
             // words anyway, not the plugin's brand.
+            //
+            // The SKUs are frozen for a stronger reason: Product_Mapper
+            // recognises this plugin's order items by SKU prefix, and every
+            // existing product keeps the SKU it was created with. 3.0.0
+            // renamed two of them with the plugin and every donation and
+            // memorial order on an upgraded site was silently skipped (#16).
             'name'        => 'Shelter Donations',
-            'sku'         => 'shelterkit-donations',
+            'sku'         => 'shelter-donations',
             'description' => 'Support us with a donation to help care for animals in need.',
             'short_desc'  => 'Support us with a donation.',
             'category'    => 'Support Us',
@@ -98,9 +104,9 @@ class Activator {
                 ],
             ],
         ],
-        'shelterkit-donations-in-memoriam' => [
+        'shelter-donations-in-memoriam' => [
             'name'        => 'In Memoriam Donations',
-            'sku'         => 'shelterkit-donations-in-memoriam',
+            'sku'         => 'shelter-donations-in-memoriam',
             'description' => 'Honor the memory of a person or pet with a meaningful donation.',
             'short_desc'  => 'Make a donation in memory of a person or pet.',
             'category'    => 'Support Us',

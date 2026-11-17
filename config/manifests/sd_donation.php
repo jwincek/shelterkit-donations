@@ -322,7 +322,7 @@ return [
 	 * for shape rationale).
 	 */
 	'products' => [
-		'shelterkit-donations' => [
+		'shelter-donations' => [
 			'ability'       => 'shelter-donations/create',
 			'product_type'  => 'donation',
 			'description'   => 'General shelter donations',

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Sites upgraded from 2.x stopped recording donations and memorials.**
+  3.0.0 renamed two product SKUs along with the plugin, but existing
+  products keep the SKU they were created with, so their order items were
+  no longer recognised and were skipped with no error or order note. The
+  2.x SKUs are restored, listed as frozen in CONTRIBUTING, and pinned by a
+  test. (#16)
+
 ## [3.0.0] - 2026-08-24
 
 ### Changed

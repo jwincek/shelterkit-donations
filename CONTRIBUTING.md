@@ -112,6 +112,16 @@ the database or in post content rather than being code:
 - **The 12 `shelter-donations/*` block names** and the 9 Interactivity store
   namespaces — these appear in saved post content
 - The `shelter-donations/v1` REST namespace
+- The WooCommerce product SKUs `shelter-donations`,
+  `shelter-donations-in-memoriam`, `shelter-memberships` and
+  `shelter-memberships-business`. Every existing product keeps the SKU it was
+  created with, and order items are recognised by SKU prefix, so renaming one
+  silently stops its orders being recorded. 3.0.0 did exactly that (#16).
+- Anything core **derives** from a block name follows the frozen name: script
+  and style handles (`shelter-donations-<block>-editor-script`, `-style`,
+  `-view-script-module`) and the `wp-block-shelter-donations-<block>` class.
+  A rename regex that spares `shelter-donations/` still catches these, and the
+  ones built by concatenation (`'shelter-donations-' . $block`) as well.
 
 The `Starter_Shelter\` namespace, `STARTER_SHELTER_*` constants and `sd_` prefix
 are internal and deliberately do **not** track the plugin's public name. That
