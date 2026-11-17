@@ -24,6 +24,38 @@ const NAMESPACE = 'shelter-donations/memorial-form';
 const { state, actions } = store( NAMESPACE, {
 	state: {
 		forms: {},
+
+		/**
+		 * This form's state, for directives.
+		 *
+		 * A directive path is split on "." only, so the old
+		 * `state.forms['<form id>'].x` never resolved: success and error
+		 * messages, field values and the processing state never reached the
+		 * page (#20). Reading the id from the element's context gives the same
+		 * per-form state through a path the runtime can follow. Undefined until
+		 * initForm has run, which renders as the empty state.
+		 */
+		get form() {
+			return state.forms[ getContext().formId ];
+		},
+
+		// The runtime evaluates no expressions, so each radio binds to a named
+		// value rather than `state.form.dedicationType === 'memory'` (#20).
+		get isMemoryDedication() {
+			return 'memory' === state.form?.dedicationType;
+		},
+
+		get isHonorDedication() {
+			return 'honor' === state.form?.dedicationType;
+		},
+
+		get isPersonHonoree() {
+			return 'person' === state.form?.honoreeType;
+		},
+
+		get isPetHonoree() {
+			return 'pet' === state.form?.honoreeType;
+		},
 	},
 
 	actions: {

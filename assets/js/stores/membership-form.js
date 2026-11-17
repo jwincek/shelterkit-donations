@@ -26,6 +26,29 @@ const logoFiles = new Map();
 const { state, actions } = store( NAMESPACE, {
 	state: {
 		forms: {},
+
+		/**
+		 * This form's state, for directives.
+		 *
+		 * A directive path is split on "." only, so the old
+		 * `state.forms['<form id>'].x` never resolved: success and error
+		 * messages, field values and the processing state never reached the
+		 * page (#20). Reading the id from the element's context gives the same
+		 * per-form state through a path the runtime can follow. Undefined until
+		 * initForm has run, which renders as the empty state.
+		 */
+		get form() {
+			return state.forms[ getContext().formId ];
+		},
+
+		// Named values for the type radios; directives evaluate no expressions (#20).
+		get isIndividualType() {
+			return 'individual' === state.form?.membershipType;
+		},
+
+		get isBusinessType() {
+			return 'business' === state.form?.membershipType;
+		},
 	},
 
 	actions: {

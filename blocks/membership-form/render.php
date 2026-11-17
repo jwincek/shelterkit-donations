@@ -120,13 +120,13 @@ $current_tiers = ( $membership_type === 'business' ) ? $business_tiers : $indivi
                 <label class="sd-type-option">
                     <input type="radio" name="<?php echo esc_attr( $form_id ); ?>_type" value="individual"
                         data-wp-on--change="actions.setMembershipType"
-                        data-wp-bind--checked="state.forms['<?php echo esc_attr( $form_id ); ?>'].membershipType === 'individual'">
+                        data-wp-bind--checked="state.isIndividualType">
                     <span class="sd-type-label"><?php esc_html_e( 'Individual', 'shelterkit-donations' ); ?></span>
                 </label>
                 <label class="sd-type-option">
                     <input type="radio" name="<?php echo esc_attr( $form_id ); ?>_type" value="business"
                         data-wp-on--change="actions.setMembershipType"
-                        data-wp-bind--checked="state.forms['<?php echo esc_attr( $form_id ); ?>'].membershipType === 'business'">
+                        data-wp-bind--checked="state.isBusinessType">
                     <span class="sd-type-label"><?php esc_html_e( 'Business', 'shelterkit-donations' ); ?></span>
                 </label>
             </div>
@@ -235,7 +235,7 @@ $current_tiers = ( $membership_type === 'business' ) ? $business_tiers : $indivi
                 data-wp-bind--placeholder="callbacks.getDonorNamePlaceholder"
                 placeholder="<?php esc_attr_e( 'Enter your name...', 'shelterkit-donations' ); ?>"
                 data-wp-on--input="actions.setDonorName"
-                data-wp-bind--value="state.forms['<?php echo esc_attr( $form_id ); ?>'].donorName">
+                data-wp-bind--value="state.form.donorName">
             <p class="description sd-field-help" data-wp-text="callbacks.getDonorNameHelp"><?php esc_html_e( 'How your name will appear on our membership records.', 'shelterkit-donations' ); ?></p>
             <p class="sd-family-tier-note sd-collapsed" data-wp-class--sd-collapsed="!callbacks.isFamilyTier" aria-live="polite">
                 <?php esc_html_e( 'Please list all family members to be included in your membership (e.g. "John & Mary Smith").', 'shelterkit-donations' ); ?>
@@ -290,9 +290,9 @@ $current_tiers = ( $membership_type === 'business' ) ? $business_tiers : $indivi
 
             <button type="button" class="sd-submit-button wp-element-button" data-wp-on--click="actions.submitToCart"
                 data-wp-bind--disabled="!callbacks.canProceed"
-                data-wp-class--is-processing="state.forms['<?php echo esc_attr( $form_id ); ?>'].isProcessing">
-                <span data-wp-bind--hidden="state.forms['<?php echo esc_attr( $form_id ); ?>'].isProcessing"><?php echo esc_html( $submit_text ); ?></span>
-                <span class="sd-button-loading" data-wp-bind--hidden="!state.forms['<?php echo esc_attr( $form_id ); ?>'].isProcessing">
+                data-wp-class--is-processing="state.form.isProcessing">
+                <span data-wp-bind--hidden="state.form.isProcessing"><?php echo esc_html( $submit_text ); ?></span>
+                <span class="sd-button-loading" data-wp-bind--hidden="!state.form.isProcessing">
                     <span class="sd-spinner-small"></span> <?php esc_html_e( 'Processing...', 'shelterkit-donations' ); ?>
                 </span>
             </button>

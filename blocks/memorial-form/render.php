@@ -81,7 +81,7 @@ $wrapper = get_block_wrapper_attributes( [
             <div class="sd-toggle-buttons">
                 <label class="sd-toggle-button">
                     <input type="radio" name="<?php echo esc_attr( $form_id ); ?>_ded" value="memory" class="sd-radio"
-                        data-wp-on--change="actions.setDedicationType" data-wp-bind--checked="state.forms['<?php echo esc_attr( $form_id ); ?>'].dedicationType === 'memory'">
+                        data-wp-on--change="actions.setDedicationType" data-wp-bind--checked="state.isMemoryDedication">
                     <span class="sd-toggle-content">
                         <svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor"/></svg>
                         <?php esc_html_e( 'In Memory Of', 'shelterkit-donations' ); ?>
@@ -89,7 +89,7 @@ $wrapper = get_block_wrapper_attributes( [
                 </label>
                 <label class="sd-toggle-button">
                     <input type="radio" name="<?php echo esc_attr( $form_id ); ?>_ded" value="honor" class="sd-radio"
-                        data-wp-on--change="actions.setDedicationType" data-wp-bind--checked="state.forms['<?php echo esc_attr( $form_id ); ?>'].dedicationType === 'honor'">
+                        data-wp-on--change="actions.setDedicationType" data-wp-bind--checked="state.isHonorDedication">
                     <span class="sd-toggle-content">
                         <svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" fill="currentColor"/></svg>
                         <?php esc_html_e( 'In Honor Of', 'shelterkit-donations' ); ?>
@@ -104,7 +104,7 @@ $wrapper = get_block_wrapper_attributes( [
             <div class="sd-honoree-cards">
                 <label class="sd-honoree-card">
                     <input type="radio" name="<?php echo esc_attr( $form_id ); ?>_hon" value="person" class="sd-radio"
-                        data-wp-on--change="actions.setHonoreeType" data-wp-bind--checked="state.forms['<?php echo esc_attr( $form_id ); ?>'].honoreeType === 'person'">
+                        data-wp-on--change="actions.setHonoreeType" data-wp-bind--checked="state.isPersonHonoree">
                     <span class="sd-card-inner">
                         <svg viewBox="0 0 24 24" width="32" height="32"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="currentColor"/></svg>
                         <span><?php esc_html_e( 'Person', 'shelterkit-donations' ); ?></span>
@@ -112,7 +112,7 @@ $wrapper = get_block_wrapper_attributes( [
                 </label>
                 <label class="sd-honoree-card">
                     <input type="radio" name="<?php echo esc_attr( $form_id ); ?>_hon" value="pet" class="sd-radio"
-                        data-wp-on--change="actions.setHonoreeType" data-wp-bind--checked="state.forms['<?php echo esc_attr( $form_id ); ?>'].honoreeType === 'pet'">
+                        data-wp-on--change="actions.setHonoreeType" data-wp-bind--checked="state.isPetHonoree">
                     <span class="sd-card-inner">
                         <svg viewBox="0 0 24 24" width="32" height="32"><path d="M4.5 9.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zm5-3a2.5 2.5 0 100-5 2.5 2.5 0 000 5zm5 0a2.5 2.5 0 100-5 2.5 2.5 0 000 5zm5 3a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM12 10c-2.5 0-4.5 2.24-4.5 5v5h9v-5c0-2.76-2-5-4.5-5z" fill="currentColor"/></svg>
                         <span><?php esc_html_e( 'Pet', 'shelterkit-donations' ); ?></span>
@@ -129,7 +129,7 @@ $wrapper = get_block_wrapper_attributes( [
             </label>
             <input type="text" id="<?php echo esc_attr( $form_id ); ?>-honoree" class="sd-text-input sd-honoree-input" maxlength="100"
                 placeholder="<?php esc_attr_e( 'Enter their name...', 'shelterkit-donations' ); ?>"
-                data-wp-on--input="actions.setHonoreeName" data-wp-bind--value="state.forms['<?php echo esc_attr( $form_id ); ?>'].honoreeName">
+                data-wp-on--input="actions.setHonoreeName" data-wp-bind--value="state.form.honoreeName">
         </div>
 
         <?php
@@ -144,7 +144,7 @@ $wrapper = get_block_wrapper_attributes( [
             <label for="<?php echo esc_attr( $form_id ); ?>-tribute" class="sd-section-label"><?php esc_html_e( 'Tribute Message', 'shelterkit-donations' ); ?> <span class="sd-optional">(<?php esc_html_e( 'Optional', 'shelterkit-donations' ); ?>)</span></label>
             <textarea id="<?php echo esc_attr( $form_id ); ?>-tribute" class="sd-textarea" rows="4" maxlength="500"
                 placeholder="<?php esc_attr_e( 'Share a memory or message about your loved one...', 'shelterkit-donations' ); ?>"
-                data-wp-on--input="actions.setTributeMessage" data-wp-bind--value="state.forms['<?php echo esc_attr( $form_id ); ?>'].tributeMessage"></textarea>
+                data-wp-on--input="actions.setTributeMessage" data-wp-bind--value="state.form.tributeMessage"></textarea>
             <p class="sd-char-count"><span data-wp-text="callbacks.getTributeCharCount">0</span>/500</p>
         </div>
 
@@ -153,8 +153,8 @@ $wrapper = get_block_wrapper_attributes( [
         <div class="sd-form-section sd-family-section">
             <label class="sd-checkbox-label sd-family-toggle">
                 <input type="checkbox" class="sd-checkbox" data-wp-on--change="actions.toggleNotifyFamily"
-                    data-wp-bind--checked="state.forms['<?php echo esc_attr( $form_id ); ?>'].notifyFamily"
-                    data-wp-bind--aria-expanded="state.forms['<?php echo esc_attr( $form_id ); ?>'].notifyFamily">
+                    data-wp-bind--checked="state.form.notifyFamily"
+                    data-wp-bind--aria-expanded="state.form.notifyFamily">
                 <span class="sd-checkbox-custom"><svg class="sd-checkbox-icon" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" fill="currentColor"/></svg></span>
                 <span class="sd-checkbox-text"><?php esc_html_e( 'Notify the family of this tribute gift', 'shelterkit-donations' ); ?></span>
             </label>
@@ -165,20 +165,20 @@ $wrapper = get_block_wrapper_attributes( [
                 <div class="sd-field-row">
                     <div class="sd-field-wrapper">
                         <label class="sd-field-label"><?php esc_html_e( 'Family Contact Name', 'shelterkit-donations' ); ?> <span class="sd-required">*</span></label>
-                        <input type="text" class="sd-text-input" data-wp-on--input="actions.setFamilyName" data-wp-bind--value="state.forms['<?php echo esc_attr( $form_id ); ?>'].familyName">
+                        <input type="text" class="sd-text-input" data-wp-on--input="actions.setFamilyName" data-wp-bind--value="state.form.familyName">
                     </div>
                     <div class="sd-field-wrapper">
                         <label class="sd-field-label"><?php esc_html_e( 'Family Email', 'shelterkit-donations' ); ?></label>
-                        <input type="email" class="sd-text-input" data-wp-on--input="actions.setFamilyEmail" data-wp-bind--value="state.forms['<?php echo esc_attr( $form_id ); ?>'].familyEmail">
+                        <input type="email" class="sd-text-input" data-wp-on--input="actions.setFamilyEmail" data-wp-bind--value="state.form.familyEmail">
                     </div>
                 </div>
                 <div class="sd-field-wrapper">
                     <label class="sd-field-label"><?php esc_html_e( 'Family Mailing Address', 'shelterkit-donations' ); ?></label>
-                    <textarea class="sd-textarea" rows="2" data-wp-on--input="actions.setFamilyAddress" data-wp-bind--value="state.forms['<?php echo esc_attr( $form_id ); ?>'].familyAddress"></textarea>
+                    <textarea class="sd-textarea" rows="2" data-wp-on--input="actions.setFamilyAddress" data-wp-bind--value="state.form.familyAddress"></textarea>
                 </div>
                 <?php if ( $show_send_card ) : ?>
                 <label class="sd-checkbox-label">
-                    <input type="checkbox" class="sd-checkbox" data-wp-on--change="actions.toggleSendCard" data-wp-bind--checked="state.forms['<?php echo esc_attr( $form_id ); ?>'].sendCard">
+                    <input type="checkbox" class="sd-checkbox" data-wp-on--change="actions.toggleSendCard" data-wp-bind--checked="state.form.sendCard">
                     <span class="sd-checkbox-custom"><svg class="sd-checkbox-icon" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" fill="currentColor"/></svg></span>
                     <span class="sd-checkbox-text"><?php esc_html_e( 'Send a physical sympathy/tribute card', 'shelterkit-donations' ); ?></span>
                 </label>
@@ -212,9 +212,9 @@ $wrapper = get_block_wrapper_attributes( [
             </div>
 
             <button type="button" class="sd-submit-button wp-element-button" data-wp-on--click="actions.submitToCart"
-                data-wp-bind--disabled="!callbacks.canProceed" data-wp-class--is-processing="state.forms['<?php echo esc_attr( $form_id ); ?>'].isProcessing">
-                <span data-wp-bind--hidden="state.forms['<?php echo esc_attr( $form_id ); ?>'].isProcessing"><?php echo esc_html( $submit_text ); ?></span>
-                <span class="sd-button-loading" data-wp-bind--hidden="!state.forms['<?php echo esc_attr( $form_id ); ?>'].isProcessing"><span class="sd-spinner-small"></span> <?php esc_html_e( 'Adding...', 'shelterkit-donations' ); ?></span>
+                data-wp-bind--disabled="!callbacks.canProceed" data-wp-class--is-processing="state.form.isProcessing">
+                <span data-wp-bind--hidden="state.form.isProcessing"><?php echo esc_html( $submit_text ); ?></span>
+                <span class="sd-button-loading" data-wp-bind--hidden="!state.form.isProcessing"><span class="sd-spinner-small"></span> <?php esc_html_e( 'Adding...', 'shelterkit-donations' ); ?></span>
             </button>
 
             <?php

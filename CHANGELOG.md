@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **The donation, membership and memorial forms never showed a confirmation
+  or an error.** They read each form's state through
+  `state.forms['<form id>'].…`, which the Interactivity API cannot follow,
+  so "Added to cart", "Please wait a moment" and every other message stayed
+  hidden. The processing spinner never appeared, and the radio buttons
+  loaded with nothing selected. The memorial form now starts on "In Memory
+  Of" and "Person", and membership on "Individual". (#20)
+- **The Donor Statistics block can now be inserted.** It never had an editor
+  script, so it was missing from the inserter, and a page that already held
+  one showed it as unsupported in the editor. It now has a sidebar for the
+  period and which figures to show, plus a live preview. (#25)
 - **Sites upgraded from 2.x stopped recording donations and memorials.**
   3.0.0 renamed two product SKUs along with the plugin, but existing
   products keep the SKU they were created with, so their order items were

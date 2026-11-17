@@ -6,7 +6,7 @@
     "title": "Donor Statistics",
     "category": "shelterkit-donations",
     "icon": "chart-bar",
-    "description": "Display donation statistics with real-time updates. Uses core blocks with block bindings.",
+    "description": "Show how much has been raised, and from how many donations, donors and members, for a chosen period.",
     "keywords": [ "stats", "statistics", "donations", "counter", "total" ],
     "textdomain": "shelterkit-donations",
     "supports": {
@@ -73,6 +73,7 @@
         },
         "viewportWidth": 800
     },
+    "editorScript": "file:./edit.js",
     "viewScriptModule": "file:./view.js",
     "style": "file:./style.css",
     "render": "file:./render.php"
