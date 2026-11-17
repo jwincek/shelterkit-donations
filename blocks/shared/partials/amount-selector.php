@@ -38,7 +38,7 @@ $legend = $legend ?? __( 'Select Amount', 'shelterkit-donations' );
 			<input type="number" id="<?php echo esc_attr( $form_id ); ?>-custom" class="sd-custom-input"
 				min="<?php echo esc_attr( $min_amount ); ?>" max="<?php echo esc_attr( $max_amount ); ?>" step="1" placeholder="0"
 				data-wp-on--input="actions.setCustomAmount" data-wp-on--focus="actions.clearPresetAmount"
-				data-wp-bind--value="state.forms['<?php echo esc_attr( $form_id ); ?>'].customAmount">
+				data-wp-bind--value="state.form.customAmount">
 		</div>
 		<p class="sd-field-help"><?php printf( /* translators: %s: minimum donation amount. */ esc_html__( '$%s minimum', 'shelterkit-donations' ), number_format( (int) $min_amount ) ); ?></p>
 	</div>

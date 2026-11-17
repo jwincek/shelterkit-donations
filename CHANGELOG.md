@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **The donation, membership and memorial forms never showed a confirmation
+  or an error.** They read each form's state through
+  `state.forms['<form id>'].…`, which the Interactivity API cannot follow,
+  so "Added to cart", "Please wait a moment" and every other message stayed
+  hidden. The processing spinner never appeared, and the radio buttons
+  loaded with nothing selected. The memorial form now starts on "In Memory
+  Of" and "Person", and membership on "Individual". (#20)
 - **Sites upgraded from 2.x stopped recording donations and memorials.**
   3.0.0 renamed two product SKUs along with the plugin, but existing
   products keep the SKU they were created with, so their order items were

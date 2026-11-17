@@ -26,6 +26,6 @@ $help  = $help ?? __( 'How your name will appear on the record.', 'shelterkit-do
 	<input type="text" id="<?php echo esc_attr( $form_id ); ?>-donor-name" class="sd-text-input" maxlength="200"
 		placeholder="<?php esc_attr_e( 'Enter your name...', 'shelterkit-donations' ); ?>"
 		data-wp-on--input="actions.setDonorName"
-		data-wp-bind--value="state.forms['<?php echo esc_attr( $form_id ); ?>'].donorName">
+		data-wp-bind--value="state.form.donorName">
 	<p class="description sd-field-help"><?php echo esc_html( $help ); ?></p>
 </div>

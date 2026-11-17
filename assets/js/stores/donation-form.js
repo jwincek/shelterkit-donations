@@ -24,6 +24,20 @@ const NAMESPACE = 'shelter-donations/donation-form';
 const { state, actions } = store( NAMESPACE, {
 	state: {
 		forms: {},
+
+		/**
+		 * This form's state, for directives.
+		 *
+		 * A directive path is split on "." only, so the old
+		 * `state.forms['<form id>'].x` never resolved: success and error
+		 * messages, field values and the processing state never reached the
+		 * page (#20). Reading the id from the element's context gives the same
+		 * per-form state through a path the runtime can follow. Undefined until
+		 * initForm has run, which renders as the empty state.
+		 */
+		get form() {
+			return state.forms[ getContext().formId ];
+		},
 	},
 
 	actions: {

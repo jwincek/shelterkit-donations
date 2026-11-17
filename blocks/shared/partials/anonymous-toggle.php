@@ -18,7 +18,7 @@ $label = $label ?? __( 'Make my donation anonymous', 'shelterkit-donations' );
 	<label class="sd-checkbox-label">
 		<input type="checkbox" class="sd-checkbox"
 			data-wp-on--change="actions.toggleAnonymous"
-			data-wp-bind--checked="state.forms['<?php echo esc_attr( $form_id ); ?>'].isAnonymous">
+			data-wp-bind--checked="state.form.isAnonymous">
 		<span class="sd-checkbox-custom">
 			<svg class="sd-checkbox-icon" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" fill="currentColor"/></svg>
 		</span>

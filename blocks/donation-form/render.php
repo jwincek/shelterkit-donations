@@ -156,11 +156,11 @@ $partials = dirname( __DIR__ ) . '/shared/partials';
             <button type="button" class="sd-submit-button wp-element-button"
                 data-wp-on--click="actions.submitToCart"
                 data-wp-bind--disabled="!callbacks.canProceed"
-                data-wp-class--is-processing="state.forms['<?php echo esc_attr( $form_id ); ?>'].isProcessing">
-                <span data-wp-bind--hidden="state.forms['<?php echo esc_attr( $form_id ); ?>'].isProcessing">
+                data-wp-class--is-processing="state.form.isProcessing">
+                <span data-wp-bind--hidden="state.form.isProcessing">
                     <?php echo esc_html( $submit_text ); ?>
                 </span>
-                <span class="sd-button-loading" data-wp-bind--hidden="!state.forms['<?php echo esc_attr( $form_id ); ?>'].isProcessing">
+                <span class="sd-button-loading" data-wp-bind--hidden="!state.form.isProcessing">
                     <span class="sd-spinner-small"></span> <?php esc_html_e( 'Adding...', 'shelterkit-donations' ); ?>
                 </span>
             </button>
