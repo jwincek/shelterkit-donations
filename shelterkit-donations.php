@@ -288,13 +288,26 @@ function starter_shelter_admin_init(): void {
     // Initialize legacy order sync.
     Starter_Shelter\Admin\Legacy_Sync_Page::init();
 
-    // Initialize activity log.
-    Starter_Shelter\Admin\Activity_Log::init();
-
     // Initialize product sync checker.
     Starter_Shelter\Admin\Product_Sync_Checker::init();
 }
 add_action( 'plugins_loaded', 'starter_shelter_admin_init', 25 );
+
+/**
+ * Initialize the activity log on every request, not only in wp-admin.
+ *
+ * Its listeners have to hear events wherever they happen: a block checkout
+ * runs in a REST request, payment webhooks and WP-CLI are not wp-admin, and
+ * the daily cleanup fires from wp-cron.php. It used to be started with the
+ * admin screens, behind is_admin(), so it heard only what happened in
+ * wp-admin and its cleanup callback was never registered when the event ran
+ * (#22). Registered after starter_shelter_admin_init so its submenu keeps
+ * its place.
+ */
+function starter_shelter_activity_log_init(): void {
+    Starter_Shelter\Admin\Activity_Log::init();
+}
+add_action( 'plugins_loaded', 'starter_shelter_activity_log_init', 25 );
 
 /**
  * Initialize cron jobs.

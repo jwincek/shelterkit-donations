@@ -108,4 +108,29 @@ final class ActivityLogTableTest extends WP_UnitTestCase {
         $this->assertFalse( wp_next_scheduled( 'sd_cleanup_activity_log' ) );
         $this->assertFalse( wp_next_scheduled( 'starter_shelter_renewal_reminders' ) );
     }
+
+    public function test_listeners_are_registered_outside_wp_admin(): void {
+        // The suite runs as a front-end request (is_admin() is false), which
+        // is where checkout, webhooks and WP-Cron happen.
+        $this->assertFalse( is_admin() );
+        $this->assertNotFalse( has_action( 'starter_shelter_donation_created', [ Activity_Log::class, 'log_donation_created' ] ) );
+        $this->assertNotFalse( has_action( 'starter_shelter_order_processed', [ Activity_Log::class, 'log_order_processed' ] ) );
+        $this->assertNotFalse( has_action( 'sd_cleanup_activity_log', [ Activity_Log::class, 'cleanup_old_logs' ] ), 'The cleanup event has a callback when wp-cron.php runs it.' );
+    }
+
+    public function test_an_address_is_recorded_only_for_wp_admin_requests(): void {
+        global $wpdb;
+        $_SERVER['REMOTE_ADDR'] = '203.0.113.9';
+        $ip_for = static function ( string $event ) use ( $wpdb ): ?string {
+            return $wpdb->get_var( $wpdb->prepare( "SELECT ip_address FROM {$wpdb->prefix}sd_activity_log WHERE event_type = %s", $event ) );
+        };
+
+        Activity_Log::log( 'probe_front', 'system', 'A donor-triggered event.' );
+        set_current_screen( 'dashboard' );
+        Activity_Log::log( 'probe_admin', 'system', 'A staff action in wp-admin.' );
+        set_current_screen( 'front' );
+
+        $this->assertNull( $ip_for( 'probe_front' ), 'Events outside wp-admin do not store the requester\'s address.' );
+        $this->assertSame( '203.0.113.9', $ip_for( 'probe_admin' ) );
+    }
 }

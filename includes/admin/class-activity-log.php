@@ -229,7 +229,11 @@ class Activity_Log {
                 'object_type'    => $object_type,
                 'object_id'      => $object_id,
                 'user_id'        => get_current_user_id() ?: null,
-                'ip_address'     => self::get_client_ip(),
+                // Only wp-admin requests record an address. Until #22 the log
+                // heard nothing else, so this is exactly what it collected
+                // before; events a donor triggers (checkout, a payment
+                // webhook) now reach the log without storing the donor's IP.
+                'ip_address'     => is_admin() ? self::get_client_ip() : null,
                 'meta'           => ! empty( $meta ) ? wp_json_encode( $meta ) : null,
                 'created_at'     => current_time( 'mysql' ),
             ],
