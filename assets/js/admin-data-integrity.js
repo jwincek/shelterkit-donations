@@ -31,6 +31,11 @@
 		$( '#' + target ).addClass( 'active' );
 	} );
 
+	// Open the tab a link points at (the dashboard links to #orders).
+	if ( window.location.hash ) {
+		$( '#sd-data-tools-tabs .nav-tab[href="' + window.location.hash + '"]' ).trigger( 'click' );
+	}
+
 	// ── Helpers ─────────────────────────────────────────────────
 
 	function showProgress( text, percent ) {
@@ -313,6 +318,30 @@
 				$results.empty().append( $( '<div class="notice notice-success"><p></p></div>' ).find( 'p' ).text( response.data.message ).end() );
 			} else {
 				$results.empty().append( $( '<div class="notice notice-error"><p></p></div>' ).find( 'p' ).text( response.data || 'Failed.' ).end() );
+			}
+		} ).fail( function() {
+			$btn.prop( 'disabled', false );
+			$results.html( '<div class="notice notice-error"><p>Request failed.</p></div>' );
+		} );
+	} );
+
+	// ── Repair records merged by Legacy Order Sync (#40) ────────
+
+	$( '#sd-repair-merges' ).on( 'click', function() {
+		var $btn = $( this ).prop( 'disabled', true );
+		post( 'skdon_integrity_repair_merges' ).done( function( response ) {
+			var data    = response && response.data ? response.data : {};
+			var message = response.success ? data.message : ( data || 'Failed.' );
+			var failed  = ( data.failed || [] ).join( '; ' );
+			$results.empty().append(
+				$( '<div class="notice"><p></p></div>' )
+					.addClass( response.success && ! failed ? 'notice-success' : 'notice-error' )
+					.find( 'p' ).text( message + ( failed ? ' ' + failed : '' ) ).end()
+			);
+			if ( response.success && ! failed ) {
+				window.setTimeout( function() { window.location.reload(); }, 1500 );
+			} else {
+				$btn.prop( 'disabled', false );
 			}
 		} ).fail( function() {
 			$btn.prop( 'disabled', false );

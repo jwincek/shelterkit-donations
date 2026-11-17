@@ -47,43 +47,7 @@
         "membership_type": "individual",
         "notes": "Shelter Memberships variable product"
       }
-    },
-
-    "by_name_pattern": [
-      {
-        "pattern": "^Memberships - (\\w+) Membership",
-        "maps_to": "memberships",
-        "type": "membership",
-        "membership_type": "individual",
-        "tier_from_match": 1
-      },
-      {
-        "pattern": "^Shelter Memberships - (\\w+) Membership",
-        "maps_to": "shelter-memberships",
-        "type": "membership",
-        "membership_type": "individual",
-        "tier_from_match": 1
-      },
-      {
-        "pattern": "^Shelter Business Memberships - (\\w+) Membership",
-        "maps_to": "shelter-memberships-business",
-        "type": "membership",
-        "membership_type": "business",
-        "tier_from_match": 1
-      },
-      {
-        "pattern": "^In Memoriam Donations - (Pet|Person)",
-        "maps_to": "shelter-donations-in-memoriam",
-        "type": "memorial",
-        "memorial_type_from_match": 1
-      },
-      {
-        "pattern": "^Shelter Donations - (.+)",
-        "maps_to": "shelter-donations",
-        "type": "donation",
-        "allocation_from_match": 1
-      }
-    ]
+    }
   },
 
   "tier_normalization": {

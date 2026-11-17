@@ -75,34 +75,21 @@ class Order_Processor {
 		$item_results = [];
 		$errors       = [];
 
-		// Resolve donor once for the entire order.
-		$donor_id = null;
-		$donor_email = $order->get_billing_email();
-		$donor_name  = trim( $order->get_billing_first_name() . ' ' . $order->get_billing_last_name() );
+		[ $donor_id, $donor_created ] = self::resolve_donor( $order );
+		if ( $donor_created ) {
+			++$created['donors'];
+		}
 
-		if ( $donor_email ) {
-			$donor_result = Donor_Lookup::find_or_create( [
-				'email'         => $donor_email,
-				'first_name'    => $order->get_billing_first_name(),
-				'last_name'     => $order->get_billing_last_name(),
-				'display_name'  => $donor_name,
-				'phone'         => $order->get_billing_phone(),
-				'address'       => [
-					'address_1' => $order->get_billing_address_1(),
-					'address_2' => $order->get_billing_address_2(),
-					'city'      => $order->get_billing_city(),
-					'state'     => $order->get_billing_state(),
-					'postcode'  => $order->get_billing_postcode(),
-					'country'   => $order->get_billing_country(),
-				],
-				'import_source' => 'legacy_sync',
-			] );
+		$lines = self::classify_lines( $order );
 
-			if ( ! is_wp_error( $donor_result ) ) {
-				$donor_id = $donor_result['id'];
-				if ( $donor_result['created'] ) {
-					++$created['donors'];
-				}
+		// How many lines of each kind the order has. An older record with no
+		// order-line link may only be matched by order when the order has a
+		// single line of its kind (#40).
+		$type_counts = [];
+		foreach ( $lines as $line ) {
+			if ( $line['config'] ) {
+				$type = $line['config']['product_type'] ?? '';
+				$type_counts[ $type ] = ( $type_counts[ $type ] ?? 0 ) + 1;
 			}
 		}
 
@@ -110,21 +97,19 @@ class Order_Processor {
 		Helpers\set_internal_processing( true );
 
 		try {
-			foreach ( $order->get_items( 'line_item' ) as $item_id => $item ) {
-				if ( ! $item instanceof \WC_Order_Item_Product ) {
-					continue;
-				}
+			foreach ( $lines as $item_id => $line ) {
+				$item      = $line['item'];
+				$item_data = $line['data'];
+				$config    = $line['config'];
 
-				$product   = $item->get_product();
-				$item_data = Item_Extractor::extract( $item, $product );
-
-				if ( ! $item_data ) {
-					continue;
-				}
-
-				$config = Item_Matcher::find_config( $item, $product, $item_data );
-
+				// A line this plugin doesn't recognise is not a gift. Record it
+				// by name, so a sync never passes over part of an order without
+				// saying so (#13).
 				if ( ! $config ) {
+					$item_results[ $item_id ] = [
+						'action' => 'skipped',
+						'name'   => $item_data['name'] ?? $item->get_name(),
+					];
 					continue;
 				}
 
@@ -149,50 +134,11 @@ class Order_Processor {
 					continue;
 				}
 
-				// Build ability input.
-				$input = $product
-					? Product_Mapper::build_input( $order, $item, $config )
-					: Legacy_Input_Builder::build( $order, $item, $item_data, $config );
-
-				// For legacy orders where the product still exists, Product_Mapper
-				// may leave required fields empty (e.g. honoree_name, memorial_type)
-				// because those order_meta keys didn't exist before custom checkout
-				// fields were added. Fall back to Legacy_Input_Builder which has
-				// cascading extraction logic with sensible defaults.
-				if ( $product ) {
-					$product_type_check = $config['product_type'] ?? '';
-					$required_fields    = self::get_required_fields( $product_type_check );
-
-					$needs_fallback = false;
-					foreach ( $required_fields as $field ) {
-						if ( empty( $input[ $field ] ) ) {
-							$needs_fallback = true;
-							break;
-						}
-					}
-
-					if ( $needs_fallback ) {
-						$legacy_input = Legacy_Input_Builder::build( $order, $item, $item_data, $config );
-						foreach ( $required_fields as $field ) {
-							if ( empty( $input[ $field ] ) && ! empty( $legacy_input[ $field ] ) ) {
-								$input[ $field ] = $legacy_input[ $field ];
-							}
-						}
-					}
-				}
-
-				// Pass donor_id directly to avoid double resolution.
-				// Remove donor_email so that only one oneOf branch matches
-				// in the ability's input schema (requires exactly one of
-				// donor_id or donor_email, not both).
-				if ( $donor_id ) {
-					$input['donor_id'] = $donor_id;
-					unset( $input['donor_email'] );
-				}
+				$input = self::build_line_input( $order, $item, $line['product'], $item_data, $config, $donor_id );
 
 				// Check for existing record.
 				$product_type = $config['product_type'] ?? '';
-				$existing_id  = self::find_existing_record( $order, $item_id, $product_type, $input, $donor_id );
+				$existing_id  = self::find_existing_record( $order, $item_id, $product_type, $input, $donor_id, $type_counts[ $product_type ] ?? 0 );
 
 				if ( $existing_id ) {
 					$result      = self::update_existing_record( $existing_id, $product_type, $input );
@@ -215,6 +161,7 @@ class Order_Processor {
 						$result->get_error_message()
 					);
 				} else {
+					Product_Mapper::stamp_order_line( $result, (int) $item_id );
 					$item_results[ $item_id ] = array_merge(
 						is_array( $result ) ? $result : [ 'id' => $result ],
 						[ 'action' => $action_type ]
@@ -248,17 +195,119 @@ class Order_Processor {
 	}
 
 	/**
-	 * Find an existing record matching this order/item combo.
+	 * Find (or create) the donor for an order, from its billing details.
 	 *
-	 * @since 2.0.0
-	 *
-	 * @param \WC_Order $order        The order.
-	 * @param int       $item_id      The order item ID.
-	 * @param string    $product_type The product type.
-	 * @param array     $input        The input data.
-	 * @param int|null  $donor_id     The resolved donor ID.
-	 * @return int|null Existing post ID or null.
+	 * @param \WC_Order $order The order.
+	 * @return array{0: int|null, 1: bool} Donor ID (null without an email) and whether it was created.
 	 */
+	public static function resolve_donor( \WC_Order $order ): array {
+		$donor_email = $order->get_billing_email();
+		if ( ! $donor_email ) {
+			return [ null, false ];
+		}
+
+		$donor_result = Donor_Lookup::find_or_create( [
+			'email'         => $donor_email,
+			'first_name'    => $order->get_billing_first_name(),
+			'last_name'     => $order->get_billing_last_name(),
+			'display_name'  => trim( $order->get_billing_first_name() . ' ' . $order->get_billing_last_name() ),
+			'phone'         => $order->get_billing_phone(),
+			'address'       => [
+				'address_1' => $order->get_billing_address_1(),
+				'address_2' => $order->get_billing_address_2(),
+				'city'      => $order->get_billing_city(),
+				'state'     => $order->get_billing_state(),
+				'postcode'  => $order->get_billing_postcode(),
+				'country'   => $order->get_billing_country(),
+			],
+			'import_source' => 'legacy_sync',
+		] );
+
+		if ( is_wp_error( $donor_result ) ) {
+			return [ null, false ];
+		}
+		return [ (int) $donor_result['id'], (bool) $donor_result['created'] ];
+	}
+
+	/**
+	 * Classify each product line of an order.
+	 *
+	 * @param \WC_Order $order The order.
+	 * @return array<int, array{item: \WC_Order_Item_Product, product: \WC_Product|null, data: array, config: array|null}>
+	 *         Keyed by order item ID. `config` is null for a line this plugin doesn't recognise.
+	 */
+	public static function classify_lines( \WC_Order $order ): array {
+		$lines = [];
+		foreach ( $order->get_items( 'line_item' ) as $item_id => $item ) {
+			if ( ! $item instanceof \WC_Order_Item_Product ) {
+				continue;
+			}
+			$product   = $item->get_product() ?: null;
+			$item_data = Item_Extractor::extract( $item, $product );
+			if ( ! $item_data ) {
+				continue;
+			}
+			$lines[ (int) $item_id ] = [
+				'item'    => $item,
+				'product' => $product,
+				'data'    => $item_data,
+				'config'  => Item_Matcher::find_config( $item, $product, $item_data ),
+			];
+		}
+		return $lines;
+	}
+
+	/**
+	 * Build the ability input for one order line.
+	 *
+	 * @param \WC_Order              $order     The order.
+	 * @param \WC_Order_Item_Product $item      The line.
+	 * @param \WC_Product|null       $product   Its product, if it still exists.
+	 * @param array                  $item_data Extracted line data.
+	 * @param array                  $config    The line's product config.
+	 * @param int|null               $donor_id  The order's donor.
+	 * @return array
+	 */
+	public static function build_line_input( \WC_Order $order, \WC_Order_Item_Product $item, ?\WC_Product $product, array $item_data, array $config, ?int $donor_id ): array {
+		$input = $product
+			? Product_Mapper::build_input( $order, $item, $config )
+			: Legacy_Input_Builder::build( $order, $item, $item_data, $config );
+
+		// For legacy orders where the product still exists, Product_Mapper
+		// may leave required fields empty (e.g. honoree_name, memorial_type)
+		// because those order_meta keys didn't exist before custom checkout
+		// fields were added. Fall back to Legacy_Input_Builder which has
+		// cascading extraction logic with sensible defaults.
+		if ( $product ) {
+			$needs_fallback = false;
+			foreach ( self::get_required_fields( $config['product_type'] ?? '' ) as $field ) {
+				if ( empty( $input[ $field ] ) ) {
+					$needs_fallback = true;
+					break;
+				}
+			}
+
+			if ( $needs_fallback ) {
+				$legacy_input = Legacy_Input_Builder::build( $order, $item, $item_data, $config );
+				foreach ( self::get_required_fields( $config['product_type'] ?? '' ) as $field ) {
+					if ( empty( $input[ $field ] ) && ! empty( $legacy_input[ $field ] ) ) {
+						$input[ $field ] = $legacy_input[ $field ];
+					}
+				}
+			}
+		}
+
+		// Pass donor_id directly to avoid double resolution. Remove
+		// donor_email so that only one oneOf branch matches in the ability's
+		// input schema (requires exactly one of donor_id or donor_email).
+		if ( $donor_id ) {
+			$input['donor_id'] = $donor_id;
+			unset( $input['donor_email'] );
+		}
+
+		return $input;
+	}
+
 	/**
 	 * Get required ability input fields by product type.
 	 *
@@ -280,12 +329,33 @@ class Order_Processor {
 		};
 	}
 
+	/**
+	 * Find the record this order line already produced, if any.
+	 *
+	 * Matched by the order line itself first (#40). Records created before
+	 * lines were linked fall back to an order-level match, but only when the
+	 * order has a single line of this kind: with two membership lines, "the
+	 * membership linked to this order" is ambiguous, and used to make the
+	 * second line overwrite the first line's record. A memorial with no order
+	 * link at all may still be matched by donor and honoree.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param \WC_Order $order        The order.
+	 * @param int       $item_id      The order item ID.
+	 * @param string    $product_type The product type.
+	 * @param array     $input        The input data.
+	 * @param int|null  $donor_id     The resolved donor ID.
+	 * @param int       $type_count   How many lines of this product type the order has.
+	 * @return int|null Existing post ID or null.
+	 */
 	private static function find_existing_record(
 		\WC_Order $order,
 		int $item_id,
 		string $product_type,
 		array $input,
-		?int $donor_id
+		?int $donor_id,
+		int $type_count = 1
 	): ?int {
 		$post_type = match ( $product_type ) {
 			'donation'   => 'skdon_donation',
@@ -298,67 +368,55 @@ class Order_Processor {
 			return null;
 		}
 
-		// Strategy 1: Record linked to this order.
-		$meta_query = [
-			[
-				'key'   => '_skdon_wc_order_id',
-				'value' => $order->get_id(),
-				'type'  => 'NUMERIC',
-			],
-		];
-
-		// For memorials, also match honoree name.
-		if ( 'memorial' === $product_type && ! empty( $input['honoree_name'] ) ) {
-			$meta_query[] = [
-				'key'   => '_skdon_honoree_name',
-				'value' => $input['honoree_name'],
-			];
-		}
-
-		// For memberships, also match donor.
-		if ( 'membership' === $product_type && $donor_id ) {
-			$meta_query[] = [
-				'key'   => '_skdon_donor_id',
-				'value' => $donor_id,
-				'type'  => 'NUMERIC',
-			];
-		}
-
-		$posts = get_posts( [
-			'post_type'      => $post_type,
-			'post_status'    => 'any',
-			'posts_per_page' => 1,
-			'meta_query'     => $meta_query,
-			'fields'         => 'ids',
-		] );
-
-		if ( ! empty( $posts ) ) {
-			return $posts[0];
-		}
-
-		// Strategy 2: Memorial with same honoree from same donor (no order link).
-		if ( 'memorial' === $product_type && ! empty( $input['honoree_name'] ) && $donor_id ) {
+		$find = static function ( array $meta_query ) use ( $post_type ): ?int {
 			$posts = get_posts( [
 				'post_type'      => $post_type,
 				'post_status'    => 'any',
 				'posts_per_page' => 1,
-				'meta_query'     => [
-					[
-						'key'   => '_skdon_donor_id',
-						'value' => $donor_id,
-						'type'  => 'NUMERIC',
-					],
-					[
-						'key'   => '_skdon_honoree_name',
-						'value' => $input['honoree_name'],
-					],
-				],
+				'meta_query'     => $meta_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- an admin sync, one order at a time.
 				'fields'         => 'ids',
 			] );
+			return $posts ? (int) $posts[0] : null;
+		};
 
-			if ( ! empty( $posts ) ) {
-				return $posts[0];
+		// 1. The record this exact line produced.
+		$found = $find( [ [ 'key' => Product_Mapper::ORDER_ITEM_META, 'value' => $item_id, 'type' => 'NUMERIC' ] ] );
+		if ( $found ) {
+			return $found;
+		}
+
+		// 2. An older record linked to the order but to no line yet: only
+		// unambiguous when the order has one line of this kind.
+		if ( 1 === $type_count ) {
+			$meta_query = [
+				[ 'key' => '_skdon_wc_order_id', 'value' => $order->get_id(), 'type' => 'NUMERIC' ],
+				[ 'key' => Product_Mapper::ORDER_ITEM_META, 'compare' => 'NOT EXISTS' ],
+			];
+			if ( 'memorial' === $product_type && ! empty( $input['honoree_name'] ) ) {
+				$meta_query[] = [ 'key' => '_skdon_honoree_name', 'value' => $input['honoree_name'] ];
 			}
+			if ( 'membership' === $product_type && $donor_id ) {
+				$meta_query[] = [ 'key' => '_skdon_donor_id', 'value' => $donor_id, 'type' => 'NUMERIC' ];
+			}
+			$found = $find( $meta_query );
+			if ( $found ) {
+				return $found;
+			}
+		}
+
+		// 3. A memorial from the same donor for the same honoree that belongs
+		// to no order (a CSV import, say). Never one linked to another order:
+		// that is a different gift.
+		if ( 'memorial' === $product_type && ! empty( $input['honoree_name'] ) && $donor_id ) {
+			return $find( [
+				[ 'key' => '_skdon_donor_id', 'value' => $donor_id, 'type' => 'NUMERIC' ],
+				[ 'key' => '_skdon_honoree_name', 'value' => $input['honoree_name'] ],
+				[
+					'relation' => 'OR',
+					[ 'key' => '_skdon_wc_order_id', 'compare' => 'NOT EXISTS' ],
+					[ 'key' => '_skdon_wc_order_id', 'value' => [ '', '0' ], 'compare' => 'IN' ],
+				],
+			] );
 		}
 
 		return null;
@@ -376,7 +434,7 @@ class Order_Processor {
 	 * @param array  $input        The input data.
 	 * @return array|WP_Error Update result.
 	 */
-	private static function update_existing_record( int $post_id, string $product_type, array $input ): array|WP_Error {
+	public static function update_existing_record( int $post_id, string $product_type, array $input ): array|WP_Error {
 		$prefix = '_skdon_';
 
 		$field_map = match ( $product_type ) {
