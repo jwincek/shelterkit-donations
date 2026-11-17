@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-24T21:33:21+00:00\n"
+"POT-Creation-Date: 2026-11-17T03:49:03+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: shelterkit-donations\n"
@@ -188,14 +188,14 @@ msgid "Add to Cart"
 msgstr ""
 
 #: blocks/donation-form/render.php:46
-#: includes/blocks/register-editor.php:131
+#: includes/blocks/register-editor.php:106
 #: includes/core/helpers.php:967
 #: includes/rest/class-rest-controller.php:575
 msgid "General Fund"
 msgstr ""
 
 #: blocks/donation-form/render.php:47
-#: includes/blocks/register-editor.php:132
+#: includes/blocks/register-editor.php:107
 #: includes/core/helpers.php:968
 #: includes/rest/class-rest-controller.php:576
 msgid "Medical Care"
@@ -685,7 +685,7 @@ msgid "All Dedications"
 msgstr ""
 
 #: blocks/memorial-wall/render.php:312
-#: includes/blocks/register-editor.php:163
+#: includes/blocks/register-editor.php:138
 #: templates/myaccount/giving-history.php:36
 msgid "All Years"
 msgstr ""
@@ -3023,25 +3023,25 @@ msgstr ""
 msgid "Membership Tier Data"
 msgstr ""
 
-#: includes/blocks/register-editor.php:106
+#: includes/blocks/register-editor.php:81
 #: blocks/campaign-card/edit.js:28
 #: blocks/campaign-progress/edit.js:20
 msgid "— Select Campaign —"
 msgstr ""
 
-#: includes/blocks/register-editor.php:133
+#: includes/blocks/register-editor.php:108
 #: includes/core/helpers.php:969
 #: includes/rest/class-rest-controller.php:577
 msgid "Food & Supplies"
 msgstr ""
 
-#: includes/blocks/register-editor.php:134
+#: includes/blocks/register-editor.php:109
 #: includes/core/helpers.php:970
 #: includes/rest/class-rest-controller.php:578
 msgid "Facility Improvements"
 msgstr ""
 
-#: includes/blocks/register-editor.php:135
+#: includes/blocks/register-editor.php:110
 #: includes/core/helpers.php:971
 #: includes/rest/class-rest-controller.php:579
 msgid "Rescue Operations"

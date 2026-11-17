@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   no longer recognised and were skipped with no error or order note. The
   2.x SKUs are restored, listed as frozen in CONTRIBUTING, and pinned by a
   test. (#16)
+- **None of the blocks could be inserted on a fresh install.** Every editor
+  script loaded before the packages it reads and threw. Each block now ships
+  an `edit.asset.php` declaring its dependencies, which also lets editor
+  strings be translated for the first time. (#17)
 
 ## [3.0.0] - 2026-08-24
 

@@ -29,37 +29,12 @@ function register_editor_assets(): void {
         true
     );
 
-    // Block editor scripts auto-registered from block.json "editorScript"
-    // lack dependency metadata (no .asset.php from build step). We need to
-    // add wp-server-side-render explicitly since every edit.js uses SSR.
-    $block_handles = [
-        'shelterkit-donations-donation-form-editor-script',
-        'shelterkit-donations-memorial-form-editor-script',
-        'shelterkit-donations-membership-form-editor-script',
-        'shelterkit-donations-memorial-wall-editor-script',
-        'shelterkit-donations-campaign-progress-editor-script',
-        'shelterkit-donations-campaign-card-editor-script',
-        'shelterkit-donations-donor-dashboard-editor-script',
-        'shelterkit-donations-contribution-tabs-editor-script',
-    ];
-
-    // All edit.js files use wp.serverSideRender, wp.blockEditor,
-    // wp.components, wp.element, wp.i18n, and wp.blocks.
-    $required_deps = [
-        'wp-blocks',
-        'wp-element',
-        'wp-components',
-        'wp-block-editor',
-        'wp-i18n',
-        'wp-server-side-render',
-    ];
-
-    foreach ( $block_handles as $handle ) {
-        $script = wp_scripts()->query( $handle );
-        if ( $script ) {
-            $script->deps = array_unique( array_merge( $script->deps, $required_deps ) );
-        }
-    }
+    // Each block's editor-script dependencies are declared in its
+    // blocks/<block>/edit.asset.php, which core reads when it registers the
+    // block. That replaced a runtime patch here that looked handles up by
+    // name: the 3.0.0 rename changed those names but not the ones core
+    // derives from the frozen block names, so the patch matched nothing and
+    // every edit.js ran before wp.element existed (#17).
 
     // Localize data for each block's editor script
     $data = [
