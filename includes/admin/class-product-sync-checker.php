@@ -14,6 +14,7 @@ declare( strict_types = 1 );
 
 namespace Starter_Shelter\Admin;
 
+use Starter_Shelter\Core\Allocations;
 use Starter_Shelter\Core\Config;
 
 /**
@@ -237,10 +238,11 @@ class Product_Sync_Checker {
 		foreach ( $variations as $variation ) {
 			foreach ( $variation['attributes'] as $attr_name => $attr_val ) {
 				$variation_list[] = [
-					'id'    => $variation['variation_id'],
-					'value' => trim( $attr_val ),
-					'slug'  => sanitize_title( $attr_val ),
-					'price' => (float) ( $variation['display_price'] ?? 0 ),
+					'id'     => $variation['variation_id'],
+					'value'  => trim( $attr_val ),
+					'slug'   => sanitize_title( $attr_val ),
+					'price'  => (float) ( $variation['display_price'] ?? 0 ),
+					'linked' => (string) get_post_meta( $variation['variation_id'], Allocations::VARIATION_META, true ),
 				];
 			}
 		}
@@ -309,7 +311,7 @@ class Product_Sync_Checker {
 	private static function get_expected_terms( string $source ): array {
 		switch ( $source ) {
 			case 'allocations':
-				$allocations = Config::get_item( 'settings', 'allocations', [] );
+				$allocations = Allocations::active();
 				return array_map(
 					fn( $key, $label ) => [ 'label' => $label, 'slug' => $key, 'price' => 10 ],
 					array_keys( $allocations ),
@@ -418,6 +420,15 @@ class Product_Sync_Checker {
 	private static function find_matching_variation( array $term, array $variation_list ): ?array {
 		$term_label_lower = strtolower( $term['label'] );
 		$term_slug        = $term['slug'];
+
+		// A donation variation linked to its fund by slug is that fund's
+		// variation, and no other's, however its label is worded (#21).
+		foreach ( $variation_list as $v ) {
+			if ( ( $v['linked'] ?? '' ) === $term_slug ) {
+				return $v;
+			}
+		}
+		$variation_list = array_filter( $variation_list, static fn( $v ) => '' === ( $v['linked'] ?? '' ) );
 
 		foreach ( $variation_list as $v ) {
 			$v_lower = strtolower( $v['value'] );
@@ -537,69 +548,80 @@ class Product_Sync_Checker {
 				$changed = true;
 			}
 
-			// Fix 3: Create missing variations.
-			$expected_terms = self::get_expected_terms( $definition['config_source'] );
-			$existing_variations = $product->get_available_variations();
-
-			$variation_list = [];
-			foreach ( $existing_variations as $v ) {
-				foreach ( $v['attributes'] as $attr_val ) {
-					$variation_list[] = [
-						'id'    => $v['variation_id'],
-						'value' => trim( $attr_val ),
-						'slug'  => sanitize_title( $attr_val ),
-						'price' => (float) ( $v['display_price'] ?? 0 ),
-					];
+			if ( 'allocations' === $definition['config_source'] ) {
+				// Donation variations are linked to their fund by slug; the same
+				// routine runs on activation and when the fund list is saved (#21).
+				foreach ( Allocations::sync_variations() as $detail ) {
+					$result['details'][] = $sku . ': ' . $detail;
+					$changed            = true;
 				}
-			}
+				// It saved the parent itself; reload so later fixes do not write a stale copy.
+				$product = wc_get_product( $product_id );
+			} else {
+				// Fix 3: Create missing variations.
+				$expected_terms = self::get_expected_terms( $definition['config_source'] );
+				$existing_variations = $product->get_available_variations();
 
-			$attribute_slug = $definition['attribute_slug'];
-			$all_option_names = [];
-
-			// Collect existing attribute option names.
-			foreach ( $existing_variations as $v ) {
-				foreach ( $v['attributes'] as $attr_val ) {
-					$all_option_names[] = trim( $attr_val );
+				$variation_list = [];
+				foreach ( $existing_variations as $v ) {
+					foreach ( $v['attributes'] as $attr_val ) {
+						$variation_list[] = [
+							'id'    => $v['variation_id'],
+							'value' => trim( $attr_val ),
+							'slug'  => sanitize_title( $attr_val ),
+							'price' => (float) ( $v['display_price'] ?? 0 ),
+						];
+					}
 				}
-			}
 
-			foreach ( $expected_terms as $term ) {
-				$match = self::find_matching_variation( $term, $variation_list );
+				$attribute_slug = $definition['attribute_slug'];
+				$all_option_names = [];
 
-				if ( ! $match ) {
-					// Create the missing variation.
-					$variation = new \WC_Product_Variation();
-					$variation->set_parent_id( $product_id );
-					$variation->set_status( 'publish' );
-					$variation->set_regular_price( (string) ( $term['price'] ?? 10 ) );
-					$variation->set_virtual( true );
-					$variation->set_manage_stock( false );
-					$variation->set_stock_status( 'instock' );
-					$variation->set_attributes( [
-						sanitize_title( $attribute_slug ) => $term['label'],
-					] );
-					$variation->save();
-
-					$all_option_names[] = $term['label'];
-					$result['details'][] = sprintf( '%s: created variation "%s" ($%s).', $sku, $term['label'], number_format( $term['price'] ?? 10, 2 ) );
-					$changed = true;
+				// Collect existing attribute option names.
+				foreach ( $existing_variations as $v ) {
+					foreach ( $v['attributes'] as $attr_val ) {
+						$all_option_names[] = trim( $attr_val );
+					}
 				}
-			}
 
-			// Fix 4: Update attribute options to include all terms.
-			$attributes = $product->get_attributes();
-			foreach ( $attributes as $attr_key => $attribute ) {
-				if ( sanitize_title( $attr_key ) === sanitize_title( $attribute_slug ) ) {
-					$current_options = $attribute->get_options();
-					$merged = array_unique( array_merge( $current_options, $all_option_names ) );
+				foreach ( $expected_terms as $term ) {
+					$match = self::find_matching_variation( $term, $variation_list );
 
-					if ( count( $merged ) > count( $current_options ) ) {
-						$attribute->set_options( $merged );
-						$product->set_attributes( [ $attribute ] );
-						$result['details'][] = sprintf( '%s: updated attribute options (%d → %d).', $sku, count( $current_options ), count( $merged ) );
+					if ( ! $match ) {
+						// Create the missing variation.
+						$variation = new \WC_Product_Variation();
+						$variation->set_parent_id( $product_id );
+						$variation->set_status( 'publish' );
+						$variation->set_regular_price( (string) ( $term['price'] ?? 10 ) );
+						$variation->set_virtual( true );
+						$variation->set_manage_stock( false );
+						$variation->set_stock_status( 'instock' );
+						$variation->set_attributes( [
+							sanitize_title( $attribute_slug ) => $term['label'],
+						] );
+						$variation->save();
+
+						$all_option_names[] = $term['label'];
+						$result['details'][] = sprintf( '%s: created variation "%s" ($%s).', $sku, $term['label'], number_format( $term['price'] ?? 10, 2 ) );
 						$changed = true;
 					}
-					break;
+				}
+
+				// Fix 4: Update attribute options to include all terms.
+				$attributes = $product->get_attributes();
+				foreach ( $attributes as $attr_key => $attribute ) {
+					if ( sanitize_title( $attr_key ) === sanitize_title( $attribute_slug ) ) {
+						$current_options = $attribute->get_options();
+						$merged = array_unique( array_merge( $current_options, $all_option_names ) );
+
+						if ( count( $merged ) > count( $current_options ) ) {
+							$attribute->set_options( $merged );
+							$product->set_attributes( [ $attribute ] );
+							$result['details'][] = sprintf( '%s: updated attribute options (%d → %d).', $sku, count( $current_options ), count( $merged ) );
+							$changed = true;
+						}
+						break;
+					}
 				}
 			}
 

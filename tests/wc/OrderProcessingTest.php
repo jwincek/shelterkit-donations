@@ -170,6 +170,35 @@ final class OrderProcessingTest extends WP_UnitTestCase {
     }
 
     /**
+     * The fund comes from the donor's choice on the cart item. It used to come
+     * from the variation, and the ability accepted only two funds, so a gift to
+     * any other fund was either rejected after payment or filed under General
+     * Fund (#21).
+     *
+     * @dataProvider donor_choices
+     */
+    public function test_a_gift_is_recorded_against_the_fund_the_donor_chose( string $chosen, string $recorded ): void {
+        $order = $this->make_shelter_order( 'shelter-donations', 30.00, [ '_sd_allocation' => $chosen ] );
+
+        $order->update_status( 'completed' );
+
+        $donations = $this->entities_for_order( $order->get_id(), 'sd_donation' );
+        $this->assertCount( 1, $donations, 'The gift was recorded, not rejected.' );
+        $this->assertSame( $recorded, get_post_meta( $donations[0], '_sd_allocation', true ) );
+    }
+
+    /**
+     * @return array<string, array{0: string, 1: string}>
+     */
+    public function donor_choices(): array {
+        return [
+            'a fund the old enum lacked'   => [ 'medical-care', 'medical-care' ],
+            'the alias an older form sent' => [ 'spay-neuter', 'spay-neuter-clinic' ],
+            'a variation label'            => [ 'Facility Improvements', 'facility' ],
+        ];
+    }
+
+    /**
      * Every product an existing site has carries the SKU it was created with,
      * and Product_Mapper recognises order items by SKU prefix. These strings are
      * therefore data, not branding: 3.0.0 renamed two of them with the plugin,

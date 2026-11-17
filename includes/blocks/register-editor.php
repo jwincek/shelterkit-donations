@@ -99,7 +99,7 @@ function get_campaigns_for_editor(): array {
  * @return array Allocation options.
  */
 function get_allocations_for_editor(): array {
-    $allocations = \Starter_Shelter\Core\Config::get_item( 'settings', 'allocations', [] );
+    $allocations = \Starter_Shelter\Core\Allocations::active();
 
     if ( empty( $allocations ) ) {
         $allocations = [

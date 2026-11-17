@@ -13,6 +13,7 @@ declare( strict_types = 1 );
 
 namespace Starter_Shelter\WooCommerce;
 
+use Starter_Shelter\Core\Allocations;
 use WP_Error;
 
 /**
@@ -106,6 +107,24 @@ class Cart_Handler {
             $_POST['sd_logo_attachment_id'] = $logo_id;
         }
 
+        // A gift must go to a fund on the list, and this is the last point
+        // before the donor pays. An unknown fund used to pass here and be
+        // rejected only when the paid order was processed (#21).
+        if ( 'donation' === $product_type ) {
+            $requested  = sanitize_text_field( wp_unslash( $_POST['allocation'] ?? '' ) );
+            $allocation = '' === $requested
+                ? ( Allocations::is_active( 'general-fund' ) ? 'general-fund' : (string) array_key_first( Allocations::active() ) )
+                : Allocations::canonical( $requested );
+
+            if ( ! Allocations::is_active( $allocation ) ) {
+                wp_send_json_error( [
+                    'message' => __( 'Please choose where your gift should go.', 'shelterkit-donations' ),
+                ] );
+            }
+
+            $_POST['allocation'] = $allocation;
+        }
+
         // Build cart item data.
         $cart_item_data = self::build_cart_item_data( $_POST, $product_type );
 
@@ -193,7 +212,8 @@ class Cart_Handler {
 
         // Common fields.
         if ( ! empty( $post_data['allocation'] ) ) {
-            $data['sd_allocation'] = sanitize_key( $post_data['allocation'] );
+            $allocation            = sanitize_text_field( (string) $post_data['allocation'] );
+            $data['sd_allocation'] = Allocations::canonical( $allocation ) ?: sanitize_key( $allocation );
         }
 
         if ( ! empty( $post_data['campaign_id'] ) ) {
@@ -289,6 +309,24 @@ class Cart_Handler {
     private static function find_variation( \WC_Product_Variable $product, array $post_data, string $product_type ) {
         $attribute_key = self::get_attribute_key_for_type( $product_type );
         $attribute_value = self::get_attribute_value_from_post( $post_data, $product_type );
+
+        // Donation variations are linked to their fund by slug, so a label
+        // worded differently from the setting ("Spay / Neuter Clinic") still
+        // matches (#21). If a fund has no variation at all (the product was
+        // edited by hand), the generic lookup below still picks one. Only the
+        // order line's wording is wrong then: the gift is recorded from
+        // sd_allocation, and the sync checker reports the missing variation.
+        if ( 'donation' === $product_type ) {
+            $variation_id = Allocations::find_variation_id( $product, Allocations::canonical( $attribute_value ) );
+            if ( $variation_id ) {
+                $variation = wc_get_product( $variation_id );
+
+                return [
+                    'variation_id' => $variation_id,
+                    'variation'    => $variation ? $variation->get_variation_attributes() : [],
+                ];
+            }
+        }
 
         if ( ! $attribute_value ) {
             // If no specific attribute needed, get the first available variation.
@@ -416,7 +454,8 @@ class Cart_Handler {
         // Handle URL parameter add-to-cart for backwards compatibility.
 
         if ( isset( $_REQUEST['sd_allocation'] ) ) {
-            $cart_item_data['sd_allocation'] = sanitize_key( $_REQUEST['sd_allocation'] );
+            $allocation                      = sanitize_key( $_REQUEST['sd_allocation'] );
+            $cart_item_data['sd_allocation'] = Allocations::canonical( $allocation ) ?: $allocation;
         }
 
         if ( isset( $_REQUEST['sd_amount'] ) ) {
@@ -450,8 +489,7 @@ class Cart_Handler {
     public static function display_cart_item_data( array $item_data, array $cart_item ): array {
         // Allocation.
         if ( ! empty( $cart_item['sd_allocation'] ) ) {
-            $allocations = \Starter_Shelter\Core\Config::get_item( 'settings', 'allocations', [] );
-            $allocation_label = $allocations[ $cart_item['sd_allocation'] ] ?? ucwords( str_replace( '-', ' ', $cart_item['sd_allocation'] ) );
+            $allocation_label = Allocations::label( (string) $cart_item['sd_allocation'] );
 
             $item_data[] = [
                 'key'   => __( 'Allocation', 'shelterkit-donations' ),

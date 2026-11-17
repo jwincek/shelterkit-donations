@@ -329,13 +329,12 @@ class Product_Mapper {
      * @return string Normalized allocation slug.
      */
     private static function normalize_allocation( string $allocation ): string {
-        $allocation = strtolower( trim( $allocation ) );
+        $slug = \Starter_Shelter\Core\Allocations::canonical( $allocation );
 
-        // Remove price suffixes like "- $50".
-        $allocation = preg_replace( '/\s*-\s*\$[\d,]+/', '', $allocation );
-
-        // Convert to slug format.
-        return sanitize_title( $allocation );
+        // An unknown value passes through as a slug so the ability rejects it
+        // visibly (an order note and the reprocess button) instead of it being
+        // quietly recorded against some other fund.
+        return '' !== $slug ? $slug : sanitize_title( $allocation );
     }
 
     /**

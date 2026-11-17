@@ -11,6 +11,7 @@ declare( strict_types = 1 );
 
 namespace Starter_Shelter\Admin;
 
+use Starter_Shelter\Core\Allocations;
 use Starter_Shelter\Core\Config;
 use Starter_Shelter\Core\Activator;
 
@@ -485,7 +486,8 @@ class Settings {
      * @since 2.1.0
      */
     private static function render_data_tab(): void {
-        $allocations  = Config::get_item( 'settings', 'allocations', [] );
+        $allocations  = Allocations::active();
+        $retired      = Allocations::retired();
         $all_tiers    = Config::get_item( 'tiers', 'tiers', [] );
         $ind_tiers    = $all_tiers['individual'] ?? [];
         $biz_tiers    = $all_tiers['business'] ?? [];
@@ -499,6 +501,7 @@ class Settings {
             <!-- Allocations -->
             <h2><?php esc_html_e( 'Donation Allocations', 'shelterkit-donations' ); ?></h2>
             <p class="description"><?php esc_html_e( 'Fund designations that donors can direct their gifts to.', 'shelterkit-donations' ); ?></p>
+            <p class="description"><?php esc_html_e( 'A saved fund\'s slug cannot be changed, because past gifts are filed under it. Removing a fund retires it: it leaves the donation form, and gifts already made to it keep their fund.', 'shelterkit-donations' ); ?></p>
             <table class="widefat striped sd-data-table" style="max-width: 600px; margin: 15px 0;">
                 <thead>
                     <tr>
@@ -510,9 +513,9 @@ class Settings {
                 <tbody id="sd-allocations-list">
                     <?php foreach ( $allocations as $slug => $label ) : ?>
                     <tr>
-                        <td><input type="text" name="sd_allocations[slugs][]" value="<?php echo esc_attr( $slug ); ?>" class="regular-text" /></td>
+                        <td><input type="text" name="sd_allocations[slugs][]" value="<?php echo esc_attr( $slug ); ?>" class="regular-text" readonly /></td>
                         <td><input type="text" name="sd_allocations[labels][]" value="<?php echo esc_attr( $label ); ?>" class="regular-text" /></td>
-                        <td><button type="button" class="button sd-remove-row" title="<?php esc_attr_e( 'Remove', 'shelterkit-donations' ); ?>">&times;</button></td>
+                        <td><button type="button" class="button sd-remove-row" title="<?php esc_attr_e( 'Retire', 'shelterkit-donations' ); ?>">&times;</button></td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>
@@ -520,6 +523,24 @@ class Settings {
             <button type="button" class="button sd-add-row" data-target="sd-allocations-list" data-fields="sd_allocations"><?php esc_html_e( '+ Add Allocation', 'shelterkit-donations' ); ?></button>
             <?php if ( Config::has_override( 'settings', 'allocations' ) ) : ?>
                 <span class="sd-override-badge"><?php esc_html_e( 'Custom', 'shelterkit-donations' ); ?></span>
+            <?php endif; ?>
+
+            <?php if ( $retired ) : ?>
+                <h3><?php esc_html_e( 'Retired Funds', 'shelterkit-donations' ); ?></h3>
+                <p class="description"><?php esc_html_e( 'Not offered on the donation form. Past gifts, reports and filters still use them.', 'shelterkit-donations' ); ?></p>
+                <table class="widefat striped sd-data-table" style="max-width: 600px; margin: 15px 0;">
+                    <tbody>
+                        <?php foreach ( $retired as $slug => $label ) : ?>
+                        <tr>
+                            <td style="width: 40%;"><code><?php echo esc_html( $slug ); ?></code></td>
+                            <td style="width: 45%;"><?php echo esc_html( $label ); ?></td>
+                            <td style="width: 15%;">
+                                <label><input type="checkbox" name="sd_restore_allocations[]" value="<?php echo esc_attr( $slug ); ?>" /> <?php esc_html_e( 'Restore', 'shelterkit-donations' ); ?></label>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
             <?php endif; ?>
 
             <hr style="margin: 30px 0;" />
@@ -638,7 +659,8 @@ class Settings {
                 var target = $( '#' + $( this ).data( 'target' ) );
                 var fields = $( this ).data( 'fields' );
                 var row = target.find( 'tr:last' ).clone();
-                row.find( 'input' ).val( '' );
+                // A new fund's slug is editable until it is saved.
+                row.find( 'input' ).val( '' ).prop( 'readonly', false );
                 target.append( row );
             } );
 
@@ -687,9 +709,11 @@ class Settings {
                     $allocations[ $slug ] = $labels[ $i ];
                 }
             }
-            if ( ! empty( $allocations ) ) {
-                Config::save_override( 'settings', 'allocations', $allocations );
-            }
+            $restore = array_map( 'sanitize_key', (array) ( $_POST['sd_restore_allocations'] ?? [] ) );
+
+            // Retires removed funds rather than dropping them, and gives every
+            // active fund a donation variation (#21).
+            Allocations::save( $allocations, $restore );
         }
 
         // Individual tiers.

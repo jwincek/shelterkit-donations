@@ -413,6 +413,10 @@ function starter_shelter_maybe_setup_products(): void {
 }
 add_action( 'admin_init', 'starter_shelter_maybe_setup_products' );
 
+// One-time upgrade to the canonical fund list (#21). After product setup, so
+// a fresh site's variations exist to be linked.
+add_action( 'admin_init', [ Starter_Shelter\Core\Allocations::class, 'maybe_migrate' ], 20 );
+
 /**
  * Show admin notice if products need setup.
  *

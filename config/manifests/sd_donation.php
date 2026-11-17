@@ -40,7 +40,10 @@ return [
 		],
 		'allocation' => [
 			'type'        => 'string',
-			'enum'        => [ 'general-fund', 'spay-neuter-clinic' ],
+			// Every fund in the Donation Allocations setting, active or retired,
+			// resolved when the manifest loads (Field_Manifest, #21). A literal
+			// list here went stale and rejected every gift to a fund it omitted.
+			'enum_source' => 'allocations',
 			'default'     => 'general-fund',
 			'description' => 'Fund allocation',
 			'form'        => [
@@ -327,9 +330,17 @@ return [
 			'product_type'  => 'donation',
 			'description'   => 'General shelter donations',
 			'input_mapping' => [
+				// The donor's choice, which the form puts on the cart item. The
+				// variation's label is only a fallback for orders from before
+				// it did: a missing variation used to fall back to the first
+				// one, and the gift was recorded against that fund (#21).
 				'allocation' => [
-					'source'    => 'attribute',
-					'key'       => 'preferred-allocation',
+					'source'    => 'item_meta',
+					'key'       => '_sd_allocation',
+					'fallback'  => [
+						'source' => 'attribute',
+						'key'    => 'preferred-allocation',
+					],
 					'transform' => 'normalize_allocation',
 					'default'   => 'general-fund',
 				],

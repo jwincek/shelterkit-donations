@@ -64,7 +64,7 @@ class Config {
      * @var array<string, string[]>
      */
     private static array $overridable = [
-        'settings' => [ 'allocations', 'memorial_types', 'pet_species', 'donor_levels' ],
+        'settings' => [ 'allocations', 'retired_allocations', 'memorial_types', 'pet_species', 'donor_levels' ],
         'tiers'    => [ 'tiers' ],
     ];
 

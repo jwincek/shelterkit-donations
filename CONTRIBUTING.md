@@ -117,6 +117,14 @@ the database or in post content rather than being code:
   `shelter-memberships-business`. Every existing product keeps the SKU it was
   created with, and order items are recognised by SKU prefix, so renaming one
   silently stops its orders being recorded. 3.0.0 did exactly that (#16).
+- The **shipped donation-fund slugs** in `config/settings.json` →
+  `allocations`: `general-fund`, `medical-care`, `food-supplies`, `facility`,
+  `rescue-operations`, `emergency-fund`, `spay-neuter-clinic`, and the
+  `allocation_aliases` that map old slugs onto them. Every donation stores
+  its fund's slug in `_sd_allocation`. Labels may change; slugs may not. A
+  shelter's own funds are its data: the settings screen makes a saved slug
+  read-only and retires a removed fund instead of deleting it. All code reads
+  the list through `Core\Allocations`, never the raw config (#21).
 - Anything core **derives** from a block name follows the frozen name: script
   and style handles (`shelter-donations-<block>-editor-script`, `-style`,
   `-view-script-module`) and the `wp-block-shelter-donations-<block>` class.

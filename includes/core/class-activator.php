@@ -49,13 +49,10 @@ class Activator {
             'attribute'   => [
                 'name'    => 'Preferred Allocation',
                 'slug'    => 'preferred-allocation',
-                'options' => [
-                    'General Fund'   => 10,
-                    'Medical Care'   => 10,
-                    'Food & Supplies' => 10,
-                    'Facility'       => 10,
-                    'Rescue Ops'     => 10,
-                ],
+                // Filled from Allocations::active() when the product is
+                // created. A list of its own here offered five funds while
+                // the form offered seven (#21).
+                'options' => [],
             ],
         ],
         'shelter-memberships' => [
@@ -161,8 +158,14 @@ class Activator {
         }
 
         foreach ( self::$products as $key => $product_data ) {
+            if ( 'shelter-donations' === $key ) {
+                $product_data['attribute']['options'] = array_fill_keys( array_values( Allocations::active() ), 10 );
+            }
             self::create_product_if_needed( $key, $product_data );
         }
+
+        // Link each donation variation to its fund by slug.
+        Allocations::sync_variations();
 
         // Mark as complete.
         update_option( 'sd_products_created', true );
