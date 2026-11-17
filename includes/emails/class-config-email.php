@@ -108,6 +108,15 @@ class Config_Email extends WC_Email {
      * @param mixed ...$args Trigger arguments matching trigger_args config.
      */
     public function trigger( ...$args ): void {
+        // Records an admin tool creates from history are not new gifts.
+        // Legacy Order Sync, CSV import and the merge repair all run as
+        // internal processing, and every *_created email used to go out for
+        // them: a donor got "Your memorial … has been created" or a welcome
+        // for a gift made years ago. Checkout never sets the flag.
+        if ( Helpers\is_internal_processing() ) {
+            return;
+        }
+
         // Map positional args to named keys. trigger_args supports two
         // shapes: a flat list `['donor_id', 'year', ...]` (legacy) or a
         // typed associative map `['donor_id' => [type: int], ...]` (new).
