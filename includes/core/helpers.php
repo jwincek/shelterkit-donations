@@ -16,23 +16,38 @@ use Starter_Shelter\Core\Config;
 use Starter_Shelter\Admin\Settings;
 
 /**
- * Format a number as currency.
+ * Format an amount as plain text in the store's currency.
+ *
+ * Follows WooCommerce's own settings: currency symbol, symbol position,
+ * decimals and both separators (#28). The client formats the same way from
+ * the shared Interactivity config (`currency.format` and the separators), so a
+ * value rendered by the server and then updated in the browser reads the same.
+ * Without WooCommerce it falls back to "$1,234.50".
  *
  * @since 1.0.0
  *
- * @param float  $amount   The amount to format.
- * @param string $currency Currency code (default USD).
- * @return string Formatted currency string.
+ * @param float       $amount   The amount to format.
+ * @param string|null $currency ISO currency code; null for the store's.
+ * @return string Formatted amount, e.g. "$1,234.50" or "1.234,50 €".
  */
-function format_currency( float $amount, string $currency = 'USD' ): string {
-    $symbol = match ( $currency ) {
-        'USD' => '$',
-        'EUR' => '€',
-        'GBP' => '£',
+function format_currency( float $amount, ?string $currency = null ): string {
+    $sign = $amount < 0 ? '-' : '';
+
+    if ( function_exists( 'get_woocommerce_price_format' ) ) {
+        $number = number_format( abs( $amount ), wc_get_price_decimals(), wc_get_price_decimal_separator(), wc_get_price_thousand_separator() );
+        $symbol = html_entity_decode( get_woocommerce_currency_symbol( $currency ?? '' ), ENT_QUOTES, 'UTF-8' );
+        $format = html_entity_decode( get_woocommerce_price_format(), ENT_QUOTES, 'UTF-8' );
+
+        return $sign . sprintf( $format, $symbol, $number );
+    }
+
+    $symbol = match ( $currency ?? 'USD' ) {
+        'EUR'   => '€',
+        'GBP'   => '£',
         default => '$',
     };
 
-    return $symbol . number_format( $amount, 2 );
+    return $sign . $symbol . number_format( abs( $amount ), 2 );
 }
 
 /**

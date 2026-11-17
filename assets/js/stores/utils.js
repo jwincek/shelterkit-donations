@@ -19,16 +19,29 @@ export function getSharedConfig() {
 }
 
 /**
- * Format currency using config settings.
+ * Format an amount in the store's currency, exactly as the server's
+ * Helpers\format_currency() does: WooCommerce's symbol, price format,
+ * decimals and separators, from the shared config (#28).
  *
  * @param {number} amount - The amount to format.
- * @returns {string} Formatted currency string.
+ * @returns {string} Formatted currency string, e.g. "$1,234.50" or "1.234,50 €".
  */
 export function formatCurrency( amount ) {
     const config = getSharedConfig();
-    const { symbol = '$', position = 'before', decimals = 2 } = config?.currency || {};
-    const formatted = parseFloat( amount || 0 ).toFixed( decimals );
-    return position === 'before' ? `${ symbol }${ formatted }` : `${ formatted }${ symbol }`;
+    const {
+        symbol = '$',
+        position = 'before',
+        decimals = 2,
+        decimalSep = '.',
+        thousandSep = ',',
+        format = position === 'before' ? '%1$s%2$s' : '%2$s%1$s',
+    } = config?.currency || {};
+
+    const value = parseFloat( amount ) || 0;
+    const [ whole, fraction ] = Math.abs( value ).toFixed( decimals ).split( '.' );
+    const number = whole.replace( /\B(?=(\d{3})+(?!\d))/g, thousandSep ) + ( fraction ? decimalSep + fraction : '' );
+
+    return ( value < 0 ? '-' : '' ) + format.replace( '%1$s', symbol ).replace( '%2$s', number );
 }
 
 /**

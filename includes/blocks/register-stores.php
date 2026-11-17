@@ -39,11 +39,12 @@ function register_interactivity_config(): void {
     // Always register config — the guard is too fragile ($post may not be
     // set yet, or blocks may be rendered outside the main query). The config
     // is lightweight and only outputs when a block actually renders.
-    $currency_symbol   = function_exists( 'get_woocommerce_currency_symbol' )
-        ? get_woocommerce_currency_symbol()
-        : '$';
+    // Decoded: WooCommerce returns HTML entities ("&euro;"), and the client
+    // writes these values as text, where an entity shows literally.
+    $has_wc            = function_exists( 'get_woocommerce_price_format' );
+    $currency_symbol   = $has_wc ? html_entity_decode( get_woocommerce_currency_symbol(), ENT_QUOTES, 'UTF-8' ) : '$';
     $currency_pos      = get_option( 'woocommerce_currency_pos', 'left' );
-    $currency_decimals = (int) get_option( 'woocommerce_price_num_decimals', 2 );
+    $currency_decimals = $has_wc ? wc_get_price_decimals() : 2;
 
     wp_interactivity_config( 'shelterkit-donations', [
         // API.
@@ -58,10 +59,16 @@ function register_interactivity_config(): void {
         'userId'   => get_current_user_id(),
 
         // Currency.
+        // The same settings Helpers\format_currency() uses, so the client and
+        // the server format an amount identically (#28). `format` is
+        // WooCommerce's price format: %1$s is the symbol, %2$s the number.
         'currency' => [
-            'symbol'   => $currency_symbol,
-            'position' => in_array( $currency_pos, [ 'left', 'left_space' ], true ) ? 'before' : 'after',
-            'decimals' => $currency_decimals,
+            'symbol'      => $currency_symbol,
+            'position'    => in_array( $currency_pos, [ 'left', 'left_space' ], true ) ? 'before' : 'after',
+            'decimals'    => $currency_decimals,
+            'format'      => $has_wc ? html_entity_decode( get_woocommerce_price_format(), ENT_QUOTES, 'UTF-8' ) : '%1$s%2$s',
+            'decimalSep'  => $has_wc ? wc_get_price_decimal_separator() : '.',
+            'thousandSep' => $has_wc ? wc_get_price_thousand_separator() : ',',
         ],
 
         // WooCommerce URLs.
@@ -345,10 +352,21 @@ function should_enqueue_interactivity(): bool {
    */
 
 // Seed server state.
+//
+// `wp_interactivity_init` is not an action WordPress (or WooCommerce, or
+// Gutenberg) fires, so this has never run; each block's render.php seeds the
+// state it needs. Left as found: switching the seeds on changes several
+// stores' starting state and adds a candle query to every page, which needs
+// its own review.
 add_action( 'wp_interactivity_init', __NAMESPACE__ . '\\register_interactivity_stores' );
 
-// Shared configuration (runs after state so state is available).
-add_action( 'wp_interactivity_init', __NAMESPACE__ . '\\register_interactivity_config', 15 );
+// Shared configuration: REST URL and nonce for apiRequest(), the donor id,
+// and the store's currency format (#28). It was hooked to
+// `wp_interactivity_init` too, so it was never printed: every store read an
+// empty config, formatted money as "$", and sent REST requests to
+// "undefined…". Front-end page loads are where blocks render and the
+// script-module data is printed.
+add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\register_interactivity_config', 15 );
 
 // Script modules.
 add_action( 'init', __NAMESPACE__ . '\\register_script_modules' );
