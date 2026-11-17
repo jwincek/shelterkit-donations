@@ -3,13 +3,13 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: ShelterKit Donations 3.0.0\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/shelterkit-donations\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/skd-wt\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-17T04:27:57+00:00\n"
+"POT-Creation-Date: 2026-11-17T04:36:42+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: shelterkit-donations\n"
@@ -1998,39 +1998,39 @@ msgstr ""
 msgid "%1$d errors, %2$d warnings, %3$d info"
 msgstr ""
 
-#: includes/admin/class-product-sync-checker.php:732
+#: includes/admin/class-product-sync-checker.php:738
 msgid "ShelterKit Donations — Product Sync:"
 msgstr ""
 
 #. translators: %d: number of issues.
-#: includes/admin/class-product-sync-checker.php:736
+#: includes/admin/class-product-sync-checker.php:742
 #, php-format
 msgid "View %d issue(s)"
 msgstr ""
 
-#: includes/admin/class-product-sync-checker.php:749
+#: includes/admin/class-product-sync-checker.php:755
 msgid "Re-check Now"
 msgstr ""
 
-#: includes/admin/class-product-sync-checker.php:751
+#: includes/admin/class-product-sync-checker.php:757
 msgid "This will create missing variations, set products to virtual, fix tax status, and assign default images. Continue?"
 msgstr ""
 
-#: includes/admin/class-product-sync-checker.php:752
+#: includes/admin/class-product-sync-checker.php:758
 msgid "Repair Issues"
 msgstr ""
 
-#: includes/admin/class-product-sync-checker.php:812
+#: includes/admin/class-product-sync-checker.php:818
 msgid "ShelterKit Donations — Repair Complete:"
 msgstr ""
 
 #. translators: 1: number of products repaired; 2: number of products skipped.
-#: includes/admin/class-product-sync-checker.php:816
+#: includes/admin/class-product-sync-checker.php:822
 #, php-format
 msgid "%1$d product(s) repaired, %2$d skipped."
 msgstr ""
 
-#: includes/admin/class-product-sync-checker.php:824
+#: includes/admin/class-product-sync-checker.php:830
 msgid "View details"
 msgstr ""
 

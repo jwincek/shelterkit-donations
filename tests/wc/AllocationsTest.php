@@ -189,6 +189,20 @@ final class AllocationsTest extends WP_UnitTestCase {
         $this->assertSame( [], preg_grep( '/variations, config expects|Medical Care/', $messages ), 'Kept on purpose, for the orders that point at it.' );
     }
 
+    public function test_repair_keeps_its_other_fixes_to_the_donation_product(): void {
+        $product_id = $this->donation_product( [ 'General Fund' ] );
+        $product    = wc_get_product( $product_id );
+        $product->set_catalog_visibility( 'visible' );
+        $product->set_tax_status( 'taxable' );
+        $product->save();
+
+        \Starter_Shelter\Admin\Product_Sync_Checker::repair();
+
+        $product = wc_get_product( $product_id );
+        $this->assertSame( 'hidden', $product->get_catalog_visibility(), 'Saved, not just reported.' );
+        $this->assertSame( 'none', $product->get_tax_status() );
+    }
+
     public function test_migration_keeps_funds_already_recorded_on_donations(): void {
         Config::save_override( 'settings', 'allocations', [ 'general-fund' => 'General Fund', 'spay-neuter' => 'Spay/Neuter Program' ] );
         $this->donation_with_allocation( 'spay-neuter-clinic' );

@@ -564,11 +564,17 @@ class Product_Sync_Checker {
 			if ( 'allocations' === $definition['config_source'] ) {
 				// Donation variations are linked to their fund by slug; the same
 				// routine runs on activation and when the fund list is saved (#21).
+				// It loads and saves the parent itself, so save the fixes made
+				// above first and reload afterwards. Otherwise one copy overwrites
+				// the other, and the reload threw away the visibility and tax
+				// fixes while the report said they were made.
+				if ( $changed ) {
+					$product->save();
+				}
 				foreach ( Allocations::sync_variations() as $detail ) {
 					$result['details'][] = $sku . ': ' . $detail;
 					$changed            = true;
 				}
-				// It saved the parent itself; reload so later fixes do not write a stale copy.
 				$product = wc_get_product( $product_id );
 			} else {
 				// Fix 3: Create missing variations.
