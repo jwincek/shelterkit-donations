@@ -62,6 +62,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `spay-neuter-clinic` everywhere. Saved settings, older forms and existing
   variations are carried over on the next admin page load, and the label you
   chose is kept. (#21)
+- **The Product Sync notice no longer cries wolf.** It tested "virtual" on
+  each variable product itself, which WooCommerce never treats as virtual,
+  so every site carried four warnings that Repair could not clear. It now
+  checks the variations, which is what decides whether checkout asks a donor
+  for a shipping address, and Repair makes them virtual. (#23)
+- **A product SKU that stops orders being recorded is now an error**, worded
+  as such, instead of one warning among many. Repair sets the SKU back. If
+  another product already has that SKU, Repair says so rather than
+  guessing. (#23)
 - The sync checker no longer expects an "In Honor Of" memorial variation.
   Honouring someone is a dedication, recorded separately, and memorial
   products need only Person and Pet. (#21)
