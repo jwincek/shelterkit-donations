@@ -57,6 +57,7 @@ final class Prefix_Migration {
 	/**
 	 * Set by `migrate-prefix --reverse`. While present the plugin stays inert,
 	 * so it cannot move the data forward again before the 2.x code is back.
+	 * Activating this release again lifts it (see maybe_run()).
 	 */
 	public const HOLD_OPTION = 'skdon_prefix_hold';
 
@@ -204,6 +205,14 @@ final class Prefix_Migration {
 	 *              may start. False keeps the plugin inert for this request.
 	 */
 	public static function maybe_run(): bool {
+		// Core loads a plugin in its sandbox only to activate it, to resume it
+		// after a fatal error, or to show an activation error: each a
+		// deliberate choice to run this code. A site that rolled back to 2.x
+		// and later upgrades again must not find the plugin still held, with
+		// a notice pointing at a CLI command its admin may not have.
+		if ( defined( 'WP_SANDBOX_SCRAPING' ) && WP_SANDBOX_SCRAPING ) {
+			delete_option( self::HOLD_OPTION );
+		}
 		if ( get_option( self::HOLD_OPTION ) ) {
 			return false;
 		}
@@ -393,7 +402,7 @@ final class Prefix_Migration {
 		if ( get_option( self::HOLD_OPTION ) ) {
 			printf(
 				'<div class="notice notice-warning"><p>%s</p></div>',
-				esc_html__( 'ShelterKit Donations is paused: its data was moved back to the 2.x names for a rollback. Install a 2.x release, or run `wp shelterkit-donations migrate-prefix` to move the data forward again.', 'shelterkit-donations' )
+				esc_html__( 'ShelterKit Donations is paused: its data was moved back to the 2.x names for a rollback. Install a 2.x release. To move the data forward again instead, deactivate and reactivate this plugin, or run `wp shelterkit-donations migrate-prefix`.', 'shelterkit-donations' )
 			);
 			return;
 		}

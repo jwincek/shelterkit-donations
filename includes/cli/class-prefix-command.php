@@ -34,8 +34,8 @@ class Prefix_Command {
 	 *
 	 * [--reverse]
 	 * : Move the data back to the `sd_` names for a rollback to 2.x. The
-	 * plugin then stays inert until it is replaced with a 2.x release, or
-	 * until this command runs again without --reverse.
+	 * plugin then stays inert until it is replaced with a 2.x release, until
+	 * it is activated again, or until this command runs without --reverse.
 	 *
 	 * [--yes]
 	 * : Skip the confirmation for --reverse.
@@ -60,6 +60,7 @@ class Prefix_Command {
 			$counts = Prefix_Migration::run( true );
 			delete_option( Prefix_Migration::VERSION_OPTION );
 			update_option( Prefix_Migration::HOLD_OPTION, time(), true );
+			update_option( Prefix_Migration::REPORT_OPTION, [ 'time' => time(), 'counts' => $counts, 'reversed' => true, 'notice' => false ], false );
 			$this->print_counts( $counts );
 			WP_CLI::success( 'Moved back to the sd_ names. Replace the plugin with a 2.x release now.' );
 			return;
@@ -86,7 +87,7 @@ class Prefix_Command {
 			WP_CLI::log( 'Held: data was moved back for a rollback; the plugin is inert.' );
 		}
 		if ( is_array( $report ) ) {
-			WP_CLI::log( 'Last run: ' . gmdate( 'Y-m-d H:i:s', (int) ( $report['time'] ?? 0 ) ) . ' UTC' );
+			WP_CLI::log( 'Last run: ' . gmdate( 'Y-m-d H:i:s', (int) ( $report['time'] ?? 0 ) ) . ' UTC' . ( empty( $report['reversed'] ) ? '' : ', moving the data back to sd_' ) );
 			if ( ! empty( $report['error'] ) ) {
 				WP_CLI::log( 'Error: ' . $report['error'] );
 			}

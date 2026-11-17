@@ -159,4 +159,6 @@ Two cleanups stay done:
 - Expanded family-notification fields stay expanded. 2.x reads those fields
   first.
 
-To go forward again instead, run the command without `--reverse`.
+To go forward again instead, run the command without `--reverse`, or
+deactivate and reactivate the plugin. Upgrading from the 2.x release again
+later works the same way as the first time: activation moves the data.

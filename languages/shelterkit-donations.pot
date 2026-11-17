@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-17T21:07:35+00:00\n"
+"POT-Creation-Date: 2026-11-17T21:23:35+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: shelterkit-donations\n"
@@ -3152,15 +3152,15 @@ msgstr ""
 msgid "Business Membership"
 msgstr ""
 
-#: includes/core/class-prefix-migration.php:396
-msgid "ShelterKit Donations is paused: its data was moved back to the 2.x names for a rollback. Install a 2.x release, or run `wp shelterkit-donations migrate-prefix` to move the data forward again."
+#: includes/core/class-prefix-migration.php:405
+msgid "ShelterKit Donations is paused: its data was moved back to the 2.x names for a rollback. Install a 2.x release. To move the data forward again instead, deactivate and reactivate this plugin, or run `wp shelterkit-donations migrate-prefix`."
 msgstr ""
 
-#: includes/core/class-prefix-migration.php:405
+#: includes/core/class-prefix-migration.php:414
 msgid "ShelterKit Donations has not finished moving its data to the new storage names, so it is switched off until it does. It retries on every request. Check the database, then reload this page."
 msgstr ""
 
-#: includes/core/class-prefix-migration.php:423
+#: includes/core/class-prefix-migration.php:432
 msgid "ShelterKit Donations moved its stored data to the new skdon_ names."
 msgstr ""
 
