@@ -51,6 +51,41 @@ function format_currency( float $amount, ?string $currency = null ): string {
 }
 
 /**
+ * IDs of the WooCommerce orders that have a meta key, under either order
+ * storage.
+ *
+ * WooCommerce's wc_get_orders() honours `meta_query` only under HPOS; with orders stored as
+ * posts it ignores it (and flags incorrect usage), which would return every
+ * order.
+ *
+ * @param string $meta_key Order meta key.
+ * @param int    $limit    Maximum number of IDs; -1 for all.
+ * @return int[]
+ */
+function order_ids_with_meta( string $meta_key, int $limit = -1 ): array {
+    if ( ! function_exists( 'wc_get_orders' ) ) {
+        return [];
+    }
+
+    $meta_query = [ [ 'key' => $meta_key, 'compare' => 'EXISTS' ] ];
+
+    if ( class_exists( '\\Automattic\\WooCommerce\\Utilities\\OrderUtil' )
+        && \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
+        $ids = wc_get_orders( [ 'limit' => $limit, 'return' => 'ids', 'status' => 'any', 'meta_query' => $meta_query ] ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- an admin query on a rarely-set key.
+    } else {
+        $ids = get_posts( [
+            'post_type'   => 'shop_order',
+            'post_status' => 'any',
+            'numberposts' => $limit,
+            'fields'      => 'ids',
+            'meta_query'  => $meta_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- an admin query on a rarely-set key.
+        ] );
+    }
+
+    return array_map( 'intval', (array) $ids );
+}
+
+/**
  * Format a date for display.
  *
  * @since 1.0.0

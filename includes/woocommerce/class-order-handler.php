@@ -37,6 +37,15 @@ class Order_Handler {
     private const RESULTS_META_KEY = '_skdon_processing_results';
 
     /**
+     * Order meta: how many of the order's lines failed to become a record.
+     * Present only when there were failures, so "needs attention" is a
+     * single meta EXISTS query (#35).
+     *
+     * @var string
+     */
+    public const ERRORS_META_KEY = '_skdon_processing_errors';
+
+    /**
      * Initialize the order handler.
      *
      * @since 1.0.0
@@ -96,8 +105,9 @@ class Order_Handler {
                 return;
             }
 
-            $results = [];
-            $has_errors = false;
+            $results     = [];
+            $has_errors  = false;
+            $error_count = 0;
 
             foreach ( $order->get_items() as $item_id => $item ) {
                 $result = self::process_item( $order, $item );
@@ -107,12 +117,18 @@ class Order_Handler {
 
                     if ( is_wp_error( $result ) ) {
                         $has_errors = true;
+                        ++$error_count;
                     }
                 }
             }
 
             // Store results.
             $order->update_meta_data( self::RESULTS_META_KEY, $results );
+            if ( $error_count ) {
+                $order->update_meta_data( self::ERRORS_META_KEY, $error_count );
+            } else {
+                $order->delete_meta_data( self::ERRORS_META_KEY );
+            }
 
             // Mark as processed (even with errors, to prevent duplicate processing).
             $order->update_meta_data( self::PROCESSED_META_KEY, current_time( 'mysql' ) );
@@ -234,7 +250,20 @@ class Order_Handler {
         $config = Product_Mapper::find_by_sku( $sku );
 
         if ( ! $config ) {
-            return null;
+            // An ordinary shop product: not ours to record. One of the
+            // plugin's own products with a SKU that maps to nothing used to
+            // land here too, and the paid line vanished without a word (#35).
+            if ( ! Product_Mapper::is_plugin_product( $product ) ) {
+                return null;
+            }
+            return new WP_Error(
+                'unmapped_line',
+                sprintf(
+                    /* translators: %s: the product's current SKU. */
+                    __( 'Not recorded: this is one of the plugin\'s products, but its SKU "%s" matches no product mapping. Restore the SKU (Product Sync → Repair Issues), then reprocess the order.', 'shelterkit-donations' ),
+                    $sku
+                )
+            );
         }
 
         // Get the ability.
@@ -249,6 +278,18 @@ class Order_Handler {
                     $ability_name
                 )
             );
+        }
+
+        // Reprocessing an order must not record a line twice: Reprocess is
+        // how an admin recovers the lines that failed, and the lines that
+        // succeeded first time used to get a second record.
+        $existing = self::line_record( $order, $item, (string) ( $config['product_type'] ?? '' ) );
+        if ( $existing ) {
+            return [
+                'id'     => $existing,
+                /* translators: %d: post ID of the existing record. */
+                'status' => sprintf( __( 'Already recorded as #%d', 'shelterkit-donations' ), $existing ),
+            ];
         }
 
         // Validate that required custom meta is present.
@@ -274,9 +315,73 @@ class Order_Handler {
          */
         $input = apply_filters( 'starter_shelter_order_item_input', $input, $ability_name, $order, $item );
 
-        // Execute the ability.
+        // Execute the ability, and link the record to its order line.
         $ability = wp_get_ability( $ability_name );
-        return $ability->execute( $input );
+        $result  = $ability->execute( $input );
+        if ( ! is_wp_error( $result ) ) {
+            Product_Mapper::stamp_order_line( $result, (int) $item->get_id() );
+        }
+        return $result;
+    }
+
+    /**
+     * The record an order line already produced, if any.
+     *
+     * Records carry their order line from this release on. An older record
+     * carries only its order, which identifies the line only when the order
+     * has a single line of that kind; such a record is matched, and linked to
+     * the line for next time.
+     *
+     * @param \WC_Order      $order        The order.
+     * @param \WC_Order_Item $item         The order line.
+     * @param string         $product_type donation, membership or memorial.
+     * @return int Post ID, or 0.
+     */
+    private static function line_record( \WC_Order $order, \WC_Order_Item $item, string $product_type ): int {
+        $post_type = match ( $product_type ) {
+            'donation'   => 'skdon_donation',
+            'membership' => 'skdon_membership',
+            'memorial'   => 'skdon_memorial',
+            default      => '',
+        };
+        if ( '' === $post_type ) {
+            return 0;
+        }
+
+        $find = static fn ( array $meta_query ): array => get_posts( [
+            'post_type'      => $post_type,
+            'post_status'    => 'any',
+            'posts_per_page' => 1,
+            'fields'         => 'ids',
+            'meta_query'     => $meta_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- one order's lines.
+        ] );
+
+        $found = $find( [ [ 'key' => Product_Mapper::ORDER_ITEM_META, 'value' => $item->get_id(), 'type' => 'NUMERIC' ] ] );
+        if ( $found ) {
+            return (int) $found[0];
+        }
+
+        $same_kind = 0;
+        foreach ( $order->get_items() as $line ) {
+            $product = $line->get_product();
+            $config  = $product ? Product_Mapper::find_by_sku( $product->get_sku() ) : null;
+            if ( $config && $product_type === ( $config['product_type'] ?? '' ) ) {
+                ++$same_kind;
+            }
+        }
+        if ( 1 !== $same_kind ) {
+            return 0;
+        }
+
+        $found = $find( [
+            [ 'key' => '_skdon_wc_order_id', 'value' => $order->get_id(), 'type' => 'NUMERIC' ],
+            [ 'key' => Product_Mapper::ORDER_ITEM_META, 'compare' => 'NOT EXISTS' ],
+        ] );
+        if ( ! $found ) {
+            return 0;
+        }
+        update_post_meta( (int) $found[0], Product_Mapper::ORDER_ITEM_META, (int) $item->get_id() );
+        return (int) $found[0];
     }
 
     /**

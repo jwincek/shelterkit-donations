@@ -642,6 +642,20 @@ function action_items( array $input = [] ): array {
         ];
     }
 
+    // Orders with a paid line that produced no record (#35).
+    if ( function_exists( 'wc_get_orders' ) ) {
+        $unrecorded = count( Helpers\order_ids_with_meta( \Starter_Shelter\WooCommerce\Order_Handler::ERRORS_META_KEY ) );
+        if ( $unrecorded > 0 ) {
+            $items[] = [
+                'type'         => 'orders_not_recorded',
+                'count'        => $unrecorded,
+                'label'        => __( 'order with a line not recorded', 'shelterkit-donations' ),
+                'label_plural' => __( 'orders with lines not recorded', 'shelterkit-donations' ),
+                'url'          => admin_url( 'admin.php?page=shelterkit-donations-data-tools#orders' ),
+            ];
+        }
+    }
+
     return [ 'items' => $items ];
 }
 
