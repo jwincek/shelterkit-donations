@@ -176,6 +176,19 @@ final class AllocationsTest extends WP_UnitTestCase {
         $this->assertTrue( wc_get_product( $variation_id )->is_purchasable(), 'A created variation can be sold.' );
     }
 
+    public function test_a_retired_funds_variation_is_not_reported_as_a_problem(): void {
+        $this->donation_product( [ 'General Fund', 'Medical Care' ] );
+        Allocations::save( [ 'general-fund' => 'General Fund', 'medical-care' => 'Medical Care' ] );
+
+        Allocations::save( [ 'general-fund' => 'General Fund' ] );
+
+        $messages = array_column(
+            array_filter( \Starter_Shelter\Admin\Product_Sync_Checker::check()['issues'], static fn( $i ) => 'shelter-donations' === $i['context'] ),
+            'message'
+        );
+        $this->assertSame( [], preg_grep( '/variations, config expects|Medical Care/', $messages ), 'Kept on purpose, for the orders that point at it.' );
+    }
+
     public function test_migration_keeps_funds_already_recorded_on_donations(): void {
         Config::save_override( 'settings', 'allocations', [ 'general-fund' => 'General Fund', 'spay-neuter' => 'Spay/Neuter Program' ] );
         $this->donation_with_allocation( 'spay-neuter-clinic' );

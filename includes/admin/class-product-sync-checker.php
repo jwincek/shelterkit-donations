@@ -218,6 +218,19 @@ class Product_Sync_Checker {
 		$expected_terms = self::get_expected_terms( $definition['config_source'] );
 		$variations = $product->get_available_variations();
 
+		// A retired fund keeps its variation, because past orders point at it.
+		// It is not expected and not an orphan, so leave it out of both
+		// checks (#21).
+		if ( 'allocations' === $definition['config_source'] ) {
+			$retired    = Allocations::retired();
+			$variations = array_values(
+				array_filter(
+					$variations,
+					static fn( $v ) => ! isset( $retired[ (string) get_post_meta( $v['variation_id'], Allocations::VARIATION_META, true ) ] )
+				)
+			);
+		}
+
 		// Check variation count.
 		if ( count( $variations ) !== count( $expected_terms ) ) {
 			$result['issues'][] = self::issue(
