@@ -235,7 +235,7 @@ function get_pagination_args(): array {
  */
 function get_campaigns( WP_REST_Request $request ): WP_REST_Response {
     $terms = get_terms( [
-        'taxonomy'   => 'sd_campaign',
+        'taxonomy'   => 'skdon_campaign',
         'hide_empty' => false,
     ] );
 
@@ -261,7 +261,7 @@ function get_campaigns( WP_REST_Request $request ): WP_REST_Response {
  */
 function get_campaign( WP_REST_Request $request ) {
     $campaign_id = (int) $request->get_param( 'id' );
-    $term = get_term( $campaign_id, 'sd_campaign' );
+    $term = get_term( $campaign_id, 'skdon_campaign' );
 
     if ( ! $term || is_wp_error( $term ) ) {
         return new WP_Error( 'not_found', __( 'Campaign not found.', 'shelterkit-donations' ), [ 'status' => 404 ] );
@@ -281,16 +281,16 @@ function get_campaign( WP_REST_Request $request ) {
 function format_campaign( \WP_Term $term ): array {
     global $wpdb;
 
-    $goal = (float) get_term_meta( $term->term_id, '_sd_goal', true );
-    $end_date = get_term_meta( $term->term_id, '_sd_end_date', true );
+    $goal = (float) get_term_meta( $term->term_id, '_skdon_goal', true );
+    $end_date = get_term_meta( $term->term_id, '_skdon_end_date', true );
 
     // Calculate raised.
     $raised = (float) $wpdb->get_var( $wpdb->prepare( "
         SELECT COALESCE(SUM(pm.meta_value), 0)
         FROM {$wpdb->posts} p
-        JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_amount'
+        JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_skdon_amount'
         JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
-        WHERE p.post_type = 'sd_donation'
+        WHERE p.post_type = 'skdon_donation'
         AND p.post_status = 'publish'
         AND tr.term_taxonomy_id = %d
     ", $term->term_id ) );
@@ -299,9 +299,9 @@ function format_campaign( \WP_Term $term ): array {
     $donors = (int) $wpdb->get_var( $wpdb->prepare( "
         SELECT COUNT(DISTINCT pm.meta_value)
         FROM {$wpdb->posts} p
-        JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_donor_id'
+        JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_skdon_donor_id'
         JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
-        WHERE p.post_type = 'sd_donation'
+        WHERE p.post_type = 'skdon_donation'
         AND p.post_status = 'publish'
         AND tr.term_taxonomy_id = %d
     ", $term->term_id ) );
@@ -345,7 +345,7 @@ function get_current_donor( WP_REST_Request $request ) {
         return new WP_Error( 'no_donor', __( 'No donor profile found.', 'shelterkit-donations' ), [ 'status' => 404 ] );
     }
 
-    $donor = Entity_Hydrator::get( 'sd_donor', $donor_id );
+    $donor = Entity_Hydrator::get( 'skdon_donor', $donor_id );
 
     if ( ! $donor ) {
         return new WP_Error( 'not_found', __( 'Donor not found.', 'shelterkit-donations' ), [ 'status' => 404 ] );
@@ -397,7 +397,7 @@ function get_donor_donations( WP_REST_Request $request ) {
         return new WP_Error( 'no_donor', __( 'No donor profile found.', 'shelterkit-donations' ), [ 'status' => 404 ] );
     }
 
-    $result = Query::for( 'sd_donation' )
+    $result = Query::for( 'skdon_donation' )
         ->where( 'donor_id', $donor_id )
         ->orderBy( 'donation_date', 'DESC' )
         ->paginate(
@@ -423,7 +423,7 @@ function get_donor_memberships( WP_REST_Request $request ) {
         return new WP_Error( 'no_donor', __( 'No donor profile found.', 'shelterkit-donations' ), [ 'status' => 404 ] );
     }
 
-    $memberships = Query::for( 'sd_membership' )
+    $memberships = Query::for( 'skdon_membership' )
         ->where( 'donor_id', $donor_id )
         ->orderBy( 'start_date', 'DESC' )
         ->get();
@@ -461,7 +461,7 @@ function get_donor_memorials( WP_REST_Request $request ) {
         return new WP_Error( 'no_donor', __( 'No donor profile found.', 'shelterkit-donations' ), [ 'status' => 404 ] );
     }
 
-    $result = Query::for( 'sd_memorial' )
+    $result = Query::for( 'skdon_memorial' )
         ->where( 'donor_id', $donor_id )
         ->orderBy( 'donation_date', 'DESC' )
         ->paginate(
@@ -539,16 +539,16 @@ function get_public_stats( WP_REST_Request $request ): WP_REST_Response {
     $total = (float) $wpdb->get_var( "
         SELECT COALESCE(SUM(pm.meta_value), 0)
         FROM {$wpdb->posts} p
-        JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_amount'
-        WHERE p.post_type = 'sd_donation'
+        JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_skdon_amount'
+        WHERE p.post_type = 'skdon_donation'
         AND p.post_status = 'publish'
     " );
 
     $donors = (int) $wpdb->get_var( "
         SELECT COUNT(DISTINCT pm.meta_value)
         FROM {$wpdb->posts} p
-        JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_donor_id'
-        WHERE p.post_type = 'sd_donation'
+        JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_skdon_donor_id'
+        WHERE p.post_type = 'skdon_donation'
         AND p.post_status = 'publish'
     " );
 
@@ -624,7 +624,7 @@ function get_tiers( WP_REST_Request $request ): WP_REST_Response {
  * @return WP_REST_Response Response object.
  */
 function get_public_memorials( WP_REST_Request $request ): WP_REST_Response {
-    $query = Query::for( 'sd_memorial' )
+    $query = Query::for( 'skdon_memorial' )
         ->orderBy( 'donation_date', 'DESC' );
 
     $type = $request->get_param( 'type' );
@@ -705,11 +705,11 @@ function get_donor_id_for_current_user(): ?int {
     }
 
     $donors = get_posts( [
-        'post_type'      => 'sd_donor',
+        'post_type'      => 'skdon_donor',
         'posts_per_page' => 1,
         'meta_query'     => [
             [
-                'key'   => '_sd_user_id',
+                'key'   => '_skdon_user_id',
                 'value' => $user_id,
             ],
         ],
@@ -730,7 +730,7 @@ add_action( 'rest_api_init', __NAMESPACE__ . '\\register_routes' );
  * giving, email hooks) runs regardless of whether the memorial was
  * created via the block editor, ability, or import.
  *
- * Runs on save_post_sd_memorial (fires on both classic POST and REST saves)
+ * Runs on save_post_skdon_memorial (fires on both classic POST and REST saves)
  * at a late priority so all meta is already written.
  *
  * @since 2.1.0
@@ -759,9 +759,9 @@ function process_memorial_save( int $post_id, \WP_Post $post, bool $update ): vo
 
     unset( $processing[ $post_id ] );
 }
-// sd_memorial uses the classic editor; meta-box save handlers write
-// meta before this priority-20 hook, so reading _sd_* here is safe.
+// skdon_memorial uses the classic editor; meta-box save handlers write
+// meta before this priority-20 hook, so reading _skdon_* here is safe.
 // (If the block editor is ever re-enabled via memorial-panel.js, a
-// rest_after_insert_sd_memorial companion is needed because REST saves
+// rest_after_insert_skdon_memorial companion is needed because REST saves
 // commit meta after save_post — see that file's header note.)
-add_action( 'save_post_sd_memorial', __NAMESPACE__ . '\\process_memorial_save', 20, 3 );
+add_action( 'save_post_skdon_memorial', __NAMESPACE__ . '\\process_memorial_save', 20, 3 );

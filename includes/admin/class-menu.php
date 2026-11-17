@@ -36,8 +36,8 @@ class Menu {
         add_action( 'admin_menu', [ self::class, 'add_pending_badge' ], 99 );
 
         // Invalidate badge cache when relevant records change.
-        add_action( 'save_post_sd_membership', [ self::class, 'invalidate_pending_cache' ] );
-        add_action( 'save_post_sd_memorial', [ self::class, 'invalidate_pending_cache' ] );
+        add_action( 'save_post_skdon_membership', [ self::class, 'invalidate_pending_cache' ] );
+        add_action( 'save_post_skdon_memorial', [ self::class, 'invalidate_pending_cache' ] );
         add_action( 'starter_shelter_logo_approved', [ self::class, 'invalidate_pending_cache' ] );
         add_action( 'starter_shelter_logo_rejected', [ self::class, 'invalidate_pending_cache' ] );
         add_action( 'starter_shelter_memorial_family_notification', [ self::class, 'invalidate_pending_cache' ] );
@@ -169,13 +169,13 @@ class Menu {
                 <div class="sd-quick-links" style="margin-top: 30px;">
                     <h2><?php esc_html_e( 'Quick Links', 'shelterkit-donations' ); ?></h2>
                     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=sd_donation' ) ); ?>" class="button">
+                        <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=skdon_donation' ) ); ?>" class="button">
                             <?php esc_html_e( 'View Donations', 'shelterkit-donations' ); ?>
                         </a>
-                        <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=sd_membership' ) ); ?>" class="button">
+                        <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=skdon_membership' ) ); ?>" class="button">
                             <?php esc_html_e( 'View Memberships', 'shelterkit-donations' ); ?>
                         </a>
-                        <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=sd_memorial' ) ); ?>" class="button">
+                        <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=skdon_memorial' ) ); ?>" class="button">
                             <?php esc_html_e( 'View Memorials', 'shelterkit-donations' ); ?>
                         </a>
                         <a href="<?php echo esc_url( admin_url( 'admin.php?page=shelterkit-donations-reports' ) ); ?>" class="button button-primary">
@@ -230,7 +230,7 @@ class Menu {
      * @return int Total pending count.
      */
     private static function get_pending_count(): int {
-        $cached = get_transient( 'sd_menu_pending_count' );
+        $cached = get_transient( 'skdon_menu_pending_count' );
         if ( false !== $cached ) {
             return (int) $cached;
         }
@@ -250,7 +250,7 @@ class Menu {
             }
         }
 
-        set_transient( 'sd_menu_pending_count', $count, 600 );
+        set_transient( 'skdon_menu_pending_count', $count, 600 );
 
         return $count;
     }
@@ -264,7 +264,7 @@ class Menu {
      * @since 2.1.0
      */
     public static function invalidate_pending_cache(): void {
-        delete_transient( 'sd_menu_pending_count' );
+        delete_transient( 'skdon_menu_pending_count' );
     }
 
     /**

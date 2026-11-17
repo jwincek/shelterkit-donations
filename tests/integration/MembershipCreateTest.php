@@ -42,12 +42,12 @@ final class MembershipCreateTest extends WP_UnitTestCase {
         $this->assertIsArray( $result );
         $id = $result['membership_id'];
 
-        $this->assertSame( 'sd_membership', get_post_type( $id ) );
-        $this->assertSame( 'single', get_post_meta( $id, '_sd_tier', true ) );
-        $this->assertSame( 'individual', get_post_meta( $id, '_sd_membership_type', true ) );
-        $this->assertSame( 45.0, (float) get_post_meta( $id, '_sd_amount', true ) );
-        $this->assertSame( '2026-01-15', get_post_meta( $id, '_sd_start_date', true ) );
-        $this->assertSame( '2027-01-15', get_post_meta( $id, '_sd_end_date', true ) );
+        $this->assertSame( 'skdon_membership', get_post_type( $id ) );
+        $this->assertSame( 'single', get_post_meta( $id, '_skdon_tier', true ) );
+        $this->assertSame( 'individual', get_post_meta( $id, '_skdon_membership_type', true ) );
+        $this->assertSame( 45.0, (float) get_post_meta( $id, '_skdon_amount', true ) );
+        $this->assertSame( '2026-01-15', get_post_meta( $id, '_skdon_start_date', true ) );
+        $this->assertSame( '2027-01-15', get_post_meta( $id, '_skdon_end_date', true ) );
         $this->assertSame( '2027-01-15', $result['end_date'] );
     }
 
@@ -62,7 +62,7 @@ final class MembershipCreateTest extends WP_UnitTestCase {
 
         $this->assertSame(
             get_tier_amount( 'single', 'individual' ),
-            (float) get_post_meta( $result['membership_id'], '_sd_amount', true )
+            (float) get_post_meta( $result['membership_id'], '_skdon_amount', true )
         );
     }
 
@@ -78,7 +78,7 @@ final class MembershipCreateTest extends WP_UnitTestCase {
 
         $this->assertSame(
             'Acme Pet Supplies',
-            get_post_meta( $result['membership_id'], '_sd_business_name', true )
+            get_post_meta( $result['membership_id'], '_skdon_business_name', true )
         );
     }
 
@@ -92,7 +92,7 @@ final class MembershipCreateTest extends WP_UnitTestCase {
 
         $this->assertSame(
             45.0,
-            (float) get_post_meta( $result['donor_id'], '_sd_lifetime_giving', true )
+            (float) get_post_meta( $result['donor_id'], '_skdon_lifetime_giving', true )
         );
     }
 
@@ -115,9 +115,9 @@ final class MembershipCreateTest extends WP_UnitTestCase {
 
         $this->assertIsArray( $renewal );
         $this->assertSame( '2028-01-15', $renewal['new_end_date'] );
-        $this->assertSame( '2028-01-15', get_post_meta( $id, '_sd_end_date', true ) );
+        $this->assertSame( '2028-01-15', get_post_meta( $id, '_skdon_end_date', true ) );
 
-        $orders = get_post_meta( $id, '_sd_renewal_orders', true );
+        $orders = get_post_meta( $id, '_skdon_renewal_orders', true );
         $this->assertIsArray( $orders );
         $this->assertCount( 1, $orders );
         $this->assertSame( 9876, $orders[0]['order_id'] );
@@ -125,7 +125,7 @@ final class MembershipCreateTest extends WP_UnitTestCase {
         // Lifetime giving = initial 45 + renewal 45.
         $this->assertSame(
             90.0,
-            (float) get_post_meta( $created['donor_id'], '_sd_lifetime_giving', true )
+            (float) get_post_meta( $created['donor_id'], '_skdon_lifetime_giving', true )
         );
     }
 
@@ -145,11 +145,11 @@ final class MembershipCreateTest extends WP_UnitTestCase {
         ] );
 
         // Persisted to meta...
-        $this->assertSame( '1', (string) get_post_meta( $anon['membership_id'], '_sd_is_anonymous', true ) );
+        $this->assertSame( '1', (string) get_post_meta( $anon['membership_id'], '_skdon_is_anonymous', true ) );
 
         // ...and hydrates as a typed boolean (previously absent entirely).
-        $anon_entity  = \Starter_Shelter\Core\Entity_Hydrator::get( 'sd_membership', $anon['membership_id'] );
-        $named_entity = \Starter_Shelter\Core\Entity_Hydrator::get( 'sd_membership', $named['membership_id'] );
+        $anon_entity  = \Starter_Shelter\Core\Entity_Hydrator::get( 'skdon_membership', $anon['membership_id'] );
+        $named_entity = \Starter_Shelter\Core\Entity_Hydrator::get( 'skdon_membership', $named['membership_id'] );
         $this->assertTrue( $anon_entity['is_anonymous'] );
         $this->assertFalse( $named_entity['is_anonymous'], 'Defaults to false when not opted out.' );
     }

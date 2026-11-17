@@ -182,7 +182,7 @@ class CPT_Registry {
         $entities = Config::get_item( 'entities', 'entities', [] );
 
         foreach ( $entities as $post_type => $config ) {
-            $prefix = $config['meta_prefix'] ?? '_sd_';
+            $prefix = $config['meta_prefix'] ?? '_skdon_';
 
             foreach ( $config['fields'] ?? [] as $field => $field_config ) {
                 self::register_meta_field( $post_type, $prefix . $field, $field_config );

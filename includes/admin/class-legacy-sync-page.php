@@ -52,13 +52,13 @@ class Legacy_Sync_Page {
 		add_action( 'admin_enqueue_scripts', [ self::class, 'enqueue_assets' ] );
 
 		// AJAX handlers — same action names for JS compatibility.
-		add_action( 'wp_ajax_sd_scan_legacy_orders', [ self::class, 'ajax_scan' ] );
-		add_action( 'wp_ajax_sd_preview_legacy_order', [ self::class, 'ajax_preview' ] );
-		add_action( 'wp_ajax_sd_sync_legacy_orders', [ self::class, 'ajax_sync' ] );
-		add_action( 'wp_ajax_sd_sync_all_legacy_orders', [ self::class, 'ajax_sync_all' ] );
-		add_action( 'wp_ajax_sd_get_sync_stats', [ self::class, 'ajax_get_stats' ] );
-		add_action( 'wp_ajax_sd_reset_sync_status', [ self::class, 'ajax_reset' ] );
-		add_action( 'wp_ajax_sd_debug_order', [ self::class, 'ajax_debug' ] );
+		add_action( 'wp_ajax_skdon_scan_legacy_orders', [ self::class, 'ajax_scan' ] );
+		add_action( 'wp_ajax_skdon_preview_legacy_order', [ self::class, 'ajax_preview' ] );
+		add_action( 'wp_ajax_skdon_sync_legacy_orders', [ self::class, 'ajax_sync' ] );
+		add_action( 'wp_ajax_skdon_sync_all_legacy_orders', [ self::class, 'ajax_sync_all' ] );
+		add_action( 'wp_ajax_skdon_get_sync_stats', [ self::class, 'ajax_get_stats' ] );
+		add_action( 'wp_ajax_skdon_reset_sync_status', [ self::class, 'ajax_reset' ] );
+		add_action( 'wp_ajax_skdon_debug_order', [ self::class, 'ajax_debug' ] );
 	}
 
 	/**
@@ -174,7 +174,7 @@ class Legacy_Sync_Page {
 
 		$result = Order_Scanner::scan( $filters, $page, $per_page );
 
-		update_option( 'sd_legacy_sync_last_scan', current_time( 'mysql' ) );
+		update_option( 'skdon_legacy_sync_last_scan', current_time( 'mysql' ) );
 
 		wp_send_json_success( $result );
 	}
@@ -370,7 +370,7 @@ class Legacy_Sync_Page {
 			global $wpdb;
 
 			$wpdb->delete( $wpdb->postmeta, [ 'meta_key' => Order_Scanner::SYNCED_META_KEY ] );
-			$wpdb->delete( $wpdb->postmeta, [ 'meta_key' => '_sd_legacy_sync_results' ] );
+			$wpdb->delete( $wpdb->postmeta, [ 'meta_key' => '_skdon_legacy_sync_results' ] );
 
 			// HPOS support.
 			if ( class_exists( '\Automattic\WooCommerce\Utilities\OrderUtil' )
@@ -378,7 +378,7 @@ class Legacy_Sync_Page {
 				$meta_table = $wpdb->prefix . 'wc_orders_meta';
 				if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $meta_table ) ) === $meta_table ) {
 					$wpdb->delete( $meta_table, [ 'meta_key' => Order_Scanner::SYNCED_META_KEY ] );
-					$wpdb->delete( $meta_table, [ 'meta_key' => '_sd_legacy_sync_results' ] );
+					$wpdb->delete( $meta_table, [ 'meta_key' => '_skdon_legacy_sync_results' ] );
 				}
 			}
 
@@ -388,7 +388,7 @@ class Legacy_Sync_Page {
 				$order = wc_get_order( $order_id );
 				if ( $order ) {
 					$order->delete_meta_data( Order_Scanner::SYNCED_META_KEY );
-					$order->delete_meta_data( '_sd_legacy_sync_results' );
+					$order->delete_meta_data( '_skdon_legacy_sync_results' );
 					$order->save();
 				}
 			}

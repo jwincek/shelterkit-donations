@@ -1,17 +1,19 @@
 <?php
 /**
- * Field manifest for `sd_memorial`.
+ * Field manifest for `skdon_memorial`.
  *
- * Source of truth for every place a sd_memorial field name appears.
+ * Source of truth for every place a skdon_memorial field name appears.
  * Loaded by Field_Manifest; merged into entities/abilities/products/
  * meta-boxes/checkout-fields by their respective Config flows.
  *
- * sd_memorial is the third migrated entity. Notable shape:
+ * skdon_memorial is the third migrated entity. Notable shape:
  *
- * - Five flat `notify_family_*` entity fields are the canonical
- *   storage for family-notification settings; a sibling
- *   `notify_family` field (type: object) is preserved for the legacy
- *   nested-meta read path (`Helpers\get_memorial_notify_family`).
+ * - Five flat `notify_family_*` entity fields are the storage for
+ *   family-notification settings. The sibling `notify_family` field
+ *   (type: object) describes the composite shape that
+ *   `Helpers\get_memorial_notify_family()` returns and the email
+ *   placeholders walk; nothing stores it. Core\Prefix_Migration expands
+ *   pre-1.1.2 nested rows into the flat keys (#30).
  *   The audit's CC-2 drift between these and the checkout-fields'
  *   `family_*` shorthand keys is preserved verbatim — see the
  *   checkout_fields block below.
@@ -34,8 +36,8 @@
 declare( strict_types = 1 );
 
 return [
-	'entity'      => 'sd_memorial',
-	'meta_prefix' => '_sd_',
+	'entity'      => 'skdon_memorial',
+	'meta_prefix' => '_skdon_',
 	'fields'      => [
 		'donor_id' => [
 			'type'         => 'integer',
@@ -44,7 +46,7 @@ return [
 			'form'         => [
 				'label'      => 'Donated By',
 				'input_type' => 'post_select',
-				'post_type'  => 'sd_donor',
+				'post_type'  => 'skdon_donor',
 			],
 		],
 		'donor_display_name' => [
@@ -166,15 +168,14 @@ return [
 			'show_in_rest' => true,
 			'description'  => 'Associated WooCommerce order ID',
 		],
-		// Legacy nested-storage placeholder; canonical storage is the
-		// five flat notify_family_* fields below. Use
-		// Helpers\get_memorial_notify_family($id) for a read-both view.
+		// Composite shape only; storage is the five flat notify_family_*
+		// fields below. Read it with Helpers\get_memorial_notify_family($id).
 		// Sub-properties match config/schemas/notify-family.json so that
 		// email placeholders like `memorial.notify_family.enabled` can
 		// be validated recursively by the manifest checker.
 		'notify_family' => [
 			'type'        => 'object',
-			'description' => 'Legacy: nested family-notification meta. Canonical storage is the five flat notify_family_* fields below. Use Helpers\\get_memorial_notify_family($id) for a read-both view.',
+			'description' => 'Composite view of the five flat notify_family_* fields below, as returned by Helpers\\get_memorial_notify_family($id). Not stored.',
 			'properties'  => [
 				'enabled' => [
 					'type'        => 'boolean',
@@ -304,7 +305,7 @@ return [
 	],
 	'relations' => [
 		'donor' => [
-			'type'        => 'sd_donor',
+			'type'        => 'skdon_donor',
 			'foreign_key' => 'donor_id',
 		],
 	],
@@ -398,7 +399,7 @@ return [
 					'donor_id' => [ 'type' => 'integer' ],
 					'campaign_id' => [
 						'type'        => 'integer',
-						'description' => 'Filter by sd_campaign term ID. 0/omitted = no filter.',
+						'description' => 'Filter by skdon_campaign term ID. 0/omitted = no filter.',
 					],
 					'page'     => [ 'type' => 'integer', 'default' => 1 ],
 					'per_page' => [ 'type' => 'integer', 'default' => 12 ],
@@ -447,96 +448,96 @@ return [
 				],
 				'dedication_type' => [
 					'source'   => 'item_meta',
-					'key'      => '_sd_dedication_type',
-					'fallback' => [ 'source' => 'order_meta', 'key' => '_sd_dedication_type' ],
+					'key'      => '_skdon_dedication_type',
+					'fallback' => [ 'source' => 'order_meta', 'key' => '_skdon_dedication_type' ],
 					'default'  => 'memory',
 				],
 				'donor_name' => [
 					'source' => 'item_meta',
-					'key'    => '_sd_donor_name',
+					'key'    => '_skdon_donor_name',
 				],
 				'honoree_name' => [
 					'source'   => 'item_meta',
-					'key'      => '_sd_honoree_name',
-					'fallback' => [ 'source' => 'order_meta', 'key' => '_sd_honoree_name' ],
+					'key'      => '_skdon_honoree_name',
+					'fallback' => [ 'source' => 'order_meta', 'key' => '_skdon_honoree_name' ],
 				],
 				'tribute_message' => [
 					'source'   => 'item_meta',
-					'key'      => '_sd_tribute_message',
-					'fallback' => [ 'source' => 'order_meta', 'key' => '_sd_tribute_message' ],
+					'key'      => '_skdon_tribute_message',
+					'fallback' => [ 'source' => 'order_meta', 'key' => '_skdon_tribute_message' ],
 				],
 				'pet_species' => [
 					'source'   => 'item_meta',
-					'key'      => '_sd_pet_species',
-					'fallback' => [ 'source' => 'order_meta', 'key' => '_sd_pet_species' ],
+					'key'      => '_skdon_pet_species',
+					'fallback' => [ 'source' => 'order_meta', 'key' => '_skdon_pet_species' ],
 				],
 				'is_anonymous' => [
 					'source'    => 'item_meta',
-					'key'       => '_sd_is_anonymous',
-					'fallback'  => [ 'source' => 'order_meta', 'key' => '_sd_is_anonymous' ],
+					'key'       => '_skdon_is_anonymous',
+					'fallback'  => [ 'source' => 'order_meta', 'key' => '_skdon_is_anonymous' ],
 					'transform' => 'boolean',
 					'default'   => false,
 				],
 				'campaign_id' => [
 					'source'   => 'item_meta',
-					'key'      => '_sd_campaign_id',
-					'fallback' => [ 'source' => 'order_meta', 'key' => '_sd_campaign_id' ],
+					'key'      => '_skdon_campaign_id',
+					'fallback' => [ 'source' => 'order_meta', 'key' => '_skdon_campaign_id' ],
 				],
 				// Composite mapping — combines five flat meta keys into
 				// the notify_family object passed to the ability. The
 				// Cart_Handler/Product_Mapper handles `source: composite`
-				// natively. Reads the canonical `_sd_notify_family_*` keys
+				// natively. Reads the canonical `_skdon_notify_family_*` keys
 				// the cart-handler now writes; falls back to the legacy
-				// `_sd_family_*` keys for in-flight orders placed before
+				// `_skdon_family_*` keys for in-flight orders placed before
 				// the rename landed.
 				'notify_family' => [
 					'source' => 'composite',
 					'fields' => [
 						'enabled' => [
 							'source'    => 'item_meta',
-							'key'       => '_sd_notify_family_enabled',
+							'key'       => '_skdon_notify_family_enabled',
 							'fallback'  => [
 								'source'   => 'item_meta',
-								'key'      => '_sd_notify_family',
-								'fallback' => [ 'source' => 'order_meta', 'key' => '_sd_notify_family' ],
+								'key'      => '_skdon_notify_family',
+								'fallback' => [ 'source' => 'order_meta', 'key' => '_skdon_notify_family' ],
 							],
 							'transform' => 'boolean',
 							'default'   => false,
 						],
 						'name' => [
 							'source'   => 'item_meta',
-							'key'      => '_sd_notify_family_name',
+							'key'      => '_skdon_notify_family_name',
 							'fallback' => [
 								'source'   => 'item_meta',
-								'key'      => '_sd_family_name',
-								'fallback' => [ 'source' => 'order_meta', 'key' => '_sd_family_name' ],
+								'key'      => '_skdon_family_name',
+								'fallback' => [ 'source' => 'order_meta', 'key' => '_skdon_family_name' ],
 							],
 						],
 						'email' => [
 							'source'   => 'item_meta',
-							'key'      => '_sd_notify_family_email',
+							'key'      => '_skdon_notify_family_email',
 							'fallback' => [
 								'source'   => 'item_meta',
-								'key'      => '_sd_family_email',
-								'fallback' => [ 'source' => 'order_meta', 'key' => '_sd_family_email' ],
+								'key'      => '_skdon_family_email',
+								'fallback' => [ 'source' => 'order_meta', 'key' => '_skdon_family_email' ],
 							],
 						],
 						'address' => [
 							'source'   => 'item_meta',
-							'key'      => '_sd_notify_family_address',
+							'key'      => '_skdon_notify_family_address',
 							'fallback' => [
 								'source'   => 'item_meta',
-								'key'      => '_sd_family_address',
-								'fallback' => [ 'source' => 'order_meta', 'key' => '_sd_family_address' ],
+								'key'      => '_skdon_family_address',
+								'fallback' => [ 'source' => 'order_meta', 'key' => '_skdon_family_address' ],
 							],
 						],
 						'send_card' => [
 							'source'    => 'item_meta',
-							'key'       => '_sd_notify_family_send_card',
+							'key'       => '_skdon_notify_family_send_card',
 							'fallback'  => [
 								'source'   => 'item_meta',
-								'key'      => '_sd_send_card',
-								'fallback' => [ 'source' => 'order_meta', 'key' => '_sd_send_card' ],
+								'key'      => '_skdon_send_card',
+								'fallback' => [ 'source' => 'order_meta', 'key' => '_skdon_send_card' ],
 							],
 							'transform' => 'boolean',
 							'default'   => false,
@@ -554,7 +555,7 @@ return [
 	 * audit-flagged CC-2 cart/entity meta-key divergence). The cart-
 	 * handler and the products composite mapping were updated to use
 	 * the same canonical keys; the products mapping retains a fallback
-	 * to the legacy `_sd_family_*` keys for in-flight orders.
+	 * to the legacy `_skdon_family_*` keys for in-flight orders.
 	 */
 	'checkout_fields' => [
 		'honoree_name' => [
@@ -671,7 +672,7 @@ return [
 
 	/*
 	 * WooCommerce email definitions owned by this entity. See
-	 * sd_donation.php for the placeholder validation convention.
+	 * skdon_donation.php for the placeholder validation convention.
 	 *
 	 * `memorial-family-notification` placeholders reference paths into
 	 * the composite `notify_family` field — validator walks the
@@ -687,8 +688,8 @@ return [
 				'donor_id'    => [ 'type' => 'integer' ],
 			],
 			'entities'      => [
-				'memorial' => [ 'entity' => 'sd_memorial', 'id_from' => 'memorial_id' ],
-				'donor'    => [ 'entity' => 'sd_donor', 'id_from' => 'donor_id' ],
+				'memorial' => [ 'entity' => 'skdon_memorial', 'id_from' => 'memorial_id' ],
+				'donor'    => [ 'entity' => 'skdon_donor', 'id_from' => 'donor_id' ],
 			],
 			'recipient_type' => 'donor',
 			'subject'        => 'Your memorial for {honoree_name} has been created',
@@ -710,8 +711,8 @@ return [
 				'donor_id'    => [ 'type' => 'integer' ],
 			],
 			'entities'        => [
-				'memorial' => [ 'entity' => 'sd_memorial', 'id_from' => 'memorial_id' ],
-				'donor'    => [ 'entity' => 'sd_donor', 'id_from' => 'donor_id' ],
+				'memorial' => [ 'entity' => 'skdon_memorial', 'id_from' => 'memorial_id' ],
+				'donor'    => [ 'entity' => 'skdon_donor', 'id_from' => 'donor_id' ],
 			],
 			'condition'       => 'memorial.notify_family.enabled',
 			'recipient_type'  => 'custom',

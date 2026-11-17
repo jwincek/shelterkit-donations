@@ -42,7 +42,7 @@ class My_Account {
      * @since 1.2.0
      * @var string
      */
-    private const DONOR_CACHE_GROUP = 'sd_user_donor';
+    private const DONOR_CACHE_GROUP = 'skdon_user_donor';
 
     /**
      * Initialize My Account integration.
@@ -449,7 +449,7 @@ class My_Account {
 
         $on = ! empty( $_POST['auto_renew'] );
         // phpcs:enable WordPress.Security.NonceVerification.Missing
-        update_post_meta( $membership_id, '_sd_auto_renew', $on );
+        update_post_meta( $membership_id, '_skdon_auto_renew', $on );
 
         wc_add_notice(
             $on
@@ -472,7 +472,7 @@ class My_Account {
         if ( ! $membership_id || ! $donor_id ) {
             return false;
         }
-        return (int) get_post_meta( $membership_id, '_sd_donor_id', true ) === $donor_id;
+        return (int) get_post_meta( $membership_id, '_skdon_donor_id', true ) === $donor_id;
     }
 
     /**
@@ -514,7 +514,7 @@ class My_Account {
         }
 
         $anonymous   = ! $list_publicly;
-        $memberships = Query::for( 'sd_membership' )
+        $memberships = Query::for( 'skdon_membership' )
             ->where( 'donor_id', $donor_id )
             ->get();
 
@@ -522,7 +522,7 @@ class My_Account {
         foreach ( $memberships as $membership ) {
             $membership_id = (int) ( $membership['id'] ?? 0 );
             if ( $membership_id ) {
-                update_post_meta( $membership_id, '_sd_is_anonymous', $anonymous );
+                update_post_meta( $membership_id, '_skdon_is_anonymous', $anonymous );
                 ++$count;
             }
         }
@@ -544,7 +544,7 @@ class My_Account {
             return false;
         }
 
-        $memberships = Query::for( 'sd_membership' )
+        $memberships = Query::for( 'skdon_membership' )
             ->where( 'donor_id', $donor_id )
             ->whereCompare( 'end_date', wp_date( 'Y-m-d' ), '>=', 'DATE' )
             ->get();
@@ -681,8 +681,8 @@ class My_Account {
     /**
      * Resolve a user's donor record id (0 when none).
      *
-     * Prefers the explicit `_sd_user_id` link; falls back to matching the
-     * user's email against `_sd_email`, back-filling the link so later
+     * Prefers the explicit `_skdon_user_id` link; falls back to matching the
+     * user's email against `_skdon_email`, back-filling the link so later
      * lookups are direct.
      *
      * @since 1.2.0
@@ -692,12 +692,12 @@ class My_Account {
      */
     private static function lookup_donor_id( int $user_id ): int {
         $donors = get_posts( [
-            'post_type'      => 'sd_donor',
+            'post_type'      => 'skdon_donor',
             'post_status'    => 'publish',
             'posts_per_page' => 1,
             'meta_query'     => [
                 [
-                    'key'   => '_sd_user_id',
+                    'key'   => '_skdon_user_id',
                     'value' => $user_id,
                 ],
             ],
@@ -712,12 +712,12 @@ class My_Account {
 
         if ( $user ) {
             $donors = get_posts( [
-                'post_type'      => 'sd_donor',
+                'post_type'      => 'skdon_donor',
                 'post_status'    => 'publish',
                 'posts_per_page' => 1,
                 'meta_query'     => [
                     [
-                        'key'   => '_sd_email',
+                        'key'   => '_skdon_email',
                         'value' => $user->user_email,
                     ],
                 ],
@@ -725,7 +725,7 @@ class My_Account {
             ] );
 
             if ( ! empty( $donors ) ) {
-                update_post_meta( $donors[0], '_sd_user_id', $user_id );
+                update_post_meta( $donors[0], '_skdon_user_id', $user_id );
                 return (int) $donors[0];
             }
         }
@@ -746,14 +746,14 @@ class My_Account {
             return;
         }
 
-        $donor = Entity_Hydrator::get( 'sd_donor', $donor_id );
+        $donor = Entity_Hydrator::get( 'skdon_donor', $donor_id );
 
-        $recent_donations = Query::for( 'sd_donation' )
+        $recent_donations = Query::for( 'skdon_donation' )
             ->where( 'donor_id', $donor_id )
             ->orderBy( 'donation_date', 'DESC' )
             ->paginate( 1, 5 );
 
-        $membership = Query::for( 'sd_membership' )
+        $membership = Query::for( 'skdon_membership' )
             ->where( 'donor_id', $donor_id )
             ->whereCompare( 'end_date', wp_date( 'Y-m-d' ), '>=', 'DATE' )
             ->orderBy( 'end_date', 'DESC' )
@@ -762,8 +762,8 @@ class My_Account {
         $stats = [
             'lifetime_giving' => $donor['lifetime_giving'] ?? 0,
             'donor_level'     => $donor['donor_level'] ?? 'new',
-            'donation_count'  => Query::for( 'sd_donation' )->where( 'donor_id', $donor_id )->count(),
-            'memorial_count'  => Query::for( 'sd_memorial' )->where( 'donor_id', $donor_id )->count(),
+            'donation_count'  => Query::for( 'skdon_donation' )->where( 'donor_id', $donor_id )->count(),
+            'memorial_count'  => Query::for( 'skdon_memorial' )->where( 'donor_id', $donor_id )->count(),
         ];
 
         self::render_template( 'donor-dashboard', compact( 'donor', 'recent_donations', 'membership', 'stats' ) );
@@ -785,7 +785,7 @@ class My_Account {
         $paged = isset( $_GET['history-page'] ) ? absint( $_GET['history-page'] ) : 1;
         $year = isset( $_GET['year'] ) ? absint( $_GET['year'] ) : null;
 
-        $donations = Query::for( 'sd_donation' )
+        $donations = Query::for( 'skdon_donation' )
             ->where( 'donor_id', $donor_id )
             ->whereYear( 'donation_date', $year )
             ->orderBy( 'donation_date', 'DESC' )
@@ -813,7 +813,7 @@ class My_Account {
             return;
         }
 
-        $memberships = Query::for( 'sd_membership' )
+        $memberships = Query::for( 'skdon_membership' )
             ->where( 'donor_id', $donor_id )
             ->orderBy( 'end_date', 'DESC' )
             ->get();
@@ -843,7 +843,7 @@ class My_Account {
 
         $paged = isset( $_GET['memorial-page'] ) ? absint( $_GET['memorial-page'] ) : 1;
 
-        $memorials = Query::for( 'sd_memorial' )
+        $memorials = Query::for( 'skdon_memorial' )
             ->where( 'donor_id', $donor_id )
             ->orderBy( 'donation_date', 'DESC' )
             ->paginate( $paged, 12 );
@@ -855,7 +855,7 @@ class My_Account {
      * Render the "My Candles" endpoint — the memorials this member has lit a
      * candle for.
      *
-     * Candles are stored per *user* (user_meta `_sd_candles`), not per donor,
+     * Candles are stored per *user* (user_meta `_skdon_candles`), not per donor,
      * so this resolves from the current user and works even for a logged-in
      * visitor without a donor profile. Memorials are permanent tributes, so
      * there is no expiry to reconcile here; entries whose memorial has been
@@ -876,7 +876,7 @@ class My_Account {
                 continue; // Candle for a memorial that no longer exists / isn't public.
             }
 
-            $memorial = Entity_Hydrator::get( 'sd_memorial', $memorial_id );
+            $memorial = Entity_Hydrator::get( 'skdon_memorial', $memorial_id );
             if ( null === $memorial ) {
                 continue;
             }
@@ -948,9 +948,9 @@ class My_Account {
         $years = $wpdb->get_col( $wpdb->prepare(
             "SELECT DISTINCT YEAR(pm.meta_value) as year
             FROM {$wpdb->posts} p
-            INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_donation_date'
-            INNER JOIN {$wpdb->postmeta} pd ON p.ID = pd.post_id AND pd.meta_key = '_sd_donor_id' AND pd.meta_value = %d
-            WHERE p.post_type IN ('sd_donation', 'sd_memorial', 'sd_membership')
+            INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_skdon_donation_date'
+            INNER JOIN {$wpdb->postmeta} pd ON p.ID = pd.post_id AND pd.meta_key = '_skdon_donor_id' AND pd.meta_value = %d
+            WHERE p.post_type IN ('skdon_donation', 'skdon_memorial', 'skdon_membership')
             AND p.post_status = 'publish'
             ORDER BY year DESC",
             $donor_id

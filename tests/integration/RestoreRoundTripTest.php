@@ -31,7 +31,7 @@ final class RestoreRoundTripTest extends WP_UnitTestCase {
     }
 
     private function campaign( string $name ): int {
-        $t = wp_insert_term( $name, 'sd_campaign' );
+        $t = wp_insert_term( $name, 'skdon_campaign' );
         return is_array( $t ) ? (int) $t['term_id'] : 0;
     }
 
@@ -41,9 +41,9 @@ final class RestoreRoundTripTest extends WP_UnitTestCase {
         return $path;
     }
 
-    /** @return string[] Names of sd_campaign terms on a post. */
+    /** @return string[] Names of skdon_campaign terms on a post. */
     private function campaign_names( int $post_id ): array {
-        $terms = wp_get_object_terms( $post_id, 'sd_campaign' );
+        $terms = wp_get_object_terms( $post_id, 'skdon_campaign' );
         return is_wp_error( $terms ) ? [] : wp_list_pluck( $terms, 'name' );
     }
 
@@ -85,17 +85,17 @@ final class RestoreRoundTripTest extends WP_UnitTestCase {
 
         // Simulate a purge of the record + its campaign term (media is kept).
         wp_delete_post( $res['membership_id'], true );
-        wp_delete_term( $campaign_id, 'sd_campaign' );
+        wp_delete_term( $campaign_id, 'skdon_campaign' );
 
         CSV_Importer::process( 'memberships', $file, [ 'create_donors' => true ] );
         wp_delete_file( $file );
 
-        $restored = get_posts( [ 'post_type' => 'sd_membership', 'numberposts' => -1, 'fields' => 'ids', 'post_status' => 'publish' ] );
+        $restored = get_posts( [ 'post_type' => 'skdon_membership', 'numberposts' => -1, 'fields' => 'ids', 'post_status' => 'publish' ] );
         $this->assertCount( 1, $restored, 'Membership restored.' );
         $id = $restored[0];
 
         $this->assertContains( 'Capital Campaign', $this->campaign_names( $id ), 'Campaign relinked by name.' );
-        $this->assertSame( (string) $logo, (string) get_post_meta( $id, '_sd_logo_attachment_id', true ), 'Logo reference restored.' );
+        $this->assertSame( (string) $logo, (string) get_post_meta( $id, '_skdon_logo_attachment_id', true ), 'Logo reference restored.' );
     }
 
     public function test_memorial_restores_campaign_and_photo(): void {
@@ -113,17 +113,17 @@ final class RestoreRoundTripTest extends WP_UnitTestCase {
         $file = $this->write_csv( $csv );
 
         wp_delete_post( $res['memorial_id'], true );
-        wp_delete_term( $campaign_id, 'sd_campaign' );
+        wp_delete_term( $campaign_id, 'skdon_campaign' );
 
         CSV_Importer::process( 'memorials', $file, [ 'create_donors' => true ] );
         wp_delete_file( $file );
 
-        $restored = get_posts( [ 'post_type' => 'sd_memorial', 'numberposts' => -1, 'fields' => 'ids', 'post_status' => 'publish' ] );
+        $restored = get_posts( [ 'post_type' => 'skdon_memorial', 'numberposts' => -1, 'fields' => 'ids', 'post_status' => 'publish' ] );
         $this->assertCount( 1, $restored );
         $id = $restored[0];
 
-        $this->assertSame( 'Old Rex', get_post_meta( $id, '_sd_honoree_name', true ) );
+        $this->assertSame( 'Old Rex', get_post_meta( $id, '_skdon_honoree_name', true ) );
         $this->assertContains( 'In Memoriam Fund', $this->campaign_names( $id ), 'Campaign relinked by name.' );
-        $this->assertSame( (string) $photo, (string) get_post_meta( $id, '_sd_photo_id', true ), 'Photo reference restored.' );
+        $this->assertSame( (string) $photo, (string) get_post_meta( $id, '_skdon_photo_id', true ), 'Photo reference restored.' );
     }
 }

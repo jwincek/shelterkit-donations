@@ -22,7 +22,7 @@ if ( ! $campaign_id ) {
 }
 
 // Get campaign term.
-$campaign = get_term( $campaign_id, 'sd_campaign' );
+$campaign = get_term( $campaign_id, 'skdon_campaign' );
 
 if ( ! $campaign || is_wp_error( $campaign ) ) {
     return;
@@ -40,8 +40,8 @@ $layout           = $attributes['layout'] ?? 'horizontal';
 $refresh_interval = $attributes['refreshInterval'] ?? 0;
 
 // Get campaign data.
-$goal = (float) get_term_meta( $campaign->term_id, '_sd_goal', true );
-$end_date = get_term_meta( $campaign->term_id, '_sd_end_date', true );
+$goal = (float) get_term_meta( $campaign->term_id, '_skdon_goal', true );
+$end_date = get_term_meta( $campaign->term_id, '_skdon_end_date', true );
 
 // Calculate raised amount.
 $raised = Blocks\calculate_campaign_raised( $campaign->term_id );

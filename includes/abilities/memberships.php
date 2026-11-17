@@ -61,7 +61,7 @@ function create( array $input ): array|WP_Error {
     // to the donor record's title for the label.
     $donor_label = $input['donor_name'] ?? $input['donor_email'] ?? get_the_title( $donor_id );
     $membership_id = wp_insert_post( [
-        'post_type'   => 'sd_membership',
+        'post_type'   => 'skdon_membership',
         'post_title'  => sprintf(
             '%s - %s (%s)',
             $donor_label,
@@ -71,15 +71,15 @@ function create( array $input ): array|WP_Error {
         'post_status' => 'publish',
         'post_date'   => $input['date'] ?? current_time( 'mysql' ),
         'meta_input'  => [
-            '_sd_donor_id'        => $donor_id,
-            '_sd_tier'            => $tier,
-            '_sd_membership_type' => $type,
-            '_sd_amount'          => (float) $amount,
-            '_sd_start_date'      => $start_date,
-            '_sd_end_date'        => $end_date,
-            '_sd_wc_order_id'     => $input['order_id'] ?? 0,
-            '_sd_auto_renew'      => $input['auto_renew'] ?? false,
-            '_sd_is_anonymous'    => (bool) ( $input['is_anonymous'] ?? false ),
+            '_skdon_donor_id'        => $donor_id,
+            '_skdon_tier'            => $tier,
+            '_skdon_membership_type' => $type,
+            '_skdon_amount'          => (float) $amount,
+            '_skdon_start_date'      => $start_date,
+            '_skdon_end_date'        => $end_date,
+            '_skdon_wc_order_id'     => $input['order_id'] ?? 0,
+            '_skdon_auto_renew'      => $input['auto_renew'] ?? false,
+            '_skdon_is_anonymous'    => (bool) ( $input['is_anonymous'] ?? false ),
         ],
     ], true );
 
@@ -90,10 +90,10 @@ function create( array $input ): array|WP_Error {
     // Handle business-specific fields.
     if ( 'business' === $type ) {
         if ( ! empty( $input['business_name'] ) ) {
-            update_post_meta( $membership_id, '_sd_business_name', $input['business_name'] );
+            update_post_meta( $membership_id, '_skdon_business_name', $input['business_name'] );
         }
         if ( ! empty( $input['logo_attachment_id'] ) ) {
-            update_post_meta( $membership_id, '_sd_logo_attachment_id', $input['logo_attachment_id'] );
+            update_post_meta( $membership_id, '_skdon_logo_attachment_id', $input['logo_attachment_id'] );
         }
     }
 
@@ -101,7 +101,7 @@ function create( array $input ): array|WP_Error {
     // a `membership_drive`-type campaign's progress. Mirrors the
     // corresponding line in includes/abilities/donations.php.
     if ( ! empty( $input['campaign_id'] ) ) {
-        wp_set_object_terms( $membership_id, [ (int) $input['campaign_id'] ], 'sd_campaign' );
+        wp_set_object_terms( $membership_id, [ (int) $input['campaign_id'] ], 'skdon_campaign' );
     }
 
     // Update donor lifetime giving.
@@ -131,7 +131,7 @@ function create( array $input ): array|WP_Error {
  */
 function renew( array $input ): array|WP_Error {
     $membership_id = $input['membership_id'] ?? 0;
-    $membership    = Entity_Hydrator::get( 'sd_membership', $membership_id );
+    $membership    = Entity_Hydrator::get( 'skdon_membership', $membership_id );
 
     if ( ! $membership ) {
         return new WP_Error(
@@ -160,18 +160,18 @@ function renew( array $input ): array|WP_Error {
     $amount = $input['amount'] ?? Helpers\get_tier_amount( $tier, $type );
 
     // Update membership.
-    update_post_meta( $membership_id, '_sd_end_date', $new_end );
-    update_post_meta( $membership_id, '_sd_tier', $tier );
+    update_post_meta( $membership_id, '_skdon_end_date', $new_end );
+    update_post_meta( $membership_id, '_skdon_tier', $tier );
 
     // Record the renewal order.
     if ( ! empty( $input['order_id'] ) ) {
-        $renewals = get_post_meta( $membership_id, '_sd_renewal_orders', true ) ?: [];
+        $renewals = get_post_meta( $membership_id, '_skdon_renewal_orders', true ) ?: [];
         $renewals[] = [
             'order_id' => $input['order_id'],
             'date'     => wp_date( 'Y-m-d H:i:s' ),
             'amount'   => $amount,
         ];
-        update_post_meta( $membership_id, '_sd_renewal_orders', $renewals );
+        update_post_meta( $membership_id, '_skdon_renewal_orders', $renewals );
     }
 
     // Update donor lifetime giving.
@@ -201,7 +201,7 @@ function renew( array $input ): array|WP_Error {
 function get_status( array $input ): array|WP_Error {
     // Get by membership ID.
     if ( ! empty( $input['membership_id'] ) ) {
-        $membership = Entity_Hydrator::get( 'sd_membership', $input['membership_id'] );
+        $membership = Entity_Hydrator::get( 'skdon_membership', $input['membership_id'] );
 
         if ( ! $membership ) {
             return new WP_Error(
@@ -216,7 +216,7 @@ function get_status( array $input ): array|WP_Error {
 
     // Get by donor ID (most recent active membership).
     if ( ! empty( $input['donor_id'] ) ) {
-        $membership = Query::for( 'sd_membership' )
+        $membership = Query::for( 'skdon_membership' )
             ->where( 'donor_id', $input['donor_id'] )
             ->orderBy( 'end_date', 'DESC' )
             ->first();
@@ -251,11 +251,11 @@ function get_status( array $input ): array|WP_Error {
  * @return array Paginated membership list.
  */
 function list_memberships( array $input = [] ): array {
-    $query = Query::for( 'sd_membership' )
+    $query = Query::for( 'skdon_membership' )
         ->where( 'donor_id', $input['donor_id'] ?? null )
         ->where( 'tier', $input['tier'] ?? null )
         ->where( 'membership_type', $input['membership_type'] ?? null )
-        ->whereInTaxonomy( 'sd_campaign', $input['campaign_id'] ?? null )
+        ->whereInTaxonomy( 'skdon_campaign', $input['campaign_id'] ?? null )
         ->orderBy( 'end_date', 'DESC' );
 
     // Filter by status (active/expired/expiring).
@@ -290,7 +290,7 @@ function list_memberships( array $input = [] ): array {
 function business_directory( array $input = [] ): array {
     $limit = max( 1, min( 200, (int) ( $input['limit'] ?? 50 ) ) );
 
-    $result = Query::for( 'sd_membership' )
+    $result = Query::for( 'skdon_membership' )
         ->where( 'membership_type', 'business' )
         ->where( 'logo_status', 'approved' )
         ->whereCompare( 'end_date', wp_date( 'Y-m-d' ), '>=', 'DATE' )
@@ -337,7 +337,7 @@ function business_directory( array $input = [] ): array {
 function recognition_wall( array $input = [] ): array {
     $limit = max( 1, min( 500, (int) ( $input['limit'] ?? 200 ) ) );
 
-    $result = Query::for( 'sd_membership' )
+    $result = Query::for( 'skdon_membership' )
         ->whereCompare( 'end_date', wp_date( 'Y-m-d' ), '>=', 'DATE' )
         ->orderBy( 'start_date', 'DESC' )
         ->paginate( 1, $limit );
@@ -355,7 +355,7 @@ function recognition_wall( array $input = [] ): array {
 
         $display = $is_business ? (string) ( $m['business_name'] ?? '' ) : '';
         if ( '' === trim( $display ) ) {
-            $display = (string) ( get_post_meta( $donor_id, '_sd_display_name', true ) ?: get_the_title( $donor_id ) );
+            $display = (string) ( get_post_meta( $donor_id, '_skdon_display_name', true ) ?: get_the_title( $donor_id ) );
         }
         if ( '' === trim( $display ) ) {
             continue; // Nothing to recognize.
@@ -413,7 +413,7 @@ function cancel( array $input ): array|WP_Error {
     }
 
     // Verify the membership exists.
-    $membership = Entity_Hydrator::get( 'sd_membership', $membership_id );
+    $membership = Entity_Hydrator::get( 'skdon_membership', $membership_id );
     if ( ! $membership ) {
         return new WP_Error(
             'membership_not_found',
@@ -433,24 +433,24 @@ function cancel( array $input ): array|WP_Error {
     $cancelled_at = wp_date( 'Y-m-d H:i:s' );
 
     // Update the membership status.
-    update_post_meta( $membership_id, '_sd_status', 'cancelled' );
-    update_post_meta( $membership_id, '_sd_cancelled_at', $cancelled_at );
+    update_post_meta( $membership_id, '_skdon_status', 'cancelled' );
+    update_post_meta( $membership_id, '_skdon_cancelled_at', $cancelled_at );
 
     // Store cancellation reason if provided.
     if ( ! empty( $input['reason'] ) ) {
-        update_post_meta( $membership_id, '_sd_cancellation_reason', sanitize_textarea_field( $input['reason'] ) );
+        update_post_meta( $membership_id, '_skdon_cancellation_reason', sanitize_textarea_field( $input['reason'] ) );
     }
 
     // Clear the end date to stop renewal reminders.
-    update_post_meta( $membership_id, '_sd_end_date', '' );
+    update_post_meta( $membership_id, '_skdon_end_date', '' );
 
     // Update donor's active membership status if this was their current membership.
     $donor_id = $membership['donor_id'] ?? 0;
     if ( $donor_id ) {
-        $current_membership_id = (int) get_post_meta( $donor_id, '_sd_current_membership_id', true );
+        $current_membership_id = (int) get_post_meta( $donor_id, '_skdon_current_membership_id', true );
         if ( $current_membership_id === $membership_id ) {
-            delete_post_meta( $donor_id, '_sd_current_membership_id' );
-            update_post_meta( $donor_id, '_sd_is_member', false );
+            delete_post_meta( $donor_id, '_skdon_current_membership_id' );
+            update_post_meta( $donor_id, '_skdon_is_member', false );
         }
     }
 

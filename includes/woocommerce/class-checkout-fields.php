@@ -374,7 +374,7 @@ class Checkout_Fields {
         $options = [ '' => __( '— Select a campaign (optional) —', 'shelterkit-donations' ) ];
 
         $campaigns = get_terms( [
-            'taxonomy'   => 'sd_campaign',
+            'taxonomy'   => 'skdon_campaign',
             'hide_empty' => false,
         ] );
 
@@ -403,7 +403,7 @@ class Checkout_Fields {
 
         foreach ( self::get_field_definitions() as $key => $field ) {
             $field_name = 'sd_' . $key;
-            $meta_key = $field['meta_key'] ?? '_sd_' . $key;
+            $meta_key = $field['meta_key'] ?? '_skdon_' . $key;
 
             // phpcs:ignore WordPress.Security.NonceVerification.Missing
             if ( isset( $_POST[ $field_name ] ) ) {
@@ -495,7 +495,7 @@ class Checkout_Fields {
         $output = '<div class="sd-admin-order-fields"><h3>' . esc_html__( 'Shelter Donation Details', 'shelterkit-donations' ) . '</h3>';
 
         foreach ( self::get_field_definitions() as $key => $field ) {
-            $meta_key = $field['meta_key'] ?? '_sd_' . $key;
+            $meta_key = $field['meta_key'] ?? '_skdon_' . $key;
             $value = $order->get_meta( $meta_key );
 
             if ( '' !== $value && null !== $value && false !== $value ) {
@@ -529,7 +529,7 @@ class Checkout_Fields {
         $fields_output = [];
 
         foreach ( self::get_field_definitions() as $key => $field ) {
-            $meta_key = $field['meta_key'] ?? '_sd_' . $key;
+            $meta_key = $field['meta_key'] ?? '_skdon_' . $key;
             $value = $order->get_meta( $meta_key );
 
             if ( '' !== $value && null !== $value && false !== $value ) {

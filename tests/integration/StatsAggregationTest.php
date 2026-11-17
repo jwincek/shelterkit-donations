@@ -66,7 +66,7 @@ final class StatsAggregationTest extends WP_UnitTestCase {
     }
 
     public function test_get_stats_scopes_to_campaign(): void {
-        $cid = self::factory()->term->create( [ 'taxonomy' => 'sd_campaign', 'name' => 'Drive' ] );
+        $cid = self::factory()->term->create( [ 'taxonomy' => 'skdon_campaign', 'name' => 'Drive' ] );
 
         create_donation( [ 'donor_email' => 'a@example.test', 'donor_name' => 'A', 'amount' => 100, 'campaign_id' => $cid, 'donation_date' => '2022-01-10' ] );
         create_donation( [ 'donor_email' => 'b@example.test', 'donor_name' => 'B', 'amount' => 999, 'donation_date' => '2022-01-10' ] ); // untagged

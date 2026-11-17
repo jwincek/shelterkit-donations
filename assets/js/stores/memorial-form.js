@@ -195,7 +195,7 @@ const { state, actions } = store( NAMESPACE, {
 					if ( form.tributeMessage ) formData.append( 'tribute_message', form.tributeMessage );
 
 					if ( form.notifyFamily ) {
-						// POST keys match the sd_memorial entity's flat
+						// POST keys match the skdon_memorial entity's flat
 						// notify_family_* fields (closes the audit-CC-2
 						// cart/entity meta-key divergence).
 						formData.append( 'notify_family_enabled', '1' );

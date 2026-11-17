@@ -54,10 +54,10 @@ class Data_Integrity {
 	 * Entity types we manage.
 	 */
 	private const ENTITY_TYPES = [
-		'sd_donation'   => 'Donations',
-		'sd_membership' => 'Memberships',
-		'sd_memorial'   => 'Memorials',
-		'sd_donor'      => 'Donors',
+		'skdon_donation'   => 'Donations',
+		'skdon_membership' => 'Memberships',
+		'skdon_memorial'   => 'Memorials',
+		'skdon_donor'      => 'Donors',
 	];
 
 	/**
@@ -65,10 +65,10 @@ class Data_Integrity {
 	 */
 	public static function init(): void {
 		add_action( 'admin_menu', [ self::class, 'add_menu_page' ], 30 );
-		add_action( 'wp_ajax_sd_integrity_scan', [ self::class, 'ajax_scan' ] );
-		add_action( 'wp_ajax_sd_integrity_backfill', [ self::class, 'ajax_backfill' ] );
-		add_action( 'wp_ajax_sd_integrity_purge', [ self::class, 'ajax_purge' ] );
-		add_action( 'wp_ajax_sd_integrity_recalc_donors', [ self::class, 'ajax_recalc_donors' ] );
+		add_action( 'wp_ajax_skdon_integrity_scan', [ self::class, 'ajax_scan' ] );
+		add_action( 'wp_ajax_skdon_integrity_backfill', [ self::class, 'ajax_backfill' ] );
+		add_action( 'wp_ajax_skdon_integrity_purge', [ self::class, 'ajax_purge' ] );
+		add_action( 'wp_ajax_skdon_integrity_recalc_donors', [ self::class, 'ajax_recalc_donors' ] );
 	}
 
 	/**
@@ -265,7 +265,7 @@ class Data_Integrity {
 				<p class="description">
 					<?php
                     esc_html_e(
-						'Clears the "_sd_legacy_synced" flag on all WooCommerce orders so they can be re-processed by the Legacy Order Sync tool. Does NOT delete any records.',
+						'Clears the "_skdon_legacy_synced" flag on all WooCommerce orders so they can be re-processed by the Legacy Order Sync tool. Does NOT delete any records.',
 						'shelterkit-donations'
 					);
                     ?>
@@ -313,7 +313,7 @@ class Data_Integrity {
 	 * Scan all entity types and report missing fields.
 	 *
 	 * Returns a summary per entity type:
-	 *   { sd_donation: { total: 500, issues: { allocation: 12, donation_date: 0 } } }
+	 *   { skdon_donation: { total: 500, issues: { allocation: 12, donation_date: 0 } } }
 	 */
 	public static function ajax_scan(): void {
 		check_ajax_referer( self::NONCE, 'nonce' );
@@ -331,7 +331,7 @@ class Data_Integrity {
 				continue;
 			}
 
-			$prefix = $config['meta_prefix'] ?? '_sd_';
+			$prefix = $config['meta_prefix'] ?? '_skdon_';
 			$fields = $config['fields'] ?? [];
 
 			// Get all post IDs for this type.
@@ -439,11 +439,11 @@ class Data_Integrity {
 
 		$specials = [];
 
-		if ( 'sd_memorial' === $post_type ) {
-			// Check for missing sd_memorial_year taxonomy terms.
+		if ( 'skdon_memorial' === $post_type ) {
+			// Check for missing skdon_memorial_year taxonomy terms.
 			$missing_year = 0;
 			foreach ( $post_ids as $id ) {
-				$terms = get_the_terms( $id, 'sd_memorial_year' );
+				$terms = get_the_terms( $id, 'skdon_memorial_year' );
 				if ( ! $terms || is_wp_error( $terms ) ) {
 					++$missing_year;
 				}
@@ -471,8 +471,8 @@ class Data_Integrity {
 			}
 		}
 
-		if ( 'sd_donor' === $post_type ) {
-			// Check for donors whose _sd_display_name is an email address.
+		if ( 'skdon_donor' === $post_type ) {
+			// Check for donors whose _skdon_display_name is an email address.
 			// These need rebuilding from first_name + last_name.
 			$donor_email_display = self::count_email_display_names_on_donors( $post_ids );
 			if ( $donor_email_display > 0 ) {
@@ -481,7 +481,7 @@ class Data_Integrity {
 		}
 
 		// Check for missing import hashes on non-donor entity types.
-		if ( 'sd_donor' !== $post_type ) {
+		if ( 'skdon_donor' !== $post_type ) {
 			$missing_hash = self::count_missing_meta(
 				$post_ids,
 				\Starter_Shelter\Admin\Import_Export\CSV_Importer::HASH_META_KEY,
@@ -528,7 +528,7 @@ class Data_Integrity {
 			wp_send_json_error( 'No entity config found.' );
 		}
 
-		$prefix = $config['meta_prefix'] ?? '_sd_';
+		$prefix = $config['meta_prefix'] ?? '_skdon_';
 		$fields = $config['fields'] ?? [];
 
 		// Get batch of posts.
@@ -602,23 +602,19 @@ class Data_Integrity {
 		// Entity-specific inference for fields without schema defaults.
 		return match ( $post_type . '.' . $field_name ) {
 			// Donations: default allocation to general-fund.
-			'sd_donation.allocation' => 'general-fund',
-
-			// Donations/Memorials: fill _sd_date from donation_date.
-			'sd_donation.date',
-			'sd_memorial.date' => $all_meta['_sd_donation_date'][0] ?? $post->post_date,
+			'skdon_donation.allocation' => 'general-fund',
 
 			// Memorials: denormalize donor display name.
-			'sd_memorial.donor_display_name' => self::resolve_donor_display_name(
-				(int) ( $all_meta['_sd_donor_id'][0] ?? 0 ),
-				filter_var( $all_meta['_sd_is_anonymous'][0] ?? false, FILTER_VALIDATE_BOOLEAN )
+			'skdon_memorial.donor_display_name' => self::resolve_donor_display_name(
+				(int) ( $all_meta['_skdon_donor_id'][0] ?? 0 ),
+				filter_var( $all_meta['_skdon_is_anonymous'][0] ?? false, FILTER_VALIDATE_BOOLEAN )
 			),
 
 			// Memorials: default type to 'pet' (shelter context).
-			'sd_memorial.memorial_type' => 'pet',
+			'skdon_memorial.memorial_type' => 'pet',
 
 			// Donors: fill display_name from post title.
-			'sd_donor.display_name' => $post->post_title,
+			'skdon_donor.display_name' => $post->post_title,
 
 			// Everything else: skip (don't invent data).
 			default => null,
@@ -633,7 +629,7 @@ class Data_Integrity {
 			return '';
 		}
 
-		$name = get_post_meta( $donor_id, '_sd_display_name', true );
+		$name = get_post_meta( $donor_id, '_skdon_display_name', true );
 		if ( $name ) {
 			return $name;
 		}
@@ -643,7 +639,7 @@ class Data_Integrity {
 	}
 
 	/**
-	 * Count memorials whose _sd_donor_display_name looks like an email address.
+	 * Count memorials whose _skdon_donor_display_name looks like an email address.
 	 *
 	 * Uses a direct DB query with LIKE '%@%.%' for efficiency rather than
 	 * iterating all posts in PHP.
@@ -667,7 +663,7 @@ class Data_Integrity {
 			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the only interpolated parts are $wpdb table properties and a generated %d placeholder list; every user value is bound through $wpdb->prepare().
 			"SELECT COUNT(*) FROM {$wpdb->postmeta}
 			 WHERE post_id IN ($id_placeholders)
-			   AND meta_key = '_sd_donor_display_name'
+			   AND meta_key = '_skdon_donor_display_name'
 			   AND meta_value LIKE %s",
 			array_merge( $post_ids, [ '%@%.%' ] )
 			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -687,7 +683,7 @@ class Data_Integrity {
 	}
 
 	/**
-	 * Count donors whose _sd_display_name is an email address.
+	 * Count donors whose _skdon_display_name is an email address.
 	 *
 	 * @since 2.1.0
 	 *
@@ -708,7 +704,7 @@ class Data_Integrity {
 			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the only interpolated parts are $wpdb table properties and a generated %d placeholder list; every user value is bound through $wpdb->prepare().
 			"SELECT COUNT(*) FROM {$wpdb->postmeta}
 			 WHERE post_id IN ($id_placeholders)
-			   AND meta_key = '_sd_display_name'
+			   AND meta_key = '_skdon_display_name'
 			   AND meta_value LIKE %s",
 			array_merge( $post_ids, [ '%@%.%' ] )
 			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -722,7 +718,7 @@ class Data_Integrity {
 	 * still exists) don't receive a 'date' in the ability input, so the ability
 	 * defaults to wp_date() — the sync timestamp instead of the order date.
 	 *
-	 * Only checks memorials that have a _sd_wc_order_id (i.e. order-linked),
+	 * Only checks memorials that have a _skdon_wc_order_id (i.e. order-linked),
 	 * skipping legacy CSV imports which have no order reference.
 	 *
 	 * @since 2.1.0
@@ -747,7 +743,7 @@ class Data_Integrity {
 			 FROM {$wpdb->posts} p
 			 INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
 			 WHERE p.ID IN ($id_placeholders)
-			   AND pm.meta_key = '_sd_wc_order_id'
+			   AND pm.meta_key = '_skdon_wc_order_id'
 			   AND pm.meta_value > 0",
 			$post_ids
 			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -780,53 +776,53 @@ class Data_Integrity {
 	private static function backfill_special_fields( string $post_type, \WP_Post $post, array $all_meta ): int {
 		$fixed = 0;
 
-		if ( 'sd_memorial' === $post_type ) {
-			// Assign sd_memorial_year taxonomy if missing.
-			$terms = get_the_terms( $post->ID, 'sd_memorial_year' );
+		if ( 'skdon_memorial' === $post_type ) {
+			// Assign skdon_memorial_year taxonomy if missing.
+			$terms = get_the_terms( $post->ID, 'skdon_memorial_year' );
 			if ( ! $terms || is_wp_error( $terms ) ) {
-				$date = $all_meta['_sd_donation_date'][0] ?? $post->post_date;
+				$date = $all_meta['_skdon_donation_date'][0] ?? $post->post_date;
 				$year = wp_date( 'Y', strtotime( $date ) );
 				if ( $year ) {
-					wp_set_object_terms( $post->ID, [ $year ], 'sd_memorial_year' );
+					wp_set_object_terms( $post->ID, [ $year ], 'skdon_memorial_year' );
 					++$fixed;
 				}
 			}
 
 			// Fix email addresses stored as donor display names.
-			$current_display = $all_meta['_sd_donor_display_name'][0] ?? '';
+			$current_display = $all_meta['_skdon_donor_display_name'][0] ?? '';
 			if ( self::looks_like_email( $current_display ) ) {
-				$donor_id = (int) ( $all_meta['_sd_donor_id'][0] ?? 0 );
-				$is_anon  = filter_var( $all_meta['_sd_is_anonymous'][0] ?? false, FILTER_VALIDATE_BOOLEAN );
+				$donor_id = (int) ( $all_meta['_skdon_donor_id'][0] ?? 0 );
+				$is_anon  = filter_var( $all_meta['_skdon_is_anonymous'][0] ?? false, FILTER_VALIDATE_BOOLEAN );
 
 				if ( ! $is_anon && $donor_id ) {
 					$corrected = self::resolve_donor_display_name( $donor_id, false );
 
-					// If the donor's _sd_display_name is also an email
+					// If the donor's _skdon_display_name is also an email
 					// (hasn't been fixed yet), build from first/last directly.
 					if ( empty( $corrected ) || self::looks_like_email( $corrected ) ) {
-						$first = get_post_meta( $donor_id, '_sd_first_name', true );
-						$last  = get_post_meta( $donor_id, '_sd_last_name', true );
+						$first = get_post_meta( $donor_id, '_skdon_first_name', true );
+						$last  = get_post_meta( $donor_id, '_skdon_last_name', true );
 						$corrected = trim( "$first $last" );
 					}
 
 					// If first/last are also empty (order had no billing name),
 					// derive a name from the email address local part.
 					if ( empty( $corrected ) || self::looks_like_email( $corrected ) ) {
-						$donor_email = get_post_meta( $donor_id, '_sd_email', true );
+						$donor_email = get_post_meta( $donor_id, '_skdon_email', true );
 						if ( ! empty( $donor_email ) ) {
 							$corrected = \Starter_Shelter\Admin\Shared\Donor_Lookup::build_display_name( '', '', $donor_email );
 						}
 					}
 
 					if ( ! empty( $corrected ) && ! self::looks_like_email( $corrected ) ) {
-						update_post_meta( $post->ID, '_sd_donor_display_name', $corrected );
+						update_post_meta( $post->ID, '_skdon_donor_display_name', $corrected );
 						++$fixed;
 					}
 				}
 			}
 
 			// Fix order-linked memorial dates that don't match the order date.
-			$order_id = (int) ( $all_meta['_sd_wc_order_id'][0] ?? 0 );
+			$order_id = (int) ( $all_meta['_skdon_wc_order_id'][0] ?? 0 );
 			if ( $order_id > 0 && function_exists( 'wc_get_order' ) ) {
 				$order = wc_get_order( $order_id );
 				if ( $order && $order->get_date_created() ) {
@@ -842,31 +838,31 @@ class Data_Integrity {
 							'post_date' => $order_date,
 							'post_date_gmt' => get_gmt_from_date( $order_date ),
 						] );
-						update_post_meta( $post->ID, '_sd_donation_date', $order_date );
+						update_post_meta( $post->ID, '_skdon_donation_date', $order_date );
 						++$fixed;
 					}
 				}
 			}
 		}
 
-		// Fix donors whose _sd_display_name is an email address.
-		if ( 'sd_donor' === $post_type ) {
-			$donor_display = $all_meta['_sd_display_name'][0] ?? '';
+		// Fix donors whose _skdon_display_name is an email address.
+		if ( 'skdon_donor' === $post_type ) {
+			$donor_display = $all_meta['_skdon_display_name'][0] ?? '';
 			if ( self::looks_like_email( $donor_display ) ) {
-				$first = $all_meta['_sd_first_name'][0] ?? '';
-				$last  = $all_meta['_sd_last_name'][0] ?? '';
+				$first = $all_meta['_skdon_first_name'][0] ?? '';
+				$last  = $all_meta['_skdon_last_name'][0] ?? '';
 				$name  = trim( "$first $last" );
 
 				// If first/last are empty (order had no billing name),
 				// use build_display_name which derives a name from the
 				// email local part (e.g. john.doe@example.com → "John Doe").
 				if ( empty( $name ) ) {
-					$email = $all_meta['_sd_email'][0] ?? $donor_display;
+					$email = $all_meta['_skdon_email'][0] ?? $donor_display;
 					$name  = \Starter_Shelter\Admin\Shared\Donor_Lookup::build_display_name( '', '', $email );
 				}
 
 				if ( ! empty( $name ) && ! self::looks_like_email( $name ) ) {
-					update_post_meta( $post->ID, '_sd_display_name', $name );
+					update_post_meta( $post->ID, '_skdon_display_name', $name );
 					++$fixed;
 
 					// Also fix post_title if it's the same email.
@@ -878,7 +874,7 @@ class Data_Integrity {
 		}
 
 		// Generate import hash for records that don't have one (non-donor types).
-		if ( 'sd_donor' !== $post_type ) {
+		if ( 'skdon_donor' !== $post_type ) {
 			$existing_hash = $all_meta[ \Starter_Shelter\Admin\Import_Export\CSV_Importer::HASH_META_KEY ][0] ?? '';
 			if ( '' === $existing_hash ) {
 				$hash = self::compute_backfill_hash( $post_type, $post->ID );
@@ -907,9 +903,9 @@ class Data_Integrity {
 	private static function compute_backfill_hash( string $post_type, int $post_id ): ?string {
 		// Map post type → entity type key in import-export.json.
 		$entity_type_map = [
-			'sd_donation'   => 'donations',
-			'sd_membership' => 'memberships',
-			'sd_memorial'   => 'memorials',
+			'skdon_donation'   => 'donations',
+			'skdon_membership' => 'memberships',
+			'skdon_memorial'   => 'memorials',
 		];
 
 		$entity_type = $entity_type_map[ $post_type ] ?? null;
@@ -993,7 +989,7 @@ class Data_Integrity {
 	/**
 	 * Recalculate lifetime_giving for a batch of donors.
 	 *
-	 * Sums all sd_donation, sd_memorial, and sd_membership amounts
+	 * Sums all skdon_donation, skdon_memorial, and skdon_membership amounts
 	 * linked to each donor.
 	 */
 	public static function ajax_recalc_donors(): void {
@@ -1008,7 +1004,7 @@ class Data_Integrity {
 		// phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 
 		$donors = get_posts( [
-			'post_type'      => 'sd_donor',
+			'post_type'      => 'skdon_donor',
 			'post_status'    => 'any',
 			'posts_per_page' => self::BATCH_SIZE,
 			'offset'         => $offset,
@@ -1031,24 +1027,24 @@ class Data_Integrity {
 				"SELECT COALESCE(SUM(CAST(pm_amount.meta_value AS DECIMAL(15,2))), 0)
 				 FROM {$wpdb->posts} p
 				 INNER JOIN {$wpdb->postmeta} pm_donor ON p.ID = pm_donor.post_id
-				     AND pm_donor.meta_key = '_sd_donor_id' AND pm_donor.meta_value = %s
+				     AND pm_donor.meta_key = '_skdon_donor_id' AND pm_donor.meta_value = %s
 				 INNER JOIN {$wpdb->postmeta} pm_amount ON p.ID = pm_amount.post_id
-				     AND pm_amount.meta_key = '_sd_amount'
-				 WHERE p.post_type IN ('sd_donation', 'sd_memorial', 'sd_membership')
+				     AND pm_amount.meta_key = '_skdon_amount'
+				 WHERE p.post_type IN ('skdon_donation', 'skdon_memorial', 'skdon_membership')
 				 AND p.post_status = 'publish'",
 				$donor_id
 			) );
 
-			$current = (float) get_post_meta( $donor_id, '_sd_lifetime_giving', true );
+			$current = (float) get_post_meta( $donor_id, '_skdon_lifetime_giving', true );
 
 			if ( abs( $total - $current ) > 0.005 ) {
-				update_post_meta( $donor_id, '_sd_lifetime_giving', $total );
+				update_post_meta( $donor_id, '_skdon_lifetime_giving', $total );
 				++$updated;
 			}
 		}
 
 		// Total donors for progress.
-		$total_counts = wp_count_posts( 'sd_donor' );
+		$total_counts = wp_count_posts( 'skdon_donor' );
 		$total_donors = ( $total_counts->publish ?? 0 ) + ( $total_counts->draft ?? 0 );
 		$new_offset   = $offset + count( $donors );
 

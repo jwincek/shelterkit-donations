@@ -78,7 +78,7 @@ class Query {
      *
      * @var string
      */
-    private string $meta_prefix = '_sd_';
+    private string $meta_prefix = '_skdon_';
 
 	/**
 	 * Whether to include permalinks in results.
@@ -113,7 +113,7 @@ class Query {
         $query->post_type = $post_type;
 
         $config              = Entity_Hydrator::get_config( $post_type );
-        $query->meta_prefix  = $config['meta_prefix'] ?? '_sd_';
+        $query->meta_prefix  = $config['meta_prefix'] ?? '_skdon_';
 
         return $query;
     }
@@ -159,7 +159,7 @@ class Query {
      * Filter by a field whose absence implies a default value.
      *
      * Mirrors normalize-on-read defaults: e.g. an empty or missing
-     * `_sd_dedication_type` reads as 'memory'. A plain equality
+     * `_skdon_dedication_type` reads as 'memory'. A plain equality
      * (see {@see where()}) would then disagree with what's displayed —
      * filtering by the default value must ALSO match rows where the meta
      * is missing or empty. Filtering by a non-default value stays a plain

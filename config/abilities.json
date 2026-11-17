@@ -153,7 +153,7 @@
           },
           "campaign_id": {
             "type": "integer",
-            "description": "Filter by sd_campaign term ID. 0/omitted = no filter. Scopes the donations/memberships/memorials rollups; donor counts stay unfiltered (donors aren't directly campaign-tagged)."
+            "description": "Filter by skdon_campaign term ID. 0/omitted = no filter. Scopes the donations/memberships/memorials rollups; donor counts stay unfiltered (donors aren't directly campaign-tagged)."
           }
         }
       },
@@ -233,7 +233,7 @@
           },
           "campaign_id": {
             "type": "integer",
-            "description": "Filter by sd_campaign term ID. 0/omitted = no filter. Restricts the bucketed totals to donations attached to the campaign."
+            "description": "Filter by skdon_campaign term ID. 0/omitted = no filter. Restricts the bucketed totals to donations attached to the campaign."
           }
         }
       },
@@ -353,7 +353,7 @@
     },
     "shelter-reports/campaign-progress": {
       "label": "Campaign Progress",
-      "description": "Type-aware progress for an sd_campaign term. donation_drive returns raised dollars; membership_drive returns count of new memberships (optionally restricted by tier). Replaces ad-hoc 'raised' reimplementations across the codebase.",
+      "description": "Type-aware progress for an skdon_campaign term. donation_drive returns raised dollars; membership_drive returns count of new memberships (optionally restricted by tier). Replaces ad-hoc 'raised' reimplementations across the codebase.",
       "category": "shelter-reports",
       "permission": "public",
       "meta": {
@@ -368,7 +368,7 @@
         "type": "object",
         "required": [ "campaign_id" ],
         "properties": {
-          "campaign_id": { "type": "integer", "description": "sd_campaign term ID." },
+          "campaign_id": { "type": "integer", "description": "skdon_campaign term ID." },
           "date_from":   { "type": "string", "description": "Optional Y-m-d to bound the lookback." },
           "date_to":     { "type": "string", "description": "Optional Y-m-d to bound the lookback." }
         }
@@ -413,7 +413,7 @@
           "campaign_ids": {
             "type": "array",
             "items": { "type": "integer" },
-            "description": "Optional list of sd_campaign term IDs. Empty/omitted = all campaigns."
+            "description": "Optional list of skdon_campaign term IDs. Empty/omitted = all campaigns."
           },
           "include_ended": {
             "type": "boolean",

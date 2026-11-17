@@ -40,7 +40,7 @@ CI runs the syntax check on PHP 8.1/8.2/8.3 plus the PHPCS lint on every push to
 
 The plugin follows a **config-driven, layered architecture**:
 
-- **Manifest Layer** — Per-entity PHP-array files in `config/manifests/` (`sd_donation.php`, `sd_membership.php`, `sd_memorial.php`, `sd_donor.php`, plus `_shared.php`) are the single source of truth for each entity's field declarations, abilities, products, meta-boxes, checkout-fields, and emails. `Field_Manifest` merges them into the runtime config before consumers see it.
+- **Manifest Layer** — Per-entity PHP-array files in `config/manifests/` (`skdon_donation.php`, `skdon_membership.php`, `skdon_memorial.php`, `skdon_donor.php`, plus `_shared.php`) are the single source of truth for each entity's field declarations, abilities, products, meta-boxes, checkout-fields, and emails. `Field_Manifest` merges them into the runtime config before consumers see it.
 - **Legacy JSON Layer** — A few cross-cutting files remain in `config/` for things that aren't entity-owned by design: `products.json` (cross-product blocks like `legacy_products`, `sku_attribute_mapping`, `checkout_field_sets`), `abilities.json` (cross-entity `shelter-reports/*` aggregations), `post-types.json`, `taxonomies.json`, and shared `schemas/`.
 - **Infrastructure Layer** — Reusable PHP classes (`Config`, `Field_Manifest`, `Entity_Hydrator`, `Query`, `CPT_Registry`) read config and do the heavy lifting.
 - **Abilities Layer** — Discrete operations registered via the WordPress 6.9+ Abilities API with JSON Schema validation.
@@ -51,11 +51,11 @@ The plugin follows a **config-driven, layered architecture**:
 A manifest is a PHP file returning an array; it owns *every* layer-mention of every field for one entity. Excerpt:
 
 ```php
-// config/manifests/sd_donation.php
+// config/manifests/skdon_donation.php
 return [
     'entity' => [
-        'post_type'   => 'sd_donation',
-        'meta_prefix' => '_sd_',
+        'post_type'   => 'skdon_donation',
+        'meta_prefix' => '_skdon_',
         'fields'      => [
             'amount' => [ 'type' => 'number', 'show_in_rest' => true ],
             // …
@@ -102,10 +102,10 @@ templates/           → Email templates (HTML and plain text)
 
 | Post Type | Slug | Visibility |
 |-----------|------|------------|
-| Donation | `sd_donation` | Private |
-| Membership | `sd_membership` | Private |
-| Memorial | `sd_memorial` | Public |
-| Donor | `sd_donor` | Private |
+| Donation | `skdon_donation` | Private |
+| Membership | `skdon_membership` | Private |
+| Memorial | `skdon_memorial` | Public |
+| Donor | `skdon_donor` | Private |
 
 ### WooCommerce Products
 

@@ -55,7 +55,7 @@ class CSV_Importer {
 	 * @since 2.1.0
 	 * @var string
 	 */
-	public const HASH_META_KEY = '_sd_import_hash';
+	public const HASH_META_KEY = '_skdon_import_hash';
 
 	/**
 	 * Process a CSV import for any entity type.
@@ -282,7 +282,7 @@ class CSV_Importer {
 
 		// Move uploaded file to a persistent temp location.
 		$upload_dir = wp_upload_dir();
-		$import_key = 'sd_import_' . wp_generate_uuid4();
+		$import_key = 'skdon_import_' . wp_generate_uuid4();
 		$dest       = $upload_dir['basedir'] . '/' . $import_key . '.csv';
 
 		if ( ! copy( $filepath, $dest ) ) {
@@ -688,16 +688,16 @@ class CSV_Importer {
 	 */
 	private static function update_donor_meta( int $donor_id, array $row ): void {
 		$meta_fields = [
-			'first_name'     => '_sd_first_name',
-			'last_name'      => '_sd_last_name',
-			'email'          => '_sd_email',
-			'phone'          => '_sd_phone',
-			'address_line_1' => '_sd_address_line_1',
-			'address_line_2' => '_sd_address_line_2',
-			'city'           => '_sd_city',
-			'state'          => '_sd_state',
-			'postal_code'    => '_sd_postal_code',
-			'country'        => '_sd_country',
+			'first_name'     => '_skdon_first_name',
+			'last_name'      => '_skdon_last_name',
+			'email'          => '_skdon_email',
+			'phone'          => '_skdon_phone',
+			'address_line_1' => '_skdon_address_line_1',
+			'address_line_2' => '_skdon_address_line_2',
+			'city'           => '_skdon_city',
+			'state'          => '_skdon_state',
+			'postal_code'    => '_skdon_postal_code',
+			'country'        => '_skdon_country',
 		];
 
 		foreach ( $meta_fields as $csv_col => $meta_key ) {
@@ -714,7 +714,7 @@ class CSV_Importer {
 		);
 
 		if ( ! empty( $display_name ) ) {
-			update_post_meta( $donor_id, '_sd_display_name', $display_name );
+			update_post_meta( $donor_id, '_skdon_display_name', $display_name );
 			wp_update_post( [ 'ID' => $donor_id, 'post_title' => $display_name ] );
 		}
 	}
@@ -747,14 +747,14 @@ class CSV_Importer {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * Find (or create) an sd_campaign term by name and return its id.
+	 * Find (or create) an skdon_campaign term by name and return its id.
 	 *
 	 * Used to re-link donations/memberships/memorials to their campaign on
 	 * import by the stable name rather than a post/term id that changes on
 	 * restore. Returns 0 when the name is empty or the term can't be created.
 	 *
 	 * KNOWN GAP: this recreates the campaign term by NAME only — it does not
-	 * restore the campaign's `_sd_goal`, `_sd_campaign_type`, or `_sd_end_date`
+	 * restore the campaign's `_skdon_goal`, `_skdon_campaign_type`, or `_skdon_end_date`
 	 * term meta, because the CSV backup has no campaigns entity that carries
 	 * them. So on a full restore, campaign *associations* come back but a
 	 * recreated campaign reads as a goal-less donation_drive until an admin
@@ -773,12 +773,12 @@ class CSV_Importer {
 			return 0;
 		}
 
-		$existing = get_term_by( 'name', $name, 'sd_campaign' );
+		$existing = get_term_by( 'name', $name, 'skdon_campaign' );
 		if ( $existing instanceof \WP_Term ) {
 			return (int) $existing->term_id;
 		}
 
-		$created = wp_insert_term( $name, 'sd_campaign' );
+		$created = wp_insert_term( $name, 'skdon_campaign' );
 		return is_wp_error( $created ) ? 0 : (int) $created['term_id'];
 	}
 
@@ -988,13 +988,13 @@ class CSV_Importer {
 		foreach ( $hash_columns as $col ) {
 			if ( 'email' === $col ) {
 				// Email comes from the related donor, not from the post itself.
-				$donor_id = (int) get_post_meta( $post_id, '_sd_donor_id', true );
-				$row[ $col ] = $donor_id ? (string) get_post_meta( $donor_id, '_sd_email', true ) : '';
+				$donor_id = (int) get_post_meta( $post_id, '_skdon_donor_id', true );
+				$row[ $col ] = $donor_id ? (string) get_post_meta( $donor_id, '_skdon_email', true ) : '';
 			} else {
 				// Resolve the meta key from the field map.
 				$mapping  = $field_map[ $col ] ?? [];
 				$target   = $mapping['target'] ?? $col;
-				$meta_key = '_sd_' . $target;
+				$meta_key = '_skdon_' . $target;
 				$row[ $col ] = (string) get_post_meta( $post_id, $meta_key, true );
 			}
 		}

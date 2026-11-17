@@ -47,7 +47,7 @@ function register_editor_assets(): void {
         ],
     ];
 
-    // NOTE: sd_memorial intentionally uses the classic editor + meta
+    // NOTE: skdon_memorial intentionally uses the classic editor + meta
     // boxes (Meta_Boxes, manifest-driven) rather than the block editor.
     // assets/js/memorial-panel.js implements an alternative
     // PluginDocumentSettingPanel UX but is currently un-enqueued — see
@@ -69,7 +69,7 @@ add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\\register_editor_as
  */
 function get_campaigns_for_editor(): array {
     $campaigns = get_terms( [
-        'taxonomy'   => 'sd_campaign',
+        'taxonomy'   => 'skdon_campaign',
         'hide_empty' => false,
     ] );
 
@@ -130,7 +130,7 @@ function get_memorial_years(): array {
 
     $years = $wpdb->get_col( "
         SELECT DISTINCT YEAR(post_date) FROM {$wpdb->posts}
-        WHERE post_type = 'sd_memorial' AND post_status = 'publish'
+        WHERE post_type = 'skdon_memorial' AND post_status = 'publish'
         ORDER BY YEAR(post_date) DESC
     " );
 

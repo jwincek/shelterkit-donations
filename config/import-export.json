@@ -1,7 +1,7 @@
 {
   "entity_types": {
     "donations": {
-      "post_type": "sd_donation",
+      "post_type": "skdon_donation",
       "label": "Donations",
       "icon": "💰",
       "export": {
@@ -39,7 +39,7 @@
           {
             "header": "Campaign",
             "source": "taxonomy",
-            "taxonomy": "sd_campaign"
+            "taxonomy": "skdon_campaign"
           },
           {
             "header": "Is Anonymous",
@@ -116,7 +116,7 @@
           "allocation": {
             "target": "allocation",
             "validate": "enum",
-            "enum_ref": "sd_donation.allocation",
+            "enum_ref": "skdon_donation.allocation",
             "description": "Must be \"general-fund\" or \"spay-neuter-clinic\""
           },
           "is_anonymous": {
@@ -191,7 +191,7 @@
       }
     },
     "memberships": {
-      "post_type": "sd_membership",
+      "post_type": "skdon_membership",
       "label": "Memberships",
       "icon": "🏅",
       "export": {
@@ -244,7 +244,7 @@
           {
             "header": "Campaign",
             "source": "taxonomy",
-            "taxonomy": "sd_campaign"
+            "taxonomy": "skdon_campaign"
           },
           {
             "header": "Logo Attachment ID",
@@ -260,12 +260,12 @@
             "type": "select",
             "meta_filter": {
               "active": {
-                "key": "_sd_end_date",
+                "key": "_skdon_end_date",
                 "compare": ">=",
                 "value": "today"
               },
               "expired": {
-                "key": "_sd_end_date",
+                "key": "_skdon_end_date",
                 "compare": "<",
                 "value": "today"
               }
@@ -314,7 +314,7 @@
           "membership_type": {
             "target": "membership_type",
             "validate": "enum",
-            "enum_ref": "sd_membership.membership_type",
+            "enum_ref": "skdon_membership.membership_type",
             "enum_values": [
               "individual",
               "business"
@@ -440,7 +440,7 @@
       }
     },
     "memorials": {
-      "post_type": "sd_memorial",
+      "post_type": "skdon_memorial",
       "label": "Memorials",
       "icon": "❤️",
       "export": {
@@ -479,7 +479,7 @@
           },
           {
             "header": "Donor Name",
-            "meta": "_sd_donor_display_name"
+            "meta": "_skdon_donor_display_name"
           },
           {
             "header": "Donor Email",
@@ -497,7 +497,7 @@
           },
           {
             "header": "Family Notified",
-            "meta": "_sd_family_notified_date",
+            "meta": "_skdon_family_notified_date",
             "format": "yes_no_truthy"
           },
           {
@@ -505,40 +505,40 @@
             "relation": "donor",
             "field": "address",
             "subfield": "address_1",
-            "meta_fallback_prefix": "_sd_"
+            "meta_fallback_prefix": "_skdon_"
           },
           {
             "header": "Address Line 2",
             "relation": "donor",
             "field": "address",
             "subfield": "address_2",
-            "meta_fallback_prefix": "_sd_"
+            "meta_fallback_prefix": "_skdon_"
           },
           {
             "header": "City",
             "relation": "donor",
             "field": "address",
             "subfield": "city",
-            "meta_fallback_prefix": "_sd_"
+            "meta_fallback_prefix": "_skdon_"
           },
           {
             "header": "State",
             "relation": "donor",
             "field": "address",
             "subfield": "state",
-            "meta_fallback_prefix": "_sd_"
+            "meta_fallback_prefix": "_skdon_"
           },
           {
             "header": "Postal Code",
             "relation": "donor",
             "field": "address",
             "subfield": "postcode",
-            "meta_fallback_prefix": "_sd_"
+            "meta_fallback_prefix": "_skdon_"
           },
           {
             "header": "Campaign",
             "source": "taxonomy",
-            "taxonomy": "sd_campaign"
+            "taxonomy": "skdon_campaign"
           },
           {
             "header": "Photo ID",
@@ -708,7 +708,7 @@
       }
     },
     "donors": {
-      "post_type": "sd_donor",
+      "post_type": "skdon_donor",
       "label": "Donors",
       "icon": "👥",
       "export": {
@@ -744,37 +744,37 @@
             "header": "Address Line 1",
             "field": "address",
             "subfield": "address_1",
-            "meta_fallback": "_sd_address_line_1"
+            "meta_fallback": "_skdon_address_line_1"
           },
           {
             "header": "Address Line 2",
             "field": "address",
             "subfield": "address_2",
-            "meta_fallback": "_sd_address_line_2"
+            "meta_fallback": "_skdon_address_line_2"
           },
           {
             "header": "City",
             "field": "address",
             "subfield": "city",
-            "meta_fallback": "_sd_city"
+            "meta_fallback": "_skdon_city"
           },
           {
             "header": "State",
             "field": "address",
             "subfield": "state",
-            "meta_fallback": "_sd_state"
+            "meta_fallback": "_skdon_state"
           },
           {
             "header": "Postal Code",
             "field": "address",
             "subfield": "postcode",
-            "meta_fallback": "_sd_postal_code"
+            "meta_fallback": "_skdon_postal_code"
           },
           {
             "header": "Country",
             "field": "address",
             "subfield": "country",
-            "meta_fallback": "_sd_country"
+            "meta_fallback": "_skdon_country"
           }
         ],
         "optional_column_groups": {
@@ -788,7 +788,7 @@
               },
               {
                 "header": "Donation Count",
-                "meta": "_sd_donation_count"
+                "meta": "_skdon_donation_count"
               },
               {
                 "header": "Donor Level",
@@ -800,7 +800,7 @@
               },
               {
                 "header": "Last Donation",
-                "meta": "_sd_last_donation_date"
+                "meta": "_skdon_last_donation_date"
               }
             ]
           }

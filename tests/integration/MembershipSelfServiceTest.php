@@ -33,7 +33,7 @@ final class MembershipSelfServiceTest extends WP_UnitTestCase {
     /** @return array{0:int,1:int} [donor_id, membership_id] for a member linked to $user_id. */
     private function make_member_for_user( int $user_id ): array {
         $donor_id = get_or_create_donor( "u{$user_id}@example.test", "User {$user_id}" );
-        update_post_meta( $donor_id, '_sd_user_id', $user_id );
+        update_post_meta( $donor_id, '_skdon_user_id', $user_id );
         $res = create( [ 'donor_id' => $donor_id, 'tier' => 'single', 'amount' => 10, 'date' => '2026-01-15' ] );
         return [ $donor_id, $res['membership_id'] ];
     }
@@ -50,7 +50,7 @@ final class MembershipSelfServiceTest extends WP_UnitTestCase {
 
         $this->assertIsArray( $result );
         $this->assertSame( 'cancelled', $result['status'] );
-        $this->assertSame( 'cancelled', get_post_meta( $mid, '_sd_status', true ) );
+        $this->assertSame( 'cancelled', get_post_meta( $mid, '_skdon_status', true ) );
     }
 
     public function test_non_owner_cannot_cancel_someone_elses_membership(): void {
@@ -63,7 +63,7 @@ final class MembershipSelfServiceTest extends WP_UnitTestCase {
 
         $this->assertWPError( $result );
         $this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
-        $this->assertNotSame( 'cancelled', (string) get_post_meta( $mid, '_sd_status', true ) );
+        $this->assertNotSame( 'cancelled', (string) get_post_meta( $mid, '_skdon_status', true ) );
     }
 
     public function test_ownership_guard(): void {

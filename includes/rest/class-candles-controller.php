@@ -73,17 +73,17 @@ function toggle_candle( WP_REST_Request $request ): WP_REST_Response {
 
 	// Verify the memorial exists.
 	$memorial = get_post( $memorial_id );
-	if ( ! $memorial || 'sd_memorial' !== $memorial->post_type ) {
+	if ( ! $memorial || 'skdon_memorial' !== $memorial->post_type ) {
 		return new WP_REST_Response( [ 'error' => 'Memorial not found.' ], 404 );
 	}
 
 	// Rate limiting per user/IP.
 	$rate_key = get_rate_limit_key();
-	$last_toggle = get_transient( 'sd_candle_rate_' . $rate_key );
+	$last_toggle = get_transient( 'skdon_candle_rate_' . $rate_key );
 	if ( false !== $last_toggle ) {
 		return new WP_REST_Response( [ 'error' => 'Please wait before toggling again.' ], 429 );
 	}
-	set_transient( 'sd_candle_rate_' . $rate_key, time(), CANDLE_RATE_LIMIT_SECONDS );
+	set_transient( 'skdon_candle_rate_' . $rate_key, time(), CANDLE_RATE_LIMIT_SECONDS );
 
 	$user_id = get_current_user_id();
 	$candles = get_user_candles();
@@ -116,9 +116,9 @@ function toggle_candle( WP_REST_Request $request ): WP_REST_Response {
 	}
 
 	// Update post meta count (floor at 0).
-	$current_count = (int) get_post_meta( $memorial_id, '_sd_candle_count', true );
+	$current_count = (int) get_post_meta( $memorial_id, '_skdon_candle_count', true );
 	$new_count     = max( 0, $current_count + $delta );
-	update_post_meta( $memorial_id, '_sd_candle_count', $new_count );
+	update_post_meta( $memorial_id, '_skdon_candle_count', $new_count );
 
 	return new WP_REST_Response( [
 		'memorial_id' => $memorial_id,
@@ -156,7 +156,7 @@ function get_user_candles(): array {
 	$user_id = get_current_user_id();
 
 	if ( $user_id ) {
-		$candles = get_user_meta( $user_id, '_sd_candles', true );
+		$candles = get_user_meta( $user_id, '_skdon_candles', true );
 		return is_array( $candles ) ? array_map( 'intval', $candles ) : [];
 	}
 
@@ -185,7 +185,7 @@ function save_user_candles( array $candles ): void {
 	$user_id = get_current_user_id();
 
 	if ( $user_id ) {
-		update_user_meta( $user_id, '_sd_candles', $candles );
+		update_user_meta( $user_id, '_skdon_candles', $candles );
 	}
 
 	// Set HttpOnly cookie (prevents client-side JS manipulation). Skip if
@@ -226,7 +226,7 @@ function track_anonymous_candle( int $memorial_id, bool $lit ): void {
 	// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- guard is the route's permission_callback. /candles/* is deliberately public — anonymous candle-lighting is the feature — and rate-limited per sender; the flagged reads are the visitor cookie and REMOTE_ADDR that build that rate-limit key.
 	$ip_hash = wp_hash( $_SERVER['REMOTE_ADDR'] ?? 'unknown' );
 	// phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-	$key     = 'sd_anon_candle_' . $ip_hash . '_' . $memorial_id;
+	$key     = 'skdon_anon_candle_' . $ip_hash . '_' . $memorial_id;
 
 	if ( $lit ) {
 		set_transient( $key, 1, 30 * DAY_IN_SECONDS );
@@ -247,7 +247,7 @@ function has_anonymous_candle( int $memorial_id ): bool {
 	// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- guard is the route's permission_callback. /candles/* is deliberately public — anonymous candle-lighting is the feature — and rate-limited per sender; the flagged reads are the visitor cookie and REMOTE_ADDR that build that rate-limit key.
 	$ip_hash = wp_hash( $_SERVER['REMOTE_ADDR'] ?? 'unknown' );
 	// phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-	$key     = 'sd_anon_candle_' . $ip_hash . '_' . $memorial_id;
+	$key     = 'skdon_anon_candle_' . $ip_hash . '_' . $memorial_id;
 	return false !== get_transient( $key );
 }
 
@@ -297,13 +297,13 @@ function merge_anonymous_candles_on_login( string $user_login, $user ): void {
 
 	$cookie_ids = array_map( 'intval', array_slice( $decoded, 0, 100 ) );
 
-	$existing = get_user_meta( $user->ID, '_sd_candles', true );
+	$existing = get_user_meta( $user->ID, '_skdon_candles', true );
 	$existing = is_array( $existing ) ? array_map( 'intval', $existing ) : [];
 
 	$merged = array_values( array_unique( array_merge( $existing, $cookie_ids ) ) );
 
 	if ( $merged !== $existing ) {
-		update_user_meta( $user->ID, '_sd_candles', $merged );
+		update_user_meta( $user->ID, '_skdon_candles', $merged );
 	}
 }
 add_action( 'wp_login', __NAMESPACE__ . '\\merge_anonymous_candles_on_login', 10, 2 );

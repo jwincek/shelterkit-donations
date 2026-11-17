@@ -7,7 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Stored data moves from the `sd_` prefix to `skdon_`.** WordPress.org asks
+  for prefixes of at least four characters, and other plugins use `sd_`.
+  Post types, taxonomies, meta keys, options, WooCommerce's saved email
+  settings, the activity-log table and its cron event all move on the first
+  request after updating. It happens before the plugin starts, so nothing
+  ever runs against half-moved data. Meta is renamed only on the plugin's
+  own records, logo attachments, products and orders, so another plugin's
+  `_sd_` keys stay untouched. URLs, add-to-cart links, CSS classes and form
+  field names do not change. A live 2.x site should follow
+  `migration-scripts/MIGRATION-skdon-prefix.md`, which also covers rolling
+  back (`wp shelterkit-donations migrate-prefix --reverse`). (#30)
+- **The unread `_sd_date` copy of each donation's date is removed**, and
+  memorials older than 1.1.2 get the five separate family-notification
+  fields in place of the single nested value nothing else reads. (#30)
+
 ### Fixed
+- **Uninstalling with "Delete all data" removed other plugins' settings.**
+  It deleted every option and transient whose name began with `sd_`. It now
+  deletes the plugin's own options by name, and also those still under the
+  2.x names. (#30)
 - **The donation, membership and memorial forms never showed a confirmation
   or an error.** They read each form's state through
   `state.forms['<form id>'].…`, which the Interactivity API cannot follow,

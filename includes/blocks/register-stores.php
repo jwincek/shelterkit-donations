@@ -73,10 +73,10 @@ function register_interactivity_config(): void {
 
         // Product IDs.
         'products' => [
-            'donation'           => (int) get_option( 'sd_donation_product_id', 0 ),
-            'memorial'           => (int) get_option( 'sd_memorial_product_id', 0 ),
-            'membership'         => (int) get_option( 'sd_membership_product_id', 0 ),
-            'businessMembership' => (int) get_option( 'sd_business_membership_product_id', 0 ),
+            'donation'           => (int) get_option( 'skdon_donation_product_id', 0 ),
+            'memorial'           => (int) get_option( 'skdon_memorial_product_id', 0 ),
+            'membership'         => (int) get_option( 'skdon_membership_product_id', 0 ),
+            'businessMembership' => (int) get_option( 'skdon_business_membership_product_id', 0 ),
         ],
 
         // i18n strings shared by all stores.
@@ -315,12 +315,12 @@ function register_script_modules(): void {
  */
 function should_enqueue_interactivity(): bool {
     // Always enqueue on donation-related pages.
-    if ( is_singular( [ 'sd_donation', 'sd_memorial', 'sd_membership', 'sd_donor' ] ) ) {
+    if ( is_singular( [ 'skdon_donation', 'skdon_memorial', 'skdon_membership', 'skdon_donor' ] ) ) {
         return true;
     }
 
     // Enqueue on archive pages.
-    if ( is_post_type_archive( [ 'sd_memorial' ] ) ) {
+    if ( is_post_type_archive( [ 'skdon_memorial' ] ) ) {
         return true;
     }
 

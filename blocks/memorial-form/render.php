@@ -26,7 +26,7 @@ $min_amount            = $attributes['minAmount'] ?? 10;
 $max_amount            = $attributes['maxAmount'] ?? 100000;
 
 $checkout_url = function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : '/checkout/';
-$product_id = (int) get_option( 'sd_memorial_product_id', 0 );
+$product_id = (int) get_option( 'skdon_memorial_product_id', 0 );
 $product_ok = $product_id && function_exists( 'wc_get_product' ) && wc_get_product( $product_id );
 
 wp_interactivity_state( 'shelter-donations/memorial-form', [

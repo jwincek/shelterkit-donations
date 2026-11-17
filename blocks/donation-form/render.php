@@ -48,9 +48,9 @@ if ( empty( $allocations ) ) {
     ];
 }
 
-$campaign = $campaign_id ? get_term( $campaign_id, 'sd_campaign' ) : null;
+$campaign = $campaign_id ? get_term( $campaign_id, 'skdon_campaign' ) : null;
 $checkout_url = function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : '/checkout/';
-$product_id = (int) get_option( 'sd_donation_product_id', 0 );
+$product_id = (int) get_option( 'skdon_donation_product_id', 0 );
 $product_ok = $product_id && function_exists( 'wc_get_product' ) && wc_get_product( $product_id );
 
 $namespace = 'shelter-donations/donation-form';

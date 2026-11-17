@@ -59,7 +59,7 @@ class Order_Processor {
 			if ( $order->get_meta( Order_Scanner::SYNCED_META_KEY ) ) {
 				return [ 'skipped' => true, 'reason' => __( 'Already synced.', 'shelterkit-donations' ) ];
 			}
-			if ( $order->get_meta( '_sd_processed' ) ) {
+			if ( $order->get_meta( '_skdon_processed' ) ) {
 				return [ 'skipped' => true, 'reason' => __( 'Already processed by order handler.', 'shelterkit-donations' ) ];
 			}
 		}
@@ -288,9 +288,9 @@ class Order_Processor {
 		?int $donor_id
 	): ?int {
 		$post_type = match ( $product_type ) {
-			'donation'   => 'sd_donation',
-			'membership' => 'sd_membership',
-			'memorial'   => 'sd_memorial',
+			'donation'   => 'skdon_donation',
+			'membership' => 'skdon_membership',
+			'memorial'   => 'skdon_memorial',
 			default      => null,
 		};
 
@@ -301,7 +301,7 @@ class Order_Processor {
 		// Strategy 1: Record linked to this order.
 		$meta_query = [
 			[
-				'key'   => '_sd_wc_order_id',
+				'key'   => '_skdon_wc_order_id',
 				'value' => $order->get_id(),
 				'type'  => 'NUMERIC',
 			],
@@ -310,7 +310,7 @@ class Order_Processor {
 		// For memorials, also match honoree name.
 		if ( 'memorial' === $product_type && ! empty( $input['honoree_name'] ) ) {
 			$meta_query[] = [
-				'key'   => '_sd_honoree_name',
+				'key'   => '_skdon_honoree_name',
 				'value' => $input['honoree_name'],
 			];
 		}
@@ -318,7 +318,7 @@ class Order_Processor {
 		// For memberships, also match donor.
 		if ( 'membership' === $product_type && $donor_id ) {
 			$meta_query[] = [
-				'key'   => '_sd_donor_id',
+				'key'   => '_skdon_donor_id',
 				'value' => $donor_id,
 				'type'  => 'NUMERIC',
 			];
@@ -344,12 +344,12 @@ class Order_Processor {
 				'posts_per_page' => 1,
 				'meta_query'     => [
 					[
-						'key'   => '_sd_donor_id',
+						'key'   => '_skdon_donor_id',
 						'value' => $donor_id,
 						'type'  => 'NUMERIC',
 					],
 					[
-						'key'   => '_sd_honoree_name',
+						'key'   => '_skdon_honoree_name',
 						'value' => $input['honoree_name'],
 					],
 				],
@@ -377,7 +377,7 @@ class Order_Processor {
 	 * @return array|WP_Error Update result.
 	 */
 	private static function update_existing_record( int $post_id, string $product_type, array $input ): array|WP_Error {
-		$prefix = '_sd_';
+		$prefix = '_skdon_';
 
 		$field_map = match ( $product_type ) {
 			'donation' => [
@@ -453,7 +453,7 @@ class Order_Processor {
 	 */
 	private static function mark_synced( \WC_Order $order, array $created, array $item_results, array $errors ): void {
 		$order->update_meta_data( Order_Scanner::SYNCED_META_KEY, current_time( 'mysql' ) );
-		$order->update_meta_data( '_sd_legacy_sync_results', $item_results );
+		$order->update_meta_data( '_skdon_legacy_sync_results', $item_results );
 		$order->save();
 
 		$note = sprintf(

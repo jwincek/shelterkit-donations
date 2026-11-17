@@ -75,7 +75,7 @@
                 url: sdLogoMod.ajaxUrl,
                 type: 'POST',
                 data: {
-                    action: 'sd_approve_logo',
+                    action: 'skdon_approve_logo',
                     nonce: sdLogoMod.nonce,
                     membership_id: membershipId
                 },
@@ -151,7 +151,7 @@
                 url: sdLogoMod.ajaxUrl,
                 type: 'POST',
                 data: {
-                    action: 'sd_reject_logo',
+                    action: 'skdon_reject_logo',
                     nonce: sdLogoMod.nonce,
                     membership_id: membershipId,
                     reason: reason,

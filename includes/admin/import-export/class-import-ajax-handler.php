@@ -43,26 +43,26 @@ class Import_Ajax_Handler {
 	 */
 	public static function init(): void {
 		// Generic preview (for standard CSV imports).
-		add_action( 'wp_ajax_sd_preview_import', [ self::class, 'preview' ] );
+		add_action( 'wp_ajax_skdon_preview_import', [ self::class, 'preview' ] );
 
 		// Generic import handlers (entity type extracted from action name).
-		add_action( 'wp_ajax_sd_process_import_donors', [ self::class, 'import' ] );
-		add_action( 'wp_ajax_sd_process_import_donations', [ self::class, 'import' ] );
-		add_action( 'wp_ajax_sd_process_import_memorials', [ self::class, 'import' ] );
-		add_action( 'wp_ajax_sd_process_import_memberships', [ self::class, 'import' ] );
+		add_action( 'wp_ajax_skdon_process_import_donors', [ self::class, 'import' ] );
+		add_action( 'wp_ajax_skdon_process_import_donations', [ self::class, 'import' ] );
+		add_action( 'wp_ajax_skdon_process_import_memorials', [ self::class, 'import' ] );
+		add_action( 'wp_ajax_skdon_process_import_memberships', [ self::class, 'import' ] );
 
 		// Legacy memorial format (separate handlers due to different parameters).
-		add_action( 'wp_ajax_sd_preview_import_memorials_legacy', [ self::class, 'preview_legacy_memorials' ] );
-		add_action( 'wp_ajax_sd_process_import_memorials_legacy', [ self::class, 'import_legacy_memorials' ] );
+		add_action( 'wp_ajax_skdon_preview_import_memorials_legacy', [ self::class, 'preview_legacy_memorials' ] );
+		add_action( 'wp_ajax_skdon_process_import_memorials_legacy', [ self::class, 'import_legacy_memorials' ] );
 
 		// Batched import.
-		add_action( 'wp_ajax_sd_start_import', [ self::class, 'start_batch_import' ] );
-		add_action( 'wp_ajax_sd_process_import_batch', [ self::class, 'process_batch' ] );
-		add_action( 'wp_ajax_sd_download_error_csv', [ self::class, 'download_error_csv' ] );
+		add_action( 'wp_ajax_skdon_start_import', [ self::class, 'start_batch_import' ] );
+		add_action( 'wp_ajax_skdon_process_import_batch', [ self::class, 'process_batch' ] );
+		add_action( 'wp_ajax_skdon_download_error_csv', [ self::class, 'download_error_csv' ] );
 
 		// Templates and counts.
-		add_action( 'wp_ajax_sd_download_template', [ self::class, 'download_template' ] );
-		add_action( 'wp_ajax_sd_get_export_counts', [ self::class, 'get_export_counts' ] );
+		add_action( 'wp_ajax_skdon_download_template', [ self::class, 'download_template' ] );
+		add_action( 'wp_ajax_skdon_get_export_counts', [ self::class, 'get_export_counts' ] );
 	}
 
 	/**
@@ -106,10 +106,10 @@ class Import_Ajax_Handler {
 	 *
 	 * Generic handler for all four entity types. The entity type is
 	 * extracted from the AJAX action name:
-	 *   sd_process_import_donors      → donors
-	 *   sd_process_import_donations   → donations
-	 *   sd_process_import_memorials   → memorials
-	 *   sd_process_import_memberships → memberships
+	 *   skdon_process_import_donors      → donors
+	 *   skdon_process_import_donations   → donations
+	 *   skdon_process_import_memorials   → memorials
+	 *   skdon_process_import_memberships → memberships
 	 *
 	 * @since 2.0.0
 	 */
@@ -129,7 +129,7 @@ class Import_Ajax_Handler {
 
 		// Extract entity type from the AJAX action.
 		$action      = sanitize_key( $_POST['action'] ?? '' );
-		$entity_type = str_replace( 'sd_process_import_', '', $action );
+		$entity_type = str_replace( 'skdon_process_import_', '', $action );
 
 		// Validate entity type exists.
 		$config = Config::get_path( 'import-export', "entity_types.{$entity_type}" );
@@ -672,35 +672,35 @@ class Import_Ajax_Handler {
 		return [
 			'donations' => (int) $wpdb->get_var(
 				"SELECT COUNT(*) FROM {$wpdb->posts}
-				 WHERE post_type = 'sd_donation' AND post_status = 'publish'"
+				 WHERE post_type = 'skdon_donation' AND post_status = 'publish'"
 			),
 			'memberships' => (int) $wpdb->get_var(
 				"SELECT COUNT(*) FROM {$wpdb->posts}
-				 WHERE post_type = 'sd_membership' AND post_status = 'publish'"
+				 WHERE post_type = 'skdon_membership' AND post_status = 'publish'"
 			),
 			'memberships_active' => (int) $wpdb->get_var( $wpdb->prepare(
 				"SELECT COUNT(*) FROM {$wpdb->posts} p
-				 JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_end_date'
-				 WHERE p.post_type = 'sd_membership'
+				 JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_skdon_end_date'
+				 WHERE p.post_type = 'skdon_membership'
 				   AND p.post_status = 'publish'
 				   AND pm.meta_value >= %s",
 				$today
 			) ),
 			'memberships_expired' => (int) $wpdb->get_var( $wpdb->prepare(
 				"SELECT COUNT(*) FROM {$wpdb->posts} p
-				 JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_end_date'
-				 WHERE p.post_type = 'sd_membership'
+				 JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_skdon_end_date'
+				 WHERE p.post_type = 'skdon_membership'
 				   AND p.post_status = 'publish'
 				   AND pm.meta_value < %s",
 				$today
 			) ),
 			'donors' => (int) $wpdb->get_var(
 				"SELECT COUNT(*) FROM {$wpdb->posts}
-				 WHERE post_type = 'sd_donor' AND post_status = 'publish'"
+				 WHERE post_type = 'skdon_donor' AND post_status = 'publish'"
 			),
 			'memorials' => (int) $wpdb->get_var(
 				"SELECT COUNT(*) FROM {$wpdb->posts}
-				 WHERE post_type = 'sd_memorial' AND post_status = 'publish'"
+				 WHERE post_type = 'skdon_memorial' AND post_status = 'publish'"
 			),
 		];
 	}

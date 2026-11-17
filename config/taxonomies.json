@@ -1,12 +1,12 @@
 {
   "taxonomies": {
-    "sd_campaign": {
+    "skdon_campaign": {
       "labels": {
         "singular": "Campaign",
         "plural": "Campaigns",
         "menu_name": "Campaigns"
       },
-      "post_types": ["sd_donation", "sd_membership"],
+      "post_types": ["skdon_donation", "skdon_membership"],
       "public": true,
       "show_ui": true,
       "show_in_rest": true,
@@ -17,13 +17,13 @@
       }
     },
 
-    "sd_memorial_year": {
+    "skdon_memorial_year": {
       "labels": {
         "singular": "Year",
         "plural": "Years",
         "menu_name": "Memorial Years"
       },
-      "post_types": ["sd_memorial"],
+      "post_types": ["skdon_memorial"],
       "public": true,
       "show_ui": true,
       "show_in_rest": true,
@@ -34,13 +34,13 @@
       }
     },
 
-    "sd_donation_allocation": {
+    "skdon_donation_allocation": {
       "labels": {
         "singular": "Allocation",
         "plural": "Allocations",
         "menu_name": "Fund Allocations"
       },
-      "post_types": ["sd_donation"],
+      "post_types": ["skdon_donation"],
       "public": false,
       "show_ui": true,
       "show_in_rest": true,

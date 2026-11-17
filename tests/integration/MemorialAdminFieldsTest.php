@@ -23,7 +23,7 @@ final class MemorialAdminFieldsTest extends WP_UnitTestCase {
 
     private function family_box_fields(): array {
         $boxes = Field_Manifest::get_meta_boxes();
-        return $boxes['sd_memorial']['boxes']['family_notification']['fields'] ?? [];
+        return $boxes['skdon_memorial']['boxes']['family_notification']['fields'] ?? [];
     }
 
     public function test_family_notification_box_exposes_mailing_address_and_card_flag(): void {

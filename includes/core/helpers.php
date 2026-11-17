@@ -108,15 +108,15 @@ function get_donor_display_name( int $donor_id, ?bool $is_anonymous = null ): st
 
     // Check donor's own anonymous preference if not overridden.
     if ( null === $is_anonymous ) {
-        $is_anon = get_post_meta( $donor_id, '_sd_is_anonymous', true );
+        $is_anon = get_post_meta( $donor_id, '_skdon_is_anonymous', true );
         if ( $is_anon ) {
             return 'Anonymous Donor';
         }
     }
 
     // Priority 1: Check first/last name (standard donors from WooCommerce orders).
-    $first_name = get_post_meta( $donor_id, '_sd_first_name', true );
-    $last_name  = get_post_meta( $donor_id, '_sd_last_name', true );
+    $first_name = get_post_meta( $donor_id, '_skdon_first_name', true );
+    $last_name  = get_post_meta( $donor_id, '_skdon_last_name', true );
     $name       = trim( "$first_name $last_name" );
 
     if ( ! empty( $name ) ) {
@@ -124,7 +124,7 @@ function get_donor_display_name( int $donor_id, ?bool $is_anonymous = null ): st
     }
 
     // Priority 2: Check display_name meta (legacy imports, name-only donors).
-    $display_name = get_post_meta( $donor_id, '_sd_display_name', true );
+    $display_name = get_post_meta( $donor_id, '_skdon_display_name', true );
 
     if ( ! empty( $display_name ) ) {
         return $display_name;
@@ -144,7 +144,7 @@ function get_donor_display_name( int $donor_id, ?bool $is_anonymous = null ): st
  *
  * Resolution order:
  * 1. If anonymous flag is set → "Anonymous Donor"
- * 2. If the memorial's denormalized _sd_donor_display_name has a value → use it
+ * 2. If the memorial's denormalized _skdon_donor_display_name has a value → use it
  * 3. Fall back to the donor post lookup via get_donor_display_name()
  * 4. Ultimate fallback → "A Friend"
  *
@@ -436,7 +436,7 @@ function normalize_memorial_type( string $raw ): string {
  * deceased honoree) and `honor` (In Honor Of, a living honoree).
  * Anything that isn't `honor` normalizes to `memory` — matching the
  * field default and how `shelter-memorials/create` writes the value, so
- * legacy rows with an empty `_sd_dedication_type` read as `memory`.
+ * legacy rows with an empty `_skdon_dedication_type` read as `memory`.
  *
  * Orthogonal to memorial_type (the subject — person vs pet).
  *
@@ -467,44 +467,25 @@ function get_dedication_type_label( string $type ): string {
 /**
  * Resolve a memorial's family-notification settings as a nested array.
  *
- * Canonical storage is five flat `_sd_notify_family_*` meta keys. Legacy
- * rows may store the data in a single nested `_sd_notify_family` array
- * instead. This helper reads flat first and falls back to nested for
- * legacy data (CC-2 read-both, write-canonical).
+ * Storage is five flat `_skdon_notify_family_*` meta keys. Rows written
+ * before 1.1.2 kept a single nested family-notification array instead;
+ * Core\Prefix_Migration expands those into the flat keys (#30), so there is
+ * nothing left to fall back to.
  *
  * Always returns the same five-key shape so consumers can dot-access
  * `enabled`, `name`, `email`, `address`, `send_card` uniformly.
  *
  * @since 1.1.2
  *
- * @param int $memorial_id The sd_memorial post ID.
+ * @param int $memorial_id The skdon_memorial post ID.
  * @return array{enabled: bool, name: string, email: string, address: string, send_card: bool}
  */
 function get_memorial_notify_family( int $memorial_id ): array {
-    $enabled_raw   = get_post_meta( $memorial_id, '_sd_notify_family_enabled', true );
-    $name_raw      = get_post_meta( $memorial_id, '_sd_notify_family_name', true );
-    $email_raw     = get_post_meta( $memorial_id, '_sd_notify_family_email', true );
-    $address_raw   = get_post_meta( $memorial_id, '_sd_notify_family_address', true );
-    $send_card_raw = get_post_meta( $memorial_id, '_sd_notify_family_send_card', true );
-
-    $has_any_flat = '' !== $enabled_raw
-        || '' !== $name_raw
-        || '' !== $email_raw
-        || '' !== $address_raw
-        || '' !== $send_card_raw;
-
-    if ( ! $has_any_flat ) {
-        $legacy = get_post_meta( $memorial_id, '_sd_notify_family', true );
-        if ( is_array( $legacy ) && ! empty( $legacy ) ) {
-            return [
-                'enabled'   => (bool) ( $legacy['enabled'] ?? false ),
-                'name'      => (string) ( $legacy['name'] ?? '' ),
-                'email'     => (string) ( $legacy['email'] ?? '' ),
-                'address'   => (string) ( $legacy['address'] ?? '' ),
-                'send_card' => (bool) ( $legacy['send_card'] ?? false ),
-            ];
-        }
-    }
+    $enabled_raw   = get_post_meta( $memorial_id, '_skdon_notify_family_enabled', true );
+    $name_raw      = get_post_meta( $memorial_id, '_skdon_notify_family_name', true );
+    $email_raw     = get_post_meta( $memorial_id, '_skdon_notify_family_email', true );
+    $address_raw   = get_post_meta( $memorial_id, '_skdon_notify_family_address', true );
+    $send_card_raw = get_post_meta( $memorial_id, '_skdon_notify_family_send_card', true );
 
     return [
         'enabled'   => (bool) $enabled_raw,
@@ -687,12 +668,12 @@ function get_or_create_donor( string $email, string $name = '', array $extra_met
 
     // Check for existing donor.
     $existing = get_posts( [
-        'post_type'      => 'sd_donor',
+        'post_type'      => 'skdon_donor',
         'post_status'    => 'publish',
         'posts_per_page' => 1,
         'meta_query'     => [
             [
-                'key'   => '_sd_email',
+                'key'   => '_skdon_email',
                 'value' => $email,
             ],
         ],
@@ -703,11 +684,11 @@ function get_or_create_donor( string $email, string $name = '', array $extra_met
         $donor_id = $existing[0];
 
         // Ensure display_name is set (might be missing on older records).
-        $current_display_name = get_post_meta( $donor_id, '_sd_display_name', true );
+        $current_display_name = get_post_meta( $donor_id, '_skdon_display_name', true );
         if ( empty( $current_display_name ) && ! empty( $name ) ) {
             update_post_meta(
                 $donor_id,
-                '_sd_display_name',
+                '_skdon_display_name',
                 \Starter_Shelter\Admin\Shared\Donor_Lookup::sanitize_display_name( $name )
             );
         }
@@ -722,18 +703,18 @@ function get_or_create_donor( string $email, string $name = '', array $extra_met
 
     // Create new donor.
     $donor_id = wp_insert_post( [
-        'post_type'   => 'sd_donor',
+        'post_type'   => 'skdon_donor',
         'post_title'  => $name ?: $email,
         'post_status' => 'publish',
         'meta_input'  => array_merge( [
-            '_sd_email'           => $email,
-            '_sd_display_name'    => ! empty( $name )
+            '_skdon_email'           => $email,
+            '_skdon_display_name'    => ! empty( $name )
                 ? \Starter_Shelter\Admin\Shared\Donor_Lookup::sanitize_display_name( $name )
                 : $email,
-            '_sd_first_name'      => $first_name,
-            '_sd_last_name'       => $last_name,
-            '_sd_lifetime_giving' => 0,
-            '_sd_created_date'    => wp_date( 'Y-m-d H:i:s' ),
+            '_skdon_first_name'      => $first_name,
+            '_skdon_last_name'       => $last_name,
+            '_skdon_lifetime_giving' => 0,
+            '_skdon_created_date'    => wp_date( 'Y-m-d H:i:s' ),
         ], $extra_meta ),
     ], true );
 
@@ -750,10 +731,10 @@ function get_or_create_donor( string $email, string $name = '', array $extra_met
  * @return float The new total.
  */
 function update_donor_lifetime_giving( int $donor_id, float $amount ): float {
-    $current = (float) get_post_meta( $donor_id, '_sd_lifetime_giving', true );
+    $current = (float) get_post_meta( $donor_id, '_skdon_lifetime_giving', true );
     $new_total = $current + $amount;
 
-    update_post_meta( $donor_id, '_sd_lifetime_giving', $new_total );
+    update_post_meta( $donor_id, '_skdon_lifetime_giving', $new_total );
 
     return $new_total;
 }
@@ -896,11 +877,11 @@ function process_memorial_save( int $memorial_id, array $context = [] ): void {
     $is_new        = $context['is_new'] ?? true;
     $import_source = $context['import_source'] ?? 'admin';
 
-    $honoree_name  = get_post_meta( $memorial_id, '_sd_honoree_name', true );
-    $donor_id      = (int) get_post_meta( $memorial_id, '_sd_donor_id', true );
-    $display_name  = get_post_meta( $memorial_id, '_sd_donor_display_name', true );
-    $donation_date = get_post_meta( $memorial_id, '_sd_donation_date', true );
-    $amount        = (float) get_post_meta( $memorial_id, '_sd_amount', true );
+    $honoree_name  = get_post_meta( $memorial_id, '_skdon_honoree_name', true );
+    $donor_id      = (int) get_post_meta( $memorial_id, '_skdon_donor_id', true );
+    $display_name  = get_post_meta( $memorial_id, '_skdon_donor_display_name', true );
+    $donation_date = get_post_meta( $memorial_id, '_skdon_donation_date', true );
+    $amount        = (float) get_post_meta( $memorial_id, '_skdon_amount', true );
 
     // 1. Sync post_title from honoree_name.
     $post = get_post( $memorial_id );
@@ -920,14 +901,14 @@ function process_memorial_save( int $memorial_id, array $context = [] ): void {
 
         if ( ! is_wp_error( $result ) ) {
             $donor_id = $result['id'];
-            update_post_meta( $memorial_id, '_sd_donor_id', $donor_id );
+            update_post_meta( $memorial_id, '_skdon_donor_id', $donor_id );
         }
     }
 
-    // 3. Assign sd_memorial_year taxonomy from donation date.
+    // 3. Assign skdon_memorial_year taxonomy from donation date.
     if ( ! empty( $donation_date ) ) {
         $year = gmdate( 'Y', strtotime( $donation_date ) );
-        wp_set_object_terms( $memorial_id, [ $year ], 'sd_memorial_year' );
+        wp_set_object_terms( $memorial_id, [ $year ], 'skdon_memorial_year' );
     }
 
     // 4. Update donor lifetime giving.
@@ -979,7 +960,7 @@ function get_allocation_label( string $allocation ): string {
  * Resolve a campaign ID from `?campaign=<id>` in the current request.
  *
  * Returns 0 unless the query var is present AND resolves to a valid
- * `sd_campaign` term — never trust the raw query string to flow into
+ * `skdon_campaign` term — never trust the raw query string to flow into
  * input mappings unfiltered.
  *
  * Use this from form-block renderers to auto-tag conversions to the
@@ -1002,7 +983,7 @@ function resolve_campaign_id_from_request(): int {
     if ( $candidate <= 0 ) {
         return 0;
     }
-    $term = get_term( $candidate, 'sd_campaign' );
+    $term = get_term( $candidate, 'skdon_campaign' );
     if ( ! $term || is_wp_error( $term ) ) {
         return 0;
     }

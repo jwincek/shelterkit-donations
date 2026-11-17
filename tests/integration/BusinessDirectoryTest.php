@@ -73,12 +73,12 @@ final class BusinessDirectoryTest extends WP_UnitTestCase {
         // Moderation status + logo attachment aren't part of create()'s
         // contract for non-business or for the moderation flow, so set the
         // fixture meta directly.
-        update_post_meta( $id, '_sd_logo_status', $a['logo_status'] );
+        update_post_meta( $id, '_skdon_logo_status', $a['logo_status'] );
         if ( $logo_id ) {
-            update_post_meta( $id, '_sd_logo_attachment_id', $logo_id );
+            update_post_meta( $id, '_skdon_logo_attachment_id', $logo_id );
         }
         if ( '' !== $a['website'] ) {
-            update_post_meta( $id, '_sd_business_website', $a['website'] );
+            update_post_meta( $id, '_skdon_business_website', $a['website'] );
         }
         return $id;
     }
@@ -149,7 +149,7 @@ final class BusinessDirectoryTest extends WP_UnitTestCase {
     public function test_excludes_anonymous_optout_members(): void {
         $this->make_member( [ 'name' => 'Listed Co' ] );
         $optout = $this->make_member( [ 'name' => 'Private Co' ] );
-        update_post_meta( $optout, '_sd_is_anonymous', true ); // Unchecked "list me publicly".
+        update_post_meta( $optout, '_skdon_is_anonymous', true ); // Unchecked "list me publicly".
 
         $dir = business_directory();
 

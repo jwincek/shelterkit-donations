@@ -286,7 +286,7 @@
                 setIsLoading( true );
 
                 var formData = new FormData();
-                formData.append( 'action', 'sd_preview_import' );
+                formData.append( 'action', 'skdon_preview_import' );
                 formData.append( 'import_type', importAction );
                 formData.append( 'file', selectedFile );
                 formData.append( 'nonce', sdImportExport.previewNonce );
@@ -312,7 +312,7 @@
 
         function processBatch( key ) {
             var formData = new FormData();
-            formData.append( 'action', 'sd_process_import_batch' );
+            formData.append( 'action', 'skdon_process_import_batch' );
             formData.append( 'import_key', key );
             formData.append( 'nonce', sdImportExport.importNonce );
 
@@ -357,7 +357,7 @@
 
             // Step 1: Start the import (upload file, get session key).
             var formData = new FormData();
-            formData.append( 'action', 'sd_start_import' );
+            formData.append( 'action', 'skdon_start_import' );
             formData.append( 'import_type', importAction );
             formData.append( 'file', file );
             formData.append( 'nonce', sdImportExport.importNonce );
@@ -446,7 +446,7 @@
                         results.errors > 0 ? el( 'span', { style: { color: '#d63638' } }, results.errors + ' errors' ) : null,
                         results.errors > 0 && importKey ? el( 'div', { style: { marginTop: '8px' } },
                             el( 'a', {
-                                href: sdImportExport.ajaxUrl + '?action=sd_download_error_csv&import_key=' + importKey + '&_wpnonce=' + sdImportExport.errorCsvNonce,
+                                href: sdImportExport.ajaxUrl + '?action=skdon_download_error_csv&import_key=' + importKey + '&_wpnonce=' + sdImportExport.errorCsvNonce,
                                 className: 'button button-small',
                                 style: { textDecoration: 'none' }
                             }, __( 'Download Error Report (CSV)', 'shelterkit-donations' ) )
@@ -592,7 +592,7 @@
                 setIsLoading( true );
                 
                 var formData = new FormData();
-                formData.append( 'action', 'sd_preview_import_memorials_legacy' );
+                formData.append( 'action', 'skdon_preview_import_memorials_legacy' );
                 formData.append( 'file', selectedFile );
                 formData.append( 'year', year );
                 formData.append( 'nonce', sdImportExport.importNonce );
@@ -633,7 +633,7 @@
             setIsImporting( true );
 
             var formData = new FormData();
-            formData.append( 'action', 'sd_process_import_memorials_legacy' );
+            formData.append( 'action', 'skdon_process_import_memorials_legacy' );
             formData.append( 'file', file );
             formData.append( 'year', year );
             formData.append( 'skip_duplicates', skipDuplicates ? '1' : '0' );
@@ -870,7 +870,7 @@
             }
 
             addField( '_wpnonce', sdImportExport.exportNonce );
-            addField( 'action', 'sd_export');
+            addField( 'action', 'skdon_export');
             addField( 'export_type', type);
             if ( option && option !== 'all' ) {
                 addField( type === 'donations' ? 'date_range' : 'status', option );

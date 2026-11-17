@@ -67,7 +67,7 @@ class Config_Email extends WC_Email {
         $this->config = $config;
 
         // Set WC_Email properties.
-        $this->id = 'sd_' . str_replace( '-', '_', $email_id );
+        $this->id = 'skdon_' . str_replace( '-', '_', $email_id );
         $this->title = $config['title'] ?? ucwords( str_replace( '-', ' ', $email_id ) );
         $this->description = $config['description'] ?? '';
 

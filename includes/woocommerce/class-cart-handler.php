@@ -30,8 +30,8 @@ class Cart_Handler {
      */
     public static function init(): void {
         // AJAX handlers.
-        add_action( 'wp_ajax_sd_add_to_cart', [ self::class, 'ajax_add_to_cart' ] );
-        add_action( 'wp_ajax_nopriv_sd_add_to_cart', [ self::class, 'ajax_add_to_cart' ] );
+        add_action( 'wp_ajax_skdon_add_to_cart', [ self::class, 'ajax_add_to_cart' ] );
+        add_action( 'wp_ajax_nopriv_skdon_add_to_cart', [ self::class, 'ajax_add_to_cart' ] );
 
         // Modify cart item data.
         add_filter( 'woocommerce_add_cart_item_data', [ self::class, 'add_cart_item_data' ], 10, 3 );
@@ -59,7 +59,7 @@ class Cart_Handler {
 
         // Rate limit: 1 add-to-cart per 3 seconds per user/IP.
         // phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- check_ajax_referer( 'sd_add_to_cart' ) runs on the first line; the flagged read is REMOTE_ADDR, hashed into a rate-limit key rather than rendered or stored as text.
-        $rate_key = 'sd_cart_rate_' . ( get_current_user_id() ?: wp_hash( $_SERVER['REMOTE_ADDR'] ?? '' ) );
+        $rate_key = 'skdon_cart_rate_' . ( get_current_user_id() ?: wp_hash( $_SERVER['REMOTE_ADDR'] ?? '' ) );
         // phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
         if ( false !== get_transient( $rate_key ) ) {
             wp_send_json_error( [
@@ -184,10 +184,10 @@ class Cart_Handler {
      */
     private static function get_product_id_for_type( string $type ): int {
         $option_keys = [
-            'donation'            => 'sd_donation_product_id',
-            'membership'          => 'sd_membership_product_id',
-            'business_membership' => 'sd_business_membership_product_id',
-            'memorial'            => 'sd_memorial_product_id',
+            'donation'            => 'skdon_donation_product_id',
+            'membership'          => 'skdon_membership_product_id',
+            'business_membership' => 'skdon_business_membership_product_id',
+            'memorial'            => 'skdon_memorial_product_id',
         ];
 
         $option_key = $option_keys[ $type ] ?? $option_keys['donation'];
@@ -206,67 +206,67 @@ class Cart_Handler {
      */
     private static function build_cart_item_data( array $post_data, string $product_type ): array {
         $data = [
-            'sd_product_type' => $product_type,
-            'sd_custom_price' => floatval( $post_data['amount'] ?? 0 ),
+            'skdon_product_type' => $product_type,
+            'skdon_custom_price' => floatval( $post_data['amount'] ?? 0 ),
         ];
 
         // Common fields.
         if ( ! empty( $post_data['allocation'] ) ) {
             $allocation            = sanitize_text_field( (string) $post_data['allocation'] );
-            $data['sd_allocation'] = Allocations::canonical( $allocation ) ?: sanitize_key( $allocation );
+            $data['skdon_allocation'] = Allocations::canonical( $allocation ) ?: sanitize_key( $allocation );
         }
 
         if ( ! empty( $post_data['campaign_id'] ) ) {
-            $data['sd_campaign_id'] = absint( $post_data['campaign_id'] );
+            $data['skdon_campaign_id'] = absint( $post_data['campaign_id'] );
         }
 
         if ( ! empty( $post_data['is_anonymous'] ) ) {
-            $data['sd_is_anonymous'] = true;
+            $data['skdon_is_anonymous'] = true;
         }
 
         if ( ! empty( $post_data['donor_name'] ) ) {
-            $data['sd_donor_name'] = sanitize_text_field( $post_data['donor_name'] );
+            $data['skdon_donor_name'] = sanitize_text_field( $post_data['donor_name'] );
         }
 
         // Dedication fields.
         if ( ! empty( $post_data['dedication_enabled'] ) ) {
-            $data['sd_dedication_enabled'] = true;
+            $data['skdon_dedication_enabled'] = true;
 
             if ( ! empty( $post_data['dedication_type'] ) ) {
-                $data['sd_dedication_type'] = sanitize_key( $post_data['dedication_type'] );
+                $data['skdon_dedication_type'] = sanitize_key( $post_data['dedication_type'] );
             }
 
             if ( ! empty( $post_data['honoree_name'] ) ) {
-                $data['sd_honoree_name'] = sanitize_text_field( $post_data['honoree_name'] );
+                $data['skdon_honoree_name'] = sanitize_text_field( $post_data['honoree_name'] );
             }
 
             if ( ! empty( $post_data['honoree_type'] ) ) {
-                $data['sd_honoree_type'] = sanitize_key( $post_data['honoree_type'] );
+                $data['skdon_honoree_type'] = sanitize_key( $post_data['honoree_type'] );
             }
 
             if ( ! empty( $post_data['tribute_message'] ) ) {
-                $data['sd_tribute_message'] = sanitize_textarea_field( $post_data['tribute_message'] );
+                $data['skdon_tribute_message'] = sanitize_textarea_field( $post_data['tribute_message'] );
             }
 
             // Family notification fields. POST/cart-data/item-meta keys
             // now use the canonical `notify_family_*` shape that matches
-            // the sd_memorial entity declarations — closes the CC-2
-            // audit divergence where cart wrote `_sd_family_name` while
-            // the entity used `_sd_notify_family_name` for the same data.
+            // the skdon_memorial entity declarations — closes the CC-2
+            // audit divergence where cart wrote `_skdon_family_name` while
+            // the entity used `_skdon_notify_family_name` for the same data.
             if ( ! empty( $post_data['notify_family_enabled'] ) ) {
-                $data['sd_notify_family_enabled'] = true;
+                $data['skdon_notify_family_enabled'] = true;
 
                 if ( ! empty( $post_data['notify_family_name'] ) ) {
-                    $data['sd_notify_family_name'] = sanitize_text_field( $post_data['notify_family_name'] );
+                    $data['skdon_notify_family_name'] = sanitize_text_field( $post_data['notify_family_name'] );
                 }
                 if ( ! empty( $post_data['notify_family_email'] ) ) {
-                    $data['sd_notify_family_email'] = sanitize_email( $post_data['notify_family_email'] );
+                    $data['skdon_notify_family_email'] = sanitize_email( $post_data['notify_family_email'] );
                 }
                 if ( ! empty( $post_data['notify_family_address'] ) ) {
-                    $data['sd_notify_family_address'] = sanitize_textarea_field( $post_data['notify_family_address'] );
+                    $data['skdon_notify_family_address'] = sanitize_textarea_field( $post_data['notify_family_address'] );
                 }
                 if ( ! empty( $post_data['notify_family_send_card'] ) ) {
-                    $data['sd_notify_family_send_card'] = true;
+                    $data['skdon_notify_family_send_card'] = true;
                 }
             }
         }
@@ -274,13 +274,13 @@ class Cart_Handler {
         // Membership-specific fields.
         if ( in_array( $product_type, [ 'membership', 'business_membership' ], true ) ) {
             if ( ! empty( $post_data['tier'] ) ) {
-                $data['sd_membership_tier'] = sanitize_key( $post_data['tier'] );
+                $data['skdon_membership_tier'] = sanitize_key( $post_data['tier'] );
             }
             if ( ! empty( $post_data['business_name'] ) ) {
-                $data['sd_business_name'] = sanitize_text_field( $post_data['business_name'] );
+                $data['skdon_business_name'] = sanitize_text_field( $post_data['business_name'] );
             }
             if ( ! empty( $post_data['sd_logo_attachment_id'] ) ) {
-                $data['sd_logo_attachment_id'] = absint( $post_data['sd_logo_attachment_id'] );
+                $data['skdon_logo_attachment_id'] = absint( $post_data['sd_logo_attachment_id'] );
             }
         }
 
@@ -315,7 +315,7 @@ class Cart_Handler {
         // matches (#21). If a fund has no variation at all (the product was
         // edited by hand), the generic lookup below still picks one. Only the
         // order line's wording is wrong then: the gift is recorded from
-        // sd_allocation, and the sync checker reports the missing variation.
+        // skdon_allocation, and the sync checker reports the missing variation.
         if ( 'donation' === $product_type ) {
             $variation_id = Allocations::find_variation_id( $product, Allocations::canonical( $attribute_value ) );
             if ( $variation_id ) {
@@ -455,23 +455,23 @@ class Cart_Handler {
 
         if ( isset( $_REQUEST['sd_allocation'] ) ) {
             $allocation                      = sanitize_key( $_REQUEST['sd_allocation'] );
-            $cart_item_data['sd_allocation'] = Allocations::canonical( $allocation ) ?: $allocation;
+            $cart_item_data['skdon_allocation'] = Allocations::canonical( $allocation ) ?: $allocation;
         }
 
         if ( isset( $_REQUEST['sd_amount'] ) ) {
             $amount = floatval( $_REQUEST['sd_amount'] );
             // Reject negative or zero amounts.
             if ( $amount > 0 ) {
-                $cart_item_data['sd_custom_price'] = $amount;
+                $cart_item_data['skdon_custom_price'] = $amount;
             }
         }
 
         if ( isset( $_REQUEST['sd_campaign'] ) ) {
-            $cart_item_data['sd_campaign_id'] = absint( $_REQUEST['sd_campaign'] );
+            $cart_item_data['skdon_campaign_id'] = absint( $_REQUEST['sd_campaign'] );
         }
 
         if ( isset( $_REQUEST['sd_anonymous'] ) ) {
-            $cart_item_data['sd_is_anonymous'] = true;
+            $cart_item_data['skdon_is_anonymous'] = true;
         }
 
         return $cart_item_data;
@@ -488,8 +488,8 @@ class Cart_Handler {
      */
     public static function display_cart_item_data( array $item_data, array $cart_item ): array {
         // Allocation.
-        if ( ! empty( $cart_item['sd_allocation'] ) ) {
-            $allocation_label = Allocations::label( (string) $cart_item['sd_allocation'] );
+        if ( ! empty( $cart_item['skdon_allocation'] ) ) {
+            $allocation_label = Allocations::label( (string) $cart_item['skdon_allocation'] );
 
             $item_data[] = [
                 'key'   => __( 'Allocation', 'shelterkit-donations' ),
@@ -498,8 +498,8 @@ class Cart_Handler {
         }
 
         // Campaign.
-        if ( ! empty( $cart_item['sd_campaign_id'] ) ) {
-            $campaign = get_term( $cart_item['sd_campaign_id'], 'sd_campaign' );
+        if ( ! empty( $cart_item['skdon_campaign_id'] ) ) {
+            $campaign = get_term( $cart_item['skdon_campaign_id'], 'skdon_campaign' );
             if ( $campaign && ! is_wp_error( $campaign ) ) {
                 $item_data[] = [
                     'key'   => __( 'Campaign', 'shelterkit-donations' ),
@@ -509,49 +509,49 @@ class Cart_Handler {
         }
 
         // Dedication.
-        if ( ! empty( $cart_item['sd_dedication_enabled'] ) ) {
-            $dedication_type = $cart_item['sd_dedication_type'] ?? 'honor';
+        if ( ! empty( $cart_item['skdon_dedication_enabled'] ) ) {
+            $dedication_type = $cart_item['skdon_dedication_type'] ?? 'honor';
             $type_labels = [
                 'honor'  => __( 'In Honor Of', 'shelterkit-donations' ),
                 'memory' => __( 'In Memory Of', 'shelterkit-donations' ),
             ];
 
-            if ( ! empty( $cart_item['sd_honoree_name'] ) ) {
+            if ( ! empty( $cart_item['skdon_honoree_name'] ) ) {
                 $item_data[] = [
                     'key'   => $type_labels[ $dedication_type ] ?? __( 'Dedication', 'shelterkit-donations' ),
-                    'value' => $cart_item['sd_honoree_name'],
+                    'value' => $cart_item['skdon_honoree_name'],
                 ];
             }
 
-            if ( ! empty( $cart_item['sd_honoree_type'] ) ) {
+            if ( ! empty( $cart_item['skdon_honoree_type'] ) ) {
                 $honoree_types = [
                     'person' => __( 'Person', 'shelterkit-donations' ),
                     'pet'    => __( 'Pet', 'shelterkit-donations' ),
                 ];
                 $item_data[] = [
                     'key'   => __( 'Honoree Type', 'shelterkit-donations' ),
-                    'value' => $honoree_types[ $cart_item['sd_honoree_type'] ] ?? $cart_item['sd_honoree_type'],
+                    'value' => $honoree_types[ $cart_item['skdon_honoree_type'] ] ?? $cart_item['skdon_honoree_type'],
                 ];
             }
 
-            if ( ! empty( $cart_item['sd_tribute_message'] ) ) {
+            if ( ! empty( $cart_item['skdon_tribute_message'] ) ) {
                 $item_data[] = [
                     'key'   => __( 'Tribute Message', 'shelterkit-donations' ),
-                    'value' => wp_trim_words( $cart_item['sd_tribute_message'], 20 ),
+                    'value' => wp_trim_words( $cart_item['skdon_tribute_message'], 20 ),
                 ];
             }
         }
 
         // Donor name.
-        if ( ! empty( $cart_item['sd_donor_name'] ) ) {
+        if ( ! empty( $cart_item['skdon_donor_name'] ) ) {
             $item_data[] = [
                 'key'   => __( 'Donor Name', 'shelterkit-donations' ),
-                'value' => $cart_item['sd_donor_name'],
+                'value' => $cart_item['skdon_donor_name'],
             ];
         }
 
         // Anonymous.
-        if ( ! empty( $cart_item['sd_is_anonymous'] ) ) {
+        if ( ! empty( $cart_item['skdon_is_anonymous'] ) ) {
             $item_data[] = [
                 'key'   => __( 'Anonymous', 'shelterkit-donations' ),
                 'value' => __( 'Yes', 'shelterkit-donations' ),
@@ -559,24 +559,24 @@ class Cart_Handler {
         }
 
         // Membership tier.
-        if ( ! empty( $cart_item['sd_membership_tier'] ) ) {
+        if ( ! empty( $cart_item['skdon_membership_tier'] ) ) {
             $item_data[] = [
                 'key'   => __( 'Membership Level', 'shelterkit-donations' ),
-                'value' => ucwords( str_replace( '-', ' ', $cart_item['sd_membership_tier'] ) ),
+                'value' => ucwords( str_replace( '-', ' ', $cart_item['skdon_membership_tier'] ) ),
             ];
         }
 
         // Business name.
-        if ( ! empty( $cart_item['sd_business_name'] ) ) {
+        if ( ! empty( $cart_item['skdon_business_name'] ) ) {
             $item_data[] = [
                 'key'   => __( 'Business Name', 'shelterkit-donations' ),
-                'value' => $cart_item['sd_business_name'],
+                'value' => $cart_item['skdon_business_name'],
             ];
         }
 
         // Business logo.
-        if ( ! empty( $cart_item['sd_logo_attachment_id'] ) ) {
-            $logo_url = wp_get_attachment_image_url( $cart_item['sd_logo_attachment_id'], 'thumbnail' );
+        if ( ! empty( $cart_item['skdon_logo_attachment_id'] ) ) {
+            $logo_url = wp_get_attachment_image_url( $cart_item['skdon_logo_attachment_id'], 'thumbnail' );
             if ( $logo_url ) {
                 $item_data[] = [
                     'key'     => __( 'Business Logo', 'shelterkit-donations' ),
@@ -602,24 +602,24 @@ class Cart_Handler {
      */
     public static function save_cart_item_to_order( $item, $cart_item_key, $values, $order ): void {
         $meta_keys = [
-            'sd_product_type',
-            'sd_donor_name',
-            'sd_allocation',
-            'sd_campaign_id',
-            'sd_is_anonymous',
-            'sd_dedication_enabled',
-            'sd_dedication_type',
-            'sd_honoree_name',
-            'sd_honoree_type',
-            'sd_tribute_message',
-            'sd_notify_family_enabled',
-            'sd_notify_family_name',
-            'sd_notify_family_email',
-            'sd_notify_family_address',
-            'sd_notify_family_send_card',
-            'sd_membership_tier',
-            'sd_business_name',
-            'sd_logo_attachment_id',
+            'skdon_product_type',
+            'skdon_donor_name',
+            'skdon_allocation',
+            'skdon_campaign_id',
+            'skdon_is_anonymous',
+            'skdon_dedication_enabled',
+            'skdon_dedication_type',
+            'skdon_honoree_name',
+            'skdon_honoree_type',
+            'skdon_tribute_message',
+            'skdon_notify_family_enabled',
+            'skdon_notify_family_name',
+            'skdon_notify_family_email',
+            'skdon_notify_family_address',
+            'skdon_notify_family_send_card',
+            'skdon_membership_tier',
+            'skdon_business_name',
+            'skdon_logo_attachment_id',
         ];
 
         foreach ( $meta_keys as $key ) {
@@ -646,8 +646,8 @@ class Cart_Handler {
         }
 
         foreach ( $cart->get_cart() as $cart_item ) {
-            if ( isset( $cart_item['sd_custom_price'] ) && $cart_item['sd_custom_price'] > 0 ) {
-                $cart_item['data']->set_price( $cart_item['sd_custom_price'] );
+            if ( isset( $cart_item['skdon_custom_price'] ) && $cart_item['skdon_custom_price'] > 0 ) {
+                $cart_item['data']->set_price( $cart_item['skdon_custom_price'] );
             }
         }
     }
@@ -714,7 +714,7 @@ class Cart_Handler {
         }
 
         // Mark as pending review.
-        update_post_meta( $attachment_id, '_sd_logo_status', 'pending' );
+        update_post_meta( $attachment_id, '_skdon_logo_status', 'pending' );
 
         return $attachment_id;
     }

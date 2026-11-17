@@ -42,10 +42,10 @@ final class CheckoutPersistenceTest extends WP_UnitTestCase {
 
         // The values ajax_add_to_cart / the form stashed on the cart item.
         $values = [
-            'sd_product_type'    => 'memorial',
-            'sd_honoree_name'    => 'Biscuit',
-            'sd_is_anonymous'    => true,
-            'sd_tribute_message' => 'In loving memory',
+            'skdon_product_type'    => 'memorial',
+            'skdon_honoree_name'    => 'Biscuit',
+            'skdon_is_anonymous'    => true,
+            'skdon_tribute_message' => 'In loving memory',
             'not_whitelisted'    => 'ignore me',
         ];
 
@@ -55,16 +55,16 @@ final class CheckoutPersistenceTest extends WP_UnitTestCase {
         // Reload from the order to confirm persistence, not just in-memory.
         $fresh = wc_get_order( $order->get_id() )->get_item( $item_id );
 
-        $this->assertSame( 'Biscuit', $fresh->get_meta( '_sd_honoree_name' ) );
-        $this->assertSame( 'memorial', $fresh->get_meta( '_sd_product_type' ) );
-        $this->assertSame( 'In loving memory', $fresh->get_meta( '_sd_tribute_message' ) );
-        $this->assertNotEmpty( $fresh->get_meta( '_sd_is_anonymous' ) );
-        $this->assertSame( '', $fresh->get_meta( '_not_whitelisted' ), 'Only whitelisted sd_* keys are copied.' );
+        $this->assertSame( 'Biscuit', $fresh->get_meta( '_skdon_honoree_name' ) );
+        $this->assertSame( 'memorial', $fresh->get_meta( '_skdon_product_type' ) );
+        $this->assertSame( 'In loving memory', $fresh->get_meta( '_skdon_tribute_message' ) );
+        $this->assertNotEmpty( $fresh->get_meta( '_skdon_is_anonymous' ) );
+        $this->assertSame( '', $fresh->get_meta( '_not_whitelisted' ), 'Only whitelisted _skdon_* keys are copied.' );
     }
 
     public function test_cart_write_feeds_order_processing_read(): void {
         // Full channel: cart values → order-item meta (write) → memorial (read).
-        // Proves the write keys (_sd_honoree_name) are exactly what build_input
+        // Proves the write keys (_skdon_honoree_name) are exactly what build_input
         // consumes — the seam that has historically broken.
         $order = wc_create_order();
         $order->set_billing_first_name( 'Pat' );
@@ -78,7 +78,7 @@ final class CheckoutPersistenceTest extends WP_UnitTestCase {
         Cart_Handler::save_cart_item_to_order(
             $item,
             'cart_key',
-            [ 'sd_product_type' => 'memorial', 'sd_honoree_name' => 'Biscuit' ],
+            [ 'skdon_product_type' => 'memorial', 'skdon_honoree_name' => 'Biscuit' ],
             $order
         );
         $item->save();
@@ -88,17 +88,17 @@ final class CheckoutPersistenceTest extends WP_UnitTestCase {
         $order->update_status( 'completed' );
 
         $memorials = get_posts( [
-            'post_type'   => 'sd_memorial',
+            'post_type'   => 'skdon_memorial',
             'post_status' => 'publish',
             'numberposts' => -1,
             'fields'      => 'ids',
-            'meta_key'    => '_sd_wc_order_id',
+            'meta_key'    => '_skdon_wc_order_id',
             'meta_value'  => $order->get_id(),
         ] );
 
         $this->assertCount( 1, $memorials, 'Memorial created from the cart-written meta.' );
-        $this->assertSame( 'Biscuit', get_post_meta( $memorials[0], '_sd_honoree_name', true ) );
-        $this->assertSame( 'pet', get_post_meta( $memorials[0], '_sd_memorial_type', true ) );
+        $this->assertSame( 'Biscuit', get_post_meta( $memorials[0], '_skdon_honoree_name', true ) );
+        $this->assertSame( 'pet', get_post_meta( $memorials[0], '_skdon_memorial_type', true ) );
     }
 
     public function test_checkout_fields_are_saved_to_order_meta(): void {
@@ -114,10 +114,10 @@ final class CheckoutPersistenceTest extends WP_UnitTestCase {
 
         $fresh = wc_get_order( $order->get_id() );
 
-        $this->assertSame( 'In honor of Rex', $fresh->get_meta( '_sd_dedication' ) );
-        $this->assertNotEmpty( $fresh->get_meta( '_sd_is_anonymous' ), 'Checkbox saved truthy.' );
-        $this->assertSame( 'family@example.test', $fresh->get_meta( '_sd_notify_family_email' ) );
-        $this->assertStringNotContainsString( '<b>', (string) $fresh->get_meta( '_sd_tribute_message' ), 'Textarea is sanitized.' );
+        $this->assertSame( 'In honor of Rex', $fresh->get_meta( '_skdon_dedication' ) );
+        $this->assertNotEmpty( $fresh->get_meta( '_skdon_is_anonymous' ), 'Checkbox saved truthy.' );
+        $this->assertSame( 'family@example.test', $fresh->get_meta( '_skdon_notify_family_email' ) );
+        $this->assertStringNotContainsString( '<b>', (string) $fresh->get_meta( '_skdon_tribute_message' ), 'Textarea is sanitized.' );
     }
 
     public function test_checkout_fields_absent_from_post_are_not_written(): void {
@@ -129,7 +129,7 @@ final class CheckoutPersistenceTest extends WP_UnitTestCase {
         Checkout_Fields::save_checkout_fields( $order->get_id() );
 
         $fresh = wc_get_order( $order->get_id() );
-        $this->assertSame( 'Only this one', $fresh->get_meta( '_sd_dedication' ) );
-        $this->assertSame( '', $fresh->get_meta( '_sd_honoree_name' ), 'Unposted fields are left unset.' );
+        $this->assertSame( 'Only this one', $fresh->get_meta( '_skdon_dedication' ) );
+        $this->assertSame( '', $fresh->get_meta( '_skdon_honoree_name' ), 'Unposted fields are left unset.' );
     }
 }

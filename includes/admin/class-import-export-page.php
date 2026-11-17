@@ -54,10 +54,10 @@ class Import_Export_Page {
 		add_action( 'admin_enqueue_scripts', [ self::class, 'enqueue_assets' ] );
 
 		// Single generic export handler (replaces 4 separate admin_post actions).
-		add_action( 'admin_post_sd_export', [ self::class, 'handle_export' ] );
+		add_action( 'admin_post_skdon_export', [ self::class, 'handle_export' ] );
 
 		// Full-backup ZIP (all entities) — for pre-uninstall backups.
-		add_action( 'admin_post_sd_export_all', [ self::class, 'handle_export_all' ] );
+		add_action( 'admin_post_skdon_export_all', [ self::class, 'handle_export_all' ] );
 
 		// Register all AJAX handlers.
 		Import_Ajax_Handler::init();
@@ -133,7 +133,7 @@ class Import_Export_Page {
 	 * Handle CSV export.
 	 *
 	 * Generic handler for all entity types. The type comes from POST data.
-	 * Replaces the four separate admin_post_sd_export_* actions.
+	 * Replaces the four separate admin_post_skdon_export_* actions.
 	 *
 	 * @since 2.0.0
 	 */
@@ -222,7 +222,7 @@ class Import_Export_Page {
 			<p><?php esc_html_e( 'Download every donor, donation, membership, and memorial as a single CSV ZIP. Do this before uninstalling with "Delete all data on uninstall" enabled — deletion is permanent.', 'shelterkit-donations' ); ?></p>
 			<p class="description"><?php esc_html_e( 'Included: donors, donations, memberships, memorials — relinked by email, with their campaign association and logo/photo references restored on same-site re-import. Not restored automatically: campaign goals/end-dates, candle counts, the activity log, and settings.', 'shelterkit-donations' ); ?></p>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-				<input type="hidden" name="action" value="sd_export_all" />
+				<input type="hidden" name="action" value="skdon_export_all" />
 				<?php wp_nonce_field( self::EXPORT_NONCE ); ?>
 				<button type="submit" class="button button-secondary"><?php esc_html_e( 'Download full backup (CSV ZIP)', 'shelterkit-donations' ); ?></button>
 			</form>
@@ -245,7 +245,7 @@ class Import_Export_Page {
 
 		foreach ( array_keys( $entity_types ) as $type ) {
 			$urls[ $type ] = admin_url( 'admin-ajax.php' ) . '?' . http_build_query( [
-				'action'   => 'sd_download_template',
+				'action'   => 'skdon_download_template',
 				'_wpnonce' => $nonce,
 				'type'     => $type,
 			] );

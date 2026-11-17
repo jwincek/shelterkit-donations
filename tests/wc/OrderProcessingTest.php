@@ -70,7 +70,7 @@ final class OrderProcessingTest extends WP_UnitTestCase {
             'post_status' => 'publish',
             'numberposts' => -1,
             'fields'      => 'ids',
-            'meta_key'    => '_sd_wc_order_id',
+            'meta_key'    => '_skdon_wc_order_id',
             'meta_value'  => $order_id,
         ] );
     }
@@ -80,28 +80,28 @@ final class OrderProcessingTest extends WP_UnitTestCase {
 
         $order->update_status( 'completed' ); // Fires the real processing flow.
 
-        $donations = $this->entities_for_order( $order->get_id(), 'sd_donation' );
+        $donations = $this->entities_for_order( $order->get_id(), 'skdon_donation' );
         $this->assertCount( 1, $donations, 'One donation created from the order.' );
 
         $id = $donations[0];
-        $this->assertSame( 25.0, (float) get_post_meta( $id, '_sd_amount', true ) );
-        $this->assertSame( 'general-fund', get_post_meta( $id, '_sd_allocation', true ), 'Allocation falls back to the configured default.' );
+        $this->assertSame( 25.0, (float) get_post_meta( $id, '_skdon_amount', true ) );
+        $this->assertSame( 'general-fund', get_post_meta( $id, '_skdon_allocation', true ), 'Allocation falls back to the configured default.' );
 
-        $donor_id = (int) get_post_meta( $id, '_sd_donor_id', true );
+        $donor_id = (int) get_post_meta( $id, '_skdon_donor_id', true );
         $this->assertGreaterThan( 0, $donor_id, 'Donor resolved from billing.' );
-        $this->assertSame( 'pat.donor@example.test', get_post_meta( $donor_id, '_sd_email', true ) );
+        $this->assertSame( 'pat.donor@example.test', get_post_meta( $donor_id, '_skdon_email', true ) );
     }
 
     public function test_paid_transition_does_not_double_count(): void {
-        // processing → completed both fire the processing hook; the _sd_processed
+        // processing → completed both fire the processing hook; the _skdon_processed
         // guard must keep it to a single donation.
         $order = $this->make_shelter_order( 'shelter-donations', 10.00 );
 
         $order->update_status( 'processing' );
         $order->update_status( 'completed' );
 
-        $this->assertCount( 1, $this->entities_for_order( $order->get_id(), 'sd_donation' ), 'No duplicate across paid transitions.' );
-        $this->assertNotEmpty( wc_get_order( $order->get_id() )->get_meta( '_sd_processed' ) );
+        $this->assertCount( 1, $this->entities_for_order( $order->get_id(), 'skdon_donation' ), 'No duplicate across paid transitions.' );
+        $this->assertNotEmpty( wc_get_order( $order->get_id() )->get_meta( '_skdon_processed' ) );
     }
 
     public function test_memorial_order_uses_the_form_meta_channel(): void {
@@ -112,17 +112,17 @@ final class OrderProcessingTest extends WP_UnitTestCase {
             50.00,
             [
                 'in-memoriam-type'  => 'Pet',     // Selected attribute → memorial_type.
-                '_sd_honoree_name'  => 'Biscuit', // Form-set item meta.
-                '_sd_product_type'  => 'memorial',
+                '_skdon_honoree_name'  => 'Biscuit', // Form-set item meta.
+                '_skdon_product_type'  => 'memorial',
             ]
         );
 
         $order->update_status( 'completed' );
 
-        $memorials = $this->entities_for_order( $order->get_id(), 'sd_memorial' );
+        $memorials = $this->entities_for_order( $order->get_id(), 'skdon_memorial' );
         $this->assertCount( 1, $memorials, 'One memorial created from the order.' );
-        $this->assertSame( 'Biscuit', get_post_meta( $memorials[0], '_sd_honoree_name', true ) );
-        $this->assertSame( 'pet', get_post_meta( $memorials[0], '_sd_memorial_type', true ), 'memorial_type resolved from the attribute (lowercased).' );
+        $this->assertSame( 'Biscuit', get_post_meta( $memorials[0], '_skdon_honoree_name', true ) );
+        $this->assertSame( 'pet', get_post_meta( $memorials[0], '_skdon_memorial_type', true ), 'memorial_type resolved from the attribute (lowercased).' );
     }
 
     public function test_duplicate_trigger_after_completion_is_a_noop(): void {
@@ -130,11 +130,11 @@ final class OrderProcessingTest extends WP_UnitTestCase {
         // order already processed must not create a second donation.
         $order = $this->make_shelter_order( 'shelter-donations', 20.00 );
         $order->update_status( 'completed' );
-        $this->assertCount( 1, $this->entities_for_order( $order->get_id(), 'sd_donation' ) );
+        $this->assertCount( 1, $this->entities_for_order( $order->get_id(), 'skdon_donation' ) );
 
         Order_Handler::process_order( $order->get_id() );
 
-        $this->assertCount( 1, $this->entities_for_order( $order->get_id(), 'sd_donation' ), 'No duplicate from a repeat trigger.' );
+        $this->assertCount( 1, $this->entities_for_order( $order->get_id(), 'skdon_donation' ), 'No duplicate from a repeat trigger.' );
     }
 
     public function test_processed_flag_is_read_fresh_from_the_database(): void {
@@ -147,7 +147,7 @@ final class OrderProcessingTest extends WP_UnitTestCase {
 
         $this->assertFalse( $method->invoke( null, $order->get_id() ), 'Not processed yet.' );
 
-        $order->update_meta_data( '_sd_processed', current_time( 'mysql' ) );
+        $order->update_meta_data( '_skdon_processed', current_time( 'mysql' ) );
         $order->save();
 
         $this->assertTrue( $method->invoke( null, $order->get_id() ), 'Reads the just-written flag from the DB.' );
@@ -158,10 +158,10 @@ final class OrderProcessingTest extends WP_UnitTestCase {
 
         $order->update_status( 'completed' );
 
-        $this->assertCount( 0, $this->entities_for_order( $order->get_id(), 'sd_memorial' ), 'No memorial when the honoree is missing.' );
+        $this->assertCount( 0, $this->entities_for_order( $order->get_id(), 'skdon_memorial' ), 'No memorial when the honoree is missing.' );
 
         // The error is recorded on the order for admin review/reprocessing.
-        $results = wc_get_order( $order->get_id() )->get_meta( '_sd_processing_results' );
+        $results = wc_get_order( $order->get_id() )->get_meta( '_skdon_processing_results' );
         $this->assertNotEmpty( $results );
         $this->assertTrue(
             (bool) array_filter( (array) $results, static fn ( $r ) => is_wp_error( $r ) ),
@@ -178,13 +178,13 @@ final class OrderProcessingTest extends WP_UnitTestCase {
      * @dataProvider donor_choices
      */
     public function test_a_gift_is_recorded_against_the_fund_the_donor_chose( string $chosen, string $recorded ): void {
-        $order = $this->make_shelter_order( 'shelter-donations', 30.00, [ '_sd_allocation' => $chosen ] );
+        $order = $this->make_shelter_order( 'shelter-donations', 30.00, [ '_skdon_allocation' => $chosen ] );
 
         $order->update_status( 'completed' );
 
-        $donations = $this->entities_for_order( $order->get_id(), 'sd_donation' );
+        $donations = $this->entities_for_order( $order->get_id(), 'skdon_donation' );
         $this->assertCount( 1, $donations, 'The gift was recorded, not rejected.' );
-        $this->assertSame( $recorded, get_post_meta( $donations[0], '_sd_allocation', true ) );
+        $this->assertSame( $recorded, get_post_meta( $donations[0], '_skdon_allocation', true ) );
     }
 
     /**

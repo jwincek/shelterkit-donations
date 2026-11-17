@@ -105,7 +105,7 @@
 				<element value="STARTER_SHELTER"/>
 				<element value="shelter_donations"/>
 				<element value="shelterkit_donations"/>
-				<element value="sd_"/>
+				<element value="skdon"/>
 				<!-- Not this plugin's prefix, deliberately. includes/shelterkit/
 				     holds files copied byte-identically into the sibling
 				     ShelterKit plugins, so their classes must carry a shared
@@ -159,16 +159,6 @@
 		<exclude-pattern>blocks/shared/partials/*</exclude-pattern>
 		<exclude-pattern>templates/*</exclude-pattern>
 	</rule>
-
-	<!--
-		sd_ is three characters where this sniff wants four, but it is the
-		prefix already persisted in the database: post types (sd_donation),
-		taxonomies (sd_campaign) and meta keys (_sd_amount) all carry it, and
-		renaming them would orphan every existing install's data.
-	-->
-	<rule ref="WordPress.NamingConventions.PrefixAllGlobals.ShortPrefixPassed">
-		<severity>0</severity>
-	</rule>
 	<rule ref="WordPress.WP.GlobalVariablesOverride">
 		<exclude-pattern>blocks/*/render.php</exclude-pattern>
 		<exclude-pattern>templates/*</exclude-pattern>
@@ -184,8 +174,8 @@
 	</rule>
 
 	<!--
-		Manifest filenames mirror their post-type slug (sd_donation.php) and
-		single-sd_memorial-classic.php follows the WordPress template
+		Manifest filenames mirror their post-type slug (skdon_donation.php) and
+		single-skdon_memorial-classic.php follows the WordPress template
 		hierarchy. Both are named by something other than this convention.
 	-->
 	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">

@@ -95,10 +95,10 @@ class Settings {
             check_admin_referer( 'sd_product_mappings' );
 
             $product_options = [
-                'sd_donation_product_id',
-                'sd_membership_product_id',
-                'sd_business_membership_product_id',
-                'sd_memorial_product_id',
+                'skdon_donation_product_id',
+                'skdon_membership_product_id',
+                'skdon_business_membership_product_id',
+                'skdon_memorial_product_id',
             ];
 
             foreach ( $product_options as $option ) {
@@ -421,7 +421,7 @@ class Settings {
             <tbody>
                 <?php
                 foreach ( $emails_config as $email_id => $email_config ) :
-                    $wc_id    = 'sd_' . str_replace( '-', '_', $email_id );
+                    $wc_id    = 'skdon_' . str_replace( '-', '_', $email_id );
                     $wc_email = $wc_emails[ $wc_id ] ?? null;
                     $enabled  = $wc_email ? $wc_email->is_enabled() : true;
                     $subject  = $wc_email ? $wc_email->get_option( 'subject', $email_config['subject'] ?? '' ) : ( $email_config['subject'] ?? '' );
@@ -924,7 +924,7 @@ class Settings {
      * @since 3.0.0
      */
     public static function maybe_migrate_organization_to_profile(): void {
-        if ( get_option( 'sd_org_profile_migrated' ) ) {
+        if ( get_option( 'skdon_org_profile_migrated' ) ) {
             return;
         }
         if ( ! class_exists( 'ShelterKit_Profile' ) ) {
@@ -973,7 +973,7 @@ class Settings {
             \ShelterKit_Profile::save( $to_write );
         }
 
-        update_option( 'sd_org_profile_migrated', 1 );
+        update_option( 'skdon_org_profile_migrated', 1 );
     }
 
     public static function get( string $key, $default = null ) {

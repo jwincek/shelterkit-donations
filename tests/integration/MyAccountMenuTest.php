@@ -30,7 +30,7 @@ final class MyAccountMenuTest extends WP_UnitTestCase {
     public function test_donor_sees_single_my_giving_item(): void {
         $user = self::factory()->user->create();
         $donor = get_or_create_donor( "u{$user}@example.test", 'Member' );
-        update_post_meta( $donor, '_sd_user_id', $user );
+        update_post_meta( $donor, '_skdon_user_id', $user );
         wp_set_current_user( $user );
 
         $items = My_Account::add_menu_items( self::WC_MENU );
@@ -62,13 +62,13 @@ final class MyAccountMenuTest extends WP_UnitTestCase {
     public function test_current_donor_id_is_memoized_per_request(): void {
         $user  = self::factory()->user->create();
         $donor = get_or_create_donor( 'memo@example.test', 'Memo Donor' );
-        update_post_meta( $donor, '_sd_user_id', $user );
+        update_post_meta( $donor, '_skdon_user_id', $user );
         wp_set_current_user( $user );
 
         $this->assertSame( $donor, My_Account::get_current_donor_id() );
 
         // Drop the underlying link; the memoized result still stands this request.
-        delete_post_meta( $donor, '_sd_user_id' );
+        delete_post_meta( $donor, '_skdon_user_id' );
         $this->assertSame( $donor, My_Account::get_current_donor_id(), 'Resolved donor id is cached for the request.' );
 
         // A fresh request (cache flush) re-resolves — and now finds nothing,

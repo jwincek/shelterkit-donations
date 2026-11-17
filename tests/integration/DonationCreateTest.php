@@ -39,11 +39,11 @@ final class DonationCreateTest extends WP_UnitTestCase {
         $this->assertIsArray( $result );
         $id = $result['donation_id'];
 
-        $this->assertSame( 'sd_donation', get_post_type( $id ) );
+        $this->assertSame( 'skdon_donation', get_post_type( $id ) );
         $this->assertSame( 'publish', get_post_status( $id ) );
-        $this->assertSame( $result['donor_id'], (int) get_post_meta( $id, '_sd_donor_id', true ) );
-        $this->assertSame( 50.0, (float) get_post_meta( $id, '_sd_amount', true ) );
-        $this->assertSame( 'general-fund', get_post_meta( $id, '_sd_allocation', true ) );
+        $this->assertSame( $result['donor_id'], (int) get_post_meta( $id, '_skdon_donor_id', true ) );
+        $this->assertSame( 50.0, (float) get_post_meta( $id, '_skdon_amount', true ) );
+        $this->assertSame( 'general-fund', get_post_meta( $id, '_skdon_allocation', true ) );
     }
 
     public function test_allocation_is_respected(): void {
@@ -54,7 +54,7 @@ final class DonationCreateTest extends WP_UnitTestCase {
             'allocation'  => 'medical-fund',
         ] );
 
-        $this->assertSame( 'medical-fund', get_post_meta( $result['donation_id'], '_sd_allocation', true ) );
+        $this->assertSame( 'medical-fund', get_post_meta( $result['donation_id'], '_skdon_allocation', true ) );
     }
 
     public function test_anonymous_flag_persisted(): void {
@@ -65,7 +65,7 @@ final class DonationCreateTest extends WP_UnitTestCase {
             'is_anonymous' => true,
         ] );
 
-        $this->assertTrue( (bool) get_post_meta( $result['donation_id'], '_sd_is_anonymous', true ) );
+        $this->assertTrue( (bool) get_post_meta( $result['donation_id'], '_skdon_is_anonymous', true ) );
     }
 
     public function test_create_accumulates_donor_lifetime_giving(): void {
@@ -75,7 +75,7 @@ final class DonationCreateTest extends WP_UnitTestCase {
 
         $this->assertSame(
             100.0,
-            (float) get_post_meta( $second['donor_id'], '_sd_lifetime_giving', true )
+            (float) get_post_meta( $second['donor_id'], '_skdon_lifetime_giving', true )
         );
     }
 
@@ -89,7 +89,7 @@ final class DonationCreateTest extends WP_UnitTestCase {
 
         $this->assertSame( $donor_id, $result['donor_id'] );
         // Only the one donor exists — no second record created.
-        $donors = get_posts( [ 'post_type' => 'sd_donor', 'numberposts' => -1, 'fields' => 'ids' ] );
+        $donors = get_posts( [ 'post_type' => 'skdon_donor', 'numberposts' => -1, 'fields' => 'ids' ] );
         $this->assertCount( 1, $donors );
         // Title falls back to the donor record's name (no donor_name/email
         // supplied) — guards the "Undefined array key" warning this path
@@ -101,7 +101,7 @@ final class DonationCreateTest extends WP_UnitTestCase {
     }
 
     public function test_campaign_is_attached(): void {
-        $campaign_id = self::factory()->term->create( [ 'taxonomy' => 'sd_campaign', 'name' => 'Spring Drive' ] );
+        $campaign_id = self::factory()->term->create( [ 'taxonomy' => 'skdon_campaign', 'name' => 'Spring Drive' ] );
 
         $result = create( [
             'donor_email' => 'donor@example.test',
@@ -110,7 +110,7 @@ final class DonationCreateTest extends WP_UnitTestCase {
             'campaign_id' => $campaign_id,
         ] );
 
-        $terms = wp_get_object_terms( $result['donation_id'], 'sd_campaign', [ 'fields' => 'ids' ] );
+        $terms = wp_get_object_terms( $result['donation_id'], 'skdon_campaign', [ 'fields' => 'ids' ] );
         $this->assertContains( $campaign_id, $terms );
     }
 

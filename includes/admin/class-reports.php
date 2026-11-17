@@ -49,7 +49,7 @@ class Reports {
     public static function init(): void {
         add_action( 'admin_menu', [ self::class, 'add_reports_page' ] );
         add_action( 'admin_enqueue_scripts', [ self::class, 'enqueue_assets' ] );
-        add_action( 'wp_ajax_sd_export_report', [ self::class, 'handle_export' ] );
+        add_action( 'wp_ajax_skdon_export_report', [ self::class, 'handle_export' ] );
     }
 
     /**
@@ -126,14 +126,14 @@ class Reports {
         // before they reach ability inputs (defense-in-depth; the list
         // abilities also call whereInTaxonomy which would no-op).
         if ( $campaign_id > 0 ) {
-            $campaign_term = get_term( $campaign_id, 'sd_campaign' );
+            $campaign_term = get_term( $campaign_id, 'skdon_campaign' );
             if ( ! $campaign_term || is_wp_error( $campaign_term ) ) {
                 $campaign_id = 0;
             }
         }
 
         $campaign_terms = get_terms( [
-            'taxonomy'   => 'sd_campaign',
+            'taxonomy'   => 'skdon_campaign',
             'hide_empty' => false,
             'orderby'    => 'name',
         ] );
@@ -434,7 +434,7 @@ class Reports {
         </table>
         <?php if ( $total > count( $items ) ) : ?>
         <p>
-            <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=sd_donation' ) ); ?>">
+            <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=skdon_donation' ) ); ?>">
                 <?php
                 printf(
                     /* translators: %d: total donation count */
@@ -589,7 +589,7 @@ class Reports {
         </table>
         <?php if ( $total > count( $items ) ) : ?>
         <p>
-            <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=sd_membership' ) ); ?>">
+            <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=skdon_membership' ) ); ?>">
                 <?php
                 printf(
                     /* translators: %d: total membership count */
@@ -721,7 +721,7 @@ class Reports {
         </table>
         <?php if ( $total > count( $items ) ) : ?>
         <p>
-            <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=sd_memorial' ) ); ?>">
+            <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=skdon_memorial' ) ); ?>">
                 <?php
                 printf(
                     /* translators: %d: total memorial count */
@@ -839,7 +839,7 @@ class Reports {
                         <a href="
                         <?php
                         echo esc_url( add_query_arg( [
-							'action'      => 'sd_export_report',
+							'action'      => 'skdon_export_report',
 							'report'      => 'campaign',
 							'campaign_id' => (int) ( $row['campaign_id'] ?? 0 ),
 							'_wpnonce'    => wp_create_nonce( 'sd_export_report' ),
@@ -1066,7 +1066,7 @@ class Reports {
             return [];
         }
 
-        $donors = \Starter_Shelter\Core\Query::for( 'sd_donor' )
+        $donors = \Starter_Shelter\Core\Query::for( 'skdon_donor' )
             ->withArgs( [ 'post__in' => $ids ] )
             ->get( count( $ids ) );
 

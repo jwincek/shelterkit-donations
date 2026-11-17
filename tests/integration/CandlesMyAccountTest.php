@@ -3,7 +3,7 @@
  * Integration tests for the "My Candles" My Account area and the
  * login-time merge of anonymously-lit candles.
  *
- * Candles are stored per user (user_meta `_sd_candles`) and are a permanent
+ * Candles are stored per user (user_meta `_skdon_candles`) and are a permanent
  * tribute. render_my_candles() lists the lit memorials (skipping any that
  * have since been removed); merge_anonymous_candles_on_login() folds a
  * logged-out visitor's cookie candles into their account on login.
@@ -37,12 +37,12 @@ final class CandlesMyAccountTest extends WP_UnitTestCase {
 
     public function test_login_merges_cookie_candles_into_user_meta(): void {
         $user = self::factory()->user->create_and_get();
-        update_user_meta( $user->ID, '_sd_candles', [ 101 ] ); // Already owned.
+        update_user_meta( $user->ID, '_skdon_candles', [ 101 ] ); // Already owned.
 
         $_COOKIE['sd_candles'] = wp_json_encode( [ 101, 202, 303 ] ); // Lit while logged out.
         merge_anonymous_candles_on_login( $user->user_login, $user );
 
-        $merged = get_user_meta( $user->ID, '_sd_candles', true );
+        $merged = get_user_meta( $user->ID, '_skdon_candles', true );
         sort( $merged );
 
         $this->assertSame( [ 101, 202, 303 ], $merged, 'Cookie candles merge in, deduped against existing.' );
@@ -50,11 +50,11 @@ final class CandlesMyAccountTest extends WP_UnitTestCase {
 
     public function test_login_merge_is_noop_without_cookie(): void {
         $user = self::factory()->user->create_and_get();
-        update_user_meta( $user->ID, '_sd_candles', [ 5 ] );
+        update_user_meta( $user->ID, '_skdon_candles', [ 5 ] );
 
         merge_anonymous_candles_on_login( $user->user_login, $user );
 
-        $this->assertSame( [ 5 ], get_user_meta( $user->ID, '_sd_candles', true ) );
+        $this->assertSame( [ 5 ], get_user_meta( $user->ID, '_skdon_candles', true ) );
     }
 
     public function test_render_lists_lit_memorials_and_skips_removed(): void {
@@ -69,7 +69,7 @@ final class CandlesMyAccountTest extends WP_UnitTestCase {
         $memorial_id = $result['memorial_id'];
 
         // Lit list = one real memorial + one that no longer exists.
-        update_user_meta( $user, '_sd_candles', [ $memorial_id, 999000 ] );
+        update_user_meta( $user, '_skdon_candles', [ $memorial_id, 999000 ] );
 
         ob_start();
         My_Account::render_my_candles();
@@ -82,7 +82,7 @@ final class CandlesMyAccountTest extends WP_UnitTestCase {
     public function test_render_shows_empty_state_with_no_candles(): void {
         $user = self::factory()->user->create();
         wp_set_current_user( $user );
-        update_user_meta( $user, '_sd_candles', [] );
+        update_user_meta( $user, '_skdon_candles', [] );
 
         ob_start();
         My_Account::render_my_candles();

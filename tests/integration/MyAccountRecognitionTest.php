@@ -61,7 +61,7 @@ final class MyAccountRecognitionTest extends WP_UnitTestCase {
         $this->assertSame( 2, $updated, 'All of the donor\'s memberships are updated.' );
         $this->assertFalse( My_Account::is_listed_publicly( $donor_id ) );
         foreach ( $ids as $id ) {
-            $this->assertSame( '1', (string) get_post_meta( $id, '_sd_is_anonymous', true ) );
+            $this->assertSame( '1', (string) get_post_meta( $id, '_skdon_is_anonymous', true ) );
         }
         $this->assertNotContains( 'Jane Doe', array_column( recognition_wall()['items'], 'display_name' ) );
     }

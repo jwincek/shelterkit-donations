@@ -211,7 +211,7 @@ class Provider {
 
                     // Check for donor_id in input.
                     if ( isset( $input['donor_id'] ) ) {
-                        $donor_user = get_post_meta( $input['donor_id'], '_sd_user_id', true );
+                        $donor_user = get_post_meta( $input['donor_id'], '_skdon_user_id', true );
                         return (int) $donor_user === $user_id;
                     }
 
@@ -227,11 +227,11 @@ class Provider {
                     // for a non-admin, blocking legitimate self-service.
                     foreach ( [ 'membership_id', 'memorial_id', 'donation_id' ] as $id_key ) {
                         if ( ! empty( $input[ $id_key ] ) ) {
-                            $donor_id = (int) get_post_meta( (int) $input[ $id_key ], '_sd_donor_id', true );
+                            $donor_id = (int) get_post_meta( (int) $input[ $id_key ], '_skdon_donor_id', true );
                             if ( ! $donor_id ) {
                                 return false;
                             }
-                            return (int) get_post_meta( $donor_id, '_sd_user_id', true ) === $user_id;
+                            return (int) get_post_meta( $donor_id, '_skdon_user_id', true ) === $user_id;
                         }
                     }
 

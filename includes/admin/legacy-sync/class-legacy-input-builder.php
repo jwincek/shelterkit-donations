@@ -94,7 +94,7 @@ class Legacy_Input_Builder {
 		};
 
 		// Anonymous flag.
-		$is_anonymous = $order->get_meta( '_sd_is_anonymous' );
+		$is_anonymous = $order->get_meta( '_skdon_is_anonymous' );
 		if ( $is_anonymous ) {
 			$input['is_anonymous'] = (bool) $is_anonymous;
 		}
@@ -158,7 +158,7 @@ class Legacy_Input_Builder {
 			?: ( $item_data['meta']['In Memory Of'] ?? '' ) ) );
 
 		if ( empty( $honoree_name ) ) {
-			$honoree_name = $order->get_meta( '_sd_honoree_name' )
+			$honoree_name = $order->get_meta( '_skdon_honoree_name' )
 				?: __( 'In Loving Memory', 'shelterkit-donations' );
 		}
 		$input['honoree_name'] = $honoree_name;
@@ -169,7 +169,7 @@ class Legacy_Input_Builder {
 			?: ( $item_data['meta']['Tribute Message'] ?? '' ) );
 
 		if ( empty( $tribute ) ) {
-			$tribute = $order->get_meta( '_sd_tribute_message' );
+			$tribute = $order->get_meta( '_skdon_tribute_message' );
 		}
 
 		// Fallback: legacy orders stored the tribute in the customer note field.
@@ -191,7 +191,7 @@ class Legacy_Input_Builder {
 				?: ( $item_data['meta']['Pet Species'] ?? '' ) );
 
 			if ( empty( $pet_species ) ) {
-				$pet_species = $order->get_meta( '_sd_pet_species' ) ?: '';
+				$pet_species = $order->get_meta( '_skdon_pet_species' ) ?: '';
 			}
 			$input['pet_species'] = $pet_species;
 		}
@@ -210,7 +210,7 @@ class Legacy_Input_Builder {
 		$allocation = self::extract_allocation( $item_data );
 		$input['allocation'] = $allocation ?: 'general-fund';
 
-		$dedication = $order->get_meta( '_sd_dedication' );
+		$dedication = $order->get_meta( '_skdon_dedication' );
 		if ( $dedication ) {
 			$input['dedication'] = $dedication;
 		}

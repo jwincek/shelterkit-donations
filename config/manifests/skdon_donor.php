@@ -1,9 +1,9 @@
 <?php
 /**
- * Field manifest for `sd_donor`.
+ * Field manifest for `skdon_donor`.
  *
  * The fourth and final entity. Has no products or checkout-fields of
- * its own (sd_donor is a profile entity, not purchasable), but owns:
+ * its own (skdon_donor is a profile entity, not purchasable), but owns:
  *
  * - 4 abilities (get-profile, update-address, get-history, update-profile)
  * - 4 meta-boxes (contact_info, address, donor_stats, user_account)
@@ -19,7 +19,7 @@
  *   contained in the meta-box block (no matching entity field).
  *   Audit-tracked drift; preserved verbatim.
  * - `donor_stats` meta-box renders `donor_level` (a computed),
- *   `donation_count` (no entity declaration — stored as `_sd_donation_count`
+ *   `donation_count` (no entity declaration — stored as `_skdon_donation_count`
  *   meta directly), and read-only display variants of
  *   `lifetime_giving` / `first_donation_date`. Display-only entries
  *   declare their own input_type in-overlay.
@@ -34,8 +34,8 @@
 declare( strict_types = 1 );
 
 return [
-	'entity'      => 'sd_donor',
-	'meta_prefix' => '_sd_',
+	'entity'      => 'skdon_donor',
+	'meta_prefix' => '_skdon_',
 	'fields'      => [
 		'email' => [
 			'type'        => 'string',
@@ -235,7 +235,7 @@ return [
 					'phone'      => [ '$entity' => 'phone' ],
 					'communication_preferences' => [
 						'type'        => 'object',
-						'description' => 'Communication preferences. Persisted as meta key `_sd_communication_preferences`.',
+						'description' => 'Communication preferences. Persisted as meta key `_skdon_communication_preferences`.',
 						'properties'  => [
 							'newsletter'         => [ 'type' => 'boolean' ],
 							'donation_receipts'  => [ 'type' => 'boolean' ],
@@ -278,9 +278,9 @@ return [
 			'title'   => 'Address',
 			'context' => 'normal',
 			// Self-contained sub-field entries — the form edits flat
-			// `_sd_address_line_1`/etc. meta keys. The `composite_save`
+			// `_skdon_address_line_1`/etc. meta keys. The `composite_save`
 			// directive below tells Meta_Boxes::save_meta_boxes to also
-			// assemble those flat values into the canonical `_sd_address`
+			// assemble those flat values into the canonical `_skdon_address`
 			// object that the abilities pipeline and REST consumers
 			// read from. Closes the audit-flagged drift where admin
 			// address edits didn't propagate to the structured store.
@@ -292,7 +292,7 @@ return [
 				'postal_code'    => [ 'label' => 'Postal Code', 'input_type' => 'text' ],
 			],
 			'composite_save' => [
-				'meta_key'  => '_sd_address',
+				'meta_key'  => '_skdon_address',
 				// Map each flat field_id to the object key the
 				// abilities-pipeline writer uses (Abilities\Donors\update_address
 				// produces line_1/line_2/postal_code keys).
@@ -314,7 +314,7 @@ return [
 				// rendering used here.
 				'lifetime_giving',
 				// Self-contained: donation_count isn't an entity field
-				// (stored as `_sd_donation_count` meta only); donor_level
+				// (stored as `_skdon_donation_count` meta only); donor_level
 				// is a computed-field-derived display.
 				'donation_count' => [ 'label' => 'Total Donations', 'input_type' => 'number_display', 'readonly' => true ],
 				'donor_level'    => [ 'label' => 'Donor Level', 'input_type' => 'level_badge', 'readonly' => true ],
@@ -379,7 +379,7 @@ return [
 				],
 			],
 			'entities'      => [
-				'donor' => [ 'entity' => 'sd_donor', 'id_from' => 'donor_id' ],
+				'donor' => [ 'entity' => 'skdon_donor', 'id_from' => 'donor_id' ],
 			],
 			'recipient_type' => 'donor',
 			'subject'        => 'Your {year} Giving Summary from {site_name}',

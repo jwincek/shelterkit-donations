@@ -156,10 +156,10 @@ class Item_Extractor {
 	 * @param array                  $data Item data (modified by reference).
 	 */
 	private static function extract_meta( $item, array &$data ): void {
-		// Raw meta — skip internal WooCommerce keys except _sd_ prefix.
+		// Raw meta — skip internal WooCommerce keys except _skdon_ prefix.
 		foreach ( $item->get_meta_data() as $meta ) {
 			$key = $meta->key;
-			if ( str_starts_with( $key, '_' ) && ! str_starts_with( $key, '_sd_' ) ) {
+			if ( str_starts_with( $key, '_' ) && ! str_starts_with( $key, '_skdon_' ) ) {
 				continue;
 			}
 			$data['meta'][ $key ] = $meta->value;

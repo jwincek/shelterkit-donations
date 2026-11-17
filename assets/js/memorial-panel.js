@@ -1,33 +1,33 @@
 /**
  * Memorial Document Setting Panels.  ⚠️ CURRENTLY UNUSED / PARKED.
  *
- * An alternative block-editor UX for creating/editing sd_memorial:
+ * An alternative block-editor UX for creating/editing skdon_memorial:
  * three PluginDocumentSettingPanel components (Memorial Details,
  * Donation Info with donor quick-create, Family Notification) in the
  * editor sidebar, plus a pre-publish validation panel.
  *
- * This file is NOT enqueued. sd_memorial intentionally ships with the
+ * This file is NOT enqueued. skdon_memorial intentionally ships with the
  * classic editor + manifest-driven meta boxes (Meta_Boxes) instead,
  * because that path is the single source of truth for field config and
  * avoids the maintenance costs that retired this panel:
  *
  *   1. It DUPLICATES field definitions that already live in
- *      config/manifests/sd_memorial.php — the type/species option lists
+ *      config/manifests/skdon_memorial.php — the type/species option lists
  *      below are hardcoded and will silently diverge from Settings →
  *      Data. The meta-box renderer reads them from the manifest.
  *   2. It depends on wp.editPost.PluginDocumentSettingPanel, deprecated
  *      in WP 6.6 (moved to wp.editor) — a standing breakage risk.
  *   3. The block editor commits meta AFTER save_post, which forced a
- *      rest_after_insert_sd_memorial companion in class-rest-controller
+ *      rest_after_insert_skdon_memorial companion in class-rest-controller
  *      to avoid title-syncing / firing the created-hook against stale
  *      meta. The classic path writes meta before save_post @ 20.
  *
- * To revive it: re-add "editor" to sd_memorial supports in
+ * To revive it: re-add "editor" to skdon_memorial supports in
  * config/post-types.json, enqueue this file in
- * includes/blocks/register-editor.php (with the sd_memorial canvas-
+ * includes/blocks/register-editor.php (with the skdon_memorial canvas-
  * hiding CSS), restore the use_block_editor_for_post() bypass in
  * Meta_Boxes::register_meta_boxes(), and restore the REST_REQUEST
- * deferral + rest_after_insert_sd_memorial handler in
+ * deferral + rest_after_insert_skdon_memorial handler in
  * class-rest-controller.php. Also migrate the hardcoded option lists
  * below to read from window.shelterDonationsBlocks before shipping.
  *
@@ -63,7 +63,7 @@
 	// ── Helper: read/write a single meta key ──
 
 	function useMemorialMeta() {
-		var entityProp = useEntityProp( 'postType', 'sd_memorial', 'meta' );
+		var entityProp = useEntityProp( 'postType', 'skdon_memorial', 'meta' );
 		var meta       = entityProp[ 0 ];
 		var setMeta    = entityProp[ 1 ];
 
@@ -88,12 +88,12 @@
 
 		// Auto-open the settings sidebar so editors see the panels immediately.
 		useEffect( function() {
-			if ( postType === 'sd_memorial' && editPost.openGeneralSidebar ) {
+			if ( postType === 'skdon_memorial' && editPost.openGeneralSidebar ) {
 				editPost.openGeneralSidebar( 'edit-post/document' );
 			}
 		}, [ postType ] );
 
-		if ( postType !== 'sd_memorial' ) {
+		if ( postType !== 'skdon_memorial' ) {
 			return null;
 		}
 
@@ -116,8 +116,8 @@
 		},
 			el( TextControl, {
 				label:    __( 'Honoree Name', 'shelterkit-donations' ),
-				value:    m.meta._sd_honoree_name || '',
-				onChange: function( v ) { m.set( '_sd_honoree_name', v ); },
+				value:    m.meta._skdon_honoree_name || '',
+				onChange: function( v ) { m.set( '_skdon_honoree_name', v ); },
 				help:     __( 'Also used as the post title.', 'shelterkit-donations' ),
 				__nextHasNoMarginBottom: true,
 			} ),
@@ -126,27 +126,27 @@
 			// (the subject). The old single "Type" select conflated them.
 			el( SelectControl, {
 				label:   __( 'Dedication', 'shelterkit-donations' ),
-				value:   m.meta._sd_dedication_type || 'memory',
+				value:   m.meta._skdon_dedication_type || 'memory',
 				options: [
 					{ value: 'memory', label: __( 'In Memory Of', 'shelterkit-donations' ) },
 					{ value: 'honor',  label: __( 'In Honor Of', 'shelterkit-donations' ) },
 				],
-				onChange: function( v ) { m.set( '_sd_dedication_type', v ); },
+				onChange: function( v ) { m.set( '_skdon_dedication_type', v ); },
 				__nextHasNoMarginBottom: true,
 			} ),
 			el( SelectControl, {
 				label:   __( 'Honoree Type', 'shelterkit-donations' ),
-				value:   m.meta._sd_memorial_type || 'person',
+				value:   m.meta._skdon_memorial_type || 'person',
 				options: [
 					{ value: 'person', label: __( 'Person', 'shelterkit-donations' ) },
 					{ value: 'pet',    label: __( 'Pet', 'shelterkit-donations' ) },
 				],
-				onChange: function( v ) { m.set( '_sd_memorial_type', v ); },
+				onChange: function( v ) { m.set( '_skdon_memorial_type', v ); },
 				__nextHasNoMarginBottom: true,
 			} ),
-			m.meta._sd_memorial_type === 'pet' && el( SelectControl, {
+			m.meta._skdon_memorial_type === 'pet' && el( SelectControl, {
 				label:   __( 'Pet Species', 'shelterkit-donations' ),
-				value:   m.meta._sd_pet_species || '',
+				value:   m.meta._skdon_pet_species || '',
 				options: [
 					{ value: '',       label: __( '— Select —', 'shelterkit-donations' ) },
 					{ value: 'dog',    label: __( 'Dog', 'shelterkit-donations' ) },
@@ -156,13 +156,13 @@
 					{ value: 'rabbit', label: __( 'Rabbit', 'shelterkit-donations' ) },
 					{ value: 'other',  label: __( 'Other', 'shelterkit-donations' ) },
 				],
-				onChange: function( v ) { m.set( '_sd_pet_species', v ); },
+				onChange: function( v ) { m.set( '_skdon_pet_species', v ); },
 				__nextHasNoMarginBottom: true,
 			} ),
 			el( TextareaControl, {
 				label:    __( 'Tribute Message', 'shelterkit-donations' ),
-				value:    m.meta._sd_tribute_message || '',
-				onChange: function( v ) { m.set( '_sd_tribute_message', v ); },
+				value:    m.meta._skdon_tribute_message || '',
+				onChange: function( v ) { m.set( '_skdon_tribute_message', v ); },
 				rows:     6,
 				__nextHasNoMarginBottom: true,
 			} )
@@ -202,9 +202,9 @@
 
 		// Load initial donor name when editing an existing memorial.
 		useEffect( function() {
-			var donorId = m.meta._sd_donor_id;
+			var donorId = m.meta._skdon_donor_id;
 			if ( donorId && ! selectedLabel ) {
-				apiFetch( { path: '/wp/v2/sd_donor/' + donorId } ).then( function( donor ) {
+				apiFetch( { path: '/wp/v2/skdon_donor/' + donorId } ).then( function( donor ) {
 					var name = donor.title.rendered;
 					setSelectedLabel( name );
 					setDonorOptions( [ { value: String( donorId ), label: name } ] );
@@ -221,7 +221,7 @@
 				return;
 			}
 			apiFetch( {
-				path: '/wp/v2/sd_donor?search=' + encodeURIComponent( inputValue ) + '&per_page=10',
+				path: '/wp/v2/skdon_donor?search=' + encodeURIComponent( inputValue ) + '&per_page=10',
 			} ).then( function( results ) {
 				setDonorOptions( results.map( function( d ) {
 					return { value: String( d.id ), label: d.title.rendered };
@@ -232,15 +232,15 @@
 		// Select a donor from the combobox.
 		var onDonorChange = function( value ) {
 			var id = value ? parseInt( value, 10 ) : 0;
-			m.set( '_sd_donor_id', id );
+			m.set( '_skdon_donor_id', id );
 
 			if ( id ) {
 				var match = donorOptions.find( function( o ) { return o.value === value; } );
 				if ( match ) {
 					setSelectedLabel( match.label );
 					// Auto-fill display name if empty.
-					if ( ! m.meta._sd_donor_display_name ) {
-						m.set( '_sd_donor_display_name', match.label );
+					if ( ! m.meta._skdon_donor_display_name ) {
+						m.set( '_skdon_donor_display_name', match.label );
 					}
 				}
 			} else {
@@ -267,11 +267,11 @@
 				// Update donor combobox.
 				setDonorOptions( [ { value: String( id ), label: name } ] );
 				setSelectedLabel( name );
-				m.set( '_sd_donor_id', id );
+				m.set( '_skdon_donor_id', id );
 
 				// Auto-fill display name if empty.
-				if ( ! m.meta._sd_donor_display_name ) {
-					m.set( '_sd_donor_display_name', name );
+				if ( ! m.meta._skdon_donor_display_name ) {
+					m.set( '_skdon_donor_display_name', name );
 				}
 
 				setQcNotice( {
@@ -304,7 +304,7 @@
 			// Donor combobox.
 			el( ComboboxControl, {
 				label:               __( 'Donated By', 'shelterkit-donations' ),
-				value:               m.meta._sd_donor_id ? String( m.meta._sd_donor_id ) : null,
+				value:               m.meta._skdon_donor_id ? String( m.meta._skdon_donor_id ) : null,
 				options:             donorOptions,
 				onFilterValueChange: onDonorFilter,
 				onChange:             onDonorChange,
@@ -364,8 +364,8 @@
 			// Display name override.
 			el( TextControl, {
 				label:    __( 'Display Name', 'shelterkit-donations' ),
-				value:    m.meta._sd_donor_display_name || '',
-				onChange: function( v ) { m.set( '_sd_donor_display_name', v ); },
+				value:    m.meta._skdon_donor_display_name || '',
+				onChange: function( v ) { m.set( '_skdon_donor_display_name', v ); },
 				help:     __( 'Name shown on the memorial wall. Leave empty to pull from donor record.', 'shelterkit-donations' ),
 				__nextHasNoMarginBottom: true,
 			} ),
@@ -373,8 +373,8 @@
 			// Amount.
 			el( TextControl, {
 				label:    __( 'Amount', 'shelterkit-donations' ),
-				value:    m.meta._sd_amount ? String( m.meta._sd_amount ) : '',
-				onChange: function( v ) { m.set( '_sd_amount', parseFloat( v ) || 0 ); },
+				value:    m.meta._skdon_amount ? String( m.meta._skdon_amount ) : '',
+				onChange: function( v ) { m.set( '_skdon_amount', parseFloat( v ) || 0 ); },
 				type:     'number',
 				min:      0,
 				step:     '0.01',
@@ -384,8 +384,8 @@
 			// Date.
 			el( TextControl, {
 				label:    __( 'Date', 'shelterkit-donations' ),
-				value:    ( m.meta._sd_donation_date || '' ).substring( 0, 10 ),
-				onChange: function( v ) { m.set( '_sd_donation_date', v ); },
+				value:    ( m.meta._skdon_donation_date || '' ).substring( 0, 10 ),
+				onChange: function( v ) { m.set( '_skdon_donation_date', v ); },
 				type:     'date',
 				__nextHasNoMarginBottom: true,
 			} ),
@@ -393,8 +393,8 @@
 			// Anonymous toggle.
 			el( ToggleControl, {
 				label:    __( 'Anonymous', 'shelterkit-donations' ),
-				checked:  !! m.meta._sd_is_anonymous,
-				onChange: function( v ) { m.set( '_sd_is_anonymous', v ); },
+				checked:  !! m.meta._skdon_is_anonymous,
+				onChange: function( v ) { m.set( '_skdon_is_anonymous', v ); },
 				__nextHasNoMarginBottom: true,
 			} )
 		);
@@ -404,7 +404,7 @@
 
 	function FamilyNotificationPanel() {
 		var m       = useMemorialMeta();
-		var enabled = !! m.meta._sd_notify_family_enabled;
+		var enabled = !! m.meta._skdon_notify_family_enabled;
 
 		return el( PluginDocumentSettingPanel, {
 			name:  'sd-family-notification',
@@ -413,29 +413,29 @@
 			el( ToggleControl, {
 				label:    __( 'Notify Family', 'shelterkit-donations' ),
 				checked:  enabled,
-				onChange: function( v ) { m.set( '_sd_notify_family_enabled', v ); },
+				onChange: function( v ) { m.set( '_skdon_notify_family_enabled', v ); },
 				__nextHasNoMarginBottom: true,
 			} ),
 			enabled && el( Fragment, {},
 				el( TextControl, {
 					label:    __( 'Family Name', 'shelterkit-donations' ),
-					value:    m.meta._sd_notify_family_name || '',
-					onChange: function( v ) { m.set( '_sd_notify_family_name', v ); },
+					value:    m.meta._skdon_notify_family_name || '',
+					onChange: function( v ) { m.set( '_skdon_notify_family_name', v ); },
 					__nextHasNoMarginBottom: true,
 				} ),
 				el( TextControl, {
 					label:    __( 'Family Email', 'shelterkit-donations' ),
-					value:    m.meta._sd_notify_family_email || '',
-					onChange: function( v ) { m.set( '_sd_notify_family_email', v ); },
+					value:    m.meta._skdon_notify_family_email || '',
+					onChange: function( v ) { m.set( '_skdon_notify_family_email', v ); },
 					type:     'email',
 					__nextHasNoMarginBottom: true,
 				} )
 			),
-			m.meta._sd_family_notified_date && el( 'p', {
+			m.meta._skdon_family_notified_date && el( 'p', {
 				style: { color: '#757575', fontSize: '12px', marginTop: '12px' },
 			},
 				__( 'Notification sent: ', 'shelterkit-donations' ),
-				el( 'strong', {}, m.meta._sd_family_notified_date )
+				el( 'strong', {}, m.meta._skdon_family_notified_date )
 			)
 		);
 	}
@@ -447,10 +447,10 @@
 
 		var errors = [];
 
-		if ( ! m.meta._sd_honoree_name || ! m.meta._sd_honoree_name.trim() ) {
+		if ( ! m.meta._skdon_honoree_name || ! m.meta._skdon_honoree_name.trim() ) {
 			errors.push( __( 'Honoree Name is required.', 'shelterkit-donations' ) );
 		}
-		if ( ! m.meta._sd_memorial_type ) {
+		if ( ! m.meta._skdon_memorial_type ) {
 			errors.push( __( 'Memorial Type is required.', 'shelterkit-donations' ) );
 		}
 

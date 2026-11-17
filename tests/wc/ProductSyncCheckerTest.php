@@ -21,7 +21,7 @@ use WP_UnitTestCase;
 final class ProductSyncCheckerTest extends WP_UnitTestCase {
 
     public function tear_down(): void {
-        delete_option( 'sd_donation_product_id' );
+        delete_option( 'skdon_donation_product_id' );
         Config::delete_override( 'settings', 'allocations' );
         parent::tear_down();
     }
@@ -130,7 +130,7 @@ final class ProductSyncCheckerTest extends WP_UnitTestCase {
             $variation->save();
         }
 
-        update_option( 'sd_donation_product_id', $product_id );
+        update_option( 'skdon_donation_product_id', $product_id );
 
         return $product_id;
     }

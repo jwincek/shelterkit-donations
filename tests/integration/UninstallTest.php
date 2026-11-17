@@ -32,17 +32,17 @@ final class UninstallTest extends WP_UnitTestCase {
 
     /** @return array{memorial:int,donor:int,term:int,user:int,attachment:int,post:int} */
     private function seed(): array {
-        $memorial = self::factory()->post->create( [ 'post_type' => 'sd_memorial' ] );
-        $donor    = self::factory()->post->create( [ 'post_type' => 'sd_donor' ] );
+        $memorial = self::factory()->post->create( [ 'post_type' => 'skdon_memorial' ] );
+        $donor    = self::factory()->post->create( [ 'post_type' => 'skdon_donor' ] );
 
-        $term = wp_insert_term( 'Spring Drive', 'sd_campaign' );
+        $term = wp_insert_term( 'Spring Drive', 'skdon_campaign' );
         $term_id = is_array( $term ) ? (int) $term['term_id'] : 0;
 
         $user = self::factory()->user->create();
-        update_user_meta( $user, '_sd_candles', [ $memorial ] );
+        update_user_meta( $user, '_skdon_candles', [ $memorial ] );
 
-        update_option( 'sd_products_created', 1 );
-        set_transient( 'sd_candle_rate_test', time(), 60 );
+        update_option( 'skdon_products_created', 1 );
+        set_transient( 'skdon_candle_rate_test', time(), 60 );
 
         // Controls that must survive a purge.
         $attachment = self::factory()->attachment->create( [ 'post_mime_type' => 'image/jpeg' ] );
@@ -61,10 +61,10 @@ final class UninstallTest extends WP_UnitTestCase {
         // Plugin-owned data is gone.
         $this->assertNull( get_post( $s['memorial'] ) );
         $this->assertNull( get_post( $s['donor'] ) );
-        $this->assertSame( 0, (int) ( new \WP_Term_Query() )->query( [ 'taxonomy' => 'sd_campaign', 'hide_empty' => false, 'count' => true ] ) );
-        $this->assertSame( '', get_user_meta( $s['user'], '_sd_candles', true ) );
-        $this->assertFalse( get_option( 'sd_products_created' ) );
-        $this->assertFalse( get_transient( 'sd_candle_rate_test' ) );
+        $this->assertSame( 0, (int) ( new \WP_Term_Query() )->query( [ 'taxonomy' => 'skdon_campaign', 'hide_empty' => false, 'count' => true ] ) );
+        $this->assertSame( '', get_user_meta( $s['user'], '_skdon_candles', true ) );
+        $this->assertFalse( get_option( 'skdon_products_created' ) );
+        $this->assertFalse( get_transient( 'skdon_candle_rate_test' ) );
 
         // Shared / WooCommerce-owned data is preserved.
         $this->assertInstanceOf( \WP_Post::class, get_post( $s['attachment'] ), 'Media library kept.' );
@@ -80,7 +80,50 @@ final class UninstallTest extends WP_UnitTestCase {
         wp_cache_flush();
 
         $this->assertInstanceOf( \WP_Post::class, get_post( $s['memorial'] ), 'Records preserved by default.' );
-        $this->assertSame( [ $s['memorial'] ], array_map( 'intval', get_user_meta( $s['user'], '_sd_candles', true ) ) );
-        $this->assertSame( 1, (int) get_option( 'sd_products_created' ) );
+        $this->assertSame( [ $s['memorial'] ], array_map( 'intval', get_user_meta( $s['user'], '_skdon_candles', true ) ) );
+        $this->assertSame( 1, (int) get_option( 'skdon_products_created' ) );
+    }
+
+    /**
+     * Purging deletes by name (#30). It used to delete every option and
+     * transient matching `sd\_%`, which included other plugins'.
+     */
+    public function test_purge_leaves_other_plugins_sd_options_alone(): void {
+        update_option( 'sd_neighbour_setting', 'keep' );
+        set_transient( 'sd_neighbour_cache', 'keep' );
+        update_option( 'starter_shelter_options', [ 'delete_data_on_uninstall' => true ] );
+
+        starter_shelter_run_uninstall();
+        wp_cache_flush();
+
+        $this->assertSame( 'keep', get_option( 'sd_neighbour_setting' ) );
+        $this->assertSame( 'keep', get_transient( 'sd_neighbour_cache' ) );
+    }
+
+    /**
+     * A site can be uninstalled before it ever loaded the release that moved
+     * its data, so the purge also removes the 2.x names.
+     */
+    public function test_purge_removes_data_still_under_the_old_names(): void {
+        $memorial = self::factory()->post->create( [ 'post_type' => 'sd_memorial' ] );
+        $user     = self::factory()->user->create();
+        update_user_meta( $user, '_sd_candles', [ $memorial ] );
+        update_option( 'sd_donation_product_id', 42 );
+        update_option( 'woocommerce_sd_donation_receipt_settings', [ 'enabled' => 'no' ] );
+        update_option( 'sd_organization', [ 'name' => 'Old Shelter' ] );
+        set_transient( 'sd_menu_pending_count', 2 );
+        set_transient( 'sd_donor_id_9', 3 );
+        update_option( 'starter_shelter_options', [ 'delete_data_on_uninstall' => true ] );
+
+        starter_shelter_run_uninstall();
+        wp_cache_flush();
+
+        $this->assertNull( get_post( $memorial ) );
+        $this->assertSame( '', get_user_meta( $user, '_sd_candles', true ) );
+        $this->assertFalse( get_option( 'sd_donation_product_id' ) );
+        $this->assertFalse( get_option( 'woocommerce_sd_donation_receipt_settings' ) );
+        $this->assertFalse( get_option( 'sd_organization' ) );
+        $this->assertFalse( get_transient( 'sd_menu_pending_count' ) );
+        $this->assertFalse( get_transient( 'sd_donor_id_9' ) );
     }
 }

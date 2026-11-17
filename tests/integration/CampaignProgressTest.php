@@ -36,14 +36,14 @@ final class CampaignProgressTest extends WP_UnitTestCase {
     }
 
     private function make_campaign( string $type, float $goal, string $end_date = '', string $tier = '' ): int {
-        $term_id = self::factory()->term->create( [ 'taxonomy' => 'sd_campaign', 'name' => "Campaign {$type}" ] );
-        update_term_meta( $term_id, '_sd_campaign_type', $type );
-        update_term_meta( $term_id, '_sd_goal', $goal );
+        $term_id = self::factory()->term->create( [ 'taxonomy' => 'skdon_campaign', 'name' => "Campaign {$type}" ] );
+        update_term_meta( $term_id, '_skdon_campaign_type', $type );
+        update_term_meta( $term_id, '_skdon_goal', $goal );
         if ( '' !== $end_date ) {
-            update_term_meta( $term_id, '_sd_end_date', $end_date );
+            update_term_meta( $term_id, '_skdon_end_date', $end_date );
         }
         if ( '' !== $tier ) {
-            update_term_meta( $term_id, '_sd_membership_tier_filter', $tier );
+            update_term_meta( $term_id, '_skdon_membership_tier_filter', $tier );
         }
         return $term_id;
     }

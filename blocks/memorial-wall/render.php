@@ -104,7 +104,7 @@ if ( $ability ) {
     }
 } else {
     // Fallback: Query builder (for environments without Abilities API).
-    $query = \Starter_Shelter\Core\Query::for( 'sd_memorial' )
+    $query = \Starter_Shelter\Core\Query::for( 'skdon_memorial' )
         ->orderBy( 'donation_date', 'DESC' );
 
     if ( 'all' !== $type_filter ) {
@@ -115,7 +115,7 @@ if ( $ability ) {
         $query->whereDefaulted( 'dedication_type', $dedication_filter, 'memory' );
     }
     if ( $year_filter ) {
-        $query->whereInTaxonomy( 'sd_memorial_year', $year_filter, 'slug' );
+        $query->whereInTaxonomy( 'skdon_memorial_year', $year_filter, 'slug' );
     }
     if ( $search_term ) {
         // Honoree only — searching donor_display_name would surface memorials
@@ -137,8 +137,8 @@ if ( $show_year_filter ) {
     $years = $wpdb->get_col( "
         SELECT DISTINCT YEAR( pm.meta_value ) AS y
         FROM {$wpdb->posts} p
-        JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_donation_date'
-        WHERE p.post_type = 'sd_memorial'
+        JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_skdon_donation_date'
+        WHERE p.post_type = 'skdon_memorial'
           AND p.post_status = 'publish'
         ORDER BY y DESC
     " );

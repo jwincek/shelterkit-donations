@@ -227,7 +227,7 @@ class CSV_Validator {
 	 * Validate against allowed enum values.
 	 *
 	 * Enum values can come from two sources:
-	 * 1. enum_ref → resolves to entities.json (e.g. "sd_donation.allocation")
+	 * 1. enum_ref → resolves to entities.json (e.g. "skdon_donation.allocation")
 	 * 2. enum_values → inline array in import-export.json
 	 *
 	 * @since 2.0.0

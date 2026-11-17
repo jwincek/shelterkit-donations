@@ -1,6 +1,6 @@
 {
   "post_types": {
-    "sd_donation": {
+    "skdon_donation": {
       "labels": {
         "singular": "Donation",
         "plural": "Donations",
@@ -21,7 +21,7 @@
       "map_meta_cap": true
     },
 
-    "sd_membership": {
+    "skdon_membership": {
       "labels": {
         "singular": "Membership",
         "plural": "Memberships",
@@ -42,7 +42,7 @@
       "map_meta_cap": true
     },
 
-    "sd_memorial": {
+    "skdon_memorial": {
       "labels": {
         "singular": "Memorial",
         "plural": "Memorials",
@@ -66,7 +66,7 @@
       "map_meta_cap": true
     },
 
-    "sd_donor": {
+    "skdon_donor": {
       "labels": {
         "singular": "Donor",
         "plural": "Donors",
