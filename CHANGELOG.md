@@ -18,6 +18,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   script loaded before the packages it reads and threw. Each block now ships
   an `edit.asset.php` declaring its dependencies, which also lets editor
   strings be translated for the first time. (#17)
+- **On classic themes the forms, walls and dashboard did nothing.** Their
+  front-end modules never declared `@wordpress/interactivity`, so it was
+  missing from the import map unless something else on the page (a block
+  theme's Navigation block, WooCommerce's mini-cart) happened to add it.
+  Each block now ships a `view.asset.php`. (#18)
 
 ## [3.0.0] - 2026-08-24
 
