@@ -283,7 +283,7 @@ class Order_Handler {
         // Reprocessing an order must not record a line twice: Reprocess is
         // how an admin recovers the lines that failed, and the lines that
         // succeeded first time used to get a second record.
-        $existing = self::line_record( $order, $item, (string) ( $config['product_type'] ?? '' ) );
+        $existing = Product_Mapper::line_record_id( $order, $item );
         if ( $existing ) {
             return [
                 'id'     => $existing,
@@ -322,66 +322,6 @@ class Order_Handler {
             Product_Mapper::stamp_order_line( $result, (int) $item->get_id() );
         }
         return $result;
-    }
-
-    /**
-     * The record an order line already produced, if any.
-     *
-     * Records carry their order line from this release on. An older record
-     * carries only its order, which identifies the line only when the order
-     * has a single line of that kind; such a record is matched, and linked to
-     * the line for next time.
-     *
-     * @param \WC_Order      $order        The order.
-     * @param \WC_Order_Item $item         The order line.
-     * @param string         $product_type donation, membership or memorial.
-     * @return int Post ID, or 0.
-     */
-    private static function line_record( \WC_Order $order, \WC_Order_Item $item, string $product_type ): int {
-        $post_type = match ( $product_type ) {
-            'donation'   => 'skdon_donation',
-            'membership' => 'skdon_membership',
-            'memorial'   => 'skdon_memorial',
-            default      => '',
-        };
-        if ( '' === $post_type ) {
-            return 0;
-        }
-
-        $find = static fn ( array $meta_query ): array => get_posts( [
-            'post_type'      => $post_type,
-            'post_status'    => 'any',
-            'posts_per_page' => 1,
-            'fields'         => 'ids',
-            'meta_query'     => $meta_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- one order's lines.
-        ] );
-
-        $found = $find( [ [ 'key' => Product_Mapper::ORDER_ITEM_META, 'value' => $item->get_id(), 'type' => 'NUMERIC' ] ] );
-        if ( $found ) {
-            return (int) $found[0];
-        }
-
-        $same_kind = 0;
-        foreach ( $order->get_items() as $line ) {
-            $product = $line->get_product();
-            $config  = $product ? Product_Mapper::find_by_sku( $product->get_sku() ) : null;
-            if ( $config && $product_type === ( $config['product_type'] ?? '' ) ) {
-                ++$same_kind;
-            }
-        }
-        if ( 1 !== $same_kind ) {
-            return 0;
-        }
-
-        $found = $find( [
-            [ 'key' => '_skdon_wc_order_id', 'value' => $order->get_id(), 'type' => 'NUMERIC' ],
-            [ 'key' => Product_Mapper::ORDER_ITEM_META, 'compare' => 'NOT EXISTS' ],
-        ] );
-        if ( ! $found ) {
-            return 0;
-        }
-        update_post_meta( (int) $found[0], Product_Mapper::ORDER_ITEM_META, (int) $item->get_id() );
-        return (int) $found[0];
     }
 
     /**

@@ -108,6 +108,10 @@ function starter_shelter_init(): void {
     // Initialize entity hydrator.
     Starter_Shelter\Core\Entity_Hydrator::init();
 
+    // The Refunded status, registered with or without WooCommerce so
+    // refunded records always display correctly (#34).
+    Starter_Shelter\WooCommerce\Refund_Handler::register();
+
     // Initialize helpers.
     require_once STARTER_SHELTER_PATH . 'includes/core/helpers.php';
     require_once STARTER_SHELTER_PATH . 'includes/core/internal-processing.php';
@@ -194,6 +198,9 @@ function starter_shelter_woocommerce_init(): void {
 
     // Initialize order handler (processes completed orders).
     Starter_Shelter\WooCommerce\Order_Handler::init();
+
+    // Refunds and cancellations reach the records orders produced (#34).
+    Starter_Shelter\WooCommerce\Refund_Handler::init();
 
     // Initialize checkout fields (dynamic fields based on cart).
     Starter_Shelter\WooCommerce\Checkout_Fields::init();
