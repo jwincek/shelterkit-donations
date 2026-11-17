@@ -31,6 +31,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   1.3.0 code, so it could lose version negotiation to an older sibling copy
   that drops fields on save. It now registers as 1.3.0, and
   `bin/check-versions.sh` fails if the two drift apart again. (#24)
+- **The activity log lost every event until its screen was first opened.**
+  Its table was only ever created by that screen. Activation now creates
+  it, existing sites get it on their next request, and the daily cleanup
+  event is cleared on deactivation and uninstall instead of outliving the
+  plugin. (#22)
 
 ## [3.0.0] - 2026-08-24
 

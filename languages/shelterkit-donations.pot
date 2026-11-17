@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-17T03:50:34+00:00\n"
+"POT-Creation-Date: 2026-11-17T03:53:46+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: shelterkit-donations\n"
@@ -898,29 +898,29 @@ msgid_plural "%d to go"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/admin/class-activity-log.php:135
-#: includes/admin/class-activity-log.php:136
-#: includes/admin/class-activity-log.php:544
+#: includes/admin/class-activity-log.php:182
+#: includes/admin/class-activity-log.php:183
+#: includes/admin/class-activity-log.php:591
 msgid "Activity Log"
 msgstr ""
 
 #. translators: 1: donor's display name; 2: formatted donation amount.
-#: includes/admin/class-activity-log.php:204
+#: includes/admin/class-activity-log.php:251
 #, php-format
 msgid "%1$s donated %2$s"
 msgstr ""
 
 #. translators: 1: donor's display name; 2: membership tier name; 3: membership type (e.g. individual, business).
-#: includes/admin/class-activity-log.php:227
+#: includes/admin/class-activity-log.php:274
 #, php-format
 msgid "%1$s joined as %2$s %3$s member"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:244
-#: includes/admin/class-activity-log.php:409
-#: includes/admin/class-activity-log.php:430
-#: includes/admin/class-activity-log.php:455
-#: includes/admin/class-activity-log.php:636
+#: includes/admin/class-activity-log.php:291
+#: includes/admin/class-activity-log.php:456
+#: includes/admin/class-activity-log.php:477
+#: includes/admin/class-activity-log.php:502
+#: includes/admin/class-activity-log.php:683
 #: includes/admin/class-list-columns.php:444
 #: includes/admin/class-reports.php:414
 #: includes/admin/class-reports.php:575
@@ -930,156 +930,156 @@ msgid "Unknown"
 msgstr ""
 
 #. translators: 1: donor's display name; 2: honoree's name the memorial is for.
-#: includes/admin/class-activity-log.php:250
+#: includes/admin/class-activity-log.php:297
 #, php-format
 msgid "%1$s created memorial for %2$s"
 msgstr ""
 
 #. translators: %s: donor's display name.
-#: includes/admin/class-activity-log.php:272
+#: includes/admin/class-activity-log.php:319
 #, php-format
 msgid "%s renewed membership"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:286
-#: includes/admin/class-activity-log.php:307
+#: includes/admin/class-activity-log.php:333
+#: includes/admin/class-activity-log.php:354
 msgid "Unknown Business"
 msgstr ""
 
 #. translators: 1: business name whose logo was approved; 2: display name of the admin who approved it.
-#: includes/admin/class-activity-log.php:293
+#: includes/admin/class-activity-log.php:340
 #, php-format
 msgid "Logo approved for %1$s by %2$s"
 msgstr ""
 
 #. translators: 1: business name whose logo was rejected; 2: display name of the admin who rejected it; 3: rejection reason.
-#: includes/admin/class-activity-log.php:315
+#: includes/admin/class-activity-log.php:362
 #, php-format
 msgid "Logo rejected for %1$s by %2$s: %3$s"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:330
+#: includes/admin/class-activity-log.php:377
 msgid "with errors"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:330
+#: includes/admin/class-activity-log.php:377
 msgid "successfully"
 msgstr ""
 
 #. translators: 1: WooCommerce order ID; 2: processing outcome (e.g. successfully, with errors).
-#: includes/admin/class-activity-log.php:336
+#: includes/admin/class-activity-log.php:383
 #, php-format
 msgid "Order #%1$d processed %2$s"
 msgstr ""
 
 #. translators: 1: email type label (e.g. Receipt, Renewal Reminder); 2: recipient email address.
-#: includes/admin/class-activity-log.php:354
+#: includes/admin/class-activity-log.php:401
 #, php-format
 msgid "%1$s email sent to %2$s"
 msgstr ""
 
 #. translators: 1: display name of the admin who changed settings; 2: comma-separated list of changed setting keys.
-#: includes/admin/class-activity-log.php:392
+#: includes/admin/class-activity-log.php:439
 #, php-format
 msgid "Settings updated by %1$s: %2$s"
 msgstr ""
 
 #. translators: 1: donor's display name; 2: new membership end date; 3: display name of the admin who extended it.
-#: includes/admin/class-activity-log.php:415
+#: includes/admin/class-activity-log.php:462
 #, php-format
 msgid "Membership for %1$s extended to %2$s by %3$s"
 msgstr ""
 
 #. translators: 1: donor's display name; 2: cancellation reason.
-#: includes/admin/class-activity-log.php:437
+#: includes/admin/class-activity-log.php:484
 #, php-format
 msgid "%1$s cancelled membership: %2$s"
 msgstr ""
 
 #. translators: %s: donor's display name.
-#: includes/admin/class-activity-log.php:439
+#: includes/admin/class-activity-log.php:486
 #, php-format
 msgid "%s cancelled membership"
 msgstr ""
 
 #. translators: 1: honoree's name the memorial is for; 2: family member's email address notified.
-#: includes/admin/class-activity-log.php:461
+#: includes/admin/class-activity-log.php:508
 #, php-format
 msgid "Family notification sent for memorial of %1$s to %2$s"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:552
+#: includes/admin/class-activity-log.php:599
 msgid "All Categories"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:561
+#: includes/admin/class-activity-log.php:608
 #: includes/admin/class-reports.php:192
 #: assets/js/admin-import-export.js:915
 msgid "All Time"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:562
+#: includes/admin/class-activity-log.php:609
 #: includes/admin/class-dashboard-widget.php:131
 #: includes/admin/class-dashboard-widget.php:253
 #: includes/admin/class-reports.php:174
 msgid "Today"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:563
+#: includes/admin/class-activity-log.php:610
 msgid "Last 7 Days"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:564
+#: includes/admin/class-activity-log.php:611
 msgid "Last 30 Days"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:567
+#: includes/admin/class-activity-log.php:614
 msgid "Search..."
 msgstr ""
 
-#: includes/admin/class-activity-log.php:569
+#: includes/admin/class-activity-log.php:616
 #: includes/admin/class-reports.php:217
 msgid "Filter"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:580
+#: includes/admin/class-activity-log.php:627
 msgid "today"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:581
+#: includes/admin/class-activity-log.php:628
 msgid "this week"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:582
+#: includes/admin/class-activity-log.php:629
 msgid "total"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:589
+#: includes/admin/class-activity-log.php:636
 msgid "No activity logged yet."
 msgstr ""
 
-#: includes/admin/class-activity-log.php:595
+#: includes/admin/class-activity-log.php:642
 msgid "Time"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:596
+#: includes/admin/class-activity-log.php:643
 msgid "Category"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:597
+#: includes/admin/class-activity-log.php:644
 msgid "Activity"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:598
+#: includes/admin/class-activity-log.php:645
 msgid "User"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:638
+#: includes/admin/class-activity-log.php:685
 msgid "System"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:693
-#: includes/admin/class-activity-log.php:696
+#: includes/admin/class-activity-log.php:740
+#: includes/admin/class-activity-log.php:743
 msgid "Unknown Donor"
 msgstr ""
 

@@ -29,6 +29,24 @@ class Activity_Log {
     private const TABLE_NAME = 'sd_activity_log';
 
     /**
+     * Schema version, recorded once the table has been created.
+     *
+     * Bump it when the CREATE TABLE statement changes, and every site
+     * re-runs dbDelta() on its next request.
+     *
+     * @var string
+     */
+    private const DB_VERSION = '1';
+
+    /**
+     * Option holding the schema version this site's table was built at.
+     * sd_-prefixed, so the uninstall purge removes it with the table.
+     *
+     * @var string
+     */
+    private const DB_VERSION_OPTION = 'sd_activity_log_db_version';
+
+    /**
      * Page slug.
      *
      * @var string
@@ -59,8 +77,14 @@ class Activity_Log {
      * Initialize activity log.
      */
     public static function init(): void {
-        // Create table on activation.
-        register_activation_hook( STARTER_SHELTER_FILE, [ self::class, 'create_table' ] );
+        // Activator::activate() creates the table on a fresh install. This
+        // covers sites that were activated before it did: a
+        // register_activation_hook() call used to sit here, but init() runs
+        // on plugins_loaded, which has already fired by the time a plugin is
+        // activated, so it never ran. Those sites only got the table when
+        // someone opened this screen, and every event before that was lost
+        // (#22). One autoloaded option read per request.
+        self::maybe_create_table();
 
         // Add admin page.
         add_action( 'admin_menu', [ self::class, 'add_menu_page' ] );
@@ -95,7 +119,18 @@ class Activity_Log {
     }
 
     /**
-     * Create the activity log table.
+     * Create the table if this site's schema is older than DB_VERSION.
+     */
+    public static function maybe_create_table(): void {
+        if ( self::DB_VERSION === get_option( self::DB_VERSION_OPTION ) ) {
+            return;
+        }
+
+        self::create_table();
+    }
+
+    /**
+     * Create or update the activity log table, and record the schema version.
      */
     public static function create_table(): void {
         global $wpdb;
@@ -103,7 +138,9 @@ class Activity_Log {
         $table_name = $wpdb->prefix . self::TABLE_NAME;
         $charset_collate = $wpdb->get_charset_collate();
 
-        $sql = "CREATE TABLE IF NOT EXISTS $table_name (
+        // No IF NOT EXISTS: dbDelta() reads the table name from the word after
+        // CREATE TABLE, and handles an existing table itself by altering it.
+        $sql = "CREATE TABLE $table_name (
             id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
             event_type varchar(50) NOT NULL,
             event_category varchar(30) NOT NULL,
@@ -124,6 +161,16 @@ class Activity_Log {
 
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
         dbDelta( $sql );
+
+        update_option( self::DB_VERSION_OPTION, self::DB_VERSION );
+    }
+
+    /**
+     * Remove the cleanup event. Called on deactivation; uninstall clears it
+     * by name too, since the plugin is not loaded then.
+     */
+    public static function unschedule_cleanup(): void {
+        wp_clear_scheduled_hook( 'sd_cleanup_activity_log' );
     }
 
     /**

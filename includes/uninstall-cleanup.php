@@ -39,6 +39,12 @@ function starter_shelter_run_uninstall(): void {
  * Purge the current site's plugin data only when the admin opted in.
  */
 function starter_shelter_maybe_purge_current_site(): void {
+    // Scheduled events are not data, so they go whatever the preserve setting.
+    // Deactivation normally clears them first; this catches a site where it
+    // did not. The plugin is not loaded here, so the hooks are named directly.
+    wp_clear_scheduled_hook( 'sd_cleanup_activity_log' );
+    wp_clear_scheduled_hook( 'starter_shelter_renewal_reminders' );
+
     $options = get_option( 'starter_shelter_options', [] );
 
     if ( empty( $options['delete_data_on_uninstall'] ) ) {

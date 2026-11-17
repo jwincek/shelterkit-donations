@@ -130,6 +130,9 @@ class Activator {
      * @since 2.0.0
      */
     public static function activate(): void {
+        // The activity log needs its table before the first event is logged.
+        \Starter_Shelter\Admin\Activity_Log::create_table();
+
         // Schedule product creation for after WooCommerce loads.
         add_action( 'woocommerce_loaded', [ __CLASS__, 'maybe_create_products' ] );
 

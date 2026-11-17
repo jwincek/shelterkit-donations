@@ -437,6 +437,10 @@ add_action( 'admin_notices', 'starter_shelter_product_setup_notice' );
  * @since 1.0.0
  */
 function starter_shelter_deactivate(): void {
+    // The cleanup event has no callback while the plugin is inactive, and
+    // used to outlive deactivation and uninstall alike (#22).
+    Starter_Shelter\Admin\Activity_Log::unschedule_cleanup();
+
     flush_rewrite_rules();
 }
 register_deactivation_hook( __FILE__, 'starter_shelter_deactivate' );
