@@ -39,7 +39,7 @@ class List_Columns {
      * @since 1.1.0
      * @var string[]
      */
-    private const POST_TYPES = [ 'sd_donation', 'sd_membership', 'sd_memorial', 'sd_donor' ];
+    private const POST_TYPES = [ 'skdon_donation', 'skdon_membership', 'skdon_memorial', 'skdon_donor' ];
 
     /**
      * Initialize list columns.
@@ -107,7 +107,7 @@ class List_Columns {
      */
     private static function get_column_config(): array {
         return [
-            'sd_donation' => [
+            'skdon_donation' => [
                 'columns' => [
                     'cb'         => '<input type="checkbox" />',
                     'title'      => __( 'Donation', 'shelterkit-donations' ),
@@ -120,7 +120,7 @@ class List_Columns {
                 'sortable' => [ 'amount', 'date' ],
                 'row_actions' => [ 'view_receipt', 'view_order' ],
             ],
-            'sd_membership' => [
+            'skdon_membership' => [
                 'columns' => [
                     'cb'          => '<input type="checkbox" />',
                     'title'       => __( 'Membership', 'shelterkit-donations' ),
@@ -134,7 +134,7 @@ class List_Columns {
                 'sortable' => [ 'expiry', 'tier' ],
                 'row_actions' => [ 'send_reminder', 'extend_membership', 'view_order' ],
             ],
-            'sd_memorial' => [
+            'skdon_memorial' => [
                 'columns' => [
                     'cb'             => '<input type="checkbox" />',
                     'title'          => __( 'Memorial', 'shelterkit-donations' ),
@@ -147,7 +147,7 @@ class List_Columns {
                 'sortable' => [ 'date', 'type' ],
                 'row_actions' => [ 'view_tribute', 'notify_family' ],
             ],
-            'sd_donor' => [
+            'skdon_donor' => [
                 'columns' => [
                     'cb'              => '<input type="checkbox" />',
                     'title'           => __( 'Donor', 'shelterkit-donations' ),
@@ -204,16 +204,16 @@ class List_Columns {
         }
 
         switch ( $post_type ) {
-            case 'sd_donation':
+            case 'skdon_donation':
                 self::render_donation_column( $column, $entity, $post_id );
                 break;
-            case 'sd_membership':
+            case 'skdon_membership':
                 self::render_membership_column( $column, $entity, $post_id );
                 break;
-            case 'sd_memorial':
+            case 'skdon_memorial':
                 self::render_memorial_column( $column, $entity, $post_id );
                 break;
-            case 'sd_donor':
+            case 'skdon_donor':
                 self::render_donor_column( $column, $entity, $post_id );
                 break;
         }
@@ -237,7 +237,7 @@ class List_Columns {
             case 'donor':
                 $donor_id = $donation['donor_id'] ?? 0;
                 if ( $donor_id ) {
-                    $donor = Entity_Hydrator::get( 'sd_donor', $donor_id );
+                    $donor = Entity_Hydrator::get( 'skdon_donor', $donor_id );
                     if ( $donor ) {
                         printf(
                             '<a href="%s">%s</a><br><span class="sd-meta">%s</span>',
@@ -258,12 +258,12 @@ class List_Columns {
                 break;
 
             case 'campaign':
-                $terms = get_the_terms( $post_id, 'sd_campaign' );
+                $terms = get_the_terms( $post_id, 'skdon_campaign' );
                 if ( $terms && ! is_wp_error( $terms ) ) {
                     $links = array_map( function ( $term ) {
                         return sprintf(
                             '<a href="%s">%s</a>',
-                            esc_url( admin_url( 'edit.php?post_type=sd_donation&sd_campaign=' . $term->slug ) ),
+                            esc_url( admin_url( 'edit.php?post_type=skdon_donation&skdon_campaign=' . $term->slug ) ),
                             esc_html( $term->name )
                         );
                     }, $terms );
@@ -285,7 +285,7 @@ class List_Columns {
             case 'donor':
                 $donor_id = $membership['donor_id'] ?? 0;
                 if ( $donor_id ) {
-                    $donor = Entity_Hydrator::get( 'sd_donor', $donor_id );
+                    $donor = Entity_Hydrator::get( 'skdon_donor', $donor_id );
                     if ( $donor ) {
                         $name = $donor['display_name'] ?? trim( ( $donor['first_name'] ?? '' ) . ' ' . ( $donor['last_name'] ?? '' ) );
                         printf(
@@ -433,7 +433,7 @@ class List_Columns {
             case 'donor':
                 $donor_id = $memorial['donor_id'] ?? 0;
                 if ( $donor_id ) {
-                    $donor = Entity_Hydrator::get( 'sd_donor', $donor_id );
+                    $donor = Entity_Hydrator::get( 'skdon_donor', $donor_id );
                     if ( $donor ) {
                         // Try display_name, then full_name, then first+last name, then post_title.
                         $donor_post = get_post( $donor_id );
@@ -470,7 +470,7 @@ class List_Columns {
             case 'family_notified':
                 $notify_data    = Helpers\get_memorial_notify_family( (int) $post_id );
                 $notify_enabled = $notify_data['enabled'];
-                $notified_date  = get_post_meta( $post_id, '_sd_family_notified_date', true );
+                $notified_date  = get_post_meta( $post_id, '_skdon_family_notified_date', true );
 
                 if ( ! $notify_enabled ) {
                     echo '<span class="sd-meta">' . esc_html__( 'Not Requested', 'shelterkit-donations' ) . '</span>';
@@ -526,11 +526,11 @@ class List_Columns {
                 $membership = $wpdb->get_row( $wpdb->prepare( "
                     SELECT p.ID, pm_tier.meta_value as tier, pm_type.meta_value as type, pm_end.meta_value as end_date
                     FROM {$wpdb->posts} p
-                    JOIN {$wpdb->postmeta} pm_donor ON p.ID = pm_donor.post_id AND pm_donor.meta_key = '_sd_donor_id'
-                    LEFT JOIN {$wpdb->postmeta} pm_tier ON p.ID = pm_tier.post_id AND pm_tier.meta_key = '_sd_tier'
-                    LEFT JOIN {$wpdb->postmeta} pm_type ON p.ID = pm_type.post_id AND pm_type.meta_key = '_sd_membership_type'
-                    LEFT JOIN {$wpdb->postmeta} pm_end ON p.ID = pm_end.post_id AND pm_end.meta_key = '_sd_end_date'
-                    WHERE p.post_type = 'sd_membership'
+                    JOIN {$wpdb->postmeta} pm_donor ON p.ID = pm_donor.post_id AND pm_donor.meta_key = '_skdon_donor_id'
+                    LEFT JOIN {$wpdb->postmeta} pm_tier ON p.ID = pm_tier.post_id AND pm_tier.meta_key = '_skdon_tier'
+                    LEFT JOIN {$wpdb->postmeta} pm_type ON p.ID = pm_type.post_id AND pm_type.meta_key = '_skdon_membership_type'
+                    LEFT JOIN {$wpdb->postmeta} pm_end ON p.ID = pm_end.post_id AND pm_end.meta_key = '_skdon_end_date'
+                    WHERE p.post_type = 'skdon_membership'
                     AND p.post_status = 'publish'
                     AND pm_donor.meta_value = %d
                     AND pm_end.meta_value >= %s
@@ -555,8 +555,8 @@ class List_Columns {
                 $count = (int) $wpdb->get_var( $wpdb->prepare( "
                     SELECT COUNT(*)
                     FROM {$wpdb->posts} p
-                    JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_donor_id'
-                    WHERE p.post_type = 'sd_donation'
+                    JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_skdon_donor_id'
+                    WHERE p.post_type = 'skdon_donation'
                     AND p.post_status = 'publish'
                     AND pm.meta_value = %d
                 ", $post_id ) );
@@ -564,7 +564,7 @@ class List_Columns {
                 if ( $count > 0 ) {
                     printf(
                         '<a href="%s">%d</a>',
-                        esc_url( admin_url( 'edit.php?post_type=sd_donation&donor_id=' . $post_id ) ),
+                        esc_url( admin_url( 'edit.php?post_type=skdon_donation&donor_id=' . $post_id ) ),
                         (int) $count
                     );
                 } else {
@@ -617,20 +617,20 @@ class List_Columns {
 
         // Map column names to meta keys.
         $meta_key_map = [
-            'amount'          => '_sd_amount',
-            'expiry'          => '_sd_end_date',
-            'tier'            => '_sd_tier',
-            'lifetime_giving' => '_sd_lifetime_giving',
-            'donation_count'  => '_sd_donation_count', // Would need to be stored/computed.
-            'donor_level'     => '_sd_donor_level',
-            'type'            => '_sd_memorial_type',
+            'amount'          => '_skdon_amount',
+            'expiry'          => '_skdon_end_date',
+            'tier'            => '_skdon_tier',
+            'lifetime_giving' => '_skdon_lifetime_giving',
+            'donation_count'  => '_skdon_donation_count', // Would need to be stored/computed.
+            'donor_level'     => '_skdon_donor_level',
+            'type'            => '_skdon_memorial_type',
         ];
 
         if ( isset( $meta_key_map[ $orderby ] ) ) {
             $query->set( 'meta_key', $meta_key_map[ $orderby ] );
 
             // Determine meta type for proper sorting.
-            $numeric_keys = [ '_sd_amount', '_sd_lifetime_giving', '_sd_donation_count' ];
+            $numeric_keys = [ '_skdon_amount', '_skdon_lifetime_giving', '_skdon_donation_count' ];
             if ( in_array( $meta_key_map[ $orderby ], $numeric_keys, true ) ) {
                 $query->set( 'orderby', 'meta_value_num' );
             } else {
@@ -674,7 +674,7 @@ class List_Columns {
                     $new_actions['view_receipt'] = sprintf(
                         '<a href="%s">%s</a>',
                         esc_url( add_query_arg( [
-                            'action' => 'sd_view_receipt',
+                            'action' => 'skdon_view_receipt',
                             'id'     => $post->ID,
                             '_wpnonce' => wp_create_nonce( 'sd_view_receipt_' . $post->ID ),
                         ], admin_url( 'admin-ajax.php' ) ) ),
@@ -696,7 +696,7 @@ class List_Columns {
                 case 'send_reminder':
                     $new_actions['send_reminder'] = sprintf(
                         '<a href="%s" class="sd-action-link">%s</a>',
-                        esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=sd_send_reminder&id=' . $post->ID ), 'sd_send_reminder_' . $post->ID ) ),
+                        esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=skdon_send_reminder&id=' . $post->ID ), 'sd_send_reminder_' . $post->ID ) ),
                         esc_html__( 'Send Reminder', 'shelterkit-donations' )
                     );
                     break;
@@ -704,7 +704,7 @@ class List_Columns {
                 case 'extend_membership':
                     $new_actions['extend'] = sprintf(
                         '<a href="%s" class="sd-action-link">%s</a>',
-                        esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=sd_extend_membership&id=' . $post->ID ), 'sd_extend_' . $post->ID ) ),
+                        esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=skdon_extend_membership&id=' . $post->ID ), 'sd_extend_' . $post->ID ) ),
                         esc_html__( 'Extend 30 Days', 'shelterkit-donations' )
                     );
                     break;
@@ -720,12 +720,12 @@ class List_Columns {
                 case 'notify_family':
                     $notify_data    = Helpers\get_memorial_notify_family( (int) $post->ID );
                     $notify_enabled = $notify_data['enabled'];
-                    $notified       = get_post_meta( $post->ID, '_sd_family_notified_date', true );
+                    $notified       = get_post_meta( $post->ID, '_skdon_family_notified_date', true );
 
                     if ( $notify_enabled && ! $notified ) {
                         $new_actions['notify_family'] = sprintf(
                             '<a href="%s" class="sd-action-link">%s</a>',
-                            esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=sd_notify_family&id=' . $post->ID ), 'sd_notify_family_' . $post->ID ) ),
+                            esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=skdon_notify_family&id=' . $post->ID ), 'sd_notify_family_' . $post->ID ) ),
                             esc_html__( 'Notify Family', 'shelterkit-donations' )
                         );
                     }
@@ -746,7 +746,7 @@ class List_Columns {
                 case 'send_statement':
                     $new_actions['send_statement'] = sprintf(
                         '<a href="%s" class="sd-action-link">%s</a>',
-                        esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=sd_send_statement&id=' . $post->ID ), 'sd_send_statement_' . $post->ID ) ),
+                        esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=skdon_send_statement&id=' . $post->ID ), 'sd_send_statement_' . $post->ID ) ),
                         esc_html__( 'Send Statement', 'shelterkit-donations' )
                     );
                     break;

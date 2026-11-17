@@ -33,13 +33,13 @@ class Dashboard_Widget {
      */
     public static function init(): void {
         add_action( 'wp_dashboard_setup', [ self::class, 'register_widget' ] );
-        add_action( 'wp_ajax_sd_dashboard_refresh', [ self::class, 'ajax_refresh' ] );
+        add_action( 'wp_ajax_skdon_dashboard_refresh', [ self::class, 'ajax_refresh' ] );
 
         // Invalidate cached stats + action items when shelter records change.
         // Mirrors class-menu's hook list so the widget's action-items count
         // doesn't stay stale for up to 15 min after a logo approval or a
         // family notification (audit §4.7).
-        foreach ( [ 'sd_donation', 'sd_membership', 'sd_memorial', 'sd_donor' ] as $cpt ) {
+        foreach ( [ 'skdon_donation', 'skdon_membership', 'skdon_memorial', 'skdon_donor' ] as $cpt ) {
             add_action( "save_post_{$cpt}", [ self::class, 'invalidate_cache' ] );
         }
         add_action( 'starter_shelter_logo_approved', [ self::class, 'invalidate_cache' ] );
@@ -54,9 +54,9 @@ class Dashboard_Widget {
      */
     public static function invalidate_cache(): void {
         foreach ( [ 'today', 'week', 'month', 'year' ] as $period ) {
-            delete_transient( 'sd_dashboard_stats_v2_' . $period );
+            delete_transient( 'skdon_dashboard_stats_v2_' . $period );
         }
-        delete_transient( 'sd_dashboard_action_items' );
+        delete_transient( 'skdon_dashboard_action_items' );
     }
 
     /**
@@ -92,12 +92,12 @@ class Dashboard_Widget {
     private const RECENT_ACTIVITY_COUNT = 5;
 
     public static function render_widget(): void {
-        $period = get_user_option( 'sd_dashboard_period' ) ?: 'month';
+        $period = get_user_option( 'skdon_dashboard_period' ) ?: 'month';
 
         // Try cached stats first. The v2 suffix is bumped whenever the
         // ability's return shape changes so old transients don't serve
         // pre-deploy data through the post-deploy renderer.
-        $cache_key = 'sd_dashboard_stats_v2_' . $period;
+        $cache_key = 'skdon_dashboard_stats_v2_' . $period;
         $stats = get_transient( $cache_key );
 
         if ( false === $stats ) {
@@ -197,7 +197,7 @@ class Dashboard_Widget {
             <a href="<?php echo esc_url( admin_url( 'admin.php?page=shelterkit-donations-reports' ) ); ?>" class="button button-primary">
                 <?php esc_html_e( 'View Reports', 'shelterkit-donations' ); ?>
             </a>
-            <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=sd_donation' ) ); ?>" class="button">
+            <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=skdon_donation' ) ); ?>" class="button">
                 <?php esc_html_e( 'All Donations', 'shelterkit-donations' ); ?>
             </a>
         </div>
@@ -214,7 +214,7 @@ class Dashboard_Widget {
                 $stats.css('opacity', '0.5');
                 
                 $.post(ajaxurl, {
-                    action: 'sd_dashboard_refresh',
+                    action: 'skdon_dashboard_refresh',
                     period: period,
                     nonce: '<?php echo esc_js( wp_create_nonce( 'sd_dashboard_refresh' ) ); ?>'
                 }, function(response) {
@@ -242,10 +242,10 @@ class Dashboard_Widget {
             && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'edit-dashboard' );
 
         if ( isset( $_POST['sd_dashboard_period'] ) && $nonce_ok ) {
-            update_user_option( get_current_user_id(), 'sd_dashboard_period', sanitize_key( $_POST['sd_dashboard_period'] ) );
+            update_user_option( get_current_user_id(), 'skdon_dashboard_period', sanitize_key( $_POST['sd_dashboard_period'] ) );
         }
 
-        $period = get_user_option( 'sd_dashboard_period' ) ?: 'month';
+        $period = get_user_option( 'skdon_dashboard_period' ) ?: 'month';
         ?>
         <p>
             <label for="sd_dashboard_period"><?php esc_html_e( 'Default period:', 'shelterkit-donations' ); ?></label>
@@ -272,10 +272,10 @@ class Dashboard_Widget {
         $period = sanitize_key( $_POST['period'] ?? 'month' );
 
         // Save preference.
-        update_user_option( get_current_user_id(), 'sd_dashboard_period', $period );
+        update_user_option( get_current_user_id(), 'skdon_dashboard_period', $period );
 
         // Use cached stats (cache key version must match render_widget).
-        $cache_key = 'sd_dashboard_stats_v2_' . $period;
+        $cache_key = 'skdon_dashboard_stats_v2_' . $period;
         $stats = get_transient( $cache_key );
 
         if ( false === $stats ) {
@@ -301,7 +301,7 @@ class Dashboard_Widget {
      * @return array Action items.
      */
     private static function get_action_items(): array {
-        $cached = get_transient( 'sd_dashboard_action_items' );
+        $cached = get_transient( 'skdon_dashboard_action_items' );
         if ( false !== $cached ) {
             return $cached;
         }
@@ -330,7 +330,7 @@ class Dashboard_Widget {
             }
         }
 
-        set_transient( 'sd_dashboard_action_items', $items, self::CACHE_TTL );
+        set_transient( 'skdon_dashboard_action_items', $items, self::CACHE_TTL );
         return $items;
     }
 
@@ -375,7 +375,7 @@ class Dashboard_Widget {
             $time   = human_time_diff( $ts, time() ) . ' ' . __( 'ago', 'shelterkit-donations' );
 
             switch ( $row['type'] ?? '' ) {
-                case 'sd_donation':
+                case 'skdon_donation':
                     $activity[] = [
                         'icon'   => '💰',
                         /* translators: %s: donor name */
@@ -385,7 +385,7 @@ class Dashboard_Widget {
                     ];
                     break;
 
-                case 'sd_membership':
+                case 'skdon_membership':
                     $tier_label = ucfirst( $row['tier'] ?? '' );
                     $activity[] = [
                         'icon'   => '🏅',
@@ -396,7 +396,7 @@ class Dashboard_Widget {
                     ];
                     break;
 
-                case 'sd_memorial':
+                case 'skdon_memorial':
                     $honoree = $row['honoree_name'] ?? __( 'someone special', 'shelterkit-donations' );
                     $activity[] = [
                         'icon'   => '❤️',

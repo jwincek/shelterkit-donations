@@ -105,10 +105,17 @@ misses whatever packaging actually produced.
 Renaming any of these breaks existing installs, because they are persisted in
 the database or in post content rather than being code:
 
-- Post types `sd_donation`, `sd_donor`, `sd_membership`, `sd_memorial`
-- The `sd_campaign` taxonomy and every `_sd_*` meta key
-- `starter_shelter_options` and the `sd_*` option keys
-- The cron hook `sd_cleanup_activity_log`
+- Post types `skdon_donation`, `skdon_donor`, `skdon_membership`, `skdon_memorial`
+- The taxonomies `skdon_campaign`, `skdon_memorial_year` and
+  `skdon_donation_allocation`, and every `_skdon_*` meta key
+- `starter_shelter_options` and the `skdon_*` option keys
+- The WooCommerce email IDs (`skdon_donation_receipt` and the rest).
+  WooCommerce saves each email's settings under its ID.
+- The cron hook `skdon_cleanup_activity_log` and the `skdon_activity_log` table
+- Names that live outside the database, where no migration can reach them:
+  the `sd_candles` cookie, and the `sd_amount`, `sd_allocation` and
+  `sd_campaign` add-to-cart URL parameters, which can sit in links on a
+  shelter's own pages. They kept their `sd_` names through the prefix change.
 - **The 12 `shelter-donations/*` block names** and the 9 Interactivity store
   namespaces — these appear in saved post content
 - The `shelter-donations/v1` REST namespace
@@ -121,7 +128,7 @@ the database or in post content rather than being code:
   `allocations`: `general-fund`, `medical-care`, `food-supplies`, `facility`,
   `rescue-operations`, `emergency-fund`, `spay-neuter-clinic`, and the
   `allocation_aliases` that map old slugs onto them. Every donation stores
-  its fund's slug in `_sd_allocation`. Labels may change; slugs may not. A
+  its fund's slug in `_skdon_allocation`. Labels may change; slugs may not. A
   shelter's own funds are its data: the settings screen makes a saved slug
   read-only and retires a removed fund instead of deleting it. All code reads
   the list through `Core\Allocations`, never the raw config (#21).
@@ -131,9 +138,18 @@ the database or in post content rather than being code:
   A rename regex that spares `shelter-donations/` still catches these, and the
   ones built by concatenation (`'shelter-donations-' . $block`) as well.
 
-The `Starter_Shelter\` namespace, `STARTER_SHELTER_*` constants and `sd_` prefix
-are internal and deliberately do **not** track the plugin's public name. That
-decoupling is what made the ShelterKit rename a day's work rather than a week's.
+The `Starter_Shelter\` namespace, `STARTER_SHELTER_*` constants and
+`starter_shelter_*` hooks are internal and deliberately do **not** track the
+plugin's public name. That decoupling is what made the ShelterKit rename a
+day's work rather than a week's.
+
+The stored-data prefix changed once, from `sd_` to `skdon_`, because
+WordPress.org asks for prefixes of at least four characters (#30).
+`Core\Prefix_Migration::MAP` is the single list of what moved; the
+migration, uninstall, `wp shelterkit-donations validate` and the tests all
+read it. A new stored name uses `skdon_`. The guard test fails on any `sd_`
+name in the code that is not on its list of deliberate exceptions (markup,
+nonce actions and the names above).
 
 ## The shared ShelterKit files
 

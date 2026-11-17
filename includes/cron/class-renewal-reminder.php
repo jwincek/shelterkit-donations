@@ -35,7 +35,7 @@ class Renewal_Reminder {
      * @since 1.0.0
      * @var string
      */
-    private const REMINDER_SENT_META = '_sd_renewal_reminder_sent';
+    private const REMINDER_SENT_META = '_skdon_renewal_reminder_sent';
 
     /**
      * Initialize the cron handler.
@@ -129,9 +129,9 @@ class Renewal_Reminder {
      * @return array Array of membership data.
      */
     private static function get_expiring_memberships( string $target_date ): array {
-        // Query methods auto-prefix fields with _sd_, so pass the
+        // Query methods auto-prefix fields with _skdon_, so pass the
         // bare field name (not the full meta key).
-        return Query::for( 'sd_membership' )
+        return Query::for( 'skdon_membership' )
             ->where( 'end_date', $target_date )
             ->whereCompare( 'status', 'cancelled', '!=' )
             ->whereNotExists( 'renewal_reminder_sent' )
@@ -161,11 +161,11 @@ class Renewal_Reminder {
         }
 
         // Check donor's communication preferences. Canonical key is
-        // `_sd_communication_preferences`; `_sd_email_preferences` is read
+        // `_skdon_communication_preferences`; `_skdon_email_preferences` is read
         // as a fallback for legacy rows (CC-2 read-both, write-canonical).
-        $donor_prefs = get_post_meta( $donor_id, '_sd_communication_preferences', true );
+        $donor_prefs = get_post_meta( $donor_id, '_skdon_communication_preferences', true );
         if ( ! is_array( $donor_prefs ) ) {
-            $donor_prefs = get_post_meta( $donor_id, '_sd_email_preferences', true );
+            $donor_prefs = get_post_meta( $donor_id, '_skdon_email_preferences', true );
         }
 
         if ( is_array( $donor_prefs ) && isset( $donor_prefs['renewal_reminders'] ) && ! $donor_prefs['renewal_reminders'] ) {
@@ -212,7 +212,7 @@ class Renewal_Reminder {
      */
     public static function send_manual_reminder( int $membership_id, bool $force = false ): bool {
         // Get membership data.
-        $membership = \Starter_Shelter\Core\Entity_Hydrator::get( 'sd_membership', $membership_id );
+        $membership = \Starter_Shelter\Core\Entity_Hydrator::get( 'skdon_membership', $membership_id );
 
         if ( ! $membership ) {
             return false;

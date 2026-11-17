@@ -54,9 +54,9 @@ class Logo_Moderation {
     public static function init(): void {
         add_action( 'admin_menu', [ self::class, 'add_menu_page' ] );
         add_action( 'admin_enqueue_scripts', [ self::class, 'enqueue_assets' ] );
-        add_action( 'wp_ajax_sd_approve_logo', [ self::class, 'ajax_approve_logo' ] );
-        add_action( 'wp_ajax_sd_reject_logo', [ self::class, 'ajax_reject_logo' ] );
-        add_action( 'admin_post_sd_bulk_logo_action', [ self::class, 'handle_bulk_action' ] );
+        add_action( 'wp_ajax_skdon_approve_logo', [ self::class, 'ajax_approve_logo' ] );
+        add_action( 'wp_ajax_skdon_reject_logo', [ self::class, 'ajax_reject_logo' ] );
+        add_action( 'admin_post_skdon_bulk_logo_action', [ self::class, 'handle_bulk_action' ] );
 
         // Add pending count to menu.
         add_action( 'admin_menu', [ self::class, 'add_pending_count_bubble' ], 99 );
@@ -116,14 +116,14 @@ class Logo_Moderation {
             SELECT COUNT(*)
             FROM {$wpdb->posts} p
             JOIN {$wpdb->postmeta} pm_type ON p.ID = pm_type.post_id 
-                AND pm_type.meta_key = '_sd_membership_type' 
+                AND pm_type.meta_key = '_skdon_membership_type' 
                 AND pm_type.meta_value = 'business'
             JOIN {$wpdb->postmeta} pm_logo ON p.ID = pm_logo.post_id 
-                AND pm_logo.meta_key = '_sd_logo_attachment_id' 
+                AND pm_logo.meta_key = '_skdon_logo_attachment_id' 
                 AND pm_logo.meta_value > 0
             LEFT JOIN {$wpdb->postmeta} pm_status ON p.ID = pm_status.post_id 
-                AND pm_status.meta_key = '_sd_logo_status'
-            WHERE p.post_type = 'sd_membership'
+                AND pm_status.meta_key = '_skdon_logo_status'
+            WHERE p.post_type = 'skdon_membership'
             AND p.post_status = 'publish'
             AND (pm_status.meta_value IS NULL OR pm_status.meta_value = 'pending')
         " );
@@ -214,7 +214,7 @@ class Logo_Moderation {
             </ul>
 
             <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-                <input type="hidden" name="action" value="sd_bulk_logo_action" />
+                <input type="hidden" name="action" value="skdon_bulk_logo_action" />
                 <?php wp_nonce_field( self::NONCE_ACTION ); ?>
                 <input type="hidden" name="status_filter" value="<?php echo esc_attr( $status_filter ); ?>" />
 
@@ -395,22 +395,22 @@ class Logo_Moderation {
                 p.post_date as upload_date
             FROM {$wpdb->posts} p
             JOIN {$wpdb->postmeta} pm_type ON p.ID = pm_type.post_id 
-                AND pm_type.meta_key = '_sd_membership_type' 
+                AND pm_type.meta_key = '_skdon_membership_type' 
                 AND pm_type.meta_value = 'business'
             JOIN {$wpdb->postmeta} pm_logo ON p.ID = pm_logo.post_id 
-                AND pm_logo.meta_key = '_sd_logo_attachment_id' 
+                AND pm_logo.meta_key = '_skdon_logo_attachment_id' 
                 AND pm_logo.meta_value > 0
             LEFT JOIN {$wpdb->postmeta} pm_business ON p.ID = pm_business.post_id 
-                AND pm_business.meta_key = '_sd_business_name'
+                AND pm_business.meta_key = '_skdon_business_name'
             LEFT JOIN {$wpdb->postmeta} pm_tier ON p.ID = pm_tier.post_id 
-                AND pm_tier.meta_key = '_sd_tier'
+                AND pm_tier.meta_key = '_skdon_tier'
             LEFT JOIN {$wpdb->postmeta} pm_donor ON p.ID = pm_donor.post_id 
-                AND pm_donor.meta_key = '_sd_donor_id'
+                AND pm_donor.meta_key = '_skdon_donor_id'
             LEFT JOIN {$wpdb->postmeta} pm_status ON p.ID = pm_status.post_id 
-                AND pm_status.meta_key = '_sd_logo_status'
+                AND pm_status.meta_key = '_skdon_logo_status'
             LEFT JOIN {$wpdb->postmeta} pm_reason ON p.ID = pm_reason.post_id 
-                AND pm_reason.meta_key = '_sd_logo_rejection_reason'
-            WHERE p.post_type = 'sd_membership'
+                AND pm_reason.meta_key = '_skdon_logo_rejection_reason'
+            WHERE p.post_type = 'skdon_membership'
             AND p.post_status = 'publish'
             {$status_condition}
             ORDER BY p.post_date DESC
@@ -420,7 +420,7 @@ class Logo_Moderation {
         $logos = [];
         foreach ( $results as $row ) {
             $logo_id = (int) $row['logo_id'];
-            $donor = $row['donor_id'] ? Entity_Hydrator::get( 'sd_donor', (int) $row['donor_id'] ) : null;
+            $donor = $row['donor_id'] ? Entity_Hydrator::get( 'skdon_donor', (int) $row['donor_id'] ) : null;
 
             $tier = $row['tier'] ?? '';
             $tiers = \Starter_Shelter\Core\Config::get_item( 'tiers', 'business', [] );
@@ -464,15 +464,15 @@ class Logo_Moderation {
             SELECT COUNT(*)
             FROM {$wpdb->posts} p
             JOIN {$wpdb->postmeta} pm_type ON p.ID = pm_type.post_id 
-                AND pm_type.meta_key = '_sd_membership_type' 
+                AND pm_type.meta_key = '_skdon_membership_type' 
                 AND pm_type.meta_value = 'business'
             JOIN {$wpdb->postmeta} pm_logo ON p.ID = pm_logo.post_id 
-                AND pm_logo.meta_key = '_sd_logo_attachment_id' 
+                AND pm_logo.meta_key = '_skdon_logo_attachment_id' 
                 AND pm_logo.meta_value > 0
             JOIN {$wpdb->postmeta} pm_status ON p.ID = pm_status.post_id 
-                AND pm_status.meta_key = '_sd_logo_status'
+                AND pm_status.meta_key = '_skdon_logo_status'
                 AND pm_status.meta_value = %s
-            WHERE p.post_type = 'sd_membership'
+            WHERE p.post_type = 'skdon_membership'
             AND p.post_status = 'publish'
         ", $status ) );
     }
@@ -495,12 +495,12 @@ class Logo_Moderation {
         }
 
         // Update logo status.
-        update_post_meta( $membership_id, '_sd_logo_status', 'approved' );
-        update_post_meta( $membership_id, '_sd_logo_approved_date', current_time( 'mysql' ) );
-        update_post_meta( $membership_id, '_sd_logo_approved_by', get_current_user_id() );
+        update_post_meta( $membership_id, '_skdon_logo_status', 'approved' );
+        update_post_meta( $membership_id, '_skdon_logo_approved_date', current_time( 'mysql' ) );
+        update_post_meta( $membership_id, '_skdon_logo_approved_by', get_current_user_id() );
 
         // Get membership data for email.
-        $membership = Entity_Hydrator::get( 'sd_membership', $membership_id );
+        $membership = Entity_Hydrator::get( 'skdon_membership', $membership_id );
         $donor_id = $membership['donor_id'] ?? 0;
 
         // Trigger email notification.
@@ -552,13 +552,13 @@ class Logo_Moderation {
         }
 
         // Update logo status.
-        update_post_meta( $membership_id, '_sd_logo_status', 'rejected' );
-        update_post_meta( $membership_id, '_sd_logo_rejection_reason', $full_reason );
-        update_post_meta( $membership_id, '_sd_logo_rejected_date', current_time( 'mysql' ) );
-        update_post_meta( $membership_id, '_sd_logo_rejected_by', get_current_user_id() );
+        update_post_meta( $membership_id, '_skdon_logo_status', 'rejected' );
+        update_post_meta( $membership_id, '_skdon_logo_rejection_reason', $full_reason );
+        update_post_meta( $membership_id, '_skdon_logo_rejected_date', current_time( 'mysql' ) );
+        update_post_meta( $membership_id, '_skdon_logo_rejected_by', get_current_user_id() );
 
         // Get membership data for email.
-        $membership = Entity_Hydrator::get( 'sd_membership', $membership_id );
+        $membership = Entity_Hydrator::get( 'skdon_membership', $membership_id );
         $donor_id = $membership['donor_id'] ?? 0;
 
         // Trigger email notification.
@@ -597,21 +597,21 @@ class Logo_Moderation {
 
         foreach ( $membership_ids as $membership_id ) {
             if ( 'approve' === $action ) {
-                update_post_meta( $membership_id, '_sd_logo_status', 'approved' );
-                update_post_meta( $membership_id, '_sd_logo_approved_date', current_time( 'mysql' ) );
-                update_post_meta( $membership_id, '_sd_logo_approved_by', get_current_user_id() );
+                update_post_meta( $membership_id, '_skdon_logo_status', 'approved' );
+                update_post_meta( $membership_id, '_skdon_logo_approved_date', current_time( 'mysql' ) );
+                update_post_meta( $membership_id, '_skdon_logo_approved_by', get_current_user_id() );
 
-                $membership = Entity_Hydrator::get( 'sd_membership', $membership_id );
+                $membership = Entity_Hydrator::get( 'skdon_membership', $membership_id );
                 do_action( 'starter_shelter_logo_approved', $membership_id, $membership['donor_id'] ?? 0, $membership );
 
                 ++$processed;
             } elseif ( 'reject' === $action ) {
-                update_post_meta( $membership_id, '_sd_logo_status', 'rejected' );
-                update_post_meta( $membership_id, '_sd_logo_rejection_reason', __( 'Bulk rejection', 'shelterkit-donations' ) );
-                update_post_meta( $membership_id, '_sd_logo_rejected_date', current_time( 'mysql' ) );
-                update_post_meta( $membership_id, '_sd_logo_rejected_by', get_current_user_id() );
+                update_post_meta( $membership_id, '_skdon_logo_status', 'rejected' );
+                update_post_meta( $membership_id, '_skdon_logo_rejection_reason', __( 'Bulk rejection', 'shelterkit-donations' ) );
+                update_post_meta( $membership_id, '_skdon_logo_rejected_date', current_time( 'mysql' ) );
+                update_post_meta( $membership_id, '_skdon_logo_rejected_by', get_current_user_id() );
 
-                $membership = Entity_Hydrator::get( 'sd_membership', $membership_id );
+                $membership = Entity_Hydrator::get( 'skdon_membership', $membership_id );
                 do_action( 'starter_shelter_logo_rejected', $membership_id, $membership['donor_id'] ?? 0, [
                     'membership' => $membership,
                     'reason'     => __( 'Bulk rejection', 'shelterkit-donations' ),

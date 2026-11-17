@@ -264,7 +264,7 @@
             setError( null );
 
             const formData = new FormData();
-            formData.append( 'action', 'sd_preview_legacy_order' );
+            formData.append( 'action', 'skdon_preview_legacy_order' );
             formData.append( 'nonce', config.nonce );
             formData.append( 'order_id', orderId );
 
@@ -431,7 +431,7 @@
         // Refresh stats
         const refreshStats = useCallback( () => {
             const formData = new FormData();
-            formData.append( 'action', 'sd_get_sync_stats' );
+            formData.append( 'action', 'skdon_get_sync_stats' );
             formData.append( 'nonce', config.nonce );
 
             fetch( config.ajaxUrl, {
@@ -454,7 +454,7 @@
             setSyncResults( null );
 
             const formData = new FormData();
-            formData.append( 'action', 'sd_scan_legacy_orders' );
+            formData.append( 'action', 'skdon_scan_legacy_orders' );
             formData.append( 'nonce', config.nonce );
             formData.append( 'page', pagination.page );
             formData.append( 'per_page', pagination.per_page );
@@ -531,7 +531,7 @@
             setSyncResults( null );
 
             const formData = new FormData();
-            formData.append( 'action', 'sd_sync_legacy_orders' );
+            formData.append( 'action', 'skdon_sync_legacy_orders' );
             formData.append( 'nonce', config.nonce );
             formData.append( 'skip_errors', '1' );
             if ( forceResync ) {
@@ -611,7 +611,7 @@
 
             const syncBatch = ( offset = 0 ) => {
                 const formData = new FormData();
-                formData.append( 'action', 'sd_sync_all_legacy_orders' );
+                formData.append( 'action', 'skdon_sync_all_legacy_orders' );
                 formData.append( 'nonce', config.nonce );
                 formData.append( 'offset', offset );
                 formData.append( 'batch_size', 50 );
@@ -691,7 +691,7 @@
             }
 
             const formData = new FormData();
-            formData.append( 'action', 'sd_reset_sync_status' );
+            formData.append( 'action', 'skdon_reset_sync_status' );
             formData.append( 'nonce', config.nonce );
             formData.append( 'reset_all', '1' );
 

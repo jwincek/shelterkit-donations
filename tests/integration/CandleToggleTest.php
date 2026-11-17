@@ -4,7 +4,7 @@
  *
  * Anonymous lit-state is governed by a server-side IP-hash transient, not
  * the forgeable `sd_candles` cookie — otherwise clearing the cookie between
- * toggles would let a visitor inflate `_sd_candle_count` without bound
+ * toggles would let a visitor inflate `_skdon_candle_count` without bound
  * (the rate limiter only throttles to 1 request per 2s). Guards that the
  * has_anonymous_candle() check is actually enforced.
  *
@@ -37,7 +37,7 @@ final class CandleToggleTest extends WP_UnitTestCase {
 
     /** The 2s rate limiter would 429 a rapid second toggle; clear it to model an attacker pacing requests. */
     private function bypass_rate_limit(): void {
-        delete_transient( 'sd_candle_rate_' . get_rate_limit_key() );
+        delete_transient( 'skdon_candle_rate_' . get_rate_limit_key() );
     }
 
     private function toggle( int $memorial_id ): array {
@@ -48,7 +48,7 @@ final class CandleToggleTest extends WP_UnitTestCase {
 
     public function test_anonymous_cannot_inflate_count_by_clearing_cookie(): void {
         wp_set_current_user( 0 );
-        $memorial = self::factory()->post->create( [ 'post_type' => 'sd_memorial' ] );
+        $memorial = self::factory()->post->create( [ 'post_type' => 'skdon_memorial' ] );
 
         // First light: count 1, IP transient records it.
         $first = $this->toggle( $memorial );
@@ -69,7 +69,7 @@ final class CandleToggleTest extends WP_UnitTestCase {
     public function test_logged_in_toggle_round_trips_via_user_meta(): void {
         $user = self::factory()->user->create();
         wp_set_current_user( $user );
-        $memorial = self::factory()->post->create( [ 'post_type' => 'sd_memorial' ] );
+        $memorial = self::factory()->post->create( [ 'post_type' => 'skdon_memorial' ] );
 
         $lit = $this->toggle( $memorial );
         $this->assertTrue( $lit['lit'] );

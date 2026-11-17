@@ -26,7 +26,7 @@ class Activity_Log {
      *
      * @var string
      */
-    private const TABLE_NAME = 'sd_activity_log';
+    private const TABLE_NAME = 'skdon_activity_log';
 
     /**
      * Schema version, recorded once the table has been created.
@@ -40,11 +40,11 @@ class Activity_Log {
 
     /**
      * Option holding the schema version this site's table was built at.
-     * sd_-prefixed, so the uninstall purge removes it with the table.
+     * Listed in Core\Prefix_Migration::OPTIONS, so uninstall removes it with the table.
      *
      * @var string
      */
-    private const DB_VERSION_OPTION = 'sd_activity_log_db_version';
+    private const DB_VERSION_OPTION = 'skdon_activity_log_db_version';
 
     /**
      * Page slug.
@@ -111,10 +111,10 @@ class Activity_Log {
         add_action( 'starter_shelter_membership_cancelled', [ self::class, 'log_membership_cancelled' ], 10, 3 );
 
         // Cleanup old logs.
-        add_action( 'sd_cleanup_activity_log', [ self::class, 'cleanup_old_logs' ] );
+        add_action( 'skdon_cleanup_activity_log', [ self::class, 'cleanup_old_logs' ] );
 
-        if ( ! wp_next_scheduled( 'sd_cleanup_activity_log' ) ) {
-            wp_schedule_event( time(), 'daily', 'sd_cleanup_activity_log' );
+        if ( ! wp_next_scheduled( 'skdon_cleanup_activity_log' ) ) {
+            wp_schedule_event( time(), 'daily', 'skdon_cleanup_activity_log' );
         }
     }
 
@@ -170,7 +170,7 @@ class Activity_Log {
      * by name too, since the plugin is not loaded then.
      */
     public static function unschedule_cleanup(): void {
-        wp_clear_scheduled_hook( 'sd_cleanup_activity_log' );
+        wp_clear_scheduled_hook( 'skdon_cleanup_activity_log' );
     }
 
     /**
@@ -253,7 +253,7 @@ class Activity_Log {
             'donation',
             /* translators: 1: donor's display name; 2: formatted donation amount. */
             sprintf( __( '%1$s donated %2$s', 'shelterkit-donations' ), $donor_name, $amount ),
-            'sd_donation',
+            'skdon_donation',
             $donation_id,
             [
                 'donor_id'   => $donor_id,
@@ -276,7 +276,7 @@ class Activity_Log {
             'membership',
             /* translators: 1: donor's display name; 2: membership tier name; 3: membership type (e.g. individual, business). */
             sprintf( __( '%1$s joined as %2$s %3$s member', 'shelterkit-donations' ), $donor_name, ucfirst( $tier ), $type ),
-            'sd_membership',
+            'skdon_membership',
             $membership_id,
             [
                 'donor_id' => $donor_id,
@@ -299,7 +299,7 @@ class Activity_Log {
             'donation',
             /* translators: 1: donor's display name; 2: honoree's name the memorial is for. */
             sprintf( __( '%1$s created memorial for %2$s', 'shelterkit-donations' ), $donor_name, $honoree ),
-            'sd_memorial',
+            'skdon_memorial',
             $memorial_id,
             [
                 'donor_id'     => $donor_id,
@@ -321,7 +321,7 @@ class Activity_Log {
             'membership',
             /* translators: %s: donor's display name. */
             sprintf( __( '%s renewed membership', 'shelterkit-donations' ), $donor_name ),
-            'sd_membership',
+            'skdon_membership',
             $membership_id,
             [
                 'donor_id' => $donor_id,
@@ -342,7 +342,7 @@ class Activity_Log {
             'admin',
             /* translators: 1: business name whose logo was approved; 2: display name of the admin who approved it. */
             sprintf( __( 'Logo approved for %1$s by %2$s', 'shelterkit-donations' ), $business_name, $admin_user->display_name ),
-            'sd_membership',
+            'skdon_membership',
             $membership_id,
             [
                 'business_name' => $business_name,
@@ -364,7 +364,7 @@ class Activity_Log {
             'admin',
             /* translators: 1: business name whose logo was rejected; 2: display name of the admin who rejected it; 3: rejection reason. */
             sprintf( __( 'Logo rejected for %1$s by %2$s: %3$s', 'shelterkit-donations' ), $business_name, $admin_user->display_name, $reason ),
-            'sd_membership',
+            'skdon_membership',
             $membership_id,
             [
                 'business_name' => $business_name,
@@ -456,7 +456,7 @@ class Activity_Log {
      */
     public static function log_membership_extended( int $membership_id, string $new_end_date ): void {
         $admin_user = wp_get_current_user();
-        $membership = Entity_Hydrator::get( 'sd_membership', $membership_id );
+        $membership = Entity_Hydrator::get( 'skdon_membership', $membership_id );
         $donor_name = $membership['donor_id'] ? self::get_donor_name( $membership['donor_id'] ) : __( 'Unknown', 'shelterkit-donations' );
 
         self::log(
@@ -464,7 +464,7 @@ class Activity_Log {
             'admin',
             /* translators: 1: donor's display name; 2: new membership end date; 3: display name of the admin who extended it. */
             sprintf( __( 'Membership for %1$s extended to %2$s by %3$s', 'shelterkit-donations' ), $donor_name, $new_end_date, $admin_user->display_name ),
-            'sd_membership',
+            'skdon_membership',
             $membership_id,
             [
                 'new_end_date' => $new_end_date,
@@ -488,7 +488,7 @@ class Activity_Log {
                 ? sprintf( __( '%1$s cancelled membership: %2$s', 'shelterkit-donations' ), $donor_name, $reason )
                 /* translators: %s: donor's display name. */
                 : sprintf( __( '%s cancelled membership', 'shelterkit-donations' ), $donor_name ),
-            'sd_membership',
+            'skdon_membership',
             $membership_id,
             [
                 'donor_id' => $donor_id,
@@ -502,7 +502,7 @@ class Activity_Log {
      * Log family notified.
      */
     public static function log_family_notified( int $memorial_id, string $family_email ): void {
-        $memorial = Entity_Hydrator::get( 'sd_memorial', $memorial_id );
+        $memorial = Entity_Hydrator::get( 'skdon_memorial', $memorial_id );
         $honoree = $memorial['honoree_name'] ?? __( 'Unknown', 'shelterkit-donations' );
 
         self::log(
@@ -510,7 +510,7 @@ class Activity_Log {
             'email',
             /* translators: 1: honoree's name the memorial is for; 2: family member's email address notified. */
             sprintf( __( 'Family notification sent for memorial of %1$s to %2$s', 'shelterkit-donations' ), $honoree, $family_email ),
-            'sd_memorial',
+            'skdon_memorial',
             $memorial_id,
             [
                 'family_email' => $family_email,
@@ -738,7 +738,7 @@ class Activity_Log {
      * Get donor name by ID.
      */
     private static function get_donor_name( int $donor_id ): string {
-        $donor = Entity_Hydrator::get( 'sd_donor', $donor_id );
+        $donor = Entity_Hydrator::get( 'skdon_donor', $donor_id );
 
         if ( ! $donor ) {
             return __( 'Unknown Donor', 'shelterkit-donations' );

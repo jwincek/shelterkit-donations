@@ -55,6 +55,26 @@ spl_autoload_register( function ( string $class ): void {
     }
 } );
 
+// Stored data moved from the `sd_` prefix to `skdon_` (#30). The move runs
+// here, before anything below registers a hook that could read or write
+// plugin data. Until it has completed, the plugin registers nothing else: it
+// never runs against half-moved data, and the activator never sees a missing
+// `skdon_products_created` flag and creates duplicate products.
+require_once STARTER_SHELTER_PATH . 'includes/core/class-prefix-migration.php';
+add_action( 'admin_notices', [ Starter_Shelter\Core\Prefix_Migration::class, 'admin_notice' ] );
+if ( defined( 'WP_CLI' ) && WP_CLI ) {
+    \WP_CLI::add_command( 'shelterkit-donations migrate-prefix', \Starter_Shelter\Cli\Prefix_Command::class );
+}
+if ( ! Starter_Shelter\Core\Prefix_Migration::maybe_run() ) {
+    return;
+}
+
+// For one release after the move: carts saved in a session before it keep
+// their item data, and cached pages that still send the old AJAX and
+// admin-post action names reach the renamed handlers.
+add_filter( 'woocommerce_get_cart_item_from_session', [ Starter_Shelter\Core\Prefix_Migration::class, 'restore_session_cart_item' ], 5, 2 );
+add_action( 'admin_init', [ Starter_Shelter\Core\Prefix_Migration::class, 'register_action_aliases' ], 999 );
+
 /**
  * Initialize the plugin.
  *
@@ -79,7 +99,7 @@ function starter_shelter_init(): void {
     // Initialize CPT and taxonomy registration.
     Starter_Shelter\Core\CPT_Registry::init();
 
-    // Register sd_campaign term meta (_sd_goal, _sd_end_date) for REST
+    // Register skdon_campaign term meta (_skdon_goal, _skdon_end_date) for REST
     // and add matching fields to the WP term-edit form. Runs from
     // starter_shelter_init so register_term_meta hooks to `init` in
     // both admin AND frontend/REST contexts.

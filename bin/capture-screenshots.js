@@ -132,7 +132,7 @@ async function go( page, url, settle = '#wpbody-content' ) {
 	await go( page, admin( 'shelterkit-donations-logos' ) );
 	await shot( page, '#wpbody-content', 'logo-moderation.png' );
 
-	await go( page, `${ SITE }/wp-admin/edit-tags.php?taxonomy=sd_campaign` );
+	await go( page, `${ SITE }/wp-admin/edit-tags.php?taxonomy=skdon_campaign` );
 	await shot( page, '#wpbody-content', 'campaigns.png' );
 
 	// --- front end ------------------------------------------------------------

@@ -39,7 +39,7 @@ class Order_Scanner {
 	 *
 	 * @var string
 	 */
-	public const SYNCED_META_KEY = '_sd_legacy_synced';
+	public const SYNCED_META_KEY = '_skdon_legacy_synced';
 
 	/**
 	 * Get sync statistics.
@@ -60,7 +60,7 @@ class Order_Scanner {
 
 		$total_orders = self::count_total_orders( $wpdb );
 		$synced_orders = self::count_by_meta( $wpdb, self::SYNCED_META_KEY );
-		$processed_orders = self::count_by_meta( $wpdb, '_sd_processed' );
+		$processed_orders = self::count_by_meta( $wpdb, '_skdon_processed' );
 
 		return [
 			'total_orders'     => $total_orders,
@@ -72,7 +72,7 @@ class Order_Scanner {
 				'membership' => 0,
 				'memorial'   => 0,
 			],
-			'last_scan' => get_option( 'sd_legacy_sync_last_scan', '' ),
+			'last_scan' => get_option( 'skdon_legacy_sync_last_scan', '' ),
 		];
 	}
 
@@ -181,7 +181,7 @@ class Order_Scanner {
 					'compare' => 'NOT EXISTS',
 				],
 				[
-					'key'     => '_sd_processed',
+					'key'     => '_skdon_processed',
 					'compare' => 'NOT EXISTS',
 				],
 			];
@@ -275,7 +275,7 @@ class Order_Scanner {
 		$sync_status = 'unsynced';
 		if ( $order->get_meta( self::SYNCED_META_KEY ) ) {
 			$sync_status = 'synced';
-		} elseif ( $order->get_meta( '_sd_processed' ) ) {
+		} elseif ( $order->get_meta( '_skdon_processed' ) ) {
 			$sync_status = 'processed';
 		}
 

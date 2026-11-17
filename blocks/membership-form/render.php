@@ -31,7 +31,7 @@ $submit_text      = $attributes['submitButtonText'] ?? __( 'Join Now', 'shelterk
 // attached to the originating campaign.
 $campaign_id = (int) ( $attributes['campaignId'] ?? 0 ) ?: Helpers\resolve_campaign_id_from_request();
 $campaign_id = $campaign_id ?: null;
-$campaign    = $campaign_id ? get_term( $campaign_id, 'sd_campaign' ) : null;
+$campaign    = $campaign_id ? get_term( $campaign_id, 'skdon_campaign' ) : null;
 
 // Get tiers from config (nested under 'tiers' key in tiers.json).
 $all_tiers        = Config::get_item( 'tiers', 'tiers', [] );
@@ -41,8 +41,8 @@ $business_tiers   = $all_tiers['business'] ?? [];
 $checkout_url = function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : '/checkout/';
 
 // Check product configuration.
-$individual_product_id = (int) get_option( 'sd_membership_product_id', 0 );
-$business_product_id   = (int) get_option( 'sd_business_membership_product_id', 0 );
+$individual_product_id = (int) get_option( 'skdon_membership_product_id', 0 );
+$business_product_id   = (int) get_option( 'skdon_business_membership_product_id', 0 );
 $product_ok = ( $membership_type === 'business' )
     ? ( $business_product_id && function_exists( 'wc_get_product' ) && wc_get_product( $business_product_id ) )
     : ( $individual_product_id && function_exists( 'wc_get_product' ) && wc_get_product( $individual_product_id ) );

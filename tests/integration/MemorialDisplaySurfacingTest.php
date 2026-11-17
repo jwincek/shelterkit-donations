@@ -51,7 +51,7 @@ final class MemorialDisplaySurfacingTest extends WP_UnitTestCase {
      * @dataProvider labelProvider
      */
     public function test_hydration_exposes_dedication_label( string $dedication, string $expected_label ): void {
-        $entity = Entity_Hydrator::get( 'sd_memorial', $this->make_memorial( $dedication ) );
+        $entity = Entity_Hydrator::get( 'skdon_memorial', $this->make_memorial( $dedication ) );
 
         $this->assertIsArray( $entity );
         $this->assertSame( $dedication, $entity['dedication_type'] ?? null, 'Raw dedication_type field hydrated.' );
@@ -70,10 +70,10 @@ final class MemorialDisplaySurfacingTest extends WP_UnitTestCase {
      * defaulting to "In Memory Of".
      */
     public function test_legacy_row_without_dedication_hydrates_default_label(): void {
-        $memorial_id = self::factory()->post->create( [ 'post_type' => 'sd_memorial', 'post_title' => 'Legacy' ] );
-        // No _sd_dedication_type meta set — simulates a pre-1.1.4 row.
+        $memorial_id = self::factory()->post->create( [ 'post_type' => 'skdon_memorial', 'post_title' => 'Legacy' ] );
+        // No _skdon_dedication_type meta set — simulates a pre-1.1.4 row.
 
-        $entity = Entity_Hydrator::get( 'sd_memorial', $memorial_id );
+        $entity = Entity_Hydrator::get( 'skdon_memorial', $memorial_id );
         $this->assertSame( 'In Memory Of', $entity['dedication_type_label'] ?? null );
     }
 
@@ -106,7 +106,7 @@ final class MemorialDisplaySurfacingTest extends WP_UnitTestCase {
     public function test_csv_exporter_resolves_dedication_label(): void {
         $memorial_id = $this->make_memorial( 'honor' );
         $post        = get_post( $memorial_id );
-        $entity      = Entity_Hydrator::get( 'sd_memorial', $memorial_id );
+        $entity      = Entity_Hydrator::get( 'skdon_memorial', $memorial_id );
 
         $resolve = new ReflectionMethod( Csv_Exporter::class, 'resolve_column_value' );
         $resolve->setAccessible( true );
@@ -116,7 +116,7 @@ final class MemorialDisplaySurfacingTest extends WP_UnitTestCase {
             $post,
             $entity,
             [ 'header' => 'Dedication', 'computed' => 'dedication_type_label' ],
-            'sd_memorial'
+            'skdon_memorial'
         );
 
         $this->assertSame( 'In Honor Of', $value );

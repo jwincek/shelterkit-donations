@@ -18,6 +18,10 @@ declare( strict_types = 1 );
 
 defined( 'ABSPATH' ) || exit;
 
+// The lists of every stored name, old and new (#30). Self-contained: it needs
+// nothing from the plugin's bootstrap.
+require_once __DIR__ . '/core/class-prefix-migration.php';
+
 /**
  * Run uninstall cleanup across the install (network-aware), honoring each
  * site's own opt-in.
@@ -42,7 +46,10 @@ function starter_shelter_maybe_purge_current_site(): void {
     // Scheduled events are not data, so they go whatever the preserve setting.
     // Deactivation normally clears them first; this catches a site where it
     // did not. The plugin is not loaded here, so the hooks are named directly.
-    wp_clear_scheduled_hook( 'sd_cleanup_activity_log' );
+    foreach ( \Starter_Shelter\Core\Prefix_Migration::CRON_HOOKS as $hook ) {
+        wp_clear_scheduled_hook( $hook );
+        wp_clear_scheduled_hook( \Starter_Shelter\Core\Prefix_Migration::new_name( $hook ) );
+    }
     wp_clear_scheduled_hook( 'starter_shelter_renewal_reminders' );
 
     $options = get_option( 'starter_shelter_options', [] );
@@ -59,47 +66,72 @@ function starter_shelter_maybe_purge_current_site(): void {
  */
 function starter_shelter_purge_site_data(): void {
     global $wpdb;
+    $prefix = \Starter_Shelter\Core\Prefix_Migration::class;
+
+    // Old names as well as new: a site can be uninstalled before the plugin
+    // ever loaded the release that moved its data (#30). Nothing here matches
+    // by `LIKE 'sd\_%'`, which also deleted other plugins' options.
+    $both = static fn ( array $old ): array => array_merge( $old, array_map( [ $prefix, 'new_name' ], $old ) );
 
     // 1. CPT posts + their meta and term relationships. The post_type strings
     // work even though the CPTs aren't registered at uninstall time.
-    $ids = $wpdb->get_col(
-        "SELECT ID FROM {$wpdb->posts}
-         WHERE post_type IN ('sd_donation','sd_membership','sd_memorial','sd_donor')"
-    );
+    $types = $both( $prefix::POST_TYPES );
+    $ids   = $wpdb->get_col( $wpdb->prepare(
+        "SELECT ID FROM {$wpdb->posts} WHERE post_type IN (" . implode( ',', array_fill( 0, count( $types ), '%s' ) ) . ')', // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- a generated %s placeholder list.
+        $types
+    ) );
     foreach ( $ids as $id ) {
         wp_delete_post( (int) $id, true );
     }
 
     // 2. Taxonomy terms (taxonomies aren't registered at uninstall, so operate
     // on the tables directly).
-    foreach ( [ 'sd_campaign', 'sd_memorial_year', 'sd_donation_allocation' ] as $taxonomy ) {
+    foreach ( $both( $prefix::TAXONOMIES ) as $taxonomy ) {
         starter_shelter_delete_taxonomy_terms( $taxonomy );
     }
 
-    // 3. Activity-log table. Guarded by a (non-DDL) existence check so we don't
-    // issue a DROP — which implicitly commits — when there's nothing to drop.
-    $table = $wpdb->prefix . 'sd_activity_log';
-    if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) === $table ) {
-        $wpdb->query( "DROP TABLE `{$table}`" ); // phpcs:ignore WordPress.DB.PreparedSQL
+    // 3. Activity-log table. DROP TABLE IF EXISTS needs no existence check,
+    // and unlike SHOW TABLES it also sees the TEMPORARY tables tests create.
+    foreach ( $both( [ $prefix::TABLE ] ) as $table ) {
+        $wpdb->query( "DROP TABLE IF EXISTS `{$wpdb->prefix}{$table}`" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.SchemaChange -- the site prefix plus a constant.
     }
 
-    // 4. Options: the settings blob plus every sd_-prefixed option (cached
-    // config, product-id pointers, sync bookkeeping). `\_` escapes the LIKE
-    // wildcard to match a literal underscore.
-    $wpdb->query(
-        "DELETE FROM {$wpdb->options}
-         WHERE option_name = 'starter_shelter_options' OR option_name LIKE 'sd\\_%'"
-    );
+    // 4. Options: the settings blob plus every option the plugin owns, by name.
+    $options = array_merge( [ 'starter_shelter_options' ], $prefix::all_option_names() );
+    $wpdb->query( $wpdb->prepare(
+        "DELETE FROM {$wpdb->options} WHERE option_name IN (" . implode( ',', array_fill( 0, count( $options ), '%s' ) ) . ')', // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- a generated %s placeholder list.
+        $options
+    ) );
 
-    // 5. Candle-list user meta.
-    $wpdb->delete( $wpdb->usermeta, [ 'meta_key' => '_sd_candles' ] );
+    // 5. User meta: the candle list and per-user options.
+    $user_keys = $both( [ '_sd_candles' ] );
+    foreach ( $prefix::USER_OPTIONS as $option ) {
+        $user_keys[] = $wpdb->get_blog_prefix() . $option;
+        $user_keys[] = $wpdb->get_blog_prefix() . $prefix::new_name( $option );
+    }
+    foreach ( $user_keys as $key ) {
+        $wpdb->delete( $wpdb->usermeta, [ 'meta_key' => $key ] ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- uninstall.
+    }
 
-    // 6. Plugin transients (and their timeout twins).
-    $wpdb->query(
-        "DELETE FROM {$wpdb->options}
-         WHERE option_name LIKE '\\_transient\\_sd\\_%'
-            OR option_name LIKE '\\_transient\\_timeout\\_sd\\_%'"
-    );
+    // 6. Plugin transients (and their timeout twins): the fixed names, then
+    // the ones that carry an id after a long, specific prefix.
+    $transients = [];
+    foreach ( $both( $prefix::TRANSIENTS ) as $name ) {
+        $transients[] = '_transient_' . $name;
+        $transients[] = '_transient_timeout_' . $name;
+    }
+    $wpdb->query( $wpdb->prepare(
+        "DELETE FROM {$wpdb->options} WHERE option_name IN (" . implode( ',', array_fill( 0, count( $transients ), '%s' ) ) . ')', // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- a generated %s placeholder list.
+        $transients
+    ) );
+    foreach ( $both( $prefix::TRANSIENT_PREFIXES ) as $name ) {
+        foreach ( [ '_transient_', '_transient_timeout_' ] as $kind ) {
+            $wpdb->query( $wpdb->prepare(
+                "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
+                $wpdb->esc_like( $kind . $name ) . '%'
+            ) );
+        }
+    }
 }
 
 /**

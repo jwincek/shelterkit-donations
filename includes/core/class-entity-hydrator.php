@@ -11,7 +11,7 @@
  *
  * 2. hydrate_many() called update_postmeta_cache() but NOT
  *    update_object_term_cache(). For entities with taxonomy relations
- *    (sd_donation → sd_campaign, sd_memorial → sd_memorial_year),
+ *    (skdon_donation → skdon_campaign, skdon_memorial → skdon_memorial_year),
  *    get_the_terms() triggered 1 query per post.
  *    Now primes both caches in batch before hydration.
  *
@@ -195,7 +195,7 @@ class Entity_Hydrator {
 	/**
 	 * Prime meta caches for related entities.
 	 *
-	 * For example, when hydrating a list of sd_donation posts, each donation
+	 * For example, when hydrating a list of skdon_donation posts, each donation
 	 * has a donor_id field. The computed field "donor_name" calls
 	 * get_donor_display_name( donor_id ), which calls get_post_meta() on
 	 * the donor post. Without priming, that's N donor meta queries.

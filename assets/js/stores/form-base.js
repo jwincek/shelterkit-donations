@@ -373,7 +373,7 @@ export function validateAmount( amount, ctx ) {
  */
 export function createBaseFormData( productType, config ) {
 	const formData = new FormData();
-	formData.append( 'action', 'sd_add_to_cart' );
+	formData.append( 'action', 'skdon_add_to_cart' );
 	formData.append( 'nonce', config.cartNonce );
 	formData.append( 'product_type', productType );
 	return formData;

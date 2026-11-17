@@ -27,24 +27,24 @@ class Quick_Actions {
      */
     public static function init(): void {
         // Admin post handlers for row actions.
-        add_action( 'admin_post_sd_send_reminder', [ self::class, 'handle_send_reminder' ] );
-        add_action( 'admin_post_sd_extend_membership', [ self::class, 'handle_extend_membership' ] );
-        add_action( 'admin_post_sd_notify_family', [ self::class, 'handle_notify_family' ] );
-        add_action( 'admin_post_sd_send_statement', [ self::class, 'handle_send_statement' ] );
-        add_action( 'admin_post_sd_resend_receipt', [ self::class, 'handle_resend_receipt' ] );
+        add_action( 'admin_post_skdon_send_reminder', [ self::class, 'handle_send_reminder' ] );
+        add_action( 'admin_post_skdon_extend_membership', [ self::class, 'handle_extend_membership' ] );
+        add_action( 'admin_post_skdon_notify_family', [ self::class, 'handle_notify_family' ] );
+        add_action( 'admin_post_skdon_send_statement', [ self::class, 'handle_send_statement' ] );
+        add_action( 'admin_post_skdon_resend_receipt', [ self::class, 'handle_resend_receipt' ] );
 
         // AJAX handlers.
-        add_action( 'wp_ajax_sd_view_receipt', [ self::class, 'ajax_view_receipt' ] );
+        add_action( 'wp_ajax_skdon_view_receipt', [ self::class, 'ajax_view_receipt' ] );
 
         // Bulk action handlers.
-        add_filter( 'bulk_actions-edit-sd_membership', [ self::class, 'register_membership_bulk_actions' ] );
-        add_filter( 'handle_bulk_actions-edit-sd_membership', [ self::class, 'handle_membership_bulk_actions' ], 10, 3 );
+        add_filter( 'bulk_actions-edit-skdon_membership', [ self::class, 'register_membership_bulk_actions' ] );
+        add_filter( 'handle_bulk_actions-edit-skdon_membership', [ self::class, 'handle_membership_bulk_actions' ], 10, 3 );
 
-        add_filter( 'bulk_actions-edit-sd_memorial', [ self::class, 'register_memorial_bulk_actions' ] );
-        add_filter( 'handle_bulk_actions-edit-sd_memorial', [ self::class, 'handle_memorial_bulk_actions' ], 10, 3 );
+        add_filter( 'bulk_actions-edit-skdon_memorial', [ self::class, 'register_memorial_bulk_actions' ] );
+        add_filter( 'handle_bulk_actions-edit-skdon_memorial', [ self::class, 'handle_memorial_bulk_actions' ], 10, 3 );
 
-        add_filter( 'bulk_actions-edit-sd_donation', [ self::class, 'register_donation_bulk_actions' ] );
-        add_filter( 'handle_bulk_actions-edit-sd_donation', [ self::class, 'handle_donation_bulk_actions' ], 10, 3 );
+        add_filter( 'bulk_actions-edit-skdon_donation', [ self::class, 'register_donation_bulk_actions' ] );
+        add_filter( 'handle_bulk_actions-edit-skdon_donation', [ self::class, 'handle_donation_bulk_actions' ], 10, 3 );
 
         // Admin notices for action results.
         add_action( 'admin_notices', [ self::class, 'display_action_notices' ] );
@@ -66,7 +66,7 @@ class Quick_Actions {
             wp_die( esc_html__( 'Invalid request.', 'shelterkit-donations' ) );
         }
 
-        $membership = Entity_Hydrator::get( 'sd_membership', $membership_id );
+        $membership = Entity_Hydrator::get( 'skdon_membership', $membership_id );
         if ( ! $membership ) {
             wp_die( esc_html__( 'Membership not found.', 'shelterkit-donations' ) );
         }
@@ -82,10 +82,10 @@ class Quick_Actions {
         ] );
 
         // Track that reminder was sent.
-        update_post_meta( $membership_id, '_sd_reminder_sent_date', current_time( 'mysql' ) );
+        update_post_meta( $membership_id, '_skdon_reminder_sent_date', current_time( 'mysql' ) );
 
         wp_safe_redirect( add_query_arg( [
-            'post_type' => 'sd_membership',
+            'post_type' => 'skdon_membership',
             'sd_action' => 'reminder_sent',
             'sd_count'  => 1,
         ], admin_url( 'edit.php' ) ) );
@@ -104,7 +104,7 @@ class Quick_Actions {
             wp_die( esc_html__( 'Invalid request.', 'shelterkit-donations' ) );
         }
 
-        $end_date = get_post_meta( $membership_id, '_sd_end_date', true );
+        $end_date = get_post_meta( $membership_id, '_skdon_end_date', true );
 
         if ( $end_date ) {
             // Extend from current end date or today, whichever is later.
@@ -114,7 +114,7 @@ class Quick_Actions {
             $new_end_date = wp_date( 'Y-m-d', strtotime( '+30 days' ) );
         }
 
-        update_post_meta( $membership_id, '_sd_end_date', $new_end_date );
+        update_post_meta( $membership_id, '_skdon_end_date', $new_end_date );
 
         do_action( 'starter_shelter_membership_extended', $membership_id, $new_end_date );
 
@@ -125,14 +125,14 @@ class Quick_Actions {
             Helpers\format_date( $new_end_date ),
             wp_get_current_user()->display_name
         );
-        add_post_meta( $membership_id, '_sd_admin_notes', [
+        add_post_meta( $membership_id, '_skdon_admin_notes', [
             'date' => current_time( 'mysql' ),
             'note' => $note,
             'user' => get_current_user_id(),
         ] );
 
         wp_safe_redirect( add_query_arg( [
-            'post_type' => 'sd_membership',
+            'post_type' => 'skdon_membership',
             'sd_action' => 'extended',
             'sd_count'  => 1,
         ], admin_url( 'edit.php' ) ) );
@@ -151,7 +151,7 @@ class Quick_Actions {
             wp_die( esc_html__( 'Invalid request.', 'shelterkit-donations' ) );
         }
 
-        $memorial = Entity_Hydrator::get( 'sd_memorial', $memorial_id );
+        $memorial = Entity_Hydrator::get( 'skdon_memorial', $memorial_id );
         if ( ! $memorial ) {
             wp_die( esc_html__( 'Memorial not found.', 'shelterkit-donations' ) );
         }
@@ -168,12 +168,12 @@ class Quick_Actions {
         do_action( 'starter_shelter_memorial_family_notification', $memorial_id, $donor_id, $memorial );
 
         // Track that notification was sent.
-        update_post_meta( $memorial_id, '_sd_family_notified_date', current_time( 'mysql' ) );
+        update_post_meta( $memorial_id, '_skdon_family_notified_date', current_time( 'mysql' ) );
 
         do_action( 'starter_shelter_family_notified', $memorial_id, (string) $notify_family['email'] );
 
         wp_safe_redirect( add_query_arg( [
-            'post_type' => 'sd_memorial',
+            'post_type' => 'skdon_memorial',
             'sd_action' => 'family_notified',
             'sd_count'  => 1,
         ], admin_url( 'edit.php' ) ) );
@@ -192,7 +192,7 @@ class Quick_Actions {
             wp_die( esc_html__( 'Invalid request.', 'shelterkit-donations' ) );
         }
 
-        $donor = Entity_Hydrator::get( 'sd_donor', $donor_id );
+        $donor = Entity_Hydrator::get( 'skdon_donor', $donor_id );
         if ( ! $donor ) {
             wp_die( esc_html__( 'Donor not found.', 'shelterkit-donations' ) );
         }
@@ -218,7 +218,7 @@ class Quick_Actions {
         do_action( 'starter_shelter_annual_summary', $donor_id, $year, $summary );
 
         wp_safe_redirect( add_query_arg( [
-            'post_type' => 'sd_donor',
+            'post_type' => 'skdon_donor',
             'sd_action' => 'statement_sent',
             'sd_count'  => 1,
         ], admin_url( 'edit.php' ) ) );
@@ -237,7 +237,7 @@ class Quick_Actions {
             wp_die( esc_html__( 'Invalid request.', 'shelterkit-donations' ) );
         }
 
-        $donation = Entity_Hydrator::get( 'sd_donation', $donation_id );
+        $donation = Entity_Hydrator::get( 'skdon_donation', $donation_id );
         if ( ! $donation ) {
             wp_die( esc_html__( 'Donation not found.', 'shelterkit-donations' ) );
         }
@@ -254,7 +254,7 @@ class Quick_Actions {
         ] );
 
         wp_safe_redirect( add_query_arg( [
-            'post_type' => 'sd_donation',
+            'post_type' => 'skdon_donation',
             'sd_action' => 'receipt_sent',
             'sd_count'  => 1,
         ], admin_url( 'edit.php' ) ) );
@@ -273,12 +273,12 @@ class Quick_Actions {
             wp_die( esc_html__( 'Invalid request.', 'shelterkit-donations' ) );
         }
 
-        $donation = Entity_Hydrator::get( 'sd_donation', $donation_id );
+        $donation = Entity_Hydrator::get( 'skdon_donation', $donation_id );
         if ( ! $donation ) {
             wp_die( esc_html__( 'Donation not found.', 'shelterkit-donations' ) );
         }
 
-        $donor = $donation['donor_id'] ? Entity_Hydrator::get( 'sd_donor', $donation['donor_id'] ) : null;
+        $donor = $donation['donor_id'] ? Entity_Hydrator::get( 'skdon_donor', $donation['donor_id'] ) : null;
 
         // Render receipt preview.
         ?>
@@ -388,13 +388,13 @@ class Quick_Actions {
         switch ( $action ) {
             case 'sd_send_reminders':
                 foreach ( $post_ids as $membership_id ) {
-                    $membership = Entity_Hydrator::get( 'sd_membership', $membership_id );
+                    $membership = Entity_Hydrator::get( 'skdon_membership', $membership_id );
                     if ( $membership ) {
                         Email_Factory::trigger_email( 'membership-renewal', [
                             'membership_id' => $membership_id,
                             'donor_id'      => $membership['donor_id'] ?? 0,
                         ] );
-                        update_post_meta( $membership_id, '_sd_reminder_sent_date', current_time( 'mysql' ) );
+                        update_post_meta( $membership_id, '_skdon_reminder_sent_date', current_time( 'mysql' ) );
                         ++$count;
                     }
                 }
@@ -402,10 +402,10 @@ class Quick_Actions {
 
             case 'sd_extend_30_days':
                 foreach ( $post_ids as $membership_id ) {
-                    $end_date = get_post_meta( $membership_id, '_sd_end_date', true );
+                    $end_date = get_post_meta( $membership_id, '_skdon_end_date', true );
                     $base_date = $end_date ? max( strtotime( $end_date ), time() ) : time();
                     $new_end_date = wp_date( 'Y-m-d', strtotime( '+30 days', $base_date ) );
-                    update_post_meta( $membership_id, '_sd_end_date', $new_end_date );
+                    update_post_meta( $membership_id, '_skdon_end_date', $new_end_date );
                     do_action( 'starter_shelter_membership_extended', $membership_id, $new_end_date );
                     ++$count;
                 }
@@ -413,8 +413,8 @@ class Quick_Actions {
 
             case 'sd_export_selected':
                 // Store IDs in transient and redirect to export.
-                set_transient( 'sd_export_membership_ids_' . get_current_user_id(), $post_ids, HOUR_IN_SECONDS );
-                return admin_url( 'admin-ajax.php?action=sd_export_selected_memberships&_wpnonce=' . wp_create_nonce( 'sd_export_memberships' ) );
+                set_transient( 'skdon_export_membership_ids_' . get_current_user_id(), $post_ids, HOUR_IN_SECONDS );
+                return admin_url( 'admin-ajax.php?action=skdon_export_selected_memberships&_wpnonce=' . wp_create_nonce( 'sd_export_memberships' ) );
         }
 
         return $redirect_url;
@@ -440,13 +440,13 @@ class Quick_Actions {
         $count = 0;
 
         foreach ( $post_ids as $memorial_id ) {
-            $memorial      = Entity_Hydrator::get( 'sd_memorial', $memorial_id );
+            $memorial      = Entity_Hydrator::get( 'skdon_memorial', $memorial_id );
             $notify_family = Helpers\get_memorial_notify_family( $memorial_id );
-            $already_sent  = get_post_meta( $memorial_id, '_sd_family_notified_date', true );
+            $already_sent  = get_post_meta( $memorial_id, '_skdon_family_notified_date', true );
 
             if ( $notify_family['enabled'] && '' !== $notify_family['email'] && ! $already_sent ) {
                 do_action( 'starter_shelter_memorial_family_notification', $memorial_id, $memorial['donor_id'] ?? 0, $memorial );
-                update_post_meta( $memorial_id, '_sd_family_notified_date', current_time( 'mysql' ) );
+                update_post_meta( $memorial_id, '_skdon_family_notified_date', current_time( 'mysql' ) );
                 do_action( 'starter_shelter_family_notified', $memorial_id, (string) $notify_family['email'] );
                 ++$count;
             }
@@ -475,7 +475,7 @@ class Quick_Actions {
         $count = 0;
 
         foreach ( $post_ids as $donation_id ) {
-            $donation = Entity_Hydrator::get( 'sd_donation', $donation_id );
+            $donation = Entity_Hydrator::get( 'skdon_donation', $donation_id );
             if ( $donation ) {
                 Email_Factory::trigger_email( 'donation-receipt', [
                     'donation_id' => $donation_id,
@@ -532,16 +532,16 @@ class Quick_Actions {
      */
     public static function add_list_filters( string $post_type ): void {
         switch ( $post_type ) {
-            case 'sd_membership':
+            case 'skdon_membership':
                 self::render_membership_filters();
                 break;
-            case 'sd_memorial':
+            case 'skdon_memorial':
                 self::render_memorial_filters();
                 break;
-            case 'sd_donation':
+            case 'skdon_donation':
                 self::render_donation_filters();
                 break;
-            case 'sd_donor':
+            case 'skdon_donor':
                 self::render_donor_filters();
                 break;
         }
@@ -652,16 +652,16 @@ class Quick_Actions {
         $post_type = $query->get( 'post_type' );
 
         switch ( $post_type ) {
-            case 'sd_membership':
+            case 'skdon_membership':
                 self::apply_membership_filters( $query );
                 break;
-            case 'sd_memorial':
+            case 'skdon_memorial':
                 self::apply_memorial_filters( $query );
                 break;
-            case 'sd_donation':
+            case 'skdon_donation':
                 self::apply_donation_filters( $query );
                 break;
-            case 'sd_donor':
+            case 'skdon_donor':
                 self::apply_donor_filters( $query );
                 break;
         }
@@ -681,13 +681,13 @@ class Quick_Actions {
 
             switch ( $status ) {
                 case 'active':
-                    $meta_query[] = [ 'key' => '_sd_end_date', 'value' => $today, 'compare' => '>=' ];
+                    $meta_query[] = [ 'key' => '_skdon_end_date', 'value' => $today, 'compare' => '>=' ];
                     break;
                 case 'expiring':
-                    $meta_query[] = [ 'key' => '_sd_end_date', 'value' => [ $today, $in_30_days ], 'compare' => 'BETWEEN' ];
+                    $meta_query[] = [ 'key' => '_skdon_end_date', 'value' => [ $today, $in_30_days ], 'compare' => 'BETWEEN' ];
                     break;
                 case 'expired':
-                    $meta_query[] = [ 'key' => '_sd_end_date', 'value' => $today, 'compare' => '<' ];
+                    $meta_query[] = [ 'key' => '_skdon_end_date', 'value' => $today, 'compare' => '<' ];
                     break;
             }
         }
@@ -695,7 +695,7 @@ class Quick_Actions {
         // Type filter.
         $type = sanitize_key( $_GET['membership_type'] ?? '' );
         if ( $type ) {
-            $meta_query[] = [ 'key' => '_sd_membership_type', 'value' => $type ];
+            $meta_query[] = [ 'key' => '_skdon_membership_type', 'value' => $type ];
         }
 
         if ( ! empty( $meta_query ) ) {
@@ -712,7 +712,7 @@ class Quick_Actions {
         // Type filter.
         $type = sanitize_key( $_GET['memorial_type'] ?? '' );
         if ( $type ) {
-            $meta_query[] = [ 'key' => '_sd_memorial_type', 'value' => $type ];
+            $meta_query[] = [ 'key' => '_skdon_memorial_type', 'value' => $type ];
         }
 
         // Notification status filter.
@@ -720,22 +720,22 @@ class Quick_Actions {
         if ( $notify ) {
             switch ( $notify ) {
                 case 'pending':
-                    $meta_query[] = [ 'key' => '_sd_notify_family_enabled', 'value' => '1' ];
+                    $meta_query[] = [ 'key' => '_skdon_notify_family_enabled', 'value' => '1' ];
                     $meta_query[] = [
                         'relation' => 'OR',
-                        [ 'key' => '_sd_family_notified_date', 'compare' => 'NOT EXISTS' ],
-                        [ 'key' => '_sd_family_notified_date', 'value' => '' ],
+                        [ 'key' => '_skdon_family_notified_date', 'compare' => 'NOT EXISTS' ],
+                        [ 'key' => '_skdon_family_notified_date', 'value' => '' ],
                     ];
                     break;
                 case 'sent':
-                    $meta_query[] = [ 'key' => '_sd_family_notified_date', 'compare' => 'EXISTS' ];
-                    $meta_query[] = [ 'key' => '_sd_family_notified_date', 'value' => '', 'compare' => '!=' ];
+                    $meta_query[] = [ 'key' => '_skdon_family_notified_date', 'compare' => 'EXISTS' ];
+                    $meta_query[] = [ 'key' => '_skdon_family_notified_date', 'value' => '', 'compare' => '!=' ];
                     break;
                 case 'not_requested':
                     $meta_query[] = [
                         'relation' => 'OR',
-                        [ 'key' => '_sd_notify_family_enabled', 'compare' => 'NOT EXISTS' ],
-                        [ 'key' => '_sd_notify_family_enabled', 'value' => '0' ],
+                        [ 'key' => '_skdon_notify_family_enabled', 'compare' => 'NOT EXISTS' ],
+                        [ 'key' => '_skdon_notify_family_enabled', 'value' => '0' ],
                     ];
                     break;
             }
@@ -754,7 +754,7 @@ class Quick_Actions {
 
         if ( $allocation ) {
             $meta_query = $query->get( 'meta_query' ) ?: [];
-            $meta_query[] = [ 'key' => '_sd_allocation', 'value' => $allocation ];
+            $meta_query[] = [ 'key' => '_skdon_allocation', 'value' => $allocation ];
             $query->set( 'meta_query', $meta_query );
         }
     }
@@ -768,7 +768,7 @@ class Quick_Actions {
         // Level filter.
         $level = sanitize_key( $_GET['donor_level'] ?? '' );
         if ( $level ) {
-            $meta_query[] = [ 'key' => '_sd_donor_level', 'value' => $level ];
+            $meta_query[] = [ 'key' => '_skdon_donor_level', 'value' => $level ];
         }
 
         if ( ! empty( $meta_query ) ) {

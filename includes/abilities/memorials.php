@@ -47,7 +47,7 @@ function create( array $input ): array|WP_Error {
     // Denormalized donor name for the wall + search. This is a
     // per-tribute copy, so prefer the name supplied for THIS memorial
     // (the form's "Your Name" field). get_or_create_donor intentionally
-    // does NOT overwrite an existing donor's canonical _sd_display_name,
+    // does NOT overwrite an existing donor's canonical _skdon_display_name,
     // so a returning email would otherwise show the stored donor name
     // instead of what the giver typed here. Fall back to the donor
     // record only when no name was supplied.
@@ -56,34 +56,34 @@ function create( array $input ): array|WP_Error {
         $supplied = trim( (string) ( $input['donor_name'] ?? '' ) );
         $donor_display_name = '' !== $supplied
             ? \Starter_Shelter\Admin\Shared\Donor_Lookup::sanitize_display_name( $supplied )
-            : ( get_post_meta( $donor_id, '_sd_display_name', true ) ?: get_the_title( $donor_id ) );
+            : ( get_post_meta( $donor_id, '_skdon_display_name', true ) ?: get_the_title( $donor_id ) );
     }
 
     // Create memorial post.
     $memorial_id = wp_insert_post( [
-        'post_type'   => 'sd_memorial',
+        'post_type'   => 'skdon_memorial',
         'post_title'  => $input['honoree_name'],
         'post_status' => 'publish',
         'post_date'   => $memorial_date,
         'meta_input'  => [
-            '_sd_donor_id'           => $donor_id,
-            '_sd_donor_display_name' => $donor_display_name,
-            '_sd_honoree_name'       => $input['honoree_name'],
-            '_sd_memorial_type'      => Helpers\normalize_memorial_type( (string) ( $input['memorial_type'] ?? '' ) ),
-            '_sd_dedication_type'    => 'honor' === ( $input['dedication_type'] ?? 'memory' ) ? 'honor' : 'memory',
-            '_sd_pet_species'        => $input['pet_species'] ?? '',
-            '_sd_tribute_message'    => $input['tribute_message'] ?? '',
-            '_sd_amount'             => (float) ( $input['amount'] ?? 0 ),
-            '_sd_wc_order_id'        => $input['order_id'] ?? 0,
-            '_sd_is_anonymous'       => $input['is_anonymous'] ?? false,
-            '_sd_donation_date'      => $memorial_date,
+            '_skdon_donor_id'           => $donor_id,
+            '_skdon_donor_display_name' => $donor_display_name,
+            '_skdon_honoree_name'       => $input['honoree_name'],
+            '_skdon_memorial_type'      => Helpers\normalize_memorial_type( (string) ( $input['memorial_type'] ?? '' ) ),
+            '_skdon_dedication_type'    => 'honor' === ( $input['dedication_type'] ?? 'memory' ) ? 'honor' : 'memory',
+            '_skdon_pet_species'        => $input['pet_species'] ?? '',
+            '_skdon_tribute_message'    => $input['tribute_message'] ?? '',
+            '_skdon_amount'             => (float) ( $input['amount'] ?? 0 ),
+            '_skdon_wc_order_id'        => $input['order_id'] ?? 0,
+            '_skdon_is_anonymous'       => $input['is_anonymous'] ?? false,
+            '_skdon_donation_date'      => $memorial_date,
             // notify_family persisted as 5 flat keys (canonical, CC-2).
             // Input arrives nested from products.json composite mapping.
-            '_sd_notify_family_enabled'   => (bool) ( $input['notify_family']['enabled'] ?? false ),
-            '_sd_notify_family_name'      => (string) ( $input['notify_family']['name'] ?? '' ),
-            '_sd_notify_family_email'     => (string) ( $input['notify_family']['email'] ?? '' ),
-            '_sd_notify_family_address'   => (string) ( $input['notify_family']['address'] ?? '' ),
-            '_sd_notify_family_send_card' => (bool) ( $input['notify_family']['send_card'] ?? false ),
+            '_skdon_notify_family_enabled'   => (bool) ( $input['notify_family']['enabled'] ?? false ),
+            '_skdon_notify_family_name'      => (string) ( $input['notify_family']['name'] ?? '' ),
+            '_skdon_notify_family_email'     => (string) ( $input['notify_family']['email'] ?? '' ),
+            '_skdon_notify_family_address'   => (string) ( $input['notify_family']['address'] ?? '' ),
+            '_skdon_notify_family_send_card' => (bool) ( $input['notify_family']['send_card'] ?? false ),
         ],
     ], true );
 
@@ -93,14 +93,14 @@ function create( array $input ): array|WP_Error {
 
     // Handle photo attachment.
     if ( ! empty( $input['photo_id'] ) ) {
-        update_post_meta( $memorial_id, '_sd_photo_id', (int) $input['photo_id'] );
+        update_post_meta( $memorial_id, '_skdon_photo_id', (int) $input['photo_id'] );
     }
 
     // Assign the campaign term (if any) so the memorial counts toward a
     // campaign and the association survives an export/import round trip.
     // Mirrors the donation and membership create abilities.
     if ( ! empty( $input['campaign_id'] ) ) {
-        wp_set_object_terms( $memorial_id, [ (int) $input['campaign_id'] ], 'sd_campaign' );
+        wp_set_object_terms( $memorial_id, [ (int) $input['campaign_id'] ], 'skdon_campaign' );
     }
 
     // Run shared post-processing (year taxonomy, lifetime giving, emails).
@@ -127,10 +127,10 @@ function create( array $input ): array|WP_Error {
  * @return array Paginated memorial list.
  */
 function list_memorials( array $input = [] ): array {
-    $query = Query::for( 'sd_memorial' )
+    $query = Query::for( 'skdon_memorial' )
         ->withPermalinks()                    // ← one-line addition
         ->where( 'donor_id', $input['donor_id'] ?? null )
-        ->whereInTaxonomy( 'sd_campaign', $input['campaign_id'] ?? null )
+        ->whereInTaxonomy( 'skdon_campaign', $input['campaign_id'] ?? null )
         // Public wall search targets the honoree only. Searching donor_display_name
         // would match the real name even on memorials shown as "Anonymous Donor",
         // letting a visitor confirm an anonymous gift — an anonymity bypass. Donors
@@ -145,7 +145,7 @@ function list_memorials( array $input = [] ): array {
 
     // Dedication occasion (memory / honor) — orthogonal to memorial_type.
     // Use whereDefaulted so the 'memory' filter also matches legacy rows
-    // with an empty/missing _sd_dedication_type, which display as
+    // with an empty/missing _skdon_dedication_type, which display as
     // "In Memory Of" via normalize_dedication_type's default.
     $dedication = $input['dedication'] ?? null;
     if ( $dedication && 'all' !== $dedication ) {
@@ -153,7 +153,7 @@ function list_memorials( array $input = [] ): array {
     }
 
     if ( ! empty( $input['year'] ) ) {
-        $query->whereInTaxonomy( 'sd_memorial_year', (string) $input['year'], 'slug' );
+        $query->whereInTaxonomy( 'skdon_memorial_year', (string) $input['year'], 'slug' );
     }
 
     return $query->paginate(                  // ← direct return, no loop
@@ -171,7 +171,7 @@ function list_memorials( array $input = [] ): array {
  * @return array|WP_Error Memorial data or error.
  */
 function get( array $input ): array|WP_Error {
-    $result = Entity_Hydrator::get( 'sd_memorial', $input['memorial_id'] );
+    $result = Entity_Hydrator::get( 'skdon_memorial', $input['memorial_id'] );
 
     if ( ! $result ) {
         return new WP_Error(

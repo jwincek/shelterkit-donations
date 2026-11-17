@@ -150,7 +150,7 @@ class Meta_Boxes {
         $readonly = $field['readonly'] ?? false;
         $show_when = $field['show_when'] ?? null;
 
-        $value = $entity[ $field_id ] ?? get_post_meta( $post->ID, '_sd_' . $field_id, true );
+        $value = $entity[ $field_id ] ?? get_post_meta( $post->ID, '_skdon_' . $field_id, true );
 
         $row_attrs = $show_when ? ' data-show-when="' . esc_attr( wp_json_encode( $show_when ) ) . '" style="display:none;"' : '';
 
@@ -328,7 +328,7 @@ class Meta_Boxes {
                 }
 
                 $key = 'sd_' . $field_id;
-                $meta_key = '_sd_' . $field_id;
+                $meta_key = '_skdon_' . $field_id;
 
                 if ( isset( $_POST[ $key ] ) ) {
                     $value = self::sanitize_field( $_POST[ $key ], $field['type'] );
@@ -342,7 +342,7 @@ class Meta_Boxes {
             // composite_save: after the flat per-field writes, assemble
             // those values into a single object-meta key. Closes the
             // admin-vs-abilities address-storage divergence — see
-            // sd_donor manifest's address box for the canonical use.
+            // skdon_donor manifest's address box for the canonical use.
             if ( ! empty( $box['composite_save'] ) ) {
                 self::apply_composite_save( $post_id, $box['composite_save'] );
             }
@@ -369,7 +369,7 @@ class Meta_Boxes {
         $object   = is_array( $existing ) ? $existing : [];
 
         foreach ( $field_map as $field_id => $object_key ) {
-            $flat_value = get_post_meta( $post_id, '_sd_' . $field_id, true );
+            $flat_value = get_post_meta( $post_id, '_skdon_' . $field_id, true );
             if ( '' === $flat_value || null === $flat_value ) {
                 unset( $object[ $object_key ] );
             } else {

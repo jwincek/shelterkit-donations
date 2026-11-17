@@ -32,25 +32,25 @@ class Product_Sync_Checker {
 	 */
 	private static array $product_map = [
 		'shelter-donations' => [
-			'option_key'     => 'sd_donation_product_id',
+			'option_key'     => 'skdon_donation_product_id',
 			'attribute_name' => 'Preferred Allocation',
 			'attribute_slug' => 'preferred-allocation',
 			'config_source'  => 'allocations',
 		],
 		'shelter-memberships' => [
-			'option_key'     => 'sd_membership_product_id',
+			'option_key'     => 'skdon_membership_product_id',
 			'attribute_name' => 'Membership Level',
 			'attribute_slug' => 'membership-level',
 			'config_source'  => 'tiers_individual',
 		],
 		'shelter-memberships-business' => [
-			'option_key'     => 'sd_business_membership_product_id',
+			'option_key'     => 'skdon_business_membership_product_id',
 			'attribute_name' => 'Membership Level',
 			'attribute_slug' => 'membership-level',
 			'config_source'  => 'tiers_business',
 		],
 		'shelter-donations-in-memoriam' => [
-			'option_key'     => 'sd_memorial_product_id',
+			'option_key'     => 'skdon_memorial_product_id',
 			'attribute_name' => 'In Memoriam Type',
 			'attribute_slug' => 'in-memoriam-type',
 			'config_source'  => 'memorial_types',
@@ -402,8 +402,8 @@ class Product_Sync_Checker {
 		$issues = [];
 
 		$expected = [
-			'sd_campaign'       => [ 'sd_donation' ],
-			'sd_memorial_year'  => [ 'sd_memorial' ],
+			'skdon_campaign'       => [ 'skdon_donation' ],
+			'skdon_memorial_year'  => [ 'skdon_memorial' ],
 		];
 
 		foreach ( $expected as $taxonomy => $post_types ) {
@@ -425,7 +425,7 @@ class Product_Sync_Checker {
 		}
 
 		// Check CPTs exist.
-		$expected_cpts = [ 'sd_donation', 'sd_membership', 'sd_memorial', 'sd_donor' ];
+		$expected_cpts = [ 'skdon_donation', 'skdon_membership', 'skdon_memorial', 'skdon_donor' ];
 		foreach ( $expected_cpts as $cpt ) {
 			if ( ! post_type_exists( $cpt ) ) {
 				$issues[] = self::issue( 'error', 'cpt', sprintf( 'Post type "%s" is not registered.', $cpt ) );
@@ -798,13 +798,13 @@ class Product_Sync_Checker {
 		}
 
 		// Cache results for 1 hour.
-		$results = get_transient( 'sd_product_sync_check' );
+		$results = get_transient( 'skdon_product_sync_check' );
 		if ( false === $results ) {
 			if ( ! function_exists( 'wc_get_product' ) ) {
 				return;
 			}
 			$results = self::check();
-			set_transient( 'sd_product_sync_check', $results, HOUR_IN_SECONDS );
+			set_transient( 'skdon_product_sync_check', $results, HOUR_IN_SECONDS );
 		}
 
 		if ( 'ok' === $results['status'] ) {
@@ -856,7 +856,7 @@ class Product_Sync_Checker {
 			if ( ! wp_verify_nonce( $_GET['_wpnonce'] ?? '', 'sd_recheck_sync' ) ) {
 				return;
 			}
-			delete_transient( 'sd_product_sync_check' );
+			delete_transient( 'skdon_product_sync_check' );
 			wp_safe_redirect( remove_query_arg( [ 'action', '_wpnonce' ] ) );
 			exit;
 		}
@@ -871,7 +871,7 @@ class Product_Sync_Checker {
 			}
 
 			$repair_result = self::repair();
-			set_transient( 'sd_repair_result', $repair_result, 60 );
+			set_transient( 'skdon_repair_result', $repair_result, 60 );
 			wp_safe_redirect( add_query_arg( 'sd-repaired', '1', remove_query_arg( [ 'action', '_wpnonce' ] ) ) );
 			exit;
 		}
@@ -887,8 +887,8 @@ class Product_Sync_Checker {
 			return;
 		}
 
-		$result = get_transient( 'sd_repair_result' );
-		delete_transient( 'sd_repair_result' );
+		$result = get_transient( 'skdon_repair_result' );
+		delete_transient( 'skdon_repair_result' );
 
 		if ( ! $result ) {
 			return;
@@ -926,7 +926,7 @@ class Product_Sync_Checker {
 	 * @since 2.1.0
 	 */
 	public static function invalidate_cache(): void {
-		delete_transient( 'sd_product_sync_check' );
+		delete_transient( 'skdon_product_sync_check' );
 	}
 
 	/**

@@ -30,7 +30,7 @@
 declare( strict_types = 1 );
 
 return [
-	'meta_prefix' => '_sd_',
+	'meta_prefix' => '_skdon_',
 	'fields'      => [
 		'is_anonymous' => [
 			'type'        => 'boolean',

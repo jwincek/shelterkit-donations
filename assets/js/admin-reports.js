@@ -29,7 +29,7 @@
             var campaignId = parseInt($('#sd-campaign-filter').val(), 10) || 0;
 
             var params = {
-                action: 'sd_export_report',
+                action: 'skdon_export_report',
                 report: tab,
                 period: period,
                 _wpnonce: sdReports.nonce

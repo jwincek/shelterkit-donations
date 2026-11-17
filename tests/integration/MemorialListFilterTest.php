@@ -71,7 +71,7 @@ final class MemorialListFilterTest extends WP_UnitTestCase {
     }
 
     /**
-     * Legacy rows with no `_sd_dedication_type` meta display as "In Memory
+     * Legacy rows with no `_skdon_dedication_type` meta display as "In Memory
      * Of" (normalize default), so the memory filter must include them —
      * otherwise the filter and the displayed label disagree. Guards the
      * "memory filter returns nothing" regression.
@@ -89,7 +89,7 @@ final class MemorialListFilterTest extends WP_UnitTestCase {
             'amount'          => 10,
         ] );
         // Simulate a pre-1.1.4 memorial: dedication meta never written.
-        delete_post_meta( $legacy['memorial_id'], '_sd_dedication_type' );
+        delete_post_meta( $legacy['memorial_id'], '_skdon_dedication_type' );
 
         $memory = list_memorials( [ 'dedication' => 'memory', 'per_page' => 50 ] );
         $honor  = list_memorials( [ 'dedication' => 'honor', 'per_page' => 50 ] );
@@ -152,7 +152,7 @@ final class MemorialListFilterTest extends WP_UnitTestCase {
             'amount'        => 10,
         ] );
         // Memorial the donor wanted kept anonymous on the public wall.
-        update_post_meta( $result['memorial_id'], '_sd_is_anonymous', true );
+        update_post_meta( $result['memorial_id'], '_skdon_is_anonymous', true );
 
         $by_donor   = list_memorials( [ 'search' => 'Reginald', 'per_page' => 50 ] );
         $by_honoree = list_memorials( [ 'search' => 'Biscuit', 'per_page' => 50 ] );

@@ -40,7 +40,7 @@ final class MemorialCreateTest extends WP_UnitTestCase {
         $email   = 'returning@example.test';
         $donor_id = get_or_create_donor( $email, 'Stored Donor Name' );
         $this->assertIsInt( $donor_id );
-        $this->assertSame( 'Stored Donor Name', get_post_meta( $donor_id, '_sd_display_name', true ) );
+        $this->assertSame( 'Stored Donor Name', get_post_meta( $donor_id, '_skdon_display_name', true ) );
 
         $result = create( [
             'donor_email'   => $email,
@@ -56,18 +56,18 @@ final class MemorialCreateTest extends WP_UnitTestCase {
         $memorial_id = $result['memorial_id'];
         $this->assertSame(
             'Typed Different Name',
-            get_post_meta( $memorial_id, '_sd_donor_display_name', true ),
+            get_post_meta( $memorial_id, '_skdon_donor_display_name', true ),
             'Memorial "From" must reflect the typed name.'
         );
         $this->assertSame(
             'Stored Donor Name',
-            get_post_meta( $donor_id, '_sd_display_name', true ),
+            get_post_meta( $donor_id, '_skdon_display_name', true ),
             'Canonical donor record must be left untouched.'
         );
     }
 
     /**
-     * Dedication type round-trips into _sd_dedication_type for both values.
+     * Dedication type round-trips into _skdon_dedication_type for both values.
      *
      * @dataProvider dedicationProvider
      */
@@ -84,7 +84,7 @@ final class MemorialCreateTest extends WP_UnitTestCase {
         $this->assertIsArray( $result );
         $this->assertSame(
             $expected,
-            get_post_meta( $result['memorial_id'], '_sd_dedication_type', true )
+            get_post_meta( $result['memorial_id'], '_skdon_dedication_type', true )
         );
     }
 
@@ -107,7 +107,7 @@ final class MemorialCreateTest extends WP_UnitTestCase {
         $this->assertIsArray( $result );
         $this->assertSame(
             'memory',
-            get_post_meta( $result['memorial_id'], '_sd_dedication_type', true )
+            get_post_meta( $result['memorial_id'], '_skdon_dedication_type', true )
         );
     }
 
@@ -124,7 +124,7 @@ final class MemorialCreateTest extends WP_UnitTestCase {
         $this->assertIsArray( $result );
         $this->assertSame(
             '',
-            get_post_meta( $result['memorial_id'], '_sd_donor_display_name', true ),
+            get_post_meta( $result['memorial_id'], '_skdon_donor_display_name', true ),
             'Anonymous tributes must not denormalize a donor name.'
         );
     }

@@ -12,7 +12,7 @@
  * @package Starter_Shelter
  * @subpackage Templates
  *
- * @var array $memorials Hydrated sd_memorial entities the user has lit, each
+ * @var array $memorials Hydrated skdon_memorial entities the user has lit, each
  *                       with an added `permalink` key.
  */
 

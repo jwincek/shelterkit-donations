@@ -26,7 +26,7 @@ class Order_Handler {
      * @since 1.0.0
      * @var string
      */
-    private const PROCESSED_META_KEY = '_sd_processed';
+    private const PROCESSED_META_KEY = '_skdon_processed';
 
     /**
      * Meta key for storing processing results.
@@ -34,7 +34,7 @@ class Order_Handler {
      * @since 1.0.0
      * @var string
      */
-    private const RESULTS_META_KEY = '_sd_processing_results';
+    private const RESULTS_META_KEY = '_skdon_processing_results';
 
     /**
      * Initialize the order handler.
@@ -52,7 +52,7 @@ class Order_Handler {
         add_action( 'add_meta_boxes', [ self::class, 'add_processing_meta_box' ] );
 
         // AJAX handler for manual reprocessing.
-        add_action( 'wp_ajax_sd_reprocess_order', [ self::class, 'ajax_reprocess_order' ] );
+        add_action( 'wp_ajax_skdon_reprocess_order', [ self::class, 'ajax_reprocess_order' ] );
     }
 
     /**
@@ -180,7 +180,7 @@ class Order_Handler {
      */
     private static function lock_name( int $order_id ): string {
         $db = defined( 'DB_NAME' ) ? DB_NAME : 'wp';
-        return substr( $db . '_sd_proc_order_' . $order_id, 0, 64 );
+        return substr( $db . '_skdon_proc_order_' . $order_id, 0, 64 );
     }
 
     /**
@@ -283,7 +283,7 @@ class Order_Handler {
      * Validate that an order item has the required custom meta.
      *
      * Items added through the form blocks have custom meta set by the
-     * cart handler (sd_product_type, sd_honoree_name, etc.). Items added
+     * cart handler (_skdon_product_type, _skdon_honoree_name, etc.). Items added
      * directly through WooCommerce (shop page, direct URL) will be
      * missing this meta, which would create incomplete CPT records.
      *
@@ -296,8 +296,8 @@ class Order_Handler {
     private static function validate_item_meta( \WC_Order_Item $item, array $config ): bool|WP_Error {
         $product_type = $config['product_type'] ?? '';
 
-        // Check if the item was added through our form (has sd_product_type meta).
-        $has_form_meta = $item->get_meta( '_sd_product_type' );
+        // Check if the item was added through our form (has _skdon_product_type meta).
+        $has_form_meta = $item->get_meta( '_skdon_product_type' );
 
         if ( ! $has_form_meta ) {
             // Item was added directly, not through a form block.
@@ -306,7 +306,7 @@ class Order_Handler {
             // For memorials, honoree_name is required and has no fallback.
 
             if ( 'memorial' === $product_type ) {
-                $honoree = $item->get_meta( '_sd_honoree_name' );
+                $honoree = $item->get_meta( '_skdon_honoree_name' );
                 if ( empty( $honoree ) ) {
                     return new WP_Error(
                         'missing_required_meta',
@@ -326,7 +326,7 @@ class Order_Handler {
 
         // Specific field validation for form-submitted items.
         if ( 'memorial' === $product_type ) {
-            $honoree = $item->get_meta( '_sd_honoree_name' );
+            $honoree = $item->get_meta( '_skdon_honoree_name' );
             if ( empty( $honoree ) ) {
                 return new WP_Error(
                     'missing_honoree',
@@ -336,7 +336,7 @@ class Order_Handler {
         }
 
         if ( 'membership' === $product_type ) {
-            $tier = $item->get_meta( '_sd_membership_tier' );
+            $tier = $item->get_meta( '_skdon_membership_tier' );
             if ( empty( $tier ) ) {
                 // Tier might come from the variation attribute instead.
                 // Only error if we can't determine it at all.
@@ -565,7 +565,7 @@ class Order_Handler {
                     $btn.prop('disabled', true).text('<?php echo esc_js( __( 'Processing...', 'shelterkit-donations' ) ); ?>');
                     
                     $.post(ajaxurl, {
-                        action: 'sd_reprocess_order',
+                        action: 'skdon_reprocess_order',
                         order_id: $btn.data('order-id'),
                         nonce: $('#sd_reprocess_nonce').val()
                     }, function(response) {

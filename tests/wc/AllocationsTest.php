@@ -40,8 +40,8 @@ final class AllocationsTest extends WP_UnitTestCase {
     public function tear_down(): void {
         Config::delete_override( 'settings', 'allocations' );
         Config::delete_override( 'settings', 'retired_allocations' );
-        delete_option( 'sd_allocations_version' );
-        delete_option( 'sd_donation_product_id' );
+        delete_option( 'skdon_allocations_version' );
+        delete_option( 'skdon_donation_product_id' );
         Field_Manifest::clear_cache();
         Config::clear_cache( 'entities' );
         parent::tear_down();
@@ -105,7 +105,7 @@ final class AllocationsTest extends WP_UnitTestCase {
         Field_Manifest::clear_cache();
         Config::clear_cache( 'entities' );
 
-        $this->assertSame( [ 'general-fund', 'bedding' ], Config::get_path( 'entities', 'entities.sd_donation.fields.allocation.enum' ) );
+        $this->assertSame( [ 'general-fund', 'bedding' ], Config::get_path( 'entities', 'entities.skdon_donation.fields.allocation.enum' ) );
     }
 
     public function test_removing_a_fund_retires_it(): void {
@@ -212,17 +212,17 @@ final class AllocationsTest extends WP_UnitTestCase {
 
         $this->assertSame(
             [ 'general-fund' => 'General Fund', 'spay-neuter-clinic' => 'Spay/Neuter Program' ],
-            get_option( 'sd_config_settings_allocations' ),
+            get_option( 'skdon_config_settings_allocations' ),
             'The stored key is rewritten to the canonical slug.'
         );
         $this->assertSame( [ 'old-roof' ], array_keys( Allocations::retired() ), 'A recorded fund missing from the list is kept, retired.' );
-        $this->assertSame( '1', get_option( 'sd_allocations_version' ) );
+        $this->assertSame( '1', get_option( 'skdon_allocations_version' ) );
     }
 
     public function test_memorial_types_match_the_memorial_enum(): void {
         // "honor" moved to dedication_type; the subject is only person or pet.
         $this->assertSame(
-            Config::get_path( 'entities', 'entities.sd_memorial.fields.memorial_type.enum' ),
+            Config::get_path( 'entities', 'entities.skdon_memorial.fields.memorial_type.enum' ),
             array_keys( (array) Config::get_item( 'settings', 'memorial_types', [] ) )
         );
     }
@@ -252,13 +252,13 @@ final class AllocationsTest extends WP_UnitTestCase {
             $variation->save();
         }
 
-        update_option( 'sd_donation_product_id', $product_id );
+        update_option( 'skdon_donation_product_id', $product_id );
 
         return $product_id;
     }
 
     private function donation_with_allocation( string $allocation ): void {
-        $id = self::factory()->post->create( [ 'post_type' => 'sd_donation' ] );
-        update_post_meta( $id, '_sd_allocation', $allocation );
+        $id = self::factory()->post->create( [ 'post_type' => 'skdon_donation' ] );
+        update_post_meta( $id, '_skdon_allocation', $allocation );
     }
 }

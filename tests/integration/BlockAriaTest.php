@@ -51,8 +51,8 @@ final class BlockAriaTest extends WP_UnitTestCase {
             'logo_attachment_id' => $logo_id,
         ] );
         $id = $res['membership_id'];
-        update_post_meta( $id, '_sd_logo_status', 'approved' );
-        update_post_meta( $id, '_sd_logo_attachment_id', $logo_id );
+        update_post_meta( $id, '_skdon_logo_status', 'approved' );
+        update_post_meta( $id, '_skdon_logo_attachment_id', $logo_id );
         return $id;
     }
 

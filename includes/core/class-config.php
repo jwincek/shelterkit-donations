@@ -59,7 +59,7 @@ class Config {
      *
      * Each entry maps a config file name to an array of top-level keys
      * that can be overridden. The admin override is stored as a WordPress
-     * option named 'sd_config_{name}_{key}'.
+     * option named 'skdon_config_{name}_{key}'.
      *
      * @var array<string, string[]>
      */
@@ -114,7 +114,7 @@ class Config {
         }
 
         // Resolve $ref references recursively. Runs AFTER manifest merges
-        // so refs contributed by manifests (e.g., sd_memorial's
+        // so refs contributed by manifests (e.g., skdon_memorial's
         // notify_family pointing to schemas/notify-family.json) are
         // resolved alongside refs already in the JSON.
         $data = self::resolve_refs( $data );
@@ -224,7 +224,7 @@ class Config {
      * Apply admin overrides from the options table.
      *
      * JSON config provides defaults. Admin-edited values (stored as
-     * 'sd_config_{name}_{key}' options) take precedence when present.
+     * 'skdon_config_{name}_{key}' options) take precedence when present.
      *
      * @since 2.1.0
      *
@@ -236,7 +236,7 @@ class Config {
         $keys = self::$overridable[ $name ] ?? [];
 
         foreach ( $keys as $key ) {
-            $option = get_option( 'sd_config_' . $name . '_' . $key );
+            $option = get_option( 'skdon_config_' . $name . '_' . $key );
 
             if ( false !== $option && is_array( $option ) ) {
                 $data[ $key ] = $option;
@@ -263,7 +263,7 @@ class Config {
             return false;
         }
 
-        update_option( 'sd_config_' . $name . '_' . $key, $value );
+        update_option( 'skdon_config_' . $name . '_' . $key, $value );
         self::clear_cache( $name );
 
         return true;
@@ -278,7 +278,7 @@ class Config {
      * @param string $key  Top-level key to revert.
      */
     public static function delete_override( string $name, string $key ): void {
-        delete_option( 'sd_config_' . $name . '_' . $key );
+        delete_option( 'skdon_config_' . $name . '_' . $key );
         self::clear_cache( $name );
     }
 
@@ -292,7 +292,7 @@ class Config {
      * @return bool True if override exists.
      */
     public static function has_override( string $name, string $key ): bool {
-        return false !== get_option( 'sd_config_' . $name . '_' . $key );
+        return false !== get_option( 'skdon_config_' . $name . '_' . $key );
     }
 
     /**
@@ -316,7 +316,7 @@ class Config {
      * @since 1.0.0
      *
      * @param string $name    Config file name.
-     * @param string $path    Dot-notation path (e.g., 'entities.sd_donation.fields').
+     * @param string $path    Dot-notation path (e.g., 'entities.skdon_donation.fields').
      * @param mixed  $default Default value if path not found.
      * @return mixed The config value or default.
      */

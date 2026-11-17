@@ -35,23 +35,23 @@ $recent_gifts = [];
 $membership = null;
 
 if ( $donor_id ) {
-    $donor = Entity_Hydrator::get( 'sd_donor', $donor_id );
+    $donor = Entity_Hydrator::get( 'skdon_donor', $donor_id );
 
     // Get stats.
     $stats = [
-        'lifetime_giving' => (float) get_post_meta( $donor_id, '_sd_lifetime_giving', true ),
-        'donation_count'  => (int) get_post_meta( $donor_id, '_sd_donation_count', true ),
-        'first_gift_date' => get_post_meta( $donor_id, '_sd_first_gift_date', true ),
-        'last_gift_date'  => get_post_meta( $donor_id, '_sd_last_gift_date', true ),
+        'lifetime_giving' => (float) get_post_meta( $donor_id, '_skdon_lifetime_giving', true ),
+        'donation_count'  => (int) get_post_meta( $donor_id, '_skdon_donation_count', true ),
+        'first_gift_date' => get_post_meta( $donor_id, '_skdon_first_gift_date', true ),
+        'last_gift_date'  => get_post_meta( $donor_id, '_skdon_last_gift_date', true ),
     ];
 
     // Get recent donations.
     $recent_query = new WP_Query( [
-        'post_type'      => 'sd_donation',
+        'post_type'      => 'skdon_donation',
         'posts_per_page' => $recent_count,
         'meta_query'     => [
             [
-                'key'   => '_sd_donor_id',
+                'key'   => '_skdon_donor_id',
                 'value' => $donor_id,
             ],
         ],
@@ -62,25 +62,25 @@ if ( $donor_id ) {
     $recent_gifts = array_map( function ( $post ) {
         return [
             'id'         => $post->ID,
-            'amount'     => (float) get_post_meta( $post->ID, '_sd_amount', true ),
+            'amount'     => (float) get_post_meta( $post->ID, '_skdon_amount', true ),
             'date'       => get_the_date( get_option( 'date_format' ), $post ),
-            'allocation' => get_post_meta( $post->ID, '_sd_allocation', true ),
-            'type'       => get_post_meta( $post->ID, '_sd_donation_type', true ) ?: 'general',
+            'allocation' => get_post_meta( $post->ID, '_skdon_allocation', true ),
+            'type'       => get_post_meta( $post->ID, '_skdon_donation_type', true ) ?: 'general',
         ];
     }, $recent_query->posts );
 
     // Get membership status.
     if ( $show_membership ) {
         $membership_query = new WP_Query( [
-            'post_type'      => 'sd_membership',
+            'post_type'      => 'skdon_membership',
             'posts_per_page' => 1,
             'meta_query'     => [
                 [
-                    'key'   => '_sd_donor_id',
+                    'key'   => '_skdon_donor_id',
                     'value' => $donor_id,
                 ],
                 [
-                    'key'     => '_sd_end_date',
+                    'key'     => '_skdon_end_date',
                     'value'   => wp_date( 'Y-m-d' ),
                     'compare' => '>=',
                     'type'    => 'DATE',
@@ -92,10 +92,10 @@ if ( $donor_id ) {
             $mem_post = $membership_query->posts[0];
             $membership = [
                 'id'        => $mem_post->ID,
-                'tier'      => get_post_meta( $mem_post->ID, '_sd_tier', true ),
-                'type'      => get_post_meta( $mem_post->ID, '_sd_membership_type', true ),
-                'start'     => get_post_meta( $mem_post->ID, '_sd_start_date', true ),
-                'end'       => get_post_meta( $mem_post->ID, '_sd_end_date', true ),
+                'tier'      => get_post_meta( $mem_post->ID, '_skdon_tier', true ),
+                'type'      => get_post_meta( $mem_post->ID, '_skdon_membership_type', true ),
+                'start'     => get_post_meta( $mem_post->ID, '_skdon_start_date', true ),
+                'end'       => get_post_meta( $mem_post->ID, '_skdon_end_date', true ),
                 'is_active' => true,
             ];
         }

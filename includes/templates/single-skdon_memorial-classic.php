@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 
 get_header();
 
-$template_file = __DIR__ . '/single-sd_memorial.html';
+$template_file = __DIR__ . '/single-skdon_memorial.html';
 
 if ( file_exists( $template_file ) ) {
     $content = file_get_contents( $template_file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents

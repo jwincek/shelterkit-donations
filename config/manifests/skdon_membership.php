@@ -1,8 +1,8 @@
 <?php
 /**
- * Field manifest for `sd_membership`.
+ * Field manifest for `skdon_membership`.
  *
- * Source of truth for every place a sd_membership field name appears.
+ * Source of truth for every place a skdon_membership field name appears.
  * Loaded by Field_Manifest; merged into the entities config by
  * Config::get('entities') so existing Entity_Hydrator consumers
  * transparently see this content.
@@ -20,8 +20,8 @@
 declare( strict_types = 1 );
 
 return [
-	'entity'      => 'sd_membership',
-	'meta_prefix' => '_sd_',
+	'entity'      => 'skdon_membership',
+	'meta_prefix' => '_skdon_',
 	'fields'      => [
 		'donor_id' => [
 			'type'        => 'integer',
@@ -29,7 +29,7 @@ return [
 			'form'        => [
 				'label'      => 'Member',
 				'input_type' => 'post_select',
-				'post_type'  => 'sd_donor',
+				'post_type'  => 'skdon_donor',
 			],
 		],
 		'tier' => [
@@ -148,7 +148,7 @@ return [
 		],
 		// Declared on the entity (not just the shared checkout field) so it
 		// hydrates and is persisted by create() — required for the public
-		// recognition wall to honor a member's opt-out. Mirrors sd_memorial.
+		// recognition wall to honor a member's opt-out. Mirrors skdon_memorial.
 		'is_anonymous' => [
 			'type'         => 'boolean',
 			'default'      => false,
@@ -191,7 +191,7 @@ return [
 			'args'     => [ 'tier', 'membership_type' ],
 		],
 		// Resolved business-logo URL (empty when no/invalid attachment).
-		// Mirrors sd_memorial's photo_url; consumed by the business-member
+		// Mirrors skdon_memorial's photo_url; consumed by the business-member
 		// slideshow block.
 		'logo_url' => [
 			'function' => 'get_attachment_url',
@@ -200,7 +200,7 @@ return [
 	],
 	'relations' => [
 		'donor' => [
-			'type'        => 'sd_donor',
+			'type'        => 'skdon_donor',
 			'foreign_key' => 'donor_id',
 		],
 	],
@@ -269,7 +269,7 @@ return [
 					],
 					'campaign_id' => [
 						'type'        => 'integer',
-						'description' => 'Optional sd_campaign term ID. When set, the new membership is attached to the campaign and counts toward its progress (membership_drive type).',
+						'description' => 'Optional skdon_campaign term ID. When set, the new membership is attached to the campaign and counts toward its progress (membership_drive type).',
 					],
 				],
 			],
@@ -369,7 +369,7 @@ return [
 					'membership_type' => [ 'type' => 'string' ],
 					'campaign_id'     => [
 						'type'        => 'integer',
-						'description' => 'Filter by sd_campaign term ID. 0/omitted = no filter.',
+						'description' => 'Filter by skdon_campaign term ID. 0/omitted = no filter.',
 					],
 					'page'            => [ 'type' => 'integer', 'default' => 1 ],
 					'per_page'        => [ 'type' => 'integer', 'default' => 10 ],
@@ -500,24 +500,24 @@ return [
 				],
 				'donor_name' => [
 					'source' => 'item_meta',
-					'key'    => '_sd_donor_name',
+					'key'    => '_skdon_donor_name',
 				],
 				'is_anonymous' => [
 					'source'    => 'item_meta',
-					'key'       => '_sd_is_anonymous',
+					'key'       => '_skdon_is_anonymous',
 					'fallback'  => [
 						'source' => 'order_meta',
-						'key'    => '_sd_is_anonymous',
+						'key'    => '_skdon_is_anonymous',
 					],
 					'transform' => 'boolean',
 					'default'   => false,
 				],
 				'campaign_id' => [
 					'source'   => 'item_meta',
-					'key'      => '_sd_campaign_id',
+					'key'      => '_skdon_campaign_id',
 					'fallback' => [
 						'source' => 'order_meta',
-						'key'    => '_sd_campaign_id',
+						'key'    => '_skdon_campaign_id',
 					],
 				],
 			],
@@ -539,14 +539,14 @@ return [
 				],
 				'donor_name' => [
 					'source' => 'item_meta',
-					'key'    => '_sd_donor_name',
+					'key'    => '_skdon_donor_name',
 				],
 				'business_name' => [
 					'source'   => 'item_meta',
-					'key'      => '_sd_business_name',
+					'key'      => '_skdon_business_name',
 					'fallback' => [
 						'source'   => 'order_meta',
-						'key'      => '_sd_business_name',
+						'key'      => '_skdon_business_name',
 						'fallback' => [
 							'source' => 'order_field',
 							'key'    => 'billing_company',
@@ -555,25 +555,25 @@ return [
 				],
 				'logo_attachment_id' => [
 					'source'    => 'item_meta',
-					'key'       => '_sd_logo_attachment_id',
+					'key'       => '_skdon_logo_attachment_id',
 					'transform' => 'integer',
 				],
 				'is_anonymous' => [
 					'source'    => 'item_meta',
-					'key'       => '_sd_is_anonymous',
+					'key'       => '_skdon_is_anonymous',
 					'fallback'  => [
 						'source' => 'order_meta',
-						'key'    => '_sd_is_anonymous',
+						'key'    => '_skdon_is_anonymous',
 					],
 					'transform' => 'boolean',
 					'default'   => false,
 				],
 				'campaign_id' => [
 					'source'   => 'item_meta',
-					'key'      => '_sd_campaign_id',
+					'key'      => '_skdon_campaign_id',
 					'fallback' => [
 						'source' => 'order_meta',
-						'key'    => '_sd_campaign_id',
+						'key'    => '_skdon_campaign_id',
 					],
 				],
 			],
@@ -629,7 +629,7 @@ return [
 	 *
 	 * Box-level `show_when` hides the entire box conditionally; field-
 	 * level `show_when` lives on the field's `form` block (none used
-	 * for sd_membership today). The projector produces a config shape
+	 * for skdon_membership today). The projector produces a config shape
 	 * compatible with Meta_Boxes::render_field's switch on `type`.
 	 */
 	'meta_boxes' => [
@@ -662,7 +662,7 @@ return [
 
 	/*
 	 * WooCommerce email definitions owned by this entity. See
-	 * sd_donation.php for the placeholder validation convention.
+	 * skdon_donation.php for the placeholder validation convention.
 	 */
 	'emails' => [
 		'membership-welcome' => [
@@ -678,8 +678,8 @@ return [
 				'input'         => [ '$ability_input' => 'shelter-memberships/create' ],
 			],
 			'entities'      => [
-				'membership' => [ 'entity' => 'sd_membership', 'id_from' => 'membership_id' ],
-				'donor'      => [ 'entity' => 'sd_donor', 'id_from' => 'donor_id' ],
+				'membership' => [ 'entity' => 'skdon_membership', 'id_from' => 'membership_id' ],
+				'donor'      => [ 'entity' => 'skdon_donor', 'id_from' => 'donor_id' ],
 			],
 			'recipient_type' => 'donor',
 			'subject'        => 'Welcome to the {site_name} family!',
@@ -701,8 +701,8 @@ return [
 				'donor_id'      => [ 'type' => 'integer' ],
 			],
 			'entities'      => [
-				'membership' => [ 'entity' => 'sd_membership', 'id_from' => 'membership_id' ],
-				'donor'      => [ 'entity' => 'sd_donor', 'id_from' => 'donor_id' ],
+				'membership' => [ 'entity' => 'skdon_membership', 'id_from' => 'membership_id' ],
+				'donor'      => [ 'entity' => 'skdon_donor', 'id_from' => 'donor_id' ],
 			],
 			'recipient_type' => 'donor',
 			'subject'        => 'Your {site_name} membership expires soon',
@@ -725,8 +725,8 @@ return [
 				'donor_id'      => [ 'type' => 'integer' ],
 			],
 			'entities'      => [
-				'membership' => [ 'entity' => 'sd_membership', 'id_from' => 'membership_id' ],
-				'donor'      => [ 'entity' => 'sd_donor', 'id_from' => 'donor_id' ],
+				'membership' => [ 'entity' => 'skdon_membership', 'id_from' => 'membership_id' ],
+				'donor'      => [ 'entity' => 'skdon_donor', 'id_from' => 'donor_id' ],
 			],
 			'recipient_type' => 'donor',
 			'subject'        => 'Your business logo has been approved - {site_name}',
@@ -748,8 +748,8 @@ return [
 				'reason'        => [ 'type' => 'string' ],
 			],
 			'entities'      => [
-				'membership' => [ 'entity' => 'sd_membership', 'id_from' => 'membership_id' ],
-				'donor'      => [ 'entity' => 'sd_donor', 'id_from' => 'donor_id' ],
+				'membership' => [ 'entity' => 'skdon_membership', 'id_from' => 'membership_id' ],
+				'donor'      => [ 'entity' => 'skdon_donor', 'id_from' => 'donor_id' ],
 			],
 			'recipient_type' => 'donor',
 			'subject'        => 'Action required: Your business logo needs attention - {site_name}',

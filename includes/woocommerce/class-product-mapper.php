@@ -114,7 +114,7 @@ class Product_Mapper {
 
             // Only override the base when the mapping produced a real value.
             // This lets products.json donor_name override the billing default
-            // when the form supplied one (item_meta _sd_donor_name).
+            // when the form supplied one (item_meta _skdon_donor_name).
             if ( null !== $value && '' !== $value ) {
                 $input[ $field ] = $value;
             }

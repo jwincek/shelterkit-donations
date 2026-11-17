@@ -7,7 +7,7 @@
  * Uses the filter-based approach (get_block_templates +
  * pre_get_block_file_template) as the primary method because
  * register_block_template() rejects template slugs containing
- * underscores (e.g. single-sd_memorial) due to a regex limitation
+ * underscores (e.g. single-skdon_memorial) due to a regex limitation
  * in WP_Block_Templates_Registry. See:
  * https://github.com/WordPress/gutenberg/issues/67066
  *
@@ -36,10 +36,10 @@ defined( 'ABSPATH' ) || exit;
  */
 function get_plugin_templates(): array {
     return [
-        'single-sd_memorial' => [
+        'single-skdon_memorial' => [
             'title'       => __( 'Single Memorial', 'shelterkit-donations' ),
             'description' => __( 'Displays an individual memorial tribute with honoree name, message, and donor attribution.', 'shelterkit-donations' ),
-            'post_types'  => [ 'sd_memorial' ],
+            'post_types'  => [ 'skdon_memorial' ],
         ],
     ];
 }
@@ -197,11 +197,11 @@ function classic_theme_fallback( string $template ): string {
         return $template;
     }
 
-    if ( ! is_singular( 'sd_memorial' ) ) {
+    if ( ! is_singular( 'skdon_memorial' ) ) {
         return $template;
     }
 
-    $fallback = get_templates_dir() . 'single-sd_memorial-classic.php';
+    $fallback = get_templates_dir() . 'single-skdon_memorial-classic.php';
 
     return file_exists( $fallback ) ? $fallback : $template;
 }

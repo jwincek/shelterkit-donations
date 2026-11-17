@@ -1,10 +1,10 @@
 <?php
 /**
- * Campaign Admin - Term meta + WP term-edit UI for sd_campaign.
+ * Campaign Admin - Term meta + WP term-edit UI for skdon_campaign.
  *
- * Closes audit §1 P0-1: no writer existed for `_sd_goal` or `_sd_end_date`.
+ * Closes audit §1 P0-1: no writer existed for `_skdon_goal` or `_skdon_end_date`.
  * Registers the two as REST-exposed term meta and adds matching fields to
- * the standard WP term add/edit forms (at edit-tags.php?taxonomy=sd_campaign).
+ * the standard WP term add/edit forms (at edit-tags.php?taxonomy=skdon_campaign).
  *
  * @package Starter_Shelter
  * @subpackage Admin
@@ -16,7 +16,7 @@ declare( strict_types = 1 );
 namespace Starter_Shelter\Admin;
 
 /**
- * Adds writable goal / end-date term meta to sd_campaign.
+ * Adds writable goal / end-date term meta to skdon_campaign.
  *
  * REST-exposure of the meta lets a future block-editor inspector
  * (mirroring assets/js/memorial-panel.js) read/write these via
@@ -29,11 +29,11 @@ class Campaign_Admin {
     /**
      * Target taxonomy slug.
      */
-    private const TAXONOMY = 'sd_campaign';
+    private const TAXONOMY = 'skdon_campaign';
 
     /**
      * Recognized campaign types. `donation_drive` is the historical
-     * default — campaigns count $ raised from sd_donation. `membership_drive`
+     * default — campaigns count $ raised from skdon_donation. `membership_drive`
      * counts new memberships (optionally restricted by tier_filter)
      * against a numeric goal. (Audit-campaigns §4 also names a 'mixed'
      * type; deferred until there's a concrete use case to inform its
@@ -62,7 +62,7 @@ class Campaign_Admin {
         add_action( "created_{$tax}", [ self::class, 'save_fields' ] );
         add_action( "edited_{$tax}", [ self::class, 'save_fields' ] );
 
-        // The sd_donation CPT lives under the 'shelterkit-donations' menu, but
+        // The skdon_donation CPT lives under the 'shelterkit-donations' menu, but
         // taxonomies attached to a CPT with a custom show_in_menu parent
         // don't auto-follow there — so add an explicit submenu link.
         add_action( 'admin_menu', [ self::class, 'register_submenu' ] );
@@ -70,7 +70,7 @@ class Campaign_Admin {
 
     /**
      * Add a "Campaigns" item to the ShelterKit Donations menu that opens
-     * the standard WP taxonomy edit page for sd_campaign.
+     * the standard WP taxonomy edit page for skdon_campaign.
      */
     public static function register_submenu(): void {
         add_submenu_page(
@@ -78,16 +78,16 @@ class Campaign_Admin {
             __( 'Campaigns', 'shelterkit-donations' ),
             __( 'Campaigns', 'shelterkit-donations' ),
             'manage_categories',
-            'edit-tags.php?taxonomy=' . self::TAXONOMY . '&post_type=sd_donation'
+            'edit-tags.php?taxonomy=' . self::TAXONOMY . '&post_type=skdon_donation'
         );
     }
 
     /**
-     * Register `_sd_goal` (number) and `_sd_end_date` (string) as
-     * REST-exposed term meta on sd_campaign.
+     * Register `_skdon_goal` (number) and `_skdon_end_date` (string) as
+     * REST-exposed term meta on skdon_campaign.
      */
     public static function register_term_meta(): void {
-        register_term_meta( self::TAXONOMY, '_sd_goal', [
+        register_term_meta( self::TAXONOMY, '_skdon_goal', [
             'type'              => 'number',
             'description'       => 'Campaign goal: dollars (donation_drive) or member count (membership_drive).',
             'single'            => true,
@@ -96,7 +96,7 @@ class Campaign_Admin {
             'auth_callback'     => static fn() => current_user_can( 'manage_options' ),
         ] );
 
-        register_term_meta( self::TAXONOMY, '_sd_end_date', [
+        register_term_meta( self::TAXONOMY, '_skdon_end_date', [
             'type'              => 'string',
             'description'       => 'Campaign end date (Y-m-d, blank = ongoing).',
             'single'            => true,
@@ -105,7 +105,7 @@ class Campaign_Admin {
             'auth_callback'     => static fn() => current_user_can( 'manage_options' ),
         ] );
 
-        register_term_meta( self::TAXONOMY, '_sd_campaign_type', [
+        register_term_meta( self::TAXONOMY, '_skdon_campaign_type', [
             'type'              => 'string',
             'description'       => 'Campaign type: donation_drive (default) or membership_drive.',
             'single'            => true,
@@ -114,7 +114,7 @@ class Campaign_Admin {
             'auth_callback'     => static fn() => current_user_can( 'manage_options' ),
         ] );
 
-        register_term_meta( self::TAXONOMY, '_sd_membership_tier_filter', [
+        register_term_meta( self::TAXONOMY, '_skdon_membership_tier_filter', [
             'type'              => 'string',
             'description'       => 'Optional tier slug that restricts which memberships count toward a membership_drive goal.',
             'single'            => true,
@@ -196,10 +196,10 @@ class Campaign_Admin {
      * @param \WP_Term $term The taxonomy term being edited.
      */
     public static function render_edit_fields( \WP_Term $term ): void {
-        $goal          = get_term_meta( $term->term_id, '_sd_goal', true );
-        $end_date      = (string) get_term_meta( $term->term_id, '_sd_end_date', true );
-        $current_type  = self::sanitize_campaign_type( get_term_meta( $term->term_id, '_sd_campaign_type', true ) );
-        $tier_filter   = (string) get_term_meta( $term->term_id, '_sd_membership_tier_filter', true );
+        $goal          = get_term_meta( $term->term_id, '_skdon_goal', true );
+        $end_date      = (string) get_term_meta( $term->term_id, '_skdon_end_date', true );
+        $current_type  = self::sanitize_campaign_type( get_term_meta( $term->term_id, '_skdon_campaign_type', true ) );
+        $tier_filter   = (string) get_term_meta( $term->term_id, '_skdon_membership_tier_filter', true );
         ?>
         <tr class="form-field">
             <th scope="row"><label for="sd_campaign_type"><?php esc_html_e( 'Campaign Type', 'shelterkit-donations' ); ?></label></th>
@@ -252,30 +252,30 @@ class Campaign_Admin {
         // phpcs:disable WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- capability and check_admin_referer() run before any write; the sniff flags the reads that precede its own nonce call textually.
         if ( array_key_exists( 'sd_goal', $_POST ) ) {
             $goal = max( 0.0, (float) wp_unslash( $_POST['sd_goal'] ) );
-            update_term_meta( $term_id, '_sd_goal', $goal );
+            update_term_meta( $term_id, '_skdon_goal', $goal );
         }
 
         if ( array_key_exists( 'sd_end_date', $_POST ) ) {
             $end_date = self::sanitize_end_date( wp_unslash( $_POST['sd_end_date'] ) );
             if ( '' !== $end_date ) {
-                update_term_meta( $term_id, '_sd_end_date', $end_date );
+                update_term_meta( $term_id, '_skdon_end_date', $end_date );
             } else {
-                delete_term_meta( $term_id, '_sd_end_date' );
+                delete_term_meta( $term_id, '_skdon_end_date' );
             }
         }
 
         if ( array_key_exists( 'sd_campaign_type', $_POST ) ) {
             $type = self::sanitize_campaign_type( wp_unslash( $_POST['sd_campaign_type'] ) );
-            update_term_meta( $term_id, '_sd_campaign_type', $type );
+            update_term_meta( $term_id, '_skdon_campaign_type', $type );
         }
 
         if ( array_key_exists( 'sd_membership_tier_filter', $_POST ) ) {
             $tier = sanitize_key( wp_unslash( $_POST['sd_membership_tier_filter'] ) );
         // phpcs:enable WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
             if ( '' !== $tier ) {
-                update_term_meta( $term_id, '_sd_membership_tier_filter', $tier );
+                update_term_meta( $term_id, '_skdon_membership_tier_filter', $tier );
             } else {
-                delete_term_meta( $term_id, '_sd_membership_tier_filter' );
+                delete_term_meta( $term_id, '_skdon_membership_tier_filter' );
             }
         }
     }

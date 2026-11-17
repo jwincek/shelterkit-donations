@@ -43,7 +43,7 @@ class Activator {
             'description' => 'Support us with a donation to help care for animals in need.',
             'short_desc'  => 'Support us with a donation.',
             'category'    => 'Support Us',
-            'option_key'  => 'sd_donation_product_id',
+            'option_key'  => 'skdon_donation_product_id',
             'virtual'     => true,
             'image_file'  => 'product-donation.svg',
             'attribute'   => [
@@ -61,7 +61,7 @@ class Activator {
             'description' => 'Our shelter is sustained through your membership. Become a member today!',
             'short_desc'  => 'Become a member and support our pets in need!',
             'category'    => 'Support Us',
-            'option_key'  => 'sd_membership_product_id',
+            'option_key'  => 'skdon_membership_product_id',
             'virtual'     => true,
             'image_file'  => 'product-membership.svg',
             'attribute'   => [
@@ -85,7 +85,7 @@ class Activator {
             'description' => 'Our shelter is sustained through your business membership. Support us today!',
             'short_desc'  => 'Become a business member and support our pets in need!',
             'category'    => 'Support Us',
-            'option_key'  => 'sd_business_membership_product_id',
+            'option_key'  => 'skdon_business_membership_product_id',
             'virtual'     => true,
             'image_file'  => 'product-membership-business.svg',
             'attribute'   => [
@@ -107,7 +107,7 @@ class Activator {
             'description' => 'Honor the memory of a person or pet with a meaningful donation.',
             'short_desc'  => 'Make a donation in memory of a person or pet.',
             'category'    => 'Support Us',
-            'option_key'  => 'sd_memorial_product_id',
+            'option_key'  => 'skdon_memorial_product_id',
             'virtual'     => true,
             'image_file'  => 'product-memorial.svg',
             'attribute'   => [
@@ -153,7 +153,7 @@ class Activator {
         }
 
         // Check if we've already run setup.
-        if ( get_option( 'sd_products_created' ) ) {
+        if ( get_option( 'skdon_products_created' ) ) {
             return;
         }
 
@@ -168,7 +168,7 @@ class Activator {
         Allocations::sync_variations();
 
         // Mark as complete.
-        update_option( 'sd_products_created', true );
+        update_option( 'skdon_products_created', true );
     }
 
     /**
@@ -416,7 +416,7 @@ class Activator {
      * @since 2.0.0
      */
     public static function reset_product_flags(): void {
-        delete_option( 'sd_products_created' );
+        delete_option( 'skdon_products_created' );
 
         foreach ( self::$products as $product_data ) {
             delete_option( $product_data['option_key'] );

@@ -50,18 +50,18 @@ function create( array $input ): array|WP_Error {
     // to the donor record's title for the label.
     $donor_label = $input['donor_name'] ?? $input['donor_email'] ?? get_the_title( $donor_id );
     $donation_id = wp_insert_post( [
-        'post_type'   => 'sd_donation',
+        'post_type'   => 'skdon_donation',
         'post_title'  => sprintf( '%s - %s', $donor_label, $display_date ),
         'post_status' => 'publish',
         'post_date'   => $donation_date,
         'meta_input'  => [
-            '_sd_donor_id'      => $donor_id,
-            '_sd_amount'        => (float) $input['amount'],
-            '_sd_wc_order_id'   => $input['order_id'] ?? 0,
-            '_sd_allocation'    => $input['allocation'] ?? 'general-fund',
-            '_sd_is_anonymous'  => $input['is_anonymous'] ?? false,
-            '_sd_dedication'    => $input['dedication'] ?? '',
-            '_sd_donation_date' => $donation_date,
+            '_skdon_donor_id'      => $donor_id,
+            '_skdon_amount'        => (float) $input['amount'],
+            '_skdon_wc_order_id'   => $input['order_id'] ?? 0,
+            '_skdon_allocation'    => $input['allocation'] ?? 'general-fund',
+            '_skdon_is_anonymous'  => $input['is_anonymous'] ?? false,
+            '_skdon_dedication'    => $input['dedication'] ?? '',
+            '_skdon_donation_date' => $donation_date,
         ],
     ], true );
 
@@ -71,7 +71,7 @@ function create( array $input ): array|WP_Error {
 
     // Assign campaign if specified.
     if ( ! empty( $input['campaign_id'] ) ) {
-        wp_set_object_terms( $donation_id, [ (int) $input['campaign_id'] ], 'sd_campaign' );
+        wp_set_object_terms( $donation_id, [ (int) $input['campaign_id'] ], 'skdon_campaign' );
     }
 
     // Update donor lifetime giving.
@@ -95,7 +95,7 @@ function create( array $input ): array|WP_Error {
  * @return array|WP_Error Donation data or error.
  */
 function get( array $input ): array|WP_Error {
-    $result = Entity_Hydrator::get( 'sd_donation', $input['donation_id'] );
+    $result = Entity_Hydrator::get( 'skdon_donation', $input['donation_id'] );
 
     if ( ! $result ) {
         return new WP_Error(
@@ -117,7 +117,7 @@ function get( array $input ): array|WP_Error {
  * @return array Paginated donation list.
  */
 function list_donations( array $input = [] ): array {
-    return Query::for( 'sd_donation' )
+    return Query::for( 'skdon_donation' )
         ->where( 'donor_id', $input['donor_id'] ?? null )
         ->where( 'allocation', $input['allocation'] ?? null )
         ->whereDateBetween(
@@ -125,7 +125,7 @@ function list_donations( array $input = [] ): array {
             $input['date_from'] ?? null,
             $input['date_to'] ?? null
         )
-        ->whereInTaxonomy( 'sd_campaign', $input['campaign_id'] ?? null )
+        ->whereInTaxonomy( 'skdon_campaign', $input['campaign_id'] ?? null )
         ->orderBy( 'donation_date', 'DESC' )
         ->paginate( $input['page'] ?? 1, $input['per_page'] ?? 10 );
 }
@@ -148,7 +148,7 @@ function get_stats( array $input = [] ): array {
 
     global $wpdb;
 
-    // Optional sd_campaign tax_query join. Built once and spliced into
+    // Optional skdon_campaign tax_query join. Built once and spliced into
     // both queries below. We can't express this with Query::for because
     // get_stats relies on raw SUM/COUNT aggregates the builder doesn't
     // emit.
@@ -157,7 +157,7 @@ function get_stats( array $input = [] ): array {
     $campaign_args  = [];
     if ( $campaign_id > 0 ) {
         $campaign_join  = " INNER JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id"
-                        . " INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id AND tt.taxonomy = 'sd_campaign'";
+                        . " INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id AND tt.taxonomy = 'skdon_campaign'";
         $campaign_where = ' AND tt.term_id = %d';
         $campaign_args  = [ $campaign_id ];
     }
@@ -170,11 +170,11 @@ function get_stats( array $input = [] ): array {
             COALESCE(SUM(pm_amount.meta_value + 0), 0) as total_amount,
             COUNT(DISTINCT pm_donor.meta_value) as donor_count
         FROM {$wpdb->posts} p
-        INNER JOIN {$wpdb->postmeta} pm_amount ON p.ID = pm_amount.post_id AND pm_amount.meta_key = '_sd_amount'
-        INNER JOIN {$wpdb->postmeta} pm_donor ON p.ID = pm_donor.post_id AND pm_donor.meta_key = '_sd_donor_id'
-        INNER JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = '_sd_donation_date'
+        INNER JOIN {$wpdb->postmeta} pm_amount ON p.ID = pm_amount.post_id AND pm_amount.meta_key = '_skdon_amount'
+        INNER JOIN {$wpdb->postmeta} pm_donor ON p.ID = pm_donor.post_id AND pm_donor.meta_key = '_skdon_donor_id'
+        INNER JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = '_skdon_donation_date'
         {$campaign_join}
-        WHERE p.post_type = 'sd_donation'
+        WHERE p.post_type = 'skdon_donation'
         AND p.post_status = 'publish'
         AND pm_date.meta_value BETWEEN %s AND %s
         {$campaign_where}",
@@ -191,11 +191,11 @@ function get_stats( array $input = [] ): array {
             COUNT(*) as count,
             COALESCE(SUM(pm_amount.meta_value + 0), 0) as total
         FROM {$wpdb->posts} p
-        INNER JOIN {$wpdb->postmeta} pm_amount ON p.ID = pm_amount.post_id AND pm_amount.meta_key = '_sd_amount'
-        INNER JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = '_sd_donation_date'
-        LEFT JOIN {$wpdb->postmeta} pm_alloc ON p.ID = pm_alloc.post_id AND pm_alloc.meta_key = '_sd_allocation'
+        INNER JOIN {$wpdb->postmeta} pm_amount ON p.ID = pm_amount.post_id AND pm_amount.meta_key = '_skdon_amount'
+        INNER JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = '_skdon_donation_date'
+        LEFT JOIN {$wpdb->postmeta} pm_alloc ON p.ID = pm_alloc.post_id AND pm_alloc.meta_key = '_skdon_allocation'
         {$campaign_join}
-        WHERE p.post_type = 'sd_donation'
+        WHERE p.post_type = 'skdon_donation'
         AND p.post_status = 'publish'
         AND pm_date.meta_value BETWEEN %s AND %s
         {$campaign_where}

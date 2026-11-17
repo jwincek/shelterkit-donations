@@ -94,10 +94,10 @@ function get_entity_value( array $source_args, $block_instance, string $attribut
 
     // Map friendly entity names to post types.
     $entity_map = [
-        'donation'   => 'sd_donation',
-        'membership' => 'sd_membership',
-        'memorial'   => 'sd_memorial',
-        'donor'      => 'sd_donor',
+        'donation'   => 'skdon_donation',
+        'membership' => 'skdon_membership',
+        'memorial'   => 'skdon_memorial',
+        'donor'      => 'skdon_donor',
     ];
 
     $post_type = $entity_map[ $entity_type ] ?? $entity_type;
@@ -134,7 +134,7 @@ function get_donor_value( array $source_args, $block_instance, string $attribute
         return null;
     }
 
-    $donor = Entity_Hydrator::get( 'sd_donor', (int) $donor_id );
+    $donor = Entity_Hydrator::get( 'skdon_donor', (int) $donor_id );
 
     if ( ! $donor ) {
         return null;
@@ -195,15 +195,15 @@ function get_campaign_value( array $source_args, $block_instance, string $attrib
     }
 
     // Get campaign term.
-    $campaign = $campaign_id ? get_term( (int) $campaign_id, 'sd_campaign' ) : null;
+    $campaign = $campaign_id ? get_term( (int) $campaign_id, 'skdon_campaign' ) : null;
 
     if ( ! $campaign || is_wp_error( $campaign ) ) {
         return null;
     }
 
     // Get campaign meta.
-    $goal = (float) get_term_meta( $campaign->term_id, '_sd_goal', true );
-    $end_date = get_term_meta( $campaign->term_id, '_sd_end_date', true );
+    $goal = (float) get_term_meta( $campaign->term_id, '_skdon_goal', true );
+    $end_date = get_term_meta( $campaign->term_id, '_skdon_end_date', true );
 
     // Calculate raised amount.
     $raised = calculate_campaign_raised( $campaign->term_id );
@@ -310,7 +310,7 @@ function get_current_user_donor_id(): ?int {
     }
 
     // Check transient cache first.
-    $cache_key = "sd_donor_id_{$user_id}";
+    $cache_key = "skdon_donor_id_{$user_id}";
     $donor_id = get_transient( $cache_key );
 
     if ( false !== $donor_id ) {
@@ -318,11 +318,11 @@ function get_current_user_donor_id(): ?int {
     }
 
     $donors = get_posts( [
-        'post_type'      => 'sd_donor',
+        'post_type'      => 'skdon_donor',
         'posts_per_page' => 1,
         'meta_query'     => [
             [
-                'key'   => '_sd_user_id',
+                'key'   => '_skdon_user_id',
                 'value' => $user_id,
             ],
         ],
@@ -346,16 +346,16 @@ function get_current_user_donor_id(): ?int {
  * @param int $post_id Post ID.
  */
 function invalidate_donor_cache( int $post_id ): void {
-    if ( 'sd_donor' !== get_post_type( $post_id ) ) {
+    if ( 'skdon_donor' !== get_post_type( $post_id ) ) {
         return;
     }
 
-    $user_id = get_post_meta( $post_id, '_sd_user_id', true );
+    $user_id = get_post_meta( $post_id, '_skdon_user_id', true );
     if ( $user_id ) {
-        delete_transient( "sd_donor_id_{$user_id}" );
+        delete_transient( "skdon_donor_id_{$user_id}" );
     }
 }
-add_action( 'save_post_sd_donor', __NAMESPACE__ . '\\invalidate_donor_cache' );
+add_action( 'save_post_skdon_donor', __NAMESPACE__ . '\\invalidate_donor_cache' );
 
 /**
  * Calculate a shelter statistic.
@@ -390,9 +390,9 @@ function calculate_stat( string $stat, string $period ) {
             $total = (float) $wpdb->get_var( "
                 SELECT COALESCE(SUM(pm.meta_value), 0)
                 FROM {$wpdb->posts} p
-                JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_amount'
-                JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = '_sd_donation_date'
-                WHERE p.post_type = 'sd_donation'
+                JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_skdon_amount'
+                JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = '_skdon_donation_date'
+                WHERE p.post_type = 'skdon_donation'
                 AND p.post_status = 'publish'
                 {$date_clause}
             " );
@@ -403,8 +403,8 @@ function calculate_stat( string $stat, string $period ) {
             return (int) $wpdb->get_var( "
                 SELECT COUNT(*)
                 FROM {$wpdb->posts} p
-                JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = '_sd_donation_date'
-                WHERE p.post_type = 'sd_donation'
+                JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = '_skdon_donation_date'
+                WHERE p.post_type = 'skdon_donation'
                 AND p.post_status = 'publish'
                 {$date_clause}
             " );
@@ -414,9 +414,9 @@ function calculate_stat( string $stat, string $period ) {
             return (int) $wpdb->get_var( "
                 SELECT COUNT(DISTINCT pm.meta_value)
                 FROM {$wpdb->posts} p
-                JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_donor_id'
-                JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = '_sd_donation_date'
-                WHERE p.post_type = 'sd_donation'
+                JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_skdon_donor_id'
+                JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = '_skdon_donation_date'
+                WHERE p.post_type = 'skdon_donation'
                 AND p.post_status = 'publish'
                 {$date_clause}
             " );
@@ -426,8 +426,8 @@ function calculate_stat( string $stat, string $period ) {
             return (int) $wpdb->get_var( $wpdb->prepare( "
                 SELECT COUNT(*)
                 FROM {$wpdb->posts} p
-                JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_end_date'
-                WHERE p.post_type = 'sd_membership'
+                JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_skdon_end_date'
+                WHERE p.post_type = 'skdon_membership'
                 AND p.post_status = 'publish'
                 AND pm.meta_value >= %s
             ", $today ) );
@@ -437,8 +437,8 @@ function calculate_stat( string $stat, string $period ) {
             return (int) $wpdb->get_var( "
                 SELECT COUNT(*)
                 FROM {$wpdb->posts} p
-                JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = '_sd_donation_date'
-                WHERE p.post_type = 'sd_memorial'
+                JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = '_skdon_donation_date'
+                WHERE p.post_type = 'skdon_memorial'
                 AND p.post_status = 'publish'
                 {$date_clause}
             " );
@@ -463,9 +463,9 @@ function calculate_campaign_raised( int $campaign_id ): float {
     return (float) $wpdb->get_var( $wpdb->prepare( "
         SELECT COALESCE(SUM(pm.meta_value), 0)
         FROM {$wpdb->posts} p
-        JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_amount'
+        JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_skdon_amount'
         JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
-        WHERE p.post_type = 'sd_donation'
+        WHERE p.post_type = 'skdon_donation'
         AND p.post_status = 'publish'
         AND tr.term_taxonomy_id = %d
     ", $campaign_id ) );
@@ -485,9 +485,9 @@ function calculate_campaign_donors( int $campaign_id ): int {
     return (int) $wpdb->get_var( $wpdb->prepare( "
         SELECT COUNT(DISTINCT pm.meta_value)
         FROM {$wpdb->posts} p
-        JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_donor_id'
+        JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_skdon_donor_id'
         JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
-        WHERE p.post_type = 'sd_donation'
+        WHERE p.post_type = 'skdon_donation'
         AND p.post_status = 'publish'
         AND tr.term_taxonomy_id = %d
     ", $campaign_id ) );

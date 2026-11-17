@@ -299,7 +299,7 @@ class CSV_Exporter {
 		}
 
 		// For donor exports, the entity IS the donor.
-		if ( 'sd_donor' === $post_type ) {
+		if ( 'skdon_donor' === $post_type ) {
 			if ( isset( $col['computed'] ) ) {
 				return (string) ( $entity[ $col['computed'] ] ?? '' );
 			}
@@ -311,7 +311,7 @@ class CSV_Exporter {
 		}
 
 		// Hydrate the related donor.
-		$donor = Entity_Hydrator::get( 'sd_donor', $donor_id );
+		$donor = Entity_Hydrator::get( 'skdon_donor', $donor_id );
 		if ( ! $donor ) {
 			return '';
 		}
@@ -388,8 +388,8 @@ class CSV_Exporter {
 	 * Extract a subfield from an object value with flat meta fallback.
 	 *
 	 * Address data exists in two formats depending on how it was stored:
-	 * - Abilities pipeline: serialized object in _sd_address
-	 * - Meta box saves: individual keys (_sd_address_line_1, _sd_city, etc.)
+	 * - Abilities pipeline: serialized object in _skdon_address
+	 * - Meta box saves: individual keys (_skdon_address_line_1, _skdon_city, etc.)
 	 *
 	 * This method tries the hydrated object first, then falls back to
 	 * individual meta keys if the object subfield is empty.

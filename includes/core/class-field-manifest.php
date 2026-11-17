@@ -54,7 +54,7 @@ class Field_Manifest {
 	 *
 	 * @since 1.1.2
 	 *
-	 * @param string $entity Entity name (e.g., 'sd_membership').
+	 * @param string $entity Entity name (e.g., 'skdon_membership').
 	 * @return array<string, mixed>|null
 	 */
 	public static function get( string $entity ): ?array {
@@ -428,7 +428,7 @@ class Field_Manifest {
 	 * Project one checkout field into the legacy config shape.
 	 *
 	 * Overlay attrs override the field's intrinsic `form` shape — the
-	 * same field can render differently per surface (e.g., sd_donation
+	 * same field can render differently per surface (e.g., skdon_donation
 	 * dedication is a textarea in meta-boxes but a text input at
 	 * checkout). Entries without a matching entity field are allowed
 	 * if the overlay supplies its own input_type and label (e.g.,

@@ -45,12 +45,12 @@ class Donor_Lookup {
 		}
 
 		$posts = get_posts( [
-			'post_type'      => 'sd_donor',
+			'post_type'      => 'skdon_donor',
 			'post_status'    => 'any',
 			'posts_per_page' => 1,
 			'meta_query'     => [
 				[
-					'key'   => '_sd_email',
+					'key'   => '_skdon_email',
 					'value' => sanitize_email( $email ),
 				],
 			],
@@ -85,7 +85,7 @@ class Donor_Lookup {
 		// Strategy 1: Match the stored title exactly as provided.
 		$donor_id = $wpdb->get_var( $wpdb->prepare(
 			"SELECT ID FROM {$wpdb->posts}
-			 WHERE post_type = 'sd_donor'
+			 WHERE post_type = 'skdon_donor'
 			   AND post_status IN ( 'publish', 'draft', 'private' )
 			   AND post_title = %s
 			 LIMIT 1",
@@ -102,7 +102,7 @@ class Donor_Lookup {
 		if ( $encoded_name !== $name ) {
 			$donor_id = $wpdb->get_var( $wpdb->prepare(
 				"SELECT ID FROM {$wpdb->posts}
-				 WHERE post_type = 'sd_donor'
+				 WHERE post_type = 'skdon_donor'
 				   AND post_status IN ( 'publish', 'draft', 'private' )
 				   AND post_title = %s
 				 LIMIT 1",
@@ -119,7 +119,7 @@ class Donor_Lookup {
 		if ( $wp_encoded !== $name ) {
 			$donor_id = $wpdb->get_var( $wpdb->prepare(
 				"SELECT ID FROM {$wpdb->posts}
-				 WHERE post_type = 'sd_donor'
+				 WHERE post_type = 'skdon_donor'
 				   AND post_status IN ( 'publish', 'draft', 'private' )
 				   AND post_title = %s
 				 LIMIT 1",
@@ -137,9 +137,9 @@ class Donor_Lookup {
 		$donor_id = $wpdb->get_var( $wpdb->prepare(
 			"SELECT p.ID FROM {$wpdb->posts} p
 			 INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
-			 WHERE p.post_type = 'sd_donor'
+			 WHERE p.post_type = 'skdon_donor'
 			   AND p.post_status IN ( 'publish', 'draft', 'private' )
-			   AND pm.meta_key = '_sd_display_name'
+			   AND pm.meta_key = '_skdon_display_name'
 			   AND pm.meta_value = %s
 			 LIMIT 1",
 			$name
@@ -246,16 +246,16 @@ class Donor_Lookup {
 	private static function find_or_create_anonymous( string $import_source = '' ): array|\WP_Error {
 		// Check for existing anonymous donor via meta flag first (most reliable).
 		$existing = get_posts( [
-			'post_type'      => 'sd_donor',
+			'post_type'      => 'skdon_donor',
 			'post_status'    => 'any',
 			'posts_per_page' => 1,
 			'meta_query'     => [
 				[
-					'key'   => '_sd_is_anonymous',
+					'key'   => '_skdon_is_anonymous',
 					'value' => '1',
 				],
 				[
-					'key'   => '_sd_email',
+					'key'   => '_skdon_email',
 					'value' => 'anonymous@example.com',
 				],
 			],
@@ -273,14 +273,14 @@ class Donor_Lookup {
 		}
 
 		$donor_id = wp_insert_post( [
-			'post_type'   => 'sd_donor',
+			'post_type'   => 'skdon_donor',
 			'post_status' => 'publish',
 			'post_title'  => 'Anonymous',
 			'meta_input'  => [
-				'_sd_email'        => 'anonymous@example.com',
-				'_sd_display_name' => 'Anonymous',
-				'_sd_is_anonymous' => 1,
-				'_sd_import_source' => $import_source ?: 'system',
+				'_skdon_email'        => 'anonymous@example.com',
+				'_skdon_display_name' => 'Anonymous',
+				'_skdon_is_anonymous' => 1,
+				'_skdon_import_source' => $import_source ?: 'system',
 			],
 		], true );
 
@@ -316,17 +316,17 @@ class Donor_Lookup {
 		$display_name = self::build_display_name( $first_name, $last_name, $email );
 
 		$meta = array_merge( [
-			'_sd_email'           => $email,
-			'_sd_display_name'    => $display_name,
-			'_sd_first_name'      => $first_name,
-			'_sd_last_name'       => $last_name,
-			'_sd_lifetime_giving' => 0,
-			'_sd_created_date'    => wp_date( 'Y-m-d H:i:s' ),
+			'_skdon_email'           => $email,
+			'_skdon_display_name'    => $display_name,
+			'_skdon_first_name'      => $first_name,
+			'_skdon_last_name'       => $last_name,
+			'_skdon_lifetime_giving' => 0,
+			'_skdon_created_date'    => wp_date( 'Y-m-d H:i:s' ),
 		], $data['extra_meta'] ?? [] );
 
 		// Phone.
 		if ( ! empty( $data['phone'] ) ) {
-			$meta['_sd_phone'] = sanitize_text_field( $data['phone'] );
+			$meta['_skdon_phone'] = sanitize_text_field( $data['phone'] );
 		}
 
 		// Address — store as both serialized object and individual keys for
@@ -334,16 +334,16 @@ class Donor_Lookup {
 		if ( ! empty( $data['address'] ) && is_array( $data['address'] ) ) {
 			$address = array_filter( array_map( 'sanitize_text_field', $data['address'] ) );
 			if ( ! empty( $address ) ) {
-				$meta['_sd_address'] = $address;
+				$meta['_skdon_address'] = $address;
 
 				// Also store as flat keys for meta box compatibility.
 				$flat_map = [
-					'address_1' => '_sd_address_line_1',
-					'address_2' => '_sd_address_line_2',
-					'city'      => '_sd_city',
-					'state'     => '_sd_state',
-					'postcode'  => '_sd_postal_code',
-					'country'   => '_sd_country',
+					'address_1' => '_skdon_address_line_1',
+					'address_2' => '_skdon_address_line_2',
+					'city'      => '_skdon_city',
+					'state'     => '_skdon_state',
+					'postcode'  => '_skdon_postal_code',
+					'country'   => '_skdon_country',
 				];
 				foreach ( $flat_map as $key => $meta_key ) {
 					if ( ! empty( $address[ $key ] ) ) {
@@ -354,11 +354,11 @@ class Donor_Lookup {
 		}
 
 		if ( ! empty( $data['import_source'] ) ) {
-			$meta['_sd_import_source'] = sanitize_key( $data['import_source'] );
+			$meta['_skdon_import_source'] = sanitize_key( $data['import_source'] );
 		}
 
 		$donor_id = wp_insert_post( [
-			'post_type'   => 'sd_donor',
+			'post_type'   => 'skdon_donor',
 			'post_status' => 'publish',
 			'post_title'  => $display_name,
 			'meta_input'  => $meta,
@@ -402,14 +402,14 @@ class Donor_Lookup {
 		$parsed = self::parse_name( $display_name );
 
 		$meta = [
-			'_sd_email'        => '', // No email in legacy data.
-			'_sd_display_name' => $display_name,
-			'_sd_first_name'   => $parsed['first'],
-			'_sd_last_name'    => $parsed['last'],
+			'_skdon_email'        => '', // No email in legacy data.
+			'_skdon_display_name' => $display_name,
+			'_skdon_first_name'   => $parsed['first'],
+			'_skdon_last_name'    => $parsed['last'],
 		];
 
 		if ( ! empty( $data['import_source'] ) ) {
-			$meta['_sd_import_source'] = sanitize_key( $data['import_source'] );
+			$meta['_skdon_import_source'] = sanitize_key( $data['import_source'] );
 		}
 
 		if ( ! empty( $data['extra_meta'] ) ) {
@@ -417,7 +417,7 @@ class Donor_Lookup {
 		}
 
 		$donor_id = wp_insert_post( [
-			'post_type'   => 'sd_donor',
+			'post_type'   => 'skdon_donor',
 			'post_status' => 'publish',
 			'post_title'  => $display_name,
 			'meta_input'  => $meta,
@@ -434,7 +434,7 @@ class Donor_Lookup {
 	 * Backfill display_name meta on an existing donor if missing.
 	 *
 	 * Legacy donors or donors created by older code may not have the
-	 * _sd_display_name meta set, which the front-end memorial wall needs.
+	 * _skdon_display_name meta set, which the front-end memorial wall needs.
 	 *
 	 * @since 2.0.0
 	 *
@@ -442,7 +442,7 @@ class Donor_Lookup {
 	 * @param array $data     The incoming data with potential name info.
 	 */
 	private static function maybe_backfill_display_name( int $donor_id, array $data ): void {
-		$current = get_post_meta( $donor_id, '_sd_display_name', true );
+		$current = get_post_meta( $donor_id, '_skdon_display_name', true );
 
 		if ( ! empty( $current ) ) {
 			return;
@@ -469,7 +469,7 @@ class Donor_Lookup {
 		}
 
 		if ( ! empty( $display_name ) ) {
-			update_post_meta( $donor_id, '_sd_display_name', $display_name );
+			update_post_meta( $donor_id, '_skdon_display_name', $display_name );
 		}
 	}
 

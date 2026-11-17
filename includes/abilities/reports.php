@@ -55,7 +55,7 @@ function annual_summary( array $input ): array|WP_Error {
         );
     }
 
-    $donor = Entity_Hydrator::get( 'sd_donor', $donor_id );
+    $donor = Entity_Hydrator::get( 'skdon_donor', $donor_id );
     if ( ! $donor ) {
         return new WP_Error(
             'donor_not_found',
@@ -68,21 +68,21 @@ function annual_summary( array $input ): array|WP_Error {
     $date_to   = "$year-12-31";
 
     // Get donations for the year.
-    $donations = Query::for( 'sd_donation' )
+    $donations = Query::for( 'skdon_donation' )
         ->where( 'donor_id', $donor_id )
         ->whereDateBetween( 'donation_date', $date_from, $date_to )
         ->orderBy( 'donation_date', 'ASC' )
         ->get();
 
     // Get memorials for the year.
-    $memorials = Query::for( 'sd_memorial' )
+    $memorials = Query::for( 'skdon_memorial' )
         ->where( 'donor_id', $donor_id )
         ->whereDateBetween( 'donation_date', $date_from, $date_to )
         ->orderBy( 'donation_date', 'ASC' )
         ->get();
 
     // Get memberships active during the year.
-    $memberships = Query::for( 'sd_membership' )
+    $memberships = Query::for( 'skdon_membership' )
         ->where( 'donor_id', $donor_id )
         ->whereDateBetween( 'start_date', $date_from, $date_to )
         ->orderBy( 'start_date', 'ASC' )
@@ -166,11 +166,11 @@ function donor_summary( array $input ): array|WP_Error {
     $year_start = wp_date( 'Y-01-01' );
     $year_end   = wp_date( 'Y-12-31' );
 
-    $all_donations = Query::for( 'sd_donation' )
+    $all_donations = Query::for( 'skdon_donation' )
         ->where( 'donor_id', $donor_id )
         ->get();
 
-    $ytd_donations = Query::for( 'sd_donation' )
+    $ytd_donations = Query::for( 'skdon_donation' )
         ->where( 'donor_id', $donor_id )
         ->whereDateBetween( 'donation_date', $year_start, $year_end )
         ->get();
@@ -221,7 +221,7 @@ function dashboard_stats( array $input = [] ): array {
     $today           = wp_date( 'Y-m-d' );
     $expiring_window = wp_date( 'Y-m-d', strtotime( '+' . EXPIRING_SOON_WINDOW_DAYS . ' days' ) );
 
-    // Optional sd_campaign tax_query join. Spliced into the donations,
+    // Optional skdon_campaign tax_query join. Spliced into the donations,
     // memberships, by-tier, and memorials queries. Donor counts stay
     // unfiltered — donors aren't directly campaign-tagged; we'd be
     // joining transitively through donations/memberships which would
@@ -231,7 +231,7 @@ function dashboard_stats( array $input = [] ): array {
     $campaign_args  = [];
     if ( $campaign_id > 0 ) {
         $campaign_join  = " INNER JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id"
-                        . " INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id AND tt.taxonomy = 'sd_campaign'";
+                        . " INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id AND tt.taxonomy = 'skdon_campaign'";
         $campaign_where = ' AND tt.term_id = %d';
         $campaign_args  = [ $campaign_id ];
     }
@@ -245,11 +245,11 @@ function dashboard_stats( array $input = [] ): array {
             COALESCE(SUM(pm.meta_value + 0), 0) as total,
             COUNT(DISTINCT pd.meta_value) as donors
         FROM {$wpdb->posts} p
-        INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_amount'
-        INNER JOIN {$wpdb->postmeta} pd ON p.ID = pd.post_id AND pd.meta_key = '_sd_donor_id'
-        INNER JOIN {$wpdb->postmeta} pdt ON p.ID = pdt.post_id AND pdt.meta_key = '_sd_donation_date'
+        INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_skdon_amount'
+        INNER JOIN {$wpdb->postmeta} pd ON p.ID = pd.post_id AND pd.meta_key = '_skdon_donor_id'
+        INNER JOIN {$wpdb->postmeta} pdt ON p.ID = pdt.post_id AND pdt.meta_key = '_skdon_donation_date'
         {$campaign_join}
-        WHERE p.post_type = 'sd_donation'
+        WHERE p.post_type = 'skdon_donation'
         AND p.post_status = 'publish'
         AND pdt.meta_value BETWEEN %s AND %s
         {$campaign_where}",
@@ -268,11 +268,11 @@ function dashboard_stats( array $input = [] ): array {
             SUM(CASE WHEN pe.meta_value BETWEEN %s AND %s THEN 1 ELSE 0 END) as expiring_count,
             COALESCE(SUM(CASE WHEN ps.meta_value BETWEEN %s AND %s THEN pm.meta_value + 0 ELSE 0 END), 0) as revenue
         FROM {$wpdb->posts} p
-        INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_amount'
-        INNER JOIN {$wpdb->postmeta} pe ON p.ID = pe.post_id AND pe.meta_key = '_sd_end_date'
-        INNER JOIN {$wpdb->postmeta} ps ON p.ID = ps.post_id AND ps.meta_key = '_sd_start_date'
+        INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_skdon_amount'
+        INNER JOIN {$wpdb->postmeta} pe ON p.ID = pe.post_id AND pe.meta_key = '_skdon_end_date'
+        INNER JOIN {$wpdb->postmeta} ps ON p.ID = ps.post_id AND ps.meta_key = '_skdon_start_date'
         {$campaign_join}
-        WHERE p.post_type = 'sd_membership'
+        WHERE p.post_type = 'skdon_membership'
         AND p.post_status = 'publish'
         {$campaign_where}",
         $today,
@@ -293,11 +293,11 @@ function dashboard_stats( array $input = [] ): array {
             COUNT(*) as count,
             COALESCE(SUM(pm.meta_value + 0), 0) as revenue
         FROM {$wpdb->posts} p
-        INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_amount'
-        INNER JOIN {$wpdb->postmeta} ps ON p.ID = ps.post_id AND ps.meta_key = '_sd_start_date'
-        INNER JOIN {$wpdb->postmeta} pt ON p.ID = pt.post_id AND pt.meta_key = '_sd_tier'
+        INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_skdon_amount'
+        INNER JOIN {$wpdb->postmeta} ps ON p.ID = ps.post_id AND ps.meta_key = '_skdon_start_date'
+        INNER JOIN {$wpdb->postmeta} pt ON p.ID = pt.post_id AND pt.meta_key = '_skdon_tier'
         {$campaign_join}
-        WHERE p.post_type = 'sd_membership'
+        WHERE p.post_type = 'skdon_membership'
         AND p.post_status = 'publish'
         AND ps.meta_value BETWEEN %s AND %s
         {$campaign_where}
@@ -319,7 +319,7 @@ function dashboard_stats( array $input = [] ): array {
         ];
     }
 
-    // Memorials: count + sum in period. Filters by `_sd_donation_date`
+    // Memorials: count + sum in period. Filters by `_skdon_donation_date`
     // (matching donations) so back-dated memorial entries land in the
     // intended reporting period rather than the period in which the post
     // happens to be saved.
@@ -329,10 +329,10 @@ function dashboard_stats( array $input = [] ): array {
             COUNT(*) as count,
             COALESCE(SUM(pm.meta_value + 0), 0) as revenue
         FROM {$wpdb->posts} p
-        INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_amount'
-        INNER JOIN {$wpdb->postmeta} pdt ON p.ID = pdt.post_id AND pdt.meta_key = '_sd_donation_date'
+        INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_skdon_amount'
+        INNER JOIN {$wpdb->postmeta} pdt ON p.ID = pdt.post_id AND pdt.meta_key = '_skdon_donation_date'
         {$campaign_join}
-        WHERE p.post_type = 'sd_memorial'
+        WHERE p.post_type = 'skdon_memorial'
         AND p.post_status = 'publish'
         AND pdt.meta_value BETWEEN %s AND %s
         {$campaign_where}",
@@ -346,11 +346,11 @@ function dashboard_stats( array $input = [] ): array {
     $donor_total = (int) $wpdb->get_var(
         "SELECT COUNT(*)
         FROM {$wpdb->posts}
-        WHERE post_type = 'sd_donor'
+        WHERE post_type = 'skdon_donor'
         AND post_status = 'publish'"
     );
 
-    // LEFT JOIN + COALESCE so donors missing _sd_created_date (legacy
+    // LEFT JOIN + COALESCE so donors missing _skdon_created_date (legacy
     // imports, manual DB edits) still count by their post_date. Both
     // standard creation paths (Helpers\get_or_create_donor and
     // Admin\Donor_Lookup) write the meta, but the audit flagged this
@@ -358,8 +358,8 @@ function dashboard_stats( array $input = [] ): array {
     $donor_new = (int) $wpdb->get_var( $wpdb->prepare(
         "SELECT COUNT(*)
         FROM {$wpdb->posts} p
-        LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sd_created_date'
-        WHERE p.post_type = 'sd_donor'
+        LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_skdon_created_date'
+        WHERE p.post_type = 'skdon_donor'
         AND p.post_status = 'publish'
         AND COALESCE( pm.meta_value, p.post_date ) BETWEEN %s AND %s",
         $range['start'],
@@ -454,7 +454,7 @@ function donation_trend( array $input = [] ): array {
     $campaign_args  = [];
     if ( $campaign_id > 0 ) {
         $campaign_join  = " INNER JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id"
-                        . " INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id AND tt.taxonomy = 'sd_campaign'";
+                        . " INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id AND tt.taxonomy = 'skdon_campaign'";
         $campaign_where = ' AND tt.term_id = %d';
         $campaign_args  = [ $campaign_id ];
     }
@@ -468,10 +468,10 @@ function donation_trend( array $input = [] ): array {
             COALESCE( SUM( pm_amount.meta_value + 0 ), 0 ) as total,
             COUNT( * ) as count
         FROM {$wpdb->posts} p
-        JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = '_sd_donation_date'
-        JOIN {$wpdb->postmeta} pm_amount ON p.ID = pm_amount.post_id AND pm_amount.meta_key = '_sd_amount'
+        JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = '_skdon_donation_date'
+        JOIN {$wpdb->postmeta} pm_amount ON p.ID = pm_amount.post_id AND pm_amount.meta_key = '_skdon_amount'
         {$campaign_join}
-        WHERE p.post_type = 'sd_donation'
+        WHERE p.post_type = 'skdon_donation'
           AND p.post_status = 'publish'
           AND pm_date.meta_value >= %s
           AND pm_date.meta_value <= %s
@@ -509,7 +509,7 @@ function donation_trend( array $input = [] ): array {
  * "Retention" here means: of the memberships whose end_date fell in the
  * window, how many of those donors had a subsequent membership that
  * started on or after the expiry. The renewed-count query is a
- * self-correlated join on sd_membership — Query::for() can't express
+ * self-correlated join on skdon_membership — Query::for() can't express
  * that — so it stays raw, but it's now in the data layer (an ability)
  * rather than the renderer.
  *
@@ -531,7 +531,7 @@ function membership_retention( array $input = [] ): array {
     $to     = wp_date( 'Y-m-d' );
 
     // Expired-in-window count via Query builder.
-    $expired_count = Query::for( 'sd_membership' )
+    $expired_count = Query::for( 'skdon_membership' )
         ->whereDateBetween( 'end_date', $from, $to )
         ->count();
 
@@ -541,18 +541,18 @@ function membership_retention( array $input = [] ): array {
     $renewed_count = (int) $wpdb->get_var( $wpdb->prepare(
         "SELECT COUNT( DISTINCT expired.ID )
         FROM {$wpdb->posts} expired
-        JOIN {$wpdb->postmeta} pm_end ON expired.ID = pm_end.post_id AND pm_end.meta_key = '_sd_end_date'
-        JOIN {$wpdb->postmeta} pm_donor ON expired.ID = pm_donor.post_id AND pm_donor.meta_key = '_sd_donor_id'
-        JOIN {$wpdb->posts} renewed ON renewed.post_type = 'sd_membership'
+        JOIN {$wpdb->postmeta} pm_end ON expired.ID = pm_end.post_id AND pm_end.meta_key = '_skdon_end_date'
+        JOIN {$wpdb->postmeta} pm_donor ON expired.ID = pm_donor.post_id AND pm_donor.meta_key = '_skdon_donor_id'
+        JOIN {$wpdb->posts} renewed ON renewed.post_type = 'skdon_membership'
             AND renewed.post_status = 'publish'
             AND renewed.ID != expired.ID
         JOIN {$wpdb->postmeta} pm_donor2 ON renewed.ID = pm_donor2.post_id
-            AND pm_donor2.meta_key = '_sd_donor_id'
+            AND pm_donor2.meta_key = '_skdon_donor_id'
             AND pm_donor2.meta_value = pm_donor.meta_value
         JOIN {$wpdb->postmeta} pm_start ON renewed.ID = pm_start.post_id
-            AND pm_start.meta_key = '_sd_start_date'
+            AND pm_start.meta_key = '_skdon_start_date'
             AND pm_start.meta_value >= pm_end.meta_value
-        WHERE expired.post_type = 'sd_membership'
+        WHERE expired.post_type = 'skdon_membership'
           AND expired.post_status = 'publish'
           AND pm_end.meta_value >= %s
           AND pm_end.meta_value <= %s",
@@ -608,7 +608,7 @@ function action_items( array $input = [] ): array {
     }
 
     // Memberships expiring within the configured window.
-    $expiring = Query::for( 'sd_membership' )
+    $expiring = Query::for( 'skdon_membership' )
         ->whereDateBetween(
             'end_date',
             wp_date( 'Y-m-d' ),
@@ -623,12 +623,12 @@ function action_items( array $input = [] ): array {
             'label'        => sprintf( __( 'membership expiring in %d days', 'shelterkit-donations' ), $expiring_window ),
             /* translators: %d: number of days */
             'label_plural' => sprintf( __( 'memberships expiring in %d days', 'shelterkit-donations' ), $expiring_window ),
-            'url'          => admin_url( 'edit.php?post_type=sd_membership&expiring=' . $expiring_window ),
+            'url'          => admin_url( 'edit.php?post_type=skdon_membership&expiring=' . $expiring_window ),
         ];
     }
 
     // Memorials with notify_family_enabled but no recorded family_notified_date.
-    $pending_notifications = Query::for( 'sd_memorial' )
+    $pending_notifications = Query::for( 'skdon_memorial' )
         ->where( 'notify_family_enabled', '1' )
         ->whereNotExists( 'family_notified_date' )
         ->count();
@@ -638,7 +638,7 @@ function action_items( array $input = [] ): array {
             'count'        => $pending_notifications,
             'label'        => __( 'family notification pending', 'shelterkit-donations' ),
             'label_plural' => __( 'family notifications pending', 'shelterkit-donations' ),
-            'url'          => admin_url( 'edit.php?post_type=sd_memorial&notify_pending=1' ),
+            'url'          => admin_url( 'edit.php?post_type=skdon_memorial&notify_pending=1' ),
         ];
     }
 
@@ -675,7 +675,7 @@ function recent_activity( array $input = [] ): array {
     // merge + re-sort + slice in PHP. The per-type fetch is cheap because
     // each is a single primed WP_Query under the hood.
     $merged = [];
-    foreach ( [ 'sd_donation', 'sd_membership', 'sd_memorial' ] as $post_type ) {
+    foreach ( [ 'skdon_donation', 'skdon_membership', 'skdon_memorial' ] as $post_type ) {
         $entities = Query::for( $post_type )
             ->orderBy( 'date', 'DESC' )
             ->get( $limit );
@@ -718,7 +718,7 @@ function recent_activity( array $input = [] ): array {
     $donor_ids = array_filter( array_unique( array_column( $merged, 'donor_id' ) ) );
     $donor_names = [];
     if ( ! empty( $donor_ids ) ) {
-        $donors = Query::for( 'sd_donor' )
+        $donors = Query::for( 'skdon_donor' )
             ->withArgs( [ 'post__in' => $donor_ids ] )
             ->get( count( $donor_ids ) );
         foreach ( $donors as $donor ) {
@@ -748,7 +748,7 @@ function recent_activity( array $input = [] ): array {
  * @since 1.1.3
  *
  * @param array $input
- *   - campaign_id (int, required) — sd_campaign term ID.
+ *   - campaign_id (int, required) — skdon_campaign term ID.
  *   - date_from (string, optional Y-m-d) — restrict the period.
  *   - date_to (string, optional Y-m-d).
  * @return array|WP_Error {
@@ -765,7 +765,7 @@ function campaign_progress( array $input ): array|WP_Error {
         );
     }
 
-    $term = get_term( $campaign_id, 'sd_campaign' );
+    $term = get_term( $campaign_id, 'skdon_campaign' );
     if ( ! $term || is_wp_error( $term ) ) {
         return new WP_Error(
             'campaign_not_found',
@@ -774,10 +774,10 @@ function campaign_progress( array $input ): array|WP_Error {
         );
     }
 
-    $type     = (string) ( get_term_meta( $campaign_id, '_sd_campaign_type', true ) ?: 'donation_drive' );
-    $goal     = (float) get_term_meta( $campaign_id, '_sd_goal', true );
-    $end_date = (string) get_term_meta( $campaign_id, '_sd_end_date', true );
-    $tier     = (string) get_term_meta( $campaign_id, '_sd_membership_tier_filter', true );
+    $type     = (string) ( get_term_meta( $campaign_id, '_skdon_campaign_type', true ) ?: 'donation_drive' );
+    $goal     = (float) get_term_meta( $campaign_id, '_skdon_goal', true );
+    $end_date = (string) get_term_meta( $campaign_id, '_skdon_end_date', true );
+    $tier     = (string) get_term_meta( $campaign_id, '_skdon_membership_tier_filter', true );
 
     $date_from = $input['date_from'] ?? null;
     $date_to   = $input['date_to'] ?? null;
@@ -786,13 +786,13 @@ function campaign_progress( array $input ): array|WP_Error {
     $member_count = 0;
 
     if ( 'donation_drive' === $type ) {
-        $q = Query::for( 'sd_donation' )->whereInTaxonomy( 'sd_campaign', $campaign_id );
+        $q = Query::for( 'skdon_donation' )->whereInTaxonomy( 'skdon_campaign', $campaign_id );
         if ( $date_from && $date_to ) {
             $q->whereDateBetween( 'donation_date', $date_from, $date_to );
         }
         $raised = $q->sum( 'amount' );
     } else { // membership_drive
-        $q = Query::for( 'sd_membership' )->whereInTaxonomy( 'sd_campaign', $campaign_id );
+        $q = Query::for( 'skdon_membership' )->whereInTaxonomy( 'skdon_campaign', $campaign_id );
         if ( $date_from && $date_to ) {
             $q->whereDateBetween( 'start_date', $date_from, $date_to );
         }
@@ -841,12 +841,12 @@ function campaign_progress( array $input ): array|WP_Error {
  *
  * Mechanics:
  * 1. Resolve the campaign list (input `campaign_ids` or every
- *    sd_campaign term).
+ *    skdon_campaign term).
  * 2. Prime the term-meta cache with one call so the per-row meta
  *    reads below hit cache, not DB.
  * 3. One GROUP BY query per type (donations sum, memberships count)
  *    aggregating across the campaign IDs.
- * 4. Per-row synthesis. Campaigns with a `_sd_membership_tier_filter`
+ * 4. Per-row synthesis. Campaigns with a `_skdon_membership_tier_filter`
  *    set fall back to a focused Query::for count (tier filtering
  *    isn't easy to fold into the batched aggregate); typical
  *    campaigns don't set the filter so this is the rare path.
@@ -864,7 +864,7 @@ function campaigns_progress( array $input = [] ): array {
 
     if ( empty( $requested ) ) {
         $terms = get_terms( [
-            'taxonomy'   => 'sd_campaign',
+            'taxonomy'   => 'skdon_campaign',
             'hide_empty' => false,
             'orderby'    => 'name',
         ] );
@@ -874,7 +874,7 @@ function campaigns_progress( array $input = [] ): array {
             return [ 'campaigns' => [] ];
         }
         $terms = get_terms( [
-            'taxonomy'   => 'sd_campaign',
+            'taxonomy'   => 'skdon_campaign',
             'hide_empty' => false,
             'include'    => $requested,
             'orderby'    => 'include',
@@ -904,10 +904,10 @@ function campaigns_progress( array $input = [] ): array {
             tt.term_id,
             COALESCE(SUM(pm_amount.meta_value + 0), 0) as raised
         FROM {$wpdb->posts} p
-        INNER JOIN {$wpdb->postmeta} pm_amount ON p.ID = pm_amount.post_id AND pm_amount.meta_key = '_sd_amount'
+        INNER JOIN {$wpdb->postmeta} pm_amount ON p.ID = pm_amount.post_id AND pm_amount.meta_key = '_skdon_amount'
         INNER JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
-        INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id AND tt.taxonomy = 'sd_campaign'
-        WHERE p.post_type = 'sd_donation'
+        INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id AND tt.taxonomy = 'skdon_campaign'
+        WHERE p.post_type = 'skdon_donation'
           AND p.post_status = 'publish'
           AND tt.term_id IN ({$placeholders})
         GROUP BY tt.term_id",
@@ -925,8 +925,8 @@ function campaigns_progress( array $input = [] ): array {
             COUNT(*) as member_count
         FROM {$wpdb->posts} p
         INNER JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
-        INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id AND tt.taxonomy = 'sd_campaign'
-        WHERE p.post_type = 'sd_membership'
+        INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id AND tt.taxonomy = 'skdon_campaign'
+        WHERE p.post_type = 'skdon_membership'
           AND p.post_status = 'publish'
           AND tt.term_id IN ({$placeholders})
         GROUP BY tt.term_id",
@@ -948,10 +948,10 @@ function campaigns_progress( array $input = [] ): array {
             continue;
         }
 
-        $type     = (string) ( get_term_meta( $cid, '_sd_campaign_type', true ) ?: 'donation_drive' );
-        $goal     = (float) get_term_meta( $cid, '_sd_goal', true );
-        $end_date = (string) get_term_meta( $cid, '_sd_end_date', true );
-        $tier     = (string) get_term_meta( $cid, '_sd_membership_tier_filter', true );
+        $type     = (string) ( get_term_meta( $cid, '_skdon_campaign_type', true ) ?: 'donation_drive' );
+        $goal     = (float) get_term_meta( $cid, '_skdon_goal', true );
+        $end_date = (string) get_term_meta( $cid, '_skdon_end_date', true );
+        $tier     = (string) get_term_meta( $cid, '_skdon_membership_tier_filter', true );
 
         $raised       = $raised_by_id[ $cid ] ?? 0.0;
         $member_count = $members_by_id[ $cid ] ?? 0;
@@ -960,8 +960,8 @@ function campaigns_progress( array $input = [] ): array {
         // per-campaign meta, not per-row). Re-count for the rare case
         // when the filter is actually set on a membership drive.
         if ( 'membership_drive' === $type && '' !== $tier ) {
-            $member_count = (int) Query::for( 'sd_membership' )
-                ->whereInTaxonomy( 'sd_campaign', $cid )
+            $member_count = (int) Query::for( 'skdon_membership' )
+                ->whereInTaxonomy( 'skdon_campaign', $cid )
                 ->where( 'tier', $tier )
                 ->count();
         }
@@ -1022,7 +1022,7 @@ function campaign_report( array $input ): array|WP_Error {
         );
     }
 
-    $term = get_term( $campaign_id, 'sd_campaign' );
+    $term = get_term( $campaign_id, 'skdon_campaign' );
     if ( ! $term || is_wp_error( $term ) ) {
         return new WP_Error(
             'campaign_not_found',
@@ -1031,15 +1031,15 @@ function campaign_report( array $input ): array|WP_Error {
         );
     }
 
-    $type = (string) ( get_term_meta( $campaign_id, '_sd_campaign_type', true ) ?: 'donation_drive' );
+    $type = (string) ( get_term_meta( $campaign_id, '_skdon_campaign_type', true ) ?: 'donation_drive' );
 
-    // _sd_goal is the canonical meta key (matches campaign_progress and
+    // _skdon_goal is the canonical meta key (matches campaign_progress and
     // the Campaign_Admin term-meta writer). The earlier implementation
     // read the unprefixed 'goal' key — silently null for every campaign
     // so percent_of_goal / remaining were always null in the CSV header.
-    $goal_raw = get_term_meta( $campaign_id, '_sd_goal', true );
+    $goal_raw = get_term_meta( $campaign_id, '_skdon_goal', true );
     $goal     = '' !== $goal_raw && null !== $goal_raw ? (float) $goal_raw : null;
-    $tier     = (string) get_term_meta( $campaign_id, '_sd_membership_tier_filter', true );
+    $tier     = (string) get_term_meta( $campaign_id, '_skdon_membership_tier_filter', true );
 
     $campaign = [
         'id'             => $campaign_id,
@@ -1057,8 +1057,8 @@ function campaign_report( array $input ): array|WP_Error {
     ];
 
     if ( 'donation_drive' === $type ) {
-        $donations = Query::for( 'sd_donation' )
-            ->whereInTaxonomy( 'sd_campaign', $campaign_id )
+        $donations = Query::for( 'skdon_donation' )
+            ->whereInTaxonomy( 'skdon_campaign', $campaign_id )
             ->orderBy( 'donation_date', 'DESC' )
             ->get();
 
@@ -1086,7 +1086,7 @@ function campaign_report( array $input ): array|WP_Error {
     }
 
     // membership_drive
-    $q = Query::for( 'sd_membership' )->whereInTaxonomy( 'sd_campaign', $campaign_id );
+    $q = Query::for( 'skdon_membership' )->whereInTaxonomy( 'skdon_campaign', $campaign_id );
     if ( '' !== $tier ) {
         $q->where( 'tier', $tier );
     }

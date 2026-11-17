@@ -30,12 +30,12 @@ function get_profile( array $input ): array|WP_Error {
     // Allow lookup by user_id.
     if ( empty( $donor_id ) && ! empty( $input['user_id'] ) ) {
         $donors = get_posts( [
-            'post_type'      => 'sd_donor',
+            'post_type'      => 'skdon_donor',
             'post_status'    => 'publish',
             'posts_per_page' => 1,
             'meta_query'     => [
                 [
-                    'key'   => '_sd_user_id',
+                    'key'   => '_skdon_user_id',
                     'value' => $input['user_id'],
                 ],
             ],
@@ -50,12 +50,12 @@ function get_profile( array $input ): array|WP_Error {
     // Allow lookup by email.
     if ( empty( $donor_id ) && ! empty( $input['email'] ) ) {
         $donors = get_posts( [
-            'post_type'      => 'sd_donor',
+            'post_type'      => 'skdon_donor',
             'post_status'    => 'publish',
             'posts_per_page' => 1,
             'meta_query'     => [
                 [
-                    'key'   => '_sd_email',
+                    'key'   => '_skdon_email',
                     'value' => sanitize_email( $input['email'] ),
                 ],
             ],
@@ -75,7 +75,7 @@ function get_profile( array $input ): array|WP_Error {
         );
     }
 
-    $donor = Entity_Hydrator::get( 'sd_donor', $donor_id );
+    $donor = Entity_Hydrator::get( 'skdon_donor', $donor_id );
 
     if ( ! $donor ) {
         return new WP_Error(
@@ -111,7 +111,7 @@ function update_address( array $input ): array|WP_Error {
     }
 
     $donor = get_post( $donor_id );
-    if ( ! $donor || 'sd_donor' !== $donor->post_type ) {
+    if ( ! $donor || 'skdon_donor' !== $donor->post_type ) {
         return new WP_Error(
             'donor_not_found',
             __( 'Donor not found.', 'shelterkit-donations' ),
@@ -133,12 +133,12 @@ function update_address( array $input ): array|WP_Error {
     // Filter out empty values.
     $normalized_address = array_filter( $normalized_address, fn( $v ) => '' !== $v );
 
-    update_post_meta( $donor_id, '_sd_address', $normalized_address );
+    update_post_meta( $donor_id, '_skdon_address', $normalized_address );
 
     // Track the source of the update.
     $source = $input['source'] ?? 'unknown';
-    update_post_meta( $donor_id, '_sd_address_last_updated', wp_date( 'Y-m-d H:i:s' ) );
-    update_post_meta( $donor_id, '_sd_address_update_source', $source );
+    update_post_meta( $donor_id, '_skdon_address_last_updated', wp_date( 'Y-m-d H:i:s' ) );
+    update_post_meta( $donor_id, '_skdon_address_update_source', $source );
 
     do_action( 'starter_shelter_donor_address_updated', $donor_id, $normalized_address, $source );
 
@@ -169,7 +169,7 @@ function get_history( array $input ): array|WP_Error {
         );
     }
 
-    $donor = Entity_Hydrator::get( 'sd_donor', $donor_id );
+    $donor = Entity_Hydrator::get( 'skdon_donor', $donor_id );
     if ( ! $donor ) {
         return new WP_Error(
             'donor_not_found',
@@ -179,7 +179,7 @@ function get_history( array $input ): array|WP_Error {
     }
 
     // Get donations.
-    $donations = Query::for( 'sd_donation' )
+    $donations = Query::for( 'skdon_donation' )
         ->where( 'donor_id', $donor_id )
         ->whereDateBetween(
             'donation_date',
@@ -190,13 +190,13 @@ function get_history( array $input ): array|WP_Error {
         ->get( $input['limit'] ?? 100 );
 
     // Get memberships.
-    $memberships = Query::for( 'sd_membership' )
+    $memberships = Query::for( 'skdon_membership' )
         ->where( 'donor_id', $donor_id )
         ->orderBy( 'start_date', 'DESC' )
         ->get( 10 );
 
     // Get memorials.
-    $memorials = Query::for( 'sd_memorial' )
+    $memorials = Query::for( 'skdon_memorial' )
         ->where( 'donor_id', $donor_id )
         ->orderBy( 'donation_date', 'DESC' )
         ->get( $input['limit'] ?? 50 );
@@ -245,7 +245,7 @@ function update_profile( array $input ): array|WP_Error {
     }
 
     $donor = get_post( $donor_id );
-    if ( ! $donor || 'sd_donor' !== $donor->post_type ) {
+    if ( ! $donor || 'skdon_donor' !== $donor->post_type ) {
         return new WP_Error(
             'donor_not_found',
             __( 'Donor not found.', 'shelterkit-donations' ),
@@ -263,14 +263,14 @@ function update_profile( array $input ): array|WP_Error {
 
     foreach ( $updatable_fields as $field ) {
         if ( isset( $input[ $field ] ) ) {
-            update_post_meta( $donor_id, '_sd_' . $field, $input[ $field ] );
+            update_post_meta( $donor_id, '_skdon_' . $field, $input[ $field ] );
         }
     }
 
     // Update post title if name changed.
     if ( isset( $input['first_name'] ) || isset( $input['last_name'] ) ) {
-        $first = $input['first_name'] ?? get_post_meta( $donor_id, '_sd_first_name', true );
-        $last  = $input['last_name'] ?? get_post_meta( $donor_id, '_sd_last_name', true );
+        $first = $input['first_name'] ?? get_post_meta( $donor_id, '_skdon_first_name', true );
+        $last  = $input['last_name'] ?? get_post_meta( $donor_id, '_skdon_last_name', true );
         $name  = trim( "$first $last" );
 
         if ( $name ) {
@@ -283,5 +283,5 @@ function update_profile( array $input ): array|WP_Error {
 
     do_action( 'starter_shelter_donor_profile_updated', $donor_id, $input );
 
-    return Entity_Hydrator::get( 'sd_donor', $donor_id );
+    return Entity_Hydrator::get( 'skdon_donor', $donor_id );
 }

@@ -25,7 +25,7 @@ final class DonorProfileSelfServiceTest extends WP_UnitTestCase {
     private function donor_for_new_user(): array {
         $user_id  = self::factory()->user->create();
         $donor_id = get_or_create_donor( "u{$user_id}@example.test", 'Old Name' );
-        update_post_meta( $donor_id, '_sd_user_id', $user_id );
+        update_post_meta( $donor_id, '_skdon_user_id', $user_id );
         return [ $donor_id, $user_id ];
     }
 
@@ -53,7 +53,7 @@ final class DonorProfileSelfServiceTest extends WP_UnitTestCase {
         $this->assertNotWPError( $profile );
         $this->assertNotWPError( $address );
 
-        $donor = Entity_Hydrator::get( 'sd_donor', $donor_id );
+        $donor = Entity_Hydrator::get( 'skdon_donor', $donor_id );
         $this->assertSame( 'Jamie', $donor['first_name'] );
         $this->assertSame( 'Rivera', $donor['last_name'] );
         $this->assertSame( '555-0100', $donor['phone'] );
@@ -77,6 +77,6 @@ final class DonorProfileSelfServiceTest extends WP_UnitTestCase {
         $this->assertWPError( $result );
         $this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
         // The rejected write must not have touched the record.
-        $this->assertNotSame( 'Hacker', (string) get_post_meta( $donor_id, '_sd_first_name', true ) );
+        $this->assertNotSame( 'Hacker', (string) get_post_meta( $donor_id, '_skdon_first_name', true ) );
     }
 }

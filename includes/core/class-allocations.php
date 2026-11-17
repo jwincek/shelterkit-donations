@@ -25,7 +25,7 @@ namespace Starter_Shelter\Core;
  *   order still succeeds. A fund is retired, never deleted.
  * - **Aliases** map an old slug to its canonical one (shipped, not editable).
  *
- * Slugs are identifiers stored on every donation (`_sd_allocation`), so the
+ * Slugs are identifiers stored on every donation (`_skdon_allocation`), so the
  * shipped defaults are frozen; see CONTRIBUTING.
  */
 final class Allocations {
@@ -38,14 +38,14 @@ final class Allocations {
      *
      * @var string
      */
-    public const VARIATION_META = '_sd_allocation';
+    public const VARIATION_META = '_skdon_allocation';
 
     /**
      * Option recording that the one-time migration has run.
      *
      * @var string
      */
-    private const VERSION_OPTION = 'sd_allocations_version';
+    private const VERSION_OPTION = 'skdon_allocations_version';
 
     /**
      * Current migration version.
@@ -231,7 +231,7 @@ final class Allocations {
             return [];
         }
 
-        $product = wc_get_product( (int) get_option( 'sd_donation_product_id', 0 ) );
+        $product = wc_get_product( (int) get_option( 'skdon_donation_product_id', 0 ) );
         if ( ! $product || ! $product->is_type( 'variable' ) ) {
             return [];
         }
@@ -363,8 +363,8 @@ final class Allocations {
                 "SELECT DISTINCT pm.meta_value FROM {$wpdb->postmeta} pm
                  INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
                  WHERE pm.meta_key = %s AND p.post_type = %s",
-                '_sd_allocation',
-                'sd_donation'
+                '_skdon_allocation',
+                'skdon_donation'
             )
         );
 

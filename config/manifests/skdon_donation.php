@@ -1,8 +1,8 @@
 <?php
 /**
- * Field manifest for `sd_donation`.
+ * Field manifest for `skdon_donation`.
  *
- * Source of truth for every place a sd_donation field name appears.
+ * Source of truth for every place a skdon_donation field name appears.
  * Loaded by Field_Manifest; merged into entities/abilities/products/
  * meta-boxes/checkout-fields by their respective Config flows.
  *
@@ -16,8 +16,8 @@
 declare( strict_types = 1 );
 
 return [
-	'entity'      => 'sd_donation',
-	'meta_prefix' => '_sd_',
+	'entity'      => 'skdon_donation',
+	'meta_prefix' => '_skdon_',
 	'fields'      => [
 		'donor_id' => [
 			'type'        => 'integer',
@@ -25,7 +25,7 @@ return [
 			'form'        => [
 				'label'      => 'Donor',
 				'input_type' => 'post_select',
-				'post_type'  => 'sd_donor',
+				'post_type'  => 'skdon_donor',
 			],
 		],
 		'amount' => [
@@ -112,17 +112,17 @@ return [
 	],
 	'relations' => [
 		'donor' => [
-			'type'        => 'sd_donor',
+			'type'        => 'skdon_donor',
 			'foreign_key' => 'donor_id',
 		],
 		'campaign' => [
 			'type'     => 'taxonomy',
-			'taxonomy' => 'sd_campaign',
+			'taxonomy' => 'skdon_campaign',
 		],
 	],
 
 	/*
-	 * Abilities owned by this entity. See sd_membership.php for the
+	 * Abilities owned by this entity. See skdon_membership.php for the
 	 * `$entity` ref convention.
 	 */
 	'abilities' => [
@@ -298,7 +298,7 @@ return [
 					],
 					'campaign_id' => [
 						'type'        => 'integer',
-						'description' => 'Filter by sd_campaign term ID. 0/omitted = no filter. Scopes total, count, donor_count, average, and by_allocation to donations attached to the campaign.',
+						'description' => 'Filter by skdon_campaign term ID. 0/omitted = no filter. Scopes total, count, donor_count, average, and by_allocation to donations attached to the campaign.',
 					],
 				],
 			],
@@ -321,7 +321,7 @@ return [
 	],
 
 	/*
-	 * WooCommerce products owned by this entity (see sd_membership.php
+	 * WooCommerce products owned by this entity (see skdon_membership.php
 	 * for shape rationale).
 	 */
 	'products' => [
@@ -336,7 +336,7 @@ return [
 				// one, and the gift was recorded against that fund (#21).
 				'allocation' => [
 					'source'    => 'item_meta',
-					'key'       => '_sd_allocation',
+					'key'       => '_skdon_allocation',
 					'fallback'  => [
 						'source' => 'attribute',
 						'key'    => 'preferred-allocation',
@@ -346,32 +346,32 @@ return [
 				],
 				'donor_name' => [
 					'source' => 'item_meta',
-					'key'    => '_sd_donor_name',
+					'key'    => '_skdon_donor_name',
 				],
 				'dedication' => [
 					'source'   => 'item_meta',
-					'key'      => '_sd_dedication',
+					'key'      => '_skdon_dedication',
 					'fallback' => [
 						'source' => 'order_meta',
-						'key'    => '_sd_dedication',
+						'key'    => '_skdon_dedication',
 					],
 				],
 				'is_anonymous' => [
 					'source'    => 'item_meta',
-					'key'       => '_sd_is_anonymous',
+					'key'       => '_skdon_is_anonymous',
 					'fallback'  => [
 						'source' => 'order_meta',
-						'key'    => '_sd_is_anonymous',
+						'key'    => '_skdon_is_anonymous',
 					],
 					'transform' => 'boolean',
 					'default'   => false,
 				],
 				'campaign_id' => [
 					'source'   => 'item_meta',
-					'key'      => '_sd_campaign_id',
+					'key'      => '_skdon_campaign_id',
 					'fallback' => [
 						'source' => 'order_meta',
-						'key'    => '_sd_campaign_id',
+						'key'    => '_skdon_campaign_id',
 					],
 				],
 			],
@@ -379,7 +379,7 @@ return [
 	],
 
 	/*
-	 * WooCommerce checkout fields (see sd_membership.php for rationale).
+	 * WooCommerce checkout fields (see skdon_membership.php for rationale).
 	 */
 	'checkout_fields' => [
 		'dedication' => [
@@ -407,7 +407,7 @@ return [
 	],
 
 	/*
-	 * Admin meta boxes (see sd_membership.php for rationale).
+	 * Admin meta boxes (see skdon_membership.php for rationale).
 	 */
 	'meta_boxes' => [
 		'donation_details' => [
@@ -451,8 +451,8 @@ return [
 				'input'       => [ '$ability_input' => 'shelter-donations/create' ],
 			],
 			'entities'      => [
-				'donation' => [ 'entity' => 'sd_donation', 'id_from' => 'donation_id' ],
-				'donor'    => [ 'entity' => 'sd_donor', 'id_from' => 'donor_id' ],
+				'donation' => [ 'entity' => 'skdon_donation', 'id_from' => 'donation_id' ],
+				'donor'    => [ 'entity' => 'skdon_donor', 'id_from' => 'donor_id' ],
 			],
 			'recipient_type' => 'donor',
 			'subject'        => 'Thank you for your donation to {site_name}!',

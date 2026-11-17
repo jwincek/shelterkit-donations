@@ -334,7 +334,7 @@ class Legacy_Memorial_Parser {
 	/**
 	 * Create a memorial record from parsed row data.
 	 *
-	 * Always sets _sd_donor_display_name on the memorial so the front-end
+	 * Always sets _skdon_donor_display_name on the memorial so the front-end
 	 * (memorial wall) can display the donor name without hydrating the
 	 * full donor entity.
 	 *
@@ -355,20 +355,20 @@ class Legacy_Memorial_Parser {
 		$donor_display_name = self::get_donor_display_for_memorial( $donor_id, $row );
 
 		$memorial_id = wp_insert_post( [
-			'post_type'   => 'sd_memorial',
+			'post_type'   => 'skdon_memorial',
 			'post_status' => 'publish',
 			'post_title'  => $honoree_name,
 			'post_date'   => $memorial_date,
 			'meta_input'  => [
-				'_sd_donor_id'           => $donor_id,
-				'_sd_donor_display_name' => $donor_display_name,
-				'_sd_honoree_name'       => $honoree_name,
-				'_sd_memorial_type'      => $row['memorial_type'],
-				'_sd_amount'             => $default_amount,
-				'_sd_donation_date'      => $memorial_date,
-				'_sd_is_anonymous'       => $row['is_anonymous'] ? 1 : 0,
-				'_sd_import_source'      => self::IMPORT_SOURCE,
-				'_sd_import_line'        => $row['line_number'],
+				'_skdon_donor_id'           => $donor_id,
+				'_skdon_donor_display_name' => $donor_display_name,
+				'_skdon_honoree_name'       => $honoree_name,
+				'_skdon_memorial_type'      => $row['memorial_type'],
+				'_skdon_amount'             => $default_amount,
+				'_skdon_donation_date'      => $memorial_date,
+				'_skdon_is_anonymous'       => $row['is_anonymous'] ? 1 : 0,
+				'_skdon_import_source'      => self::IMPORT_SOURCE,
+				'_skdon_import_line'        => $row['line_number'],
 			],
 		], true );
 
@@ -378,7 +378,7 @@ class Legacy_Memorial_Parser {
 
 		// Assign to memorial year taxonomy.
 		$year = gmdate( 'Y', strtotime( $memorial_date ) );
-		wp_set_object_terms( $memorial_id, [ $year ], 'sd_memorial_year' );
+		wp_set_object_terms( $memorial_id, [ $year ], 'skdon_memorial_year' );
 
 		// Update donor stats if amount > 0.
 		if ( $default_amount > 0 ) {
@@ -409,7 +409,7 @@ class Legacy_Memorial_Parser {
 		}
 
 		// Prefer the stored display_name meta (set by Donor_Lookup).
-		$display_name = get_post_meta( $donor_id, '_sd_display_name', true );
+		$display_name = get_post_meta( $donor_id, '_skdon_display_name', true );
 		if ( ! empty( $display_name ) ) {
 			return $display_name;
 		}
@@ -429,17 +429,17 @@ class Legacy_Memorial_Parser {
 	 */
 	private static function find_existing_memorial( string $honoree_name, int $donor_id ): ?int {
 		$existing = get_posts( [
-			'post_type'      => 'sd_memorial',
+			'post_type'      => 'skdon_memorial',
 			'post_status'    => 'any',
 			'posts_per_page' => 1,
 			'meta_query'     => [
 				'relation' => 'AND',
 				[
-					'key'   => '_sd_honoree_name',
+					'key'   => '_skdon_honoree_name',
 					'value' => $honoree_name,
 				],
 				[
-					'key'   => '_sd_donor_id',
+					'key'   => '_skdon_donor_id',
 					'value' => $donor_id,
 					'type'  => 'NUMERIC',
 				],

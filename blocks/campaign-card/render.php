@@ -30,7 +30,7 @@ $campaign_id = $attributes['campaignId'] ?? null;
 if ( ! $campaign_id && ! empty( $block->context['postId'] ) ) {
     // Check if we're in a campaign context.
     $post_type = get_post_type( $block->context['postId'] );
-    if ( 'sd_campaign' === $post_type ) {
+    if ( 'skdon_campaign' === $post_type ) {
         $campaign_id = $block->context['postId'];
     }
 }
@@ -38,12 +38,12 @@ if ( ! $campaign_id && ! empty( $block->context['postId'] ) ) {
 // If still no campaign, get active campaigns and use the first one.
 if ( ! $campaign_id ) {
     $campaigns = get_terms( [
-        'taxonomy'   => 'sd_campaign',
+        'taxonomy'   => 'skdon_campaign',
         'hide_empty' => false,
         'number'     => 1,
         'meta_query' => [
             [
-                'key'     => '_sd_end_date',
+                'key'     => '_skdon_end_date',
                 'value'   => wp_date( 'Y-m-d' ),
                 'compare' => '>=',
                 'type'    => 'DATE',
@@ -79,15 +79,15 @@ $prog_data = $progress ? $progress->execute( [ 'campaign_id' => $campaign_id ] )
 
 if ( ! $prog_data || is_wp_error( $prog_data ) ) {
     // Last-resort fallback: hydrate manually from term + term meta.
-    $campaign = get_term( $campaign_id, 'sd_campaign' );
+    $campaign = get_term( $campaign_id, 'skdon_campaign' );
     if ( ! $campaign || is_wp_error( $campaign ) ) {
         return;
     }
-    $goal     = (float) get_term_meta( $campaign_id, '_sd_goal', true );
-    $end_date = (string) get_term_meta( $campaign_id, '_sd_end_date', true );
+    $goal     = (float) get_term_meta( $campaign_id, '_skdon_goal', true );
+    $end_date = (string) get_term_meta( $campaign_id, '_skdon_end_date', true );
     $prog_data = [
         'name'                => $campaign->name,
-        'type'                => (string) ( get_term_meta( $campaign_id, '_sd_campaign_type', true ) ?: 'donation_drive' ),
+        'type'                => (string) ( get_term_meta( $campaign_id, '_skdon_campaign_type', true ) ?: 'donation_drive' ),
         'goal'                => $goal,
         'goal_unit'           => 'currency',
         'goal_formatted'      => Helpers\format_currency( $goal ),
@@ -110,7 +110,7 @@ $is_member_drive = 'members' === ( $prog_data['goal_unit'] ?? 'currency' );
 $campaign_data = [
     'id'                  => $campaign_id,
     'name'                => $prog_data['name'] ?? '',
-    'description'         => get_term( $campaign_id, 'sd_campaign' )?->description ?? '',
+    'description'         => get_term( $campaign_id, 'skdon_campaign' )?->description ?? '',
     'type'                => $prog_data['type'] ?? 'donation_drive',
     'goal_unit'           => $prog_data['goal_unit'] ?? 'currency',
     'goal'                => $prog_data['goal'] ?? 0,

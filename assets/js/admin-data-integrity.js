@@ -66,7 +66,7 @@
 		$( '#sd-backfill-actions' ).hide();
 		hideProgress();
 
-		post( 'sd_integrity_scan' ).done( function( response ) {
+		post( 'skdon_integrity_scan' ).done( function( response ) {
 			$btn.prop( 'disabled', false ).text( 'Scan All Records' );
 
 			if ( ! response.success ) {
@@ -180,7 +180,7 @@
 				0
 			);
 
-			post( 'sd_integrity_backfill', {
+			post( 'skdon_integrity_backfill', {
 				post_type: postType,
 				offset: currentOffset,
 			} ).done( function( response ) {
@@ -243,7 +243,7 @@
 		var totalDeleted = 0;
 
 		function nextBatch() {
-			post( 'sd_integrity_purge', {
+			post( 'skdon_integrity_purge', {
 				post_type: postType,
 				confirmation: confirmation,
 			} ).done( function( response ) {
@@ -305,7 +305,7 @@
 			url: config.ajaxUrl,
 			type: 'POST',
 			data: {
-				action: 'sd_legacy_sync_reset',
+				action: 'skdon_legacy_sync_reset',
 				nonce: config.nonce,
 				scope: 'all',
 			},
@@ -330,7 +330,7 @@
 		var totalProcessed = 0;
 
 		function nextBatch( offset ) {
-			post( 'sd_integrity_recalc_donors', { offset: offset } ).done( function( response ) {
+			post( 'skdon_integrity_recalc_donors', { offset: offset } ).done( function( response ) {
 				if ( ! response.success ) {
 					showProgress( 'Error: ' + ( response.data || 'Unknown' ), 0 );
 					disableButtons( false );

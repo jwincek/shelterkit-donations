@@ -49,7 +49,7 @@
 
         // Check if memorials exist.
         const hasMemorials = useSelect( function( select ) {
-            const posts = select( 'core' ).getEntityRecords( 'postType', 'sd_memorial', {
+            const posts = select( 'core' ).getEntityRecords( 'postType', 'skdon_memorial', {
                 per_page: 1,
                 status: 'publish',
             } );
