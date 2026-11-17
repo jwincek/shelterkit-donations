@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-17T05:18:46+00:00\n"
+"POT-Creation-Date: 2026-11-17T21:07:35+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: shelterkit-donations\n"
@@ -22,8 +22,8 @@ msgstr ""
 #: includes/emails/class-email-factory.php:77
 #: includes/woocommerce/class-order-handler.php:452
 #: includes/woocommerce/class-order-handler.php:463
-#: shelterkit-donations.php:104
-#: shelterkit-donations.php:335
+#: shelterkit-donations.php:124
+#: shelterkit-donations.php:355
 msgid "ShelterKit Donations"
 msgstr ""
 
@@ -189,14 +189,14 @@ msgstr ""
 
 #: blocks/donation-form/render.php:46
 #: includes/blocks/register-editor.php:106
-#: includes/core/helpers.php:969
+#: includes/core/helpers.php:950
 #: includes/rest/class-rest-controller.php:575
 msgid "General Fund"
 msgstr ""
 
 #: blocks/donation-form/render.php:47
 #: includes/blocks/register-editor.php:107
-#: includes/core/helpers.php:970
+#: includes/core/helpers.php:951
 #: includes/rest/class-rest-controller.php:576
 msgid "Medical Care"
 msgstr ""
@@ -1354,7 +1354,7 @@ msgid "Reset Legacy Sync Flags"
 msgstr ""
 
 #: includes/admin/class-data-integrity.php:267
-msgid "Clears the \"_sd_legacy_synced\" flag on all WooCommerce orders so they can be re-processed by the Legacy Order Sync tool. Does NOT delete any records."
+msgid "Clears the \"_skdon_legacy_synced\" flag on all WooCommerce orders so they can be re-processed by the Legacy Order Sync tool. Does NOT delete any records."
 msgstr ""
 
 #: includes/admin/class-data-integrity.php:275
@@ -1373,7 +1373,7 @@ msgstr ""
 msgid "Recalculate All Donors"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:958
+#: includes/admin/class-data-integrity.php:954
 msgid "Confirmation does not match. Type the exact post type slug."
 msgstr ""
 
@@ -3053,19 +3053,19 @@ msgid "— Select Campaign —"
 msgstr ""
 
 #: includes/blocks/register-editor.php:108
-#: includes/core/helpers.php:971
+#: includes/core/helpers.php:952
 #: includes/rest/class-rest-controller.php:577
 msgid "Food & Supplies"
 msgstr ""
 
 #: includes/blocks/register-editor.php:109
-#: includes/core/helpers.php:972
+#: includes/core/helpers.php:953
 #: includes/rest/class-rest-controller.php:578
 msgid "Facility Improvements"
 msgstr ""
 
 #: includes/blocks/register-editor.php:110
-#: includes/core/helpers.php:973
+#: includes/core/helpers.php:954
 #: includes/rest/class-rest-controller.php:579
 msgid "Rescue Operations"
 msgstr ""
@@ -3152,7 +3152,19 @@ msgstr ""
 msgid "Business Membership"
 msgstr ""
 
-#: includes/core/helpers.php:683
+#: includes/core/class-prefix-migration.php:396
+msgid "ShelterKit Donations is paused: its data was moved back to the 2.x names for a rollback. Install a 2.x release, or run `wp shelterkit-donations migrate-prefix` to move the data forward again."
+msgstr ""
+
+#: includes/core/class-prefix-migration.php:405
+msgid "ShelterKit Donations has not finished moving its data to the new storage names, so it is switched off until it does. It retries on every request. Check the database, then reload this page."
+msgstr ""
+
+#: includes/core/class-prefix-migration.php:423
+msgid "ShelterKit Donations moved its stored data to the new skdon_ names."
+msgstr ""
+
+#: includes/core/helpers.php:664
 msgid "A valid email address is required."
 msgstr ""
 
@@ -3619,55 +3631,55 @@ msgstr ""
 msgid "Order will be processed when status changes to Processing or Completed."
 msgstr ""
 
-#: shelterkit-donations.php:69
+#: shelterkit-donations.php:89
 msgid "ShelterKit Donations requires WordPress 6.9 or higher."
 msgstr ""
 
-#: shelterkit-donations.php:105
+#: shelterkit-donations.php:125
 msgid "Abilities for managing animal shelter donations."
 msgstr ""
 
-#: shelterkit-donations.php:109
+#: shelterkit-donations.php:129
 msgid "Shelter Memberships"
 msgstr ""
 
-#: shelterkit-donations.php:110
+#: shelterkit-donations.php:130
 msgid "Abilities for managing shelter memberships."
 msgstr ""
 
-#: shelterkit-donations.php:114
+#: shelterkit-donations.php:134
 msgid "Shelter Memorials"
 msgstr ""
 
-#: shelterkit-donations.php:115
+#: shelterkit-donations.php:135
 msgid "Abilities for managing memorial donations."
 msgstr ""
 
-#: shelterkit-donations.php:119
+#: shelterkit-donations.php:139
 msgid "Shelter Donors"
 msgstr ""
 
-#: shelterkit-donations.php:120
+#: shelterkit-donations.php:140
 msgid "Abilities for managing donor profiles."
 msgstr ""
 
-#: shelterkit-donations.php:124
+#: shelterkit-donations.php:144
 msgid "Shelter Reports"
 msgstr ""
 
-#: shelterkit-donations.php:125
+#: shelterkit-donations.php:145
 msgid "Abilities for generating shelter reports."
 msgstr ""
 
-#: shelterkit-donations.php:442
+#: shelterkit-donations.php:462
 msgid "ShelterKit Donations:"
 msgstr ""
 
-#: shelterkit-donations.php:443
+#: shelterkit-donations.php:463
 msgid "Some donation products need to be created."
 msgstr ""
 
-#: shelterkit-donations.php:444
+#: shelterkit-donations.php:464
 msgid "Set up products"
 msgstr ""
 
