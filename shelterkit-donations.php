@@ -441,13 +441,18 @@ function starter_shelter_deactivate(): void {
 }
 register_deactivation_hook( __FILE__, 'starter_shelter_deactivate' );
 
-// The shelter profile is a SHARED class, carried byte-identically by every
-// ShelterKit plugin — the Action Scheduler pattern. Registering at file scope
-// (not on a hook) is what lets the registry see every plugin's copy before it
-// picks the highest on plugins_loaded. Nothing here depends on a sibling plugin
-// being installed: alone, this copy simply wins.
+// The shelter profile is a SHARED class, carried by every ShelterKit plugin
+// and identical in each except for its text domain — the Action Scheduler
+// pattern. Registering at file scope (not on a hook) is what lets the registry
+// see every plugin's copy before it picks the highest on plugins_loaded.
+// Nothing here depends on a sibling plugin being installed: alone, this copy
+// simply wins.
+//
+// The version string must equal ShelterKit_Profile::VERSION, because it is
+// what the negotiation compares. It cannot reference the constant (the class
+// is not loaded yet), so bin/check-versions.sh checks the two agree (#24).
 require_once STARTER_SHELTER_PATH . 'includes/shelterkit/class-shelterkit-profile-versions.php';
-ShelterKit_Profile_Versions::register( '1.2.0', STARTER_SHELTER_PATH . 'includes/shelterkit/class-shelterkit-profile.php' );
+ShelterKit_Profile_Versions::register( '1.3.0', STARTER_SHELTER_PATH . 'includes/shelterkit/class-shelterkit-profile.php' );
 
 // Register the WP-CLI `wp shelterkit-donations validate` contract-checker.
 // Loaded only when WP-CLI is active to keep production overhead at zero.

@@ -27,6 +27,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   "Proceed to Checkout" and an empty error box before anything was
   clicked.** The stylesheet that hides them until needed was attached by a
   handle the 3.0.0 rename had changed, so it never loaded. (#19)
+- The shared shelter-profile copy registered itself as 1.2.0 while carrying
+  1.3.0 code, so it could lose version negotiation to an older sibling copy
+  that drops fields on save. It now registers as 1.3.0, and
+  `bin/check-versions.sh` fails if the two drift apart again. (#24)
 
 ## [3.0.0] - 2026-08-24
 

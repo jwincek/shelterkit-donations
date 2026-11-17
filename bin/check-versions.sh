@@ -113,6 +113,33 @@ else
   err "composer.json php constraint ($composer_php) != 'Requires PHP' ($header_php)"
 fi
 
+# --- shared ShelterKit profile -----------------------------------------------
+# Version negotiation compares the string passed to register(), not the code,
+# so a copy whose class says 1.3.0 but registers as 1.2.0 competes as 1.2.0 and
+# can lose to an older sibling copy. The registration cannot read the class
+# constant: the class is not loaded until negotiation picks a winner (#24).
+PROFILE_CLASS="includes/shelterkit/class-shelterkit-profile.php"
+profile_class_version=$(grep -m1 -E "public const VERSION = '" "$PROFILE_CLASS" \
+  | sed -E "s/.*VERSION = '([^']+)'.*/\1/")
+profile_doc_version=$(grep -m1 -E '^ \* @version ' "$PROFILE_CLASS" \
+  | sed -E 's/.*@version[[:space:]]*//' | tr -d '[:space:]')
+profile_registered=$(grep -m1 -E "ShelterKit_Profile_Versions::register\( '" "$MAIN_FILE" \
+  | sed -E "s/.*register\( '([^']+)'.*/\1/")
+
+if [ -z "$profile_class_version" ] || [ -z "$profile_registered" ]; then
+  err "could not read the shared profile's VERSION or its register() call"
+elif [ "$profile_registered" = "$profile_class_version" ]; then
+  ok "shared profile registers as ${profile_registered}, matching ShelterKit_Profile::VERSION"
+else
+  err "shared profile registers as ${profile_registered} but ShelterKit_Profile::VERSION is ${profile_class_version}"
+fi
+
+if [ "$profile_doc_version" = "$profile_class_version" ]; then
+  ok "shared profile @version matches ShelterKit_Profile::VERSION"
+else
+  err "shared profile @version (${profile_doc_version}) != ShelterKit_Profile::VERSION (${profile_class_version})"
+fi
+
 # --- optional: release tag ---------------------------------------------------
 if [ "$#" -ge 1 ] && [ -n "${1:-}" ]; then
   tag_version="${1#v}"
