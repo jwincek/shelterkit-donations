@@ -19,7 +19,7 @@
  *   uses a `$ref` to `schemas/notify-family.json`. The manifest
  *   passes the ref through; Config::resolve_refs resolves it after
  *   the manifest merge.
- * - `products.shelterkit-donations-in-memoriam.input_mapping.notify_family`
+ * - `products.shelter-donations-in-memoriam.input_mapping.notify_family`
  *   uses `source: composite` to combine the five flat meta keys into
  *   one structured value for the ability call. Mapping shape is a
  *   verbatim copy — Cart_Handler / Product_Mapper consume it natively.
@@ -435,7 +435,7 @@ return [
 	],
 
 	'products' => [
-		'shelterkit-donations-in-memoriam' => [
+		'shelter-donations-in-memoriam' => [
 			'ability'       => 'shelter-memorials/create',
 			'product_type'  => 'memorial',
 			'description'   => 'In memoriam donations',

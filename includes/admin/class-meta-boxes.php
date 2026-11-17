@@ -179,7 +179,13 @@ class Meta_Boxes {
                 break;
 
             case 'select':
-                $options = is_string( $field['options'] ) ? Config::get_item( 'settings', $field['options'], [] ) : $field['options'];
+                if ( 'allocations' === $field['options'] ) {
+                    // Include retired funds, or a donation filed under one shows
+                    // "— Select —" and saving the screen erases its fund (#21).
+                    $options = \Starter_Shelter\Core\Allocations::known();
+                } else {
+                    $options = is_string( $field['options'] ) ? Config::get_item( 'settings', $field['options'], [] ) : $field['options'];
+                }
                 echo '<select id="sd_' . esc_attr( $field_id ) . '" name="sd_' . esc_attr( $field_id ) . '">';
                 echo '<option value="">' . esc_html__( '— Select —', 'shelterkit-donations' ) . '</option>';
                 foreach ( $options as $opt_val => $opt_label ) {

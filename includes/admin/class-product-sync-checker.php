@@ -14,7 +14,9 @@ declare( strict_types = 1 );
 
 namespace Starter_Shelter\Admin;
 
+use Starter_Shelter\Core\Allocations;
 use Starter_Shelter\Core\Config;
+use Starter_Shelter\WooCommerce\Product_Mapper;
 
 /**
  * Validates product-config alignment and surfaces issues.
@@ -29,7 +31,7 @@ class Product_Sync_Checker {
 	 * @var array
 	 */
 	private static array $product_map = [
-		'shelterkit-donations' => [
+		'shelter-donations' => [
 			'option_key'     => 'sd_donation_product_id',
 			'attribute_name' => 'Preferred Allocation',
 			'attribute_slug' => 'preferred-allocation',
@@ -47,7 +49,7 @@ class Product_Sync_Checker {
 			'attribute_slug' => 'membership-level',
 			'config_source'  => 'tiers_business',
 		],
-		'shelterkit-donations-in-memoriam' => [
+		'shelter-donations-in-memoriam' => [
 			'option_key'     => 'sd_memorial_product_id',
 			'attribute_name' => 'In Memoriam Type',
 			'attribute_slug' => 'in-memoriam-type',
@@ -163,18 +165,38 @@ class Product_Sync_Checker {
 			);
 		}
 
-		// Check SKU matches.
-		if ( $product->get_sku() !== $sku ) {
+		// Check the SKU still identifies this product. Orders are recognised by
+		// SKU prefix, so a SKU that resolves to no product definition, or to a
+		// different one, means every order for it is skipped without a word
+		// (#16). That is an error, whatever else looks fine. A SKU that merely
+		// extends the prefix ("shelter-donations-2024") still resolves.
+		if ( ! self::sku_resolves( $product, $sku ) ) {
 			$result['issues'][] = self::issue(
-				'warning',
+				'error',
 				$sku,
-				sprintf( 'Product SKU is "%s", expected "%s".', $product->get_sku(), $sku )
+				sprintf(
+					'Product SKU is "%s", so orders for this product are not being recorded. It should be "%s"; Repair Issues sets it.',
+					$product->get_sku(),
+					$sku
+				)
 			);
 		}
 
 		// 3. Check product settings.
-		if ( ! $product->is_virtual() ) {
-			$result['issues'][] = self::issue( 'warning', $sku, 'Product is not virtual.' );
+		// Virtual is a property of the variations: WooCommerce never treats a
+		// variable product itself as virtual, so testing the parent warned on
+		// every site forever and Repair could not clear it (#23).
+		$not_virtual = self::non_virtual_ids( $product );
+		if ( $not_virtual ) {
+			$result['issues'][] = self::issue(
+				'warning',
+				$sku,
+				sprintf(
+					'%d of %d variations are not virtual, so checkout may ask donors for a shipping address.',
+					count( $not_virtual ),
+					max( 1, count( $product->get_children() ) )
+				)
+			);
 		}
 		if ( $product->get_tax_status() !== 'none' ) {
 			$result['issues'][] = self::issue( 'warning', $sku, 'Product tax status is not "none".' );
@@ -217,6 +239,19 @@ class Product_Sync_Checker {
 		$expected_terms = self::get_expected_terms( $definition['config_source'] );
 		$variations = $product->get_available_variations();
 
+		// A retired fund keeps its variation, because past orders point at it.
+		// It is not expected and not an orphan, so leave it out of both
+		// checks (#21).
+		if ( 'allocations' === $definition['config_source'] ) {
+			$retired    = Allocations::retired();
+			$variations = array_values(
+				array_filter(
+					$variations,
+					static fn( $v ) => ! isset( $retired[ (string) get_post_meta( $v['variation_id'], Allocations::VARIATION_META, true ) ] )
+				)
+			);
+		}
+
 		// Check variation count.
 		if ( count( $variations ) !== count( $expected_terms ) ) {
 			$result['issues'][] = self::issue(
@@ -237,10 +272,11 @@ class Product_Sync_Checker {
 		foreach ( $variations as $variation ) {
 			foreach ( $variation['attributes'] as $attr_name => $attr_val ) {
 				$variation_list[] = [
-					'id'    => $variation['variation_id'],
-					'value' => trim( $attr_val ),
-					'slug'  => sanitize_title( $attr_val ),
-					'price' => (float) ( $variation['display_price'] ?? 0 ),
+					'id'     => $variation['variation_id'],
+					'value'  => trim( $attr_val ),
+					'slug'   => sanitize_title( $attr_val ),
+					'price'  => (float) ( $variation['display_price'] ?? 0 ),
+					'linked' => (string) get_post_meta( $variation['variation_id'], Allocations::VARIATION_META, true ),
 				];
 			}
 		}
@@ -309,7 +345,7 @@ class Product_Sync_Checker {
 	private static function get_expected_terms( string $source ): array {
 		switch ( $source ) {
 			case 'allocations':
-				$allocations = Config::get_item( 'settings', 'allocations', [] );
+				$allocations = Allocations::active();
 				return array_map(
 					fn( $key, $label ) => [ 'label' => $label, 'slug' => $key, 'price' => 10 ],
 					array_keys( $allocations ),
@@ -400,6 +436,45 @@ class Product_Sync_Checker {
 	}
 
 	/**
+	 * Whether the product's SKU still resolves to this product definition.
+	 *
+	 * Order_Handler identifies the plugin's line items with the same lookup,
+	 * so false means this product's orders are not being recorded.
+	 *
+	 * @param \WC_Product $product Product.
+	 * @param string      $sku     The definition's SKU prefix.
+	 * @return bool
+	 */
+	private static function sku_resolves( \WC_Product $product, string $sku ): bool {
+		$config = Product_Mapper::find_by_sku( (string) $product->get_sku() );
+
+		return null !== $config && ( $config['sku_prefix'] ?? '' ) === $sku;
+	}
+
+	/**
+	 * IDs of the variations that are not virtual (the product itself, if it
+	 * is not variable).
+	 *
+	 * @param \WC_Product $product Product.
+	 * @return int[]
+	 */
+	private static function non_virtual_ids( \WC_Product $product ): array {
+		if ( ! $product->is_type( 'variable' ) ) {
+			return $product->is_virtual() ? [] : [ $product->get_id() ];
+		}
+
+		$ids = [];
+		foreach ( $product->get_children() as $id ) {
+			$variation = wc_get_product( $id );
+			if ( $variation && ! $variation->is_virtual() ) {
+				$ids[] = (int) $id;
+			}
+		}
+
+		return $ids;
+	}
+
+	/**
 	 * Find a variation that matches an expected config term.
 	 *
 	 * Uses progressively looser matching:
@@ -418,6 +493,15 @@ class Product_Sync_Checker {
 	private static function find_matching_variation( array $term, array $variation_list ): ?array {
 		$term_label_lower = strtolower( $term['label'] );
 		$term_slug        = $term['slug'];
+
+		// A donation variation linked to its fund by slug is that fund's
+		// variation, and no other's, however its label is worded (#21).
+		foreach ( $variation_list as $v ) {
+			if ( ( $v['linked'] ?? '' ) === $term_slug ) {
+				return $v;
+			}
+		}
+		$variation_list = array_filter( $variation_list, static fn( $v ) => '' === ( $v['linked'] ?? '' ) );
 
 		foreach ( $variation_list as $v ) {
 			$v_lower = strtolower( $v['value'] );
@@ -523,11 +607,32 @@ class Product_Sync_Checker {
 				$changed = true;
 			}
 
-			// Fix 1: Set virtual if not already.
-			if ( ! $product->is_virtual() ) {
-				$product->set_virtual( true );
-				$result['details'][] = sprintf( '%s: set to virtual.', $sku );
+			// Fix 1: Make the variations virtual (the parent never can be).
+			foreach ( self::non_virtual_ids( $product ) as $id ) {
+				$item = $id === $product->get_id() ? $product : wc_get_product( $id );
+				if ( ! $item ) {
+					continue;
+				}
+				$item->set_virtual( true );
+				if ( $item !== $product ) {
+					$item->save();
+				}
+				$result['details'][] = sprintf( '%s: set "%s" to virtual.', $sku, $item->get_name() );
 				$changed = true;
+			}
+
+			// Fix 1b: Restore a SKU that no longer identifies the product, so
+			// its orders are recorded again. WooCommerce refuses a SKU another
+			// product already uses; report that rather than guess.
+			if ( ! self::sku_resolves( $product, $sku ) ) {
+				try {
+					$old_sku = $product->get_sku();
+					$product->set_sku( $sku );
+					$result['details'][] = sprintf( '%s: SKU was "%s"; set it back so orders are recorded.', $sku, $old_sku );
+					$changed = true;
+				} catch ( \WC_Data_Exception $e ) {
+					$result['details'][] = sprintf( '%s: could not set the SKU: %s', $sku, $e->getMessage() );
+				}
 			}
 
 			// Fix 2: Set tax status to none.
@@ -537,69 +642,86 @@ class Product_Sync_Checker {
 				$changed = true;
 			}
 
-			// Fix 3: Create missing variations.
-			$expected_terms = self::get_expected_terms( $definition['config_source'] );
-			$existing_variations = $product->get_available_variations();
-
-			$variation_list = [];
-			foreach ( $existing_variations as $v ) {
-				foreach ( $v['attributes'] as $attr_val ) {
-					$variation_list[] = [
-						'id'    => $v['variation_id'],
-						'value' => trim( $attr_val ),
-						'slug'  => sanitize_title( $attr_val ),
-						'price' => (float) ( $v['display_price'] ?? 0 ),
-					];
+			if ( 'allocations' === $definition['config_source'] ) {
+				// Donation variations are linked to their fund by slug; the same
+				// routine runs on activation and when the fund list is saved (#21).
+				// It loads and saves the parent itself, so save the fixes made
+				// above first and reload afterwards. Otherwise one copy overwrites
+				// the other, and the reload threw away the visibility and tax
+				// fixes while the report said they were made.
+				if ( $changed ) {
+					$product->save();
 				}
-			}
-
-			$attribute_slug = $definition['attribute_slug'];
-			$all_option_names = [];
-
-			// Collect existing attribute option names.
-			foreach ( $existing_variations as $v ) {
-				foreach ( $v['attributes'] as $attr_val ) {
-					$all_option_names[] = trim( $attr_val );
+				foreach ( Allocations::sync_variations() as $detail ) {
+					$result['details'][] = $sku . ': ' . $detail;
+					$changed            = true;
 				}
-			}
+				$product = wc_get_product( $product_id );
+			} else {
+				// Fix 3: Create missing variations.
+				$expected_terms = self::get_expected_terms( $definition['config_source'] );
+				$existing_variations = $product->get_available_variations();
 
-			foreach ( $expected_terms as $term ) {
-				$match = self::find_matching_variation( $term, $variation_list );
-
-				if ( ! $match ) {
-					// Create the missing variation.
-					$variation = new \WC_Product_Variation();
-					$variation->set_parent_id( $product_id );
-					$variation->set_status( 'publish' );
-					$variation->set_regular_price( (string) ( $term['price'] ?? 10 ) );
-					$variation->set_virtual( true );
-					$variation->set_manage_stock( false );
-					$variation->set_stock_status( 'instock' );
-					$variation->set_attributes( [
-						sanitize_title( $attribute_slug ) => $term['label'],
-					] );
-					$variation->save();
-
-					$all_option_names[] = $term['label'];
-					$result['details'][] = sprintf( '%s: created variation "%s" ($%s).', $sku, $term['label'], number_format( $term['price'] ?? 10, 2 ) );
-					$changed = true;
+				$variation_list = [];
+				foreach ( $existing_variations as $v ) {
+					foreach ( $v['attributes'] as $attr_val ) {
+						$variation_list[] = [
+							'id'    => $v['variation_id'],
+							'value' => trim( $attr_val ),
+							'slug'  => sanitize_title( $attr_val ),
+							'price' => (float) ( $v['display_price'] ?? 0 ),
+						];
+					}
 				}
-			}
 
-			// Fix 4: Update attribute options to include all terms.
-			$attributes = $product->get_attributes();
-			foreach ( $attributes as $attr_key => $attribute ) {
-				if ( sanitize_title( $attr_key ) === sanitize_title( $attribute_slug ) ) {
-					$current_options = $attribute->get_options();
-					$merged = array_unique( array_merge( $current_options, $all_option_names ) );
+				$attribute_slug = $definition['attribute_slug'];
+				$all_option_names = [];
 
-					if ( count( $merged ) > count( $current_options ) ) {
-						$attribute->set_options( $merged );
-						$product->set_attributes( [ $attribute ] );
-						$result['details'][] = sprintf( '%s: updated attribute options (%d → %d).', $sku, count( $current_options ), count( $merged ) );
+				// Collect existing attribute option names.
+				foreach ( $existing_variations as $v ) {
+					foreach ( $v['attributes'] as $attr_val ) {
+						$all_option_names[] = trim( $attr_val );
+					}
+				}
+
+				foreach ( $expected_terms as $term ) {
+					$match = self::find_matching_variation( $term, $variation_list );
+
+					if ( ! $match ) {
+						// Create the missing variation.
+						$variation = new \WC_Product_Variation();
+						$variation->set_parent_id( $product_id );
+						$variation->set_status( 'publish' );
+						$variation->set_regular_price( (string) ( $term['price'] ?? 10 ) );
+						$variation->set_virtual( true );
+						$variation->set_manage_stock( false );
+						$variation->set_stock_status( 'instock' );
+						$variation->set_attributes( [
+							sanitize_title( $attribute_slug ) => $term['label'],
+						] );
+						$variation->save();
+
+						$all_option_names[] = $term['label'];
+						$result['details'][] = sprintf( '%s: created variation "%s" ($%s).', $sku, $term['label'], number_format( $term['price'] ?? 10, 2 ) );
 						$changed = true;
 					}
-					break;
+				}
+
+				// Fix 4: Update attribute options to include all terms.
+				$attributes = $product->get_attributes();
+				foreach ( $attributes as $attr_key => $attribute ) {
+					if ( sanitize_title( $attr_key ) === sanitize_title( $attribute_slug ) ) {
+						$current_options = $attribute->get_options();
+						$merged = array_unique( array_merge( $current_options, $all_option_names ) );
+
+						if ( count( $merged ) > count( $current_options ) ) {
+							$attribute->set_options( $merged );
+							$product->set_attributes( [ $attribute ] );
+							$result['details'][] = sprintf( '%s: updated attribute options (%d → %d).', $sku, count( $current_options ), count( $merged ) );
+							$changed = true;
+						}
+						break;
+					}
 				}
 			}
 
@@ -609,10 +731,10 @@ class Product_Sync_Checker {
 				// Look up image_file from the activator's product data.
 				if ( ! $image_file ) {
 					$image_map = [
-						'shelterkit-donations'             => 'product-donation.svg',
+						'shelter-donations'             => 'product-donation.svg',
 						'shelter-memberships'           => 'product-membership.svg',
-						'shelter-memberships-business'   => 'product-membership-business.svg',
-						'shelterkit-donations-in-memoriam' => 'product-memorial.svg',
+						'shelter-memberships-business'  => 'product-membership-business.svg',
+						'shelter-donations-in-memoriam' => 'product-memorial.svg',
 					];
 					$image_file = $image_map[ $sku ] ?? null;
 				}
@@ -713,7 +835,7 @@ class Product_Sync_Checker {
 				<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=shelterkit-donations-settings&action=recheck-sync' ), 'sd_recheck_sync' ) ); ?>" class="button button-small">
 					<?php esc_html_e( 'Re-check Now', 'shelterkit-donations' ); ?>
 				</a>
-				<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=shelterkit-donations-settings&action=repair-sync' ), 'sd_repair_sync' ) ); ?>" class="button button-small button-primary" onclick="return confirm('<?php echo esc_js( __( 'This will create missing variations, set products to virtual, fix tax status, and assign default images. Continue?', 'shelterkit-donations' ) ); ?>');">
+				<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=shelterkit-donations-settings&action=repair-sync' ), 'sd_repair_sync' ) ); ?>" class="button button-small button-primary" onclick="return confirm('<?php echo esc_js( __( 'This will create missing variations, make variations virtual, fix tax status, restore any product SKU that stopped orders being recorded, and assign default images. Continue?', 'shelterkit-donations' ) ); ?>');">
 					<?php esc_html_e( 'Repair Issues', 'shelterkit-donations' ); ?>
 				</a>
 			</p>

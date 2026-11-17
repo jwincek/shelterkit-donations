@@ -601,7 +601,8 @@ class Quick_Actions {
      */
     private static function render_donation_filters(): void {
         $allocation = sanitize_key( $_GET['allocation'] ?? '' );
-        $allocations = \Starter_Shelter\Core\Config::get_item( 'settings', 'allocations', [] );
+        // Retired funds stay filterable: their past gifts are still listed.
+        $allocations = \Starter_Shelter\Core\Allocations::known();
 
         ?>
         <select name="allocation">

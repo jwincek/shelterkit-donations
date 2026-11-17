@@ -24,7 +24,7 @@ class Activator {
      * @var array
      */
     private static array $products = [
-        'shelterkit-donations' => [
+        'shelter-donations' => [
             // FROZEN — not renamed with the plugin. WooCommerce copies a
             // product's title into every order line item, and the legacy-sync
             // matcher in config/sync.json keys off it with
@@ -32,8 +32,14 @@ class Activator {
             // future orders unmatched by that pattern while historical ones
             // still carry the old name. The customer-facing name is a donor's
             // words anyway, not the plugin's brand.
+            //
+            // The SKUs are frozen for a stronger reason: Product_Mapper
+            // recognises this plugin's order items by SKU prefix, and every
+            // existing product keeps the SKU it was created with. 3.0.0
+            // renamed two of them with the plugin and every donation and
+            // memorial order on an upgraded site was silently skipped (#16).
             'name'        => 'Shelter Donations',
-            'sku'         => 'shelterkit-donations',
+            'sku'         => 'shelter-donations',
             'description' => 'Support us with a donation to help care for animals in need.',
             'short_desc'  => 'Support us with a donation.',
             'category'    => 'Support Us',
@@ -43,13 +49,10 @@ class Activator {
             'attribute'   => [
                 'name'    => 'Preferred Allocation',
                 'slug'    => 'preferred-allocation',
-                'options' => [
-                    'General Fund'   => 10,
-                    'Medical Care'   => 10,
-                    'Food & Supplies' => 10,
-                    'Facility'       => 10,
-                    'Rescue Ops'     => 10,
-                ],
+                // Filled from Allocations::active() when the product is
+                // created. A list of its own here offered five funds while
+                // the form offered seven (#21).
+                'options' => [],
             ],
         ],
         'shelter-memberships' => [
@@ -98,9 +101,9 @@ class Activator {
                 ],
             ],
         ],
-        'shelterkit-donations-in-memoriam' => [
+        'shelter-donations-in-memoriam' => [
             'name'        => 'In Memoriam Donations',
-            'sku'         => 'shelterkit-donations-in-memoriam',
+            'sku'         => 'shelter-donations-in-memoriam',
             'description' => 'Honor the memory of a person or pet with a meaningful donation.',
             'short_desc'  => 'Make a donation in memory of a person or pet.',
             'category'    => 'Support Us',
@@ -124,6 +127,9 @@ class Activator {
      * @since 2.0.0
      */
     public static function activate(): void {
+        // The activity log needs its table before the first event is logged.
+        \Starter_Shelter\Admin\Activity_Log::create_table();
+
         // Schedule product creation for after WooCommerce loads.
         add_action( 'woocommerce_loaded', [ __CLASS__, 'maybe_create_products' ] );
 
@@ -152,8 +158,14 @@ class Activator {
         }
 
         foreach ( self::$products as $key => $product_data ) {
+            if ( 'shelter-donations' === $key ) {
+                $product_data['attribute']['options'] = array_fill_keys( array_values( Allocations::active() ), 10 );
+            }
             self::create_product_if_needed( $key, $product_data );
         }
+
+        // Link each donation variation to its fund by slug.
+        Allocations::sync_variations();
 
         // Mark as complete.
         update_option( 'sd_products_created', true );

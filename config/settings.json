@@ -6,12 +6,16 @@
     "facility": "Facility Improvements",
     "rescue-operations": "Rescue Operations",
     "emergency-fund": "Emergency Fund",
-    "spay-neuter": "Spay/Neuter Program"
+    "spay-neuter-clinic": "Spay/Neuter Clinic"
+  },
+  "retired_allocations": {},
+  "allocation_aliases": {
+    "spay-neuter": "spay-neuter-clinic",
+    "rescue-ops": "rescue-operations"
   },
   "memorial_types": {
-    "pet": "In Memory of a Pet",
-    "human": "In Memory of a Person",
-    "honor": "In Honor Of"
+    "person": "Person",
+    "pet": "Pet"
   },
   "pet_species": {
     "dog": "Dog",

@@ -389,8 +389,9 @@ class Import_Ajax_Handler {
 		$required  = $config['required'] ?? [];
 		$field_map = $config['field_map'] ?? [];
 
-		// Pull live enum values from config.
-		$allocations   = array_keys( Config::get_item( 'settings', 'allocations', [] ) );
+		// Pull live enum values from config. Retired funds are listed too:
+		// importing a past gift to one is valid, and the import accepts it.
+		$allocations   = array_keys( \Starter_Shelter\Core\Allocations::known() );
 		$all_tiers     = Config::get_item( 'tiers', 'tiers', [] );
 		$ind_tiers     = array_keys( $all_tiers['individual'] ?? [] );
 		$biz_tiers     = array_keys( $all_tiers['business'] ?? [] );
@@ -500,7 +501,7 @@ class Import_Ajax_Handler {
 	 * @return array Array of example rows.
 	 */
 	private static function build_example_rows( string $type, array $headers ): array {
-		$allocations = array_keys( Config::get_item( 'settings', 'allocations', [] ) );
+		$allocations = array_keys( \Starter_Shelter\Core\Allocations::active() );
 		$all_tiers   = Config::get_item( 'tiers', 'tiers', [] );
 		$ind_tiers   = $all_tiers['individual'] ?? [];
 		$species     = array_keys( Config::get_item( 'settings', 'pet_species', [] ) );

@@ -956,7 +956,9 @@ function process_memorial_save( int $memorial_id, array $context = [] ): void {
  * @return string The human-readable label.
  */
 function get_allocation_label( string $allocation ): string {
-    $allocations = Config::get_item( 'settings', 'allocations', [] );
+    // Retired funds too: a past gift keeps its fund's name after the fund
+    // leaves the donation form (#21).
+    $allocations = \Starter_Shelter\Core\Allocations::known();
 
     if ( isset( $allocations[ $allocation ] ) ) {
         return $allocations[ $allocation ];

@@ -39,7 +39,7 @@ Donor data lives in your WordPress database as private custom post types; nothin
 
 == Installation ==
 
-1. Install and activate **WooCommerce** (9.0 or newer) — Shelter Donations processes contributions through WooCommerce checkout.
+1. Install and activate **WooCommerce** (9.0 or newer) — ShelterKit Donations processes contributions through WooCommerce checkout.
 2. Install and activate **ShelterKit Donations**. On activation it creates four WooCommerce products: General Donations, In Memoriam Donations, Individual Memberships, and Business Memberships.
 3. Visit **ShelterKit Donations → Settings** to configure allocations, membership tiers, and donor levels.
 4. Add the Donation Form, Membership Form, or Memorial Form block (or the all-in-one Contribution Tabs block) to a page.
@@ -65,6 +65,8 @@ Everything is stored locally as private custom post types (donations, donors, me
 = Does uninstalling delete my data? =
 
 No — uninstall preserves all data by default. Deletion is an explicit opt-in, and the admin tools include a full-backup CSV ZIP export you can take first.
+
+Even when you opt in, the WooCommerce products the plugin created (and their images) are left in place, because your past orders refer to them. Delete them from Products if you no longer need them.
 
 == Screenshots ==
 

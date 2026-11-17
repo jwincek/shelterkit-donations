@@ -76,6 +76,15 @@
 	</rule>
 
 	<!--
+		Core reads a block script's dependencies from <script>.asset.php beside
+		it (edit.asset.php, view.asset.php). The name is fixed by core, so the
+		hyphenated-lowercase rule cannot apply to it.
+	-->
+	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
+		<exclude-pattern>blocks/*/*.asset.php</exclude-pattern>
+	</rule>
+
+	<!--
 		WooCommerce email templates fire woocommerce_email_header/footer by
 		design — that is the documented integration point, and prefixing them
 		would mean not integrating at all.

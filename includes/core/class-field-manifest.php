@@ -76,7 +76,43 @@ class Field_Manifest {
 			return self::$cache[ $entity ] = null;
 		}
 
-		return self::$cache[ $entity ] = $data;
+		return self::$cache[ $entity ] = self::resolve_enum_sources( $data );
+	}
+
+	/**
+	 * Replace every `'enum_source' => '<list>'` with the list's current values.
+	 *
+	 * Some enums are site data rather than code: the funds a donor can give to
+	 * are an admin setting. A literal `enum` in the manifest goes stale the
+	 * moment that setting changes, and every gift to a fund it omits is paid
+	 * for and then rejected by the ability (#21). Resolving here, where the
+	 * manifest is loaded, reaches every projection at once: ability schemas
+	 * (through `$entity` refs), the entities config, and CSV import's
+	 * `enum_ref`.
+	 *
+	 * @param array<string, mixed> $node Manifest data, or a branch of it.
+	 * @return array<string, mixed>
+	 */
+	private static function resolve_enum_sources( array $node ): array {
+		if ( isset( $node['enum_source'] ) && is_string( $node['enum_source'] ) ) {
+			$enum = match ( $node['enum_source'] ) {
+				// Active and retired: a retired fund is still valid on the records that carry it.
+				'allocations' => array_keys( Allocations::known() ),
+				default       => null,
+			};
+			if ( null !== $enum ) {
+				$node['enum'] = $enum;
+			}
+			unset( $node['enum_source'] );
+		}
+
+		foreach ( $node as $key => $value ) {
+			if ( is_array( $value ) ) {
+				$node[ $key ] = self::resolve_enum_sources( $value );
+			}
+		}
+
+		return $node;
 	}
 
 	/**

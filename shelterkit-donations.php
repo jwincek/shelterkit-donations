@@ -288,13 +288,26 @@ function starter_shelter_admin_init(): void {
     // Initialize legacy order sync.
     Starter_Shelter\Admin\Legacy_Sync_Page::init();
 
-    // Initialize activity log.
-    Starter_Shelter\Admin\Activity_Log::init();
-
     // Initialize product sync checker.
     Starter_Shelter\Admin\Product_Sync_Checker::init();
 }
 add_action( 'plugins_loaded', 'starter_shelter_admin_init', 25 );
+
+/**
+ * Initialize the activity log on every request, not only in wp-admin.
+ *
+ * Its listeners have to hear events wherever they happen: a block checkout
+ * runs in a REST request, payment webhooks and WP-CLI are not wp-admin, and
+ * the daily cleanup fires from wp-cron.php. It used to be started with the
+ * admin screens, behind is_admin(), so it heard only what happened in
+ * wp-admin and its cleanup callback was never registered when the event ran
+ * (#22). Registered after starter_shelter_admin_init so its submenu keeps
+ * its place.
+ */
+function starter_shelter_activity_log_init(): void {
+    Starter_Shelter\Admin\Activity_Log::init();
+}
+add_action( 'plugins_loaded', 'starter_shelter_activity_log_init', 25 );
 
 /**
  * Initialize cron jobs.
@@ -348,9 +361,14 @@ function starter_shelter_register_blocks(): void {
     }
 
     // Add shared feedback styles as dependency for form blocks.
+    //
+    // Core derives the style handle from the block name, which is frozen as
+    // shelter-donations/<block>, so this prefix is frozen with it. 3.0.0
+    // renamed it with the plugin, the lookup matched nothing, and the
+    // stylesheet that hides the success and error boxes never loaded (#19).
     $form_blocks = [ 'donation-form', 'memorial-form', 'membership-form' ];
     foreach ( $form_blocks as $block ) {
-        $handle = 'shelterkit-donations-' . $block . '-style';
+        $handle = 'shelter-donations-' . $block . '-style';
         $style = wp_styles()->query( $handle );
         if ( $style ) {
             $style->deps[] = 'sd-form-feedback';
@@ -395,6 +413,10 @@ function starter_shelter_maybe_setup_products(): void {
 }
 add_action( 'admin_init', 'starter_shelter_maybe_setup_products' );
 
+// One-time upgrade to the canonical fund list (#21). After product setup, so
+// a fresh site's variations exist to be linked.
+add_action( 'admin_init', [ Starter_Shelter\Core\Allocations::class, 'maybe_migrate' ], 20 );
+
 /**
  * Show admin notice if products need setup.
  *
@@ -432,17 +454,26 @@ add_action( 'admin_notices', 'starter_shelter_product_setup_notice' );
  * @since 1.0.0
  */
 function starter_shelter_deactivate(): void {
+    // The cleanup event has no callback while the plugin is inactive, and
+    // used to outlive deactivation and uninstall alike (#22).
+    Starter_Shelter\Admin\Activity_Log::unschedule_cleanup();
+
     flush_rewrite_rules();
 }
 register_deactivation_hook( __FILE__, 'starter_shelter_deactivate' );
 
-// The shelter profile is a SHARED class, carried byte-identically by every
-// ShelterKit plugin — the Action Scheduler pattern. Registering at file scope
-// (not on a hook) is what lets the registry see every plugin's copy before it
-// picks the highest on plugins_loaded. Nothing here depends on a sibling plugin
-// being installed: alone, this copy simply wins.
+// The shelter profile is a SHARED class, carried by every ShelterKit plugin
+// and identical in each except for its text domain — the Action Scheduler
+// pattern. Registering at file scope (not on a hook) is what lets the registry
+// see every plugin's copy before it picks the highest on plugins_loaded.
+// Nothing here depends on a sibling plugin being installed: alone, this copy
+// simply wins.
+//
+// The version string must equal ShelterKit_Profile::VERSION, because it is
+// what the negotiation compares. It cannot reference the constant (the class
+// is not loaded yet), so bin/check-versions.sh checks the two agree (#24).
 require_once STARTER_SHELTER_PATH . 'includes/shelterkit/class-shelterkit-profile-versions.php';
-ShelterKit_Profile_Versions::register( '1.2.0', STARTER_SHELTER_PATH . 'includes/shelterkit/class-shelterkit-profile.php' );
+ShelterKit_Profile_Versions::register( '1.3.0', STARTER_SHELTER_PATH . 'includes/shelterkit/class-shelterkit-profile.php' );
 
 // Register the WP-CLI `wp shelterkit-donations validate` contract-checker.
 // Loaded only when WP-CLI is active to keep production overhead at zero.

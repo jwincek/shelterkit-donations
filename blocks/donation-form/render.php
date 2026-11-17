@@ -39,7 +39,7 @@ $max_amount       = $attributes['maxAmount'] ?? 100000;
 // Get allocations.
 $allocations = [];
 if ( class_exists( '\Starter_Shelter\Core\Config' ) ) {
-    $allocations = Config::get_item( 'settings', 'allocations', [] );
+    $allocations = \Starter_Shelter\Core\Allocations::active();
 }
 if ( empty( $allocations ) ) {
     $allocations = [

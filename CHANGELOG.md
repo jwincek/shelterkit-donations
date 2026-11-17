@@ -7,6 +7,74 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Sites upgraded from 2.x stopped recording donations and memorials.**
+  3.0.0 renamed two product SKUs along with the plugin, but existing
+  products keep the SKU they were created with, so their order items were
+  no longer recognised and were skipped with no error or order note. The
+  2.x SKUs are restored, listed as frozen in CONTRIBUTING, and pinned by a
+  test. (#16)
+- **None of the blocks could be inserted on a fresh install.** Every editor
+  script loaded before the packages it reads and threw. Each block now ships
+  an `edit.asset.php` declaring its dependencies, which also lets editor
+  strings be translated for the first time. (#17)
+- **On classic themes the forms, walls and dashboard did nothing.** Their
+  front-end modules never declared `@wordpress/interactivity`, so it was
+  missing from the import map unless something else on the page (a block
+  theme's Navigation block, WooCommerce's mini-cart) happened to add it.
+  Each block now ships a `view.asset.php`. (#18)
+- **The donation, membership and memorial forms showed a success tick,
+  "Proceed to Checkout" and an empty error box before anything was
+  clicked.** The stylesheet that hides them until needed was attached by a
+  handle the 3.0.0 rename had changed, so it never loaded. (#19)
+- The shared shelter-profile copy registered itself as 1.2.0 while carrying
+  1.3.0 code, so it could lose version negotiation to an older sibling copy
+  that drops fields on save. It now registers as 1.3.0, and
+  `bin/check-versions.sh` fails if the two drift apart again. (#24)
+- **The activity log missed most events.** Its table was only created when
+  its screen was first opened, and it only listened inside wp-admin, so
+  donations completed at checkout, by a payment webhook or from WP-CLI were
+  never recorded. Activation now creates the table, existing sites get it
+  on their next request, and the log listens on every request. Entries made
+  outside wp-admin do not record an IP address, so donors' addresses are not
+  stored. (#22)
+- The activity log's 90-day cleanup never actually ran, because its
+  callback was only registered in wp-admin and WP-Cron runs elsewhere. It
+  now runs, so **entries older than 90 days are removed** on the first run
+  after updating (the `starter_shelter_activity_log_retention_days` filter
+  changes the period). The event is also cleared on deactivation and
+  uninstall instead of outliving the plugin. (#22)
+- **Gifts to most funds were never recorded.** The donation ability only
+  accepted General Fund and Spay/Neuter Clinic, so a paid gift to any other
+  fund was rejected when the order was processed. A fund with no matching
+  product variation was quietly recorded as General Fund. The Donation
+  Allocations setting is now the one list every part of the plugin uses: the
+  form, the ability, the product variations (created for every fund, and
+  linked by slug rather than by matching labels) and what is recorded, which
+  is now the fund the donor chose. A fund that isn't on the list is refused
+  at "Add to cart", before payment, instead of after. (#21)
+- **Removing a fund now retires it** rather than deleting it: it leaves the
+  donation form, while past gifts, reports and filters keep it. A saved
+  fund's slug can no longer be edited, since past gifts are filed under it.
+  Retired funds can be restored. (#21)
+- "Spay/Neuter Program" (`spay-neuter`) and "Spay/Neuter Clinic"
+  (`spay-neuter-clinic`) were one fund under two slugs. It is now
+  `spay-neuter-clinic` everywhere. Saved settings, older forms and existing
+  variations are carried over on the next admin page load, and the label you
+  chose is kept. (#21)
+- **The Product Sync notice no longer cries wolf.** It tested "virtual" on
+  each variable product itself, which WooCommerce never treats as virtual,
+  so every site carried four warnings that Repair could not clear. It now
+  checks the variations, which is what decides whether checkout asks a donor
+  for a shipping address, and Repair makes them virtual. (#23)
+- **A product SKU that stops orders being recorded is now an error**, worded
+  as such, instead of one warning among many. Repair sets the SKU back. If
+  another product already has that SKU, Repair says so rather than
+  guessing. (#23)
+- The sync checker no longer expects an "In Honor Of" memorial variation.
+  Honouring someone is a dedication, recorded separately, and memorial
+  products need only Person and Pet. (#21)
+
 ## [3.0.0] - 2026-08-24
 
 ### Changed

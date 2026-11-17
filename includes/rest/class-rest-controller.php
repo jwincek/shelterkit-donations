@@ -568,7 +568,7 @@ function get_public_stats( WP_REST_Request $request ): WP_REST_Response {
  * @return WP_REST_Response Response object.
  */
 function get_allocations( WP_REST_Request $request ): WP_REST_Response {
-    $allocations = Config::get_item( 'settings', 'allocations', [] );
+    $allocations = \Starter_Shelter\Core\Allocations::active();
 
     if ( empty( $allocations ) ) {
         $allocations = [
