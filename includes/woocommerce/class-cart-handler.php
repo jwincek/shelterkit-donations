@@ -13,6 +13,7 @@ declare( strict_types = 1 );
 
 namespace Starter_Shelter\WooCommerce;
 
+use Starter_Shelter\Admin\Settings;
 use Starter_Shelter\Core\Allocations;
 use WP_Error;
 
@@ -220,7 +221,9 @@ class Cart_Handler {
             $data['skdon_campaign_id'] = absint( $post_data['campaign_id'] );
         }
 
-        if ( ! empty( $post_data['is_anonymous'] ) ) {
+        // Only while the site offers it (#49): the form hides the choice, and
+        // a request made by hand can't make it either.
+        if ( ! empty( $post_data['is_anonymous'] ) && Settings::is_feature_enabled( 'anonymous_donations' ) ) {
             $data['skdon_is_anonymous'] = true;
         }
 
@@ -253,7 +256,7 @@ class Cart_Handler {
             // the skdon_memorial entity declarations — closes the CC-2
             // audit divergence where cart wrote `_skdon_family_name` while
             // the entity used `_skdon_notify_family_name` for the same data.
-            if ( ! empty( $post_data['notify_family_enabled'] ) ) {
+            if ( ! empty( $post_data['notify_family_enabled'] ) && Settings::is_feature_enabled( 'family_notifications' ) ) {
                 $data['skdon_notify_family_enabled'] = true;
 
                 if ( ! empty( $post_data['notify_family_name'] ) ) {
@@ -470,7 +473,7 @@ class Cart_Handler {
             $cart_item_data['skdon_campaign_id'] = absint( $_REQUEST['sd_campaign'] );
         }
 
-        if ( isset( $_REQUEST['sd_anonymous'] ) ) {
+        if ( isset( $_REQUEST['sd_anonymous'] ) && Settings::is_feature_enabled( 'anonymous_donations' ) ) {
             $cart_item_data['skdon_is_anonymous'] = true;
         }
 

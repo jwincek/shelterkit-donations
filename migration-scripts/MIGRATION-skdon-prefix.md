@@ -146,6 +146,10 @@ The first admin page after the move shows a notice with what moved. Then:
   saving the Emails tab turned renewal reminders off, reset the reminder
   period to 30 days and cleared the Donation and Membership pages. If anyone
   has ever saved the Emails tab, check those four and save General again.
+  The same save stored the Features switches as off. Three of them did
+  nothing until #49, so the update turns them back on, which is what the
+  forms have been doing all along, and a notice names them. Turn off any
+  you don't want, then save.
 - **ShelterKit Donations → Data Tools → Order Records.** Both steps are safe
   to run more than once, and neither emails a donor.
   - If this site ever ran Legacy Order Sync, check the list of records it

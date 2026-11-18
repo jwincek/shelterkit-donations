@@ -158,7 +158,7 @@ class List_Columns {
                     'donation_count'  => __( 'Donations', 'shelterkit-donations' ),
                 ],
                 'sortable' => [ 'lifetime_giving', 'donation_count', 'donor_level' ],
-                'row_actions' => [ 'view_dashboard', 'send_statement' ],
+                'row_actions' => [ 'send_statement' ],
             ],
         ];
     }
@@ -727,18 +727,6 @@ class List_Columns {
                             '<a href="%s" class="sd-action-link">%s</a>',
                             esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=skdon_notify_family&id=' . $post->ID ), 'sd_notify_family_' . $post->ID ) ),
                             esc_html__( 'Notify Family', 'shelterkit-donations' )
-                        );
-                    }
-                    break;
-
-                case 'view_dashboard':
-                    // Link to frontend donor dashboard if exists.
-                    $dashboard_page = Settings::get( 'donor_dashboard_page', 0 );
-                    if ( $dashboard_page ) {
-                        $new_actions['view_dashboard'] = sprintf(
-                            '<a href="%s" target="_blank">%s</a>',
-                            esc_url( add_query_arg( 'donor_id', $post->ID, get_permalink( $dashboard_page ) ) ),
-                            esc_html__( 'View Dashboard', 'shelterkit-donations' )
                         );
                     }
                     break;

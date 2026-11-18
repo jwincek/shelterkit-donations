@@ -16,8 +16,9 @@ $preset_amounts        = $attributes['presetAmounts'] ?? [ 25, 50, 100, 250 ];
 $default_amount        = $attributes['defaultAmount'] ?? 50;
 $default_ded_type      = $attributes['defaultDedicationType'] ?? 'memory';
 $default_honoree_type  = $attributes['defaultHonoreeType'] ?? 'person';
-$show_anonymous        = $attributes['showAnonymous'] ?? true;
-$show_family           = $attributes['showFamilyNotification'] ?? true;
+// The site-wide switches beat each form's own (#49).
+$show_anonymous        = ( $attributes['showAnonymous'] ?? true ) && \Starter_Shelter\Admin\Settings::is_feature_enabled( 'anonymous_donations' );
+$show_family           = ( $attributes['showFamilyNotification'] ?? true ) && \Starter_Shelter\Admin\Settings::is_feature_enabled( 'family_notifications' );
 $show_send_card        = $attributes['showSendCard'] ?? true;
 $title                 = $attributes['title'] ?? __( 'Give in Memory or Honor', 'shelterkit-donations' );
 $subtitle              = $attributes['subtitle'] ?? __( 'Honor a loved one with a meaningful tribute gift.', 'shelterkit-donations' );

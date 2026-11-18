@@ -27,6 +27,38 @@ class Settings {
     private const PAGE_SLUG = 'shelterkit-donations-settings';
 
     /**
+     * Which upgrade of the stored settings has run (see maybe_upgrade()).
+     */
+    public const VERSION_OPTION = 'skdon_settings_version';
+    private const VERSION       = 2;
+
+    /**
+     * The upgrade turned these back on; the notice names them until dismissed.
+     */
+    public const NOTICE_OPTION = 'skdon_settings_turned_on';
+
+    /**
+     * Feature switches that did nothing until #49. The upgrade turns each one
+     * stored as off back on, so a site keeps offering what it always has.
+     */
+    private const NOW_ENFORCED = [
+        'feature_anonymous_donations',
+        'feature_dedications',
+        'feature_family_notifications',
+    ];
+
+    /**
+     * Settings that were removed because nothing read them (#49). The upgrade
+     * deletes their stored values.
+     */
+    private const REMOVED = [
+        'email_from_name',
+        'email_from_address',
+        'logo_moderation_email',
+        'feature_annual_statements',
+    ];
+
+    /**
      * Settings tabs, keyed by slug.
      *
      * @var array<string, string>
@@ -42,6 +74,8 @@ class Settings {
         add_action( 'admin_menu', [ self::class, 'add_settings_page' ] );
         add_action( 'admin_init', [ self::class, 'register_settings' ] );
         add_action( 'admin_init', [ self::class, 'handle_product_actions' ] );
+        add_action( 'admin_notices', [ self::class, 'upgrade_notice' ] );
+        add_action( 'admin_post_skdon_dismiss_settings_notice', [ self::class, 'dismiss_upgrade_notice' ] );
     }
 
     public static function add_settings_page(): void {
@@ -142,12 +176,8 @@ class Settings {
         }, self::PAGE_SLUG . '_general' );
 
         add_settings_section( 'sd_features', __( 'Features', 'shelterkit-donations' ), function () {
-            echo '<p>' . esc_html__( 'Enable or disable plugin features.', 'shelterkit-donations' ) . '</p>';
+            echo '<p>' . esc_html__( 'What the donation, membership and memorial forms and the checkout offer. A feature turned off here is off on every form, whatever that form\'s own settings say.', 'shelterkit-donations' ) . '</p>';
         }, self::PAGE_SLUG . '_general' );
-
-        add_settings_section( 'sd_emails', __( 'Email Settings', 'shelterkit-donations' ), function () {
-            echo '<p>' . esc_html__( 'Configure email notifications.', 'shelterkit-donations' ) . '</p>';
-        }, self::PAGE_SLUG . '_emails' );
 
         add_settings_section( 'sd_data', __( 'Data Management', 'shelterkit-donations' ), function () {
             echo '<p>' . esc_html__( 'How long the activity log keeps its entries, and what happens to your data when the plugin is uninstalled.', 'shelterkit-donations' ) . '</p>';
@@ -156,12 +186,15 @@ class Settings {
 
     private static function register_fields(): void {
         // General tab fields
+        global $wp_locale;
+        $months = [];
+        for ( $m = 1; $m <= 12; $m++ ) {
+            $months[ $m ] = $wp_locale ? $wp_locale->get_month( $m ) : gmdate( 'F', gmmktime( 0, 0, 0, $m, 1 ) );
+        }
         self::add_field( 'fiscal_year_start_month', __( 'Fiscal Year Start Month', 'shelterkit-donations' ), 'sd_general', 'select', [
-            'options' => array_combine( range( 1, 12 ), [
-                'January', 'February', 'March', 'April', 'May', 'June',
-                'July', 'August', 'September', 'October', 'November', 'December',
-            ] ),
-            'default' => 7,
+            'options'     => $months,
+            'default'     => 7,
+            'description' => __( 'The fiscal year starts on the 1st of this month. It is what Reports and Donor Stats mean by "Fiscal Year", and it is named after the calendar year it starts in.', 'shelterkit-donations' ),
         ], 'general' );
 
         self::add_field( 'renewal_reminder_days', __( 'Membership Renewal Reminder (days)', 'shelterkit-donations' ), 'sd_general', 'number', [
@@ -177,30 +210,24 @@ class Settings {
             'description' => __( 'Where "Join Now" buttons (campaign-card on membership drives) should link. Campaign-card appends ?campaign={id}.', 'shelterkit-donations' ),
         ], 'general' );
 
-        // Feature toggles
-        foreach ( [
-            'feature_anonymous_donations'  => 'Allow Anonymous Donations',
-            'feature_dedications'          => 'Enable Donation Dedications',
-            'feature_family_notifications' => 'Enable Memorial Family Notifications',
-            'feature_renewal_reminders'    => 'Send Membership Renewal Reminders',
-            'feature_annual_statements'    => 'Send Annual Giving Statements',
-        ] as $id => $label ) {
-            self::add_field( $id, __( $label, 'shelterkit-donations' ), 'sd_features', 'checkbox', [ 'default' => true ], 'general' ); // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- feature toggle label sourced from the settings config map, not a literal.
-        }
-
-        // Email tab fields
-        self::add_field( 'email_from_name', __( 'Email From Name', 'shelterkit-donations' ), 'sd_emails', 'text', [
-            'default' => get_bloginfo( 'name' ),
-        ], 'emails' );
-
-        self::add_field( 'email_from_address', __( 'Email From Address', 'shelterkit-donations' ), 'sd_emails', 'email', [
-            'default' => get_option( 'admin_email' ),
-        ], 'emails' );
-
-        self::add_field( 'logo_moderation_email', __( 'Logo Moderation Notifications', 'shelterkit-donations' ), 'sd_emails', 'email', [
-            'default' => get_option( 'admin_email' ),
-            'description' => __( 'Email address for business logo moderation notifications.', 'shelterkit-donations' ),
-        ], 'emails' );
+        // Feature switches. Each one is read where its feature is offered; the
+        // guard test in tests/Unit/SettingsReadersTest.php fails on one that
+        // isn't (#49).
+        self::add_field( 'feature_anonymous_donations', __( 'Allow Anonymous Donations', 'shelterkit-donations' ), 'sd_features', 'checkbox', [
+            'default'     => true,
+            'description' => __( 'Offer donors the choice to keep their name off public lists, on the forms and at checkout. Gifts already marked anonymous stay anonymous, and staff can still mark one by hand.', 'shelterkit-donations' ),
+        ], 'general' );
+        self::add_field( 'feature_dedications', __( 'Enable Donation Dedications', 'shelterkit-donations' ), 'sd_features', 'checkbox', [
+            'default'     => true,
+            'description' => __( 'The optional "Dedication" line at checkout for general donations. Tribute gifts made with the memorial form are not affected.', 'shelterkit-donations' ),
+        ], 'general' );
+        self::add_field( 'feature_family_notifications', __( 'Enable Memorial Family Notifications', 'shelterkit-donations' ), 'sd_features', 'checkbox', [
+            'default'     => true,
+            'description' => __( 'Let donors ask for the honoree\'s family to be told about a tribute gift, on the memorial form and at checkout. Staff can still notify a family from the memorial\'s screen.', 'shelterkit-donations' ),
+        ], 'general' );
+        self::add_field( 'feature_renewal_reminders', __( 'Send Membership Renewal Reminders', 'shelterkit-donations' ), 'sd_features', 'checkbox', [
+            'default' => true,
+        ], 'general' );
 
         // Activity log retention (#38). Routine entries can go sooner; admin
         // actions are kept longer, because the log is the only record of who
@@ -298,7 +325,8 @@ class Settings {
      *
      * A save made in code, with no `_tab`, changes only the keys it passes.
      * Anything else stored, such as the organisation fields that moved to
-     * Shelter Details in 3.0.0, is kept as it is.
+     * Shelter Details in 3.0.0, is kept as it is. A key that is no longer a
+     * setting is dropped (#49).
      *
      * @param mixed $input The posted settings.
      * @return array
@@ -320,8 +348,12 @@ class Settings {
             }
         }
 
-        unset( $out['_tab'] );
-        return $out;
+        // Saving the switches the upgrade notice names answers it.
+        if ( 'general' === $tab ) {
+            delete_option( self::NOTICE_OPTION );
+        }
+
+        return array_intersect_key( $out, self::get_defaults() );
     }
 
     /**
@@ -333,11 +365,6 @@ class Settings {
      */
     private static function sanitize_field( string $key, $raw ) {
         switch ( $key ) {
-            case 'email_from_name':
-                return sanitize_text_field( (string) ( $raw ?? '' ) );
-            case 'email_from_address':
-            case 'logo_moderation_email':
-                return sanitize_email( (string) ( $raw ?? '' ) );
             case 'fiscal_year_start_month':
                 return min( 12, max( 1, absint( $raw ?? 7 ) ) );
             case 'renewal_reminder_days':
@@ -349,7 +376,6 @@ class Settings {
             case 'feature_dedications':
             case 'feature_family_notifications':
             case 'feature_renewal_reminders':
-            case 'feature_annual_statements':
             case 'delete_data_on_uninstall':
                 return ! empty( $raw );
             case 'log_retention_days':
@@ -404,14 +430,10 @@ class Settings {
             'org_phone'                     => '',
             'donation_page'                 => 0,
             'membership_page'               => 0,
-            'email_from_name'               => get_bloginfo( 'name' ),
-            'email_from_address'            => get_option( 'admin_email' ),
-            'logo_moderation_email'         => get_option( 'admin_email' ),
             'feature_anonymous_donations'   => true,
             'feature_dedications'           => true,
             'feature_family_notifications'  => true,
             'feature_renewal_reminders'     => true,
-            'feature_annual_statements'     => true,
             'delete_data_on_uninstall'      => false,
             'log_retention_days'            => 90,
             'log_retention_admin_days'      => 730,
@@ -452,6 +474,8 @@ class Settings {
                     self::render_products_tab();
                 } elseif ( 'data' === $current_tab ) {
                     self::render_data_tab();
+                } elseif ( 'emails' === $current_tab ) {
+                    self::render_emails_tab();
                 } else {
                     ?>
                     <form action="options.php" method="post">
@@ -464,14 +488,34 @@ class Settings {
                         ?>
                     </form>
                     <?php
-                    if ( 'emails' === $current_tab ) {
-                        self::render_email_templates_table();
-                    }
                 }
                 ?>
             </div>
         </div>
         <?php
+    }
+
+    /**
+     * Render the Emails tab: where the sender is set, and the emails.
+     *
+     * The plugin's emails are WooCommerce emails, so their sender name and
+     * address are WooCommerce's. The tab used to have its own From fields,
+     * which nothing read (#49).
+     */
+    private static function render_emails_tab(): void {
+        ?>
+        <h2><?php esc_html_e( 'Sender', 'shelterkit-donations' ); ?></h2>
+        <p>
+            <?php
+            printf(
+                /* translators: %s: link to WooCommerce's email settings. */
+                esc_html__( 'These emails are sent by WooCommerce, from the name and address set under %s.', 'shelterkit-donations' ),
+                '<a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=email' ) ) . '">' . esc_html__( 'WooCommerce → Settings → Emails → Email sender options', 'shelterkit-donations' ) . '</a>'
+            );
+            ?>
+        </p>
+        <?php
+        self::render_email_templates_table();
     }
 
     /**
@@ -1075,6 +1119,115 @@ class Settings {
         }
 
         update_option( 'skdon_org_profile_migrated', 1 );
+    }
+
+    /**
+     * Bring the stored settings up to date, once (#49).
+     *
+     * Three feature switches did nothing until #49. And until #50, saving any
+     * other tab stored every switch as off, so a stored "off" may never have
+     * been anyone's choice. Each one stored as off is turned back on, which is
+     * what the site has been doing all along, and an admin notice names it.
+     * The stored values of the removed settings are deleted.
+     *
+     * Hooked early on `init` on every request, not only in wp-admin, because
+     * the forms and the checkout read the switches.
+     */
+    public static function maybe_upgrade(): void {
+        if ( (int) get_option( self::VERSION_OPTION, 0 ) >= self::VERSION ) {
+            return;
+        }
+
+        $stored = get_option( self::OPTION_NAME, null );
+        if ( is_array( $stored ) ) {
+            $turned_on = [];
+            foreach ( self::NOW_ENFORCED as $key ) {
+                if ( array_key_exists( $key, $stored ) && ! $stored[ $key ] ) {
+                    $stored[ $key ] = true;
+                    $turned_on[]    = $key;
+                }
+            }
+            $removed = array_intersect_key( $stored, array_flip( self::REMOVED ) );
+
+            if ( $turned_on || $removed ) {
+                update_option( self::OPTION_NAME, array_diff_key( $stored, $removed ) );
+            }
+            if ( $turned_on ) {
+                update_option( self::NOTICE_OPTION, $turned_on, false );
+            }
+        }
+
+        update_option( self::VERSION_OPTION, self::VERSION );
+    }
+
+    /**
+     * Name the switches the upgrade turned back on, until an admin saves the
+     * General tab or dismisses the notice.
+     */
+    public static function upgrade_notice(): void {
+        $keys = get_option( self::NOTICE_OPTION );
+        if ( ! is_array( $keys ) || ! $keys || ! current_user_can( 'manage_options' ) ) {
+            return;
+        }
+        $screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+        if ( ! $screen || ! ( 'dashboard' === $screen->id
+            || str_contains( (string) $screen->id, 'shelterkit-donations' )
+            || str_starts_with( (string) $screen->post_type, 'skdon_' ) ) ) {
+            return;
+        }
+
+        $labels = [
+            'feature_anonymous_donations'  => __( 'Allow Anonymous Donations', 'shelterkit-donations' ),
+            'feature_dedications'          => __( 'Enable Donation Dedications', 'shelterkit-donations' ),
+            'feature_family_notifications' => __( 'Enable Memorial Family Notifications', 'shelterkit-donations' ),
+        ];
+        $names = array_map( static fn( $key ) => '“' . ( $labels[ $key ] ?? $key ) . '”', $keys );
+        $list  = wp_sprintf_l( '%l', $names );
+
+        $settings = admin_url( 'admin.php?page=' . self::PAGE_SLUG . '&tab=general' );
+        $dismiss  = wp_nonce_url( admin_url( 'admin-post.php?action=skdon_dismiss_settings_notice' ), 'skdon_dismiss_settings_notice' );
+        ?>
+        <div class="notice notice-warning">
+            <p>
+                <strong><?php esc_html_e( 'ShelterKit Donations:', 'shelterkit-donations' ); ?></strong>
+                <?php
+                echo esc_html( sprintf(
+                    /* translators: %s: one or more setting names, such as “Allow Anonymous Donations”. */
+                    _n(
+                        '%s was turned off in Settings, but until this update that setting did nothing, so your forms kept offering it. It has been turned on, so nothing changes for your donors.',
+                        '%s were turned off in Settings, but until this update those settings did nothing, so your forms kept offering them. They have been turned on, so nothing changes for your donors.',
+                        count( $names ),
+                        'shelterkit-donations'
+                    ),
+                    $list
+                ) );
+                ?>
+            </p>
+            <p>
+                <?php
+                printf(
+                    /* translators: %s: link to the General settings tab. */
+                    esc_html__( 'Settings now take effect. To stop offering a feature, turn it off under %s and save.', 'shelterkit-donations' ),
+                    '<a href="' . esc_url( $settings ) . '">' . esc_html__( 'Settings → General', 'shelterkit-donations' ) . '</a>'
+                );
+                ?>
+                <a href="<?php echo esc_url( $dismiss ); ?>" style="margin-left: 8px;"><?php esc_html_e( 'Dismiss', 'shelterkit-donations' ); ?></a>
+            </p>
+        </div>
+        <?php
+    }
+
+    /**
+     * Dismiss the upgrade notice.
+     */
+    public static function dismiss_upgrade_notice(): void {
+        check_admin_referer( 'skdon_dismiss_settings_notice' );
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( esc_html__( 'You do not have permission to do this.', 'shelterkit-donations' ), 403 );
+        }
+        delete_option( self::NOTICE_OPTION );
+        wp_safe_redirect( wp_get_referer() ?: admin_url() );
+        exit;
     }
 
     public static function get( string $key, $default = null ) {

@@ -577,7 +577,10 @@ function get_date_range_for_period(
     ?string $date_from = null,
     ?string $date_to = null
 ): array {
-    $year = $year ?? (int) wp_date( 'Y' );
+    // With no year given, the fiscal year is the one today falls in, which
+    // until the start month is the one that began last calendar year.
+    $fiscal_year = $fiscal_year ?? $year ?? current_fiscal_year();
+    $year        = $year ?? (int) wp_date( 'Y' );
 
     return match ( $period ) {
         'today' => [
@@ -597,7 +600,7 @@ function get_date_range_for_period(
             'start' => "$year-01-01",
             'end'   => "$year-12-31",
         ],
-        'fiscal_year' => get_fiscal_year_range( $fiscal_year ?? $year ),
+        'fiscal_year' => get_fiscal_year_range( $fiscal_year ),
         'calendar_year' => [
             'start' => "$year-01-01",
             'end'   => "$year-12-31",
@@ -643,18 +646,48 @@ function validate_ymd_or_null( ?string $value ): ?string {
 }
 
 /**
+ * The month the fiscal year starts in, from Settings → General.
+ *
+ * @return int 1–12. July unless set.
+ */
+function fiscal_year_start_month(): int {
+    $month = (int) \Starter_Shelter\Admin\Settings::get( 'fiscal_year_start_month', 7 );
+    return $month >= 1 && $month <= 12 ? $month : 7;
+}
+
+/**
+ * The fiscal year a moment falls in, named after the calendar year it
+ * starts in.
+ *
+ * Callers used to pass the calendar year, so from January until the start
+ * month "this fiscal year" was the next one, still in the future (#49).
+ *
+ * @param int|null $timestamp Unix time. Now if null.
+ * @return int The fiscal year.
+ */
+function current_fiscal_year( ?int $timestamp = null ): int {
+    $timestamp = $timestamp ?? time();
+    $year      = (int) wp_date( 'Y', $timestamp );
+    return (int) wp_date( 'n', $timestamp ) >= fiscal_year_start_month() ? $year : $year - 1;
+}
+
+/**
  * Get fiscal year date range.
- * Assumes fiscal year starts July 1.
+ *
+ * Starts on the 1st of the month set in Settings → General (#49; it used to
+ * be July whatever the setting said) and ends the day before the next one.
  *
  * @since 1.0.0
  *
- * @param int $fiscal_year The fiscal year (e.g., 2024 = July 2024 - June 2025).
+ * @param int $fiscal_year The fiscal year, named after the calendar year it
+ *                         starts in (with July: 2024 = July 2024 – June 2025).
  * @return array{start: string, end: string} Date range.
  */
 function get_fiscal_year_range( int $fiscal_year ): array {
+    $start = new \DateTimeImmutable( sprintf( '%04d-%02d-01', $fiscal_year, fiscal_year_start_month() ) );
     return [
-        'start' => "$fiscal_year-07-01",
-        'end'   => ( $fiscal_year + 1 ) . '-06-30',
+        'start' => $start->format( 'Y-m-d' ),
+        'end'   => $start->modify( '+1 year -1 day' )->format( 'Y-m-d' ),
     ];
 }
 

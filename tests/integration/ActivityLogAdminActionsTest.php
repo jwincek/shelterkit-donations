@@ -167,11 +167,11 @@ final class ActivityLogAdminActionsTest extends WP_Ajax_UnitTestCase {
 	// ─── Settings ──────────────────────────────────────────────────
 
 	public function test_a_settings_save_records_old_and_new_values(): void {
-		update_option( 'starter_shelter_options', [ 'renewal_reminder_days' => 30, 'email_from_name' => 'VCHS' ] );
+		update_option( 'starter_shelter_options', [ 'renewal_reminder_days' => 30, 'donation_page' => 12 ] );
 		global $wpdb;
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}skdon_activity_log" );
 
-		update_option( 'starter_shelter_options', [ 'renewal_reminder_days' => 14, 'email_from_name' => 'VCHS', 'api_key' => 'abc123' ] );
+		update_option( 'starter_shelter_options', [ 'renewal_reminder_days' => 14, 'donation_page' => 12, 'api_key' => 'abc123' ] );
 
 		$row = $this->rows()[0];
 		$this->assertSame( 'settings_changed', $row->event_type );

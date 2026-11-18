@@ -22,7 +22,8 @@ $form_id = $attributes['formId'] ?: wp_unique_id( 'sd-donation-' );
 $preset_amounts   = $attributes['presetAmounts'] ?? [ 25, 50, 100, 250, 500 ];
 $default_amount   = $attributes['defaultAmount'] ?? 50;
 $show_allocation  = $attributes['showAllocation'] ?? true;
-$show_anonymous   = $attributes['showAnonymous'] ?? true;
+// The site-wide switch beats each form's own (#49).
+$show_anonymous   = ( $attributes['showAnonymous'] ?? true ) && \Starter_Shelter\Admin\Settings::is_feature_enabled( 'anonymous_donations' );
 // Campaign source of truth: explicit block attribute wins; otherwise
 // auto-tag from `?campaign={id}` so a click through campaign-card
 // (or any campaign-aware deep link) lands here and the resulting

@@ -694,8 +694,16 @@ class Activity_Log {
         $new_arr  = is_array( $new_value ) ? $new_value : [];
         $all_keys = array_unique( array_merge( array_keys( $old_arr ), array_keys( $new_arr ) ) );
 
+        $current = Settings::get_defaults();
         $changes = [];
+        $removed = [];
         foreach ( $all_keys as $key ) {
+            // A key that is no longer a setting at all (#49): say it went,
+            // rather than "old value → (empty)".
+            if ( array_key_exists( $key, $old_arr ) && ! array_key_exists( $key, $new_arr ) && ! array_key_exists( $key, $current ) ) {
+                $removed[] = (string) $key;
+                continue;
+            }
             $old = $old_arr[ $key ] ?? null;
             $new = $new_arr[ $key ] ?? null;
             // As text, so 30 and "30" (a default and the form's value) agree,
@@ -708,11 +716,12 @@ class Activity_Log {
             }
         }
 
-        if ( $changes ) {
-            self::record( 'settings_changed', 'admin', [
+        if ( $changes || $removed ) {
+            self::record( 'settings_changed', 'admin', array_filter( [
                 'changed_fields' => array_keys( $changes ),
                 'changes'        => $changes,
-            ] );
+                'removed_fields' => $removed,
+            ] ) );
         }
     }
 
@@ -1060,12 +1069,18 @@ class Activity_Log {
                 return sprintf( _n( 'Deleted %1$d entry of %2$s', 'Deleted %1$d entries of %2$s', (int) ( $d['deleted'] ?? 0 ), 'shelterkit-donations' ), (int) ( $d['deleted'] ?? 0 ), $run );
 
             case 'settings_changed':
-                if ( isset( $d['changes'] ) ) {
-                    /* translators: %s: the changes, e.g. "renewal_reminder_days: 30 → 14". */
-                    return sprintf( __( 'Settings updated: %s', 'shelterkit-donations' ), self::render_changes( (array) $d['changes'] ) );
+                $parts = [];
+                if ( ! empty( $d['changes'] ) ) {
+                    $parts[] = self::render_changes( (array) $d['changes'] );
+                } elseif ( ! empty( $d['changed_fields'] ) ) {
+                    $parts[] = implode( ', ', array_map( 'strval', (array) $d['changed_fields'] ) );
                 }
-                /* translators: %s: comma-separated list of changed setting keys. */
-                return sprintf( __( 'Settings updated: %s', 'shelterkit-donations' ), implode( ', ', array_map( 'strval', (array) ( $d['changed_fields'] ?? [] ) ) ) );
+                if ( ! empty( $d['removed_fields'] ) ) {
+                    /* translators: %s: comma-separated list of setting keys that no longer exist. */
+                    $parts[] = sprintf( __( 'removed %s', 'shelterkit-donations' ), implode( ', ', array_map( 'strval', (array) $d['removed_fields'] ) ) );
+                }
+                /* translators: %s: the changes, e.g. "renewal_reminder_days: 30 → 14". */
+                return sprintf( __( 'Settings updated: %s', 'shelterkit-donations' ), implode( '; ', $parts ) );
 
             case 'config_changed':
                 return ! empty( $d['reset'] )

@@ -20,7 +20,8 @@ $default_tier     = $attributes['defaultTier'] ?? '';
 $layout           = $attributes['layout'] ?? 'cards';
 $columns          = $attributes['columns'] ?? 3;
 $show_benefits    = $attributes['showBenefits'] ?? true;
-$show_anonymous   = $attributes['showAnonymous'] ?? false;
+// The site-wide switch beats each form's own (#49).
+$show_anonymous   = ( $attributes['showAnonymous'] ?? false ) && \Starter_Shelter\Admin\Settings::is_feature_enabled( 'anonymous_donations' );
 $title            = $attributes['title'] ?? __( 'Become a Member', 'shelterkit-donations' );
 $subtitle         = $attributes['subtitle'] ?? __( 'Join our community of animal advocates.', 'shelterkit-donations' );
 $submit_text      = $attributes['submitButtonText'] ?? __( 'Join Now', 'shelterkit-donations' );
