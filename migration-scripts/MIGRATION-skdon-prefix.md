@@ -131,6 +131,9 @@ The first admin page after the move shows a notice with what moved. Then:
   SEOPress, Rank Math or similar.
 - **Screen options** such as hidden columns and closed boxes carry over. A
   bookmark to `edit.php?post_type=sd_…` needs updating.
+- **ShelterKit Donations → Data Tools → Recalculate.** Before #53 was
+  fixed, every memorial added its amount to the donor's lifetime giving
+  twice. Recalculate rebuilds each donor's total from their records.
 - **ShelterKit Donations → Settings → General.** Before #50 was fixed,
   saving the Emails tab turned renewal reminders off, reset the reminder
   period to 30 days and cleared the Donation and Membership pages. If anyone

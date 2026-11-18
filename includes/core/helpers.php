@@ -956,6 +956,16 @@ function process_memorial_save( int $memorial_id, array $context = [] ): void {
     $is_new        = $context['is_new'] ?? true;
     $import_source = $context['import_source'] ?? 'admin';
 
+    // A memorial is created once per request, however many paths reach here:
+    // twice meant two confirmation emails and its amount counted twice (#53).
+    static $created = [];
+    if ( $is_new && isset( $created[ $memorial_id ] ) ) {
+        $is_new = false;
+    }
+    if ( $is_new ) {
+        $created[ $memorial_id ] = true;
+    }
+
     $honoree_name  = get_post_meta( $memorial_id, '_skdon_honoree_name', true );
     $donor_id      = (int) get_post_meta( $memorial_id, '_skdon_donor_id', true );
     $display_name  = get_post_meta( $memorial_id, '_skdon_donor_display_name', true );
@@ -999,6 +1009,7 @@ function process_memorial_save( int $memorial_id, array $context = [] ): void {
     if ( $is_new ) {
         $input = [
             'honoree_name'  => $honoree_name,
+            'memorial_type' => (string) get_post_meta( $memorial_id, '_skdon_memorial_type', true ),
             'amount'        => $amount,
             'notify_family' => get_memorial_notify_family( $memorial_id ),
         ];

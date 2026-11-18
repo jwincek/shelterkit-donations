@@ -235,40 +235,47 @@ class Legacy_Memorial_Parser {
 			'details'        => [],
 		];
 
-		foreach ( $parsed['rows'] as $row ) {
-			$result = self::import_single_row( $row, $default_amount, $skip_duplicates );
+		// Records from the shelter's history, like Legacy Order Sync and CSV
+		// import: no donor is emailed about them (#43, #53).
+		Helpers\set_internal_processing( true );
+		try {
+			foreach ( $parsed['rows'] as $row ) {
+				$result = self::import_single_row( $row, $default_amount, $skip_duplicates );
 
-			if ( is_wp_error( $result ) ) {
-				++$results['errors'];
+				if ( is_wp_error( $result ) ) {
+					++$results['errors'];
+					$results['details'][] = [
+						'line'    => $row['line_number'],
+						'status'  => 'error',
+						'message' => $result->get_error_message(),
+					];
+					continue;
+				}
+
+				if ( $result['skipped'] ?? false ) {
+					++$results['skipped'];
+					$results['details'][] = [
+						'line'    => $row['line_number'],
+						'status'  => 'skipped',
+						'message' => $result['message'] ?? '',
+					];
+					continue;
+				}
+
+				++$results['created'];
+				if ( $result['donor_created'] ?? false ) {
+					++$results['donors_created'];
+				}
 				$results['details'][] = [
-					'line'    => $row['line_number'],
-					'status'  => 'error',
-					'message' => $result->get_error_message(),
+					'line'        => $row['line_number'],
+					'status'      => 'created',
+					'memorial_id' => $result['memorial_id'],
+					'honoree'     => $row['honoree_name'],
+					'donor'       => $row['donor_name'],
 				];
-				continue;
 			}
-
-			if ( $result['skipped'] ?? false ) {
-				++$results['skipped'];
-				$results['details'][] = [
-					'line'    => $row['line_number'],
-					'status'  => 'skipped',
-					'message' => $result['message'] ?? '',
-				];
-				continue;
-			}
-
-			++$results['created'];
-			if ( $result['donor_created'] ?? false ) {
-				++$results['donors_created'];
-			}
-			$results['details'][] = [
-				'line'        => $row['line_number'],
-				'status'      => 'created',
-				'memorial_id' => $result['memorial_id'],
-				'honoree'     => $row['honoree_name'],
-				'donor'       => $row['donor_name'],
-			];
+		} finally {
+			Helpers\set_internal_processing( false );
 		}
 
 		return $results;
@@ -376,14 +383,14 @@ class Legacy_Memorial_Parser {
 			return $memorial_id;
 		}
 
-		// Assign to memorial year taxonomy.
-		$year = gmdate( 'Y', strtotime( $memorial_date ) );
-		wp_set_object_terms( $memorial_id, [ $year ], 'skdon_memorial_year' );
-
-		// Update donor stats if amount > 0.
-		if ( $default_amount > 0 ) {
-			Helpers\update_donor_lifetime_giving( $donor_id, $default_amount );
-		}
+		// The shared post-processing, as the memorial ability runs it: the year
+		// term, lifetime giving and the "created" hook, once each (#53). The
+		// import runs as internal processing, so no email goes out about a
+		// memorial from the shelter's history.
+		Helpers\process_memorial_save( $memorial_id, [
+			'is_new'        => true,
+			'import_source' => self::IMPORT_SOURCE,
+		] );
 
 		return $memorial_id;
 	}

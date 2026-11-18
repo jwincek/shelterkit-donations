@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-18T21:36:39+00:00\n"
+"POT-Creation-Date: 2026-11-18T22:40:02+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: shelterkit-donations\n"
@@ -189,14 +189,14 @@ msgstr ""
 
 #: blocks/donation-form/render.php:46
 #: includes/blocks/register-editor.php:106
-#: includes/core/helpers.php:1029
+#: includes/core/helpers.php:1040
 #: includes/rest/class-rest-controller.php:575
 msgid "General Fund"
 msgstr ""
 
 #: blocks/donation-form/render.php:47
 #: includes/blocks/register-editor.php:107
-#: includes/core/helpers.php:1030
+#: includes/core/helpers.php:1041
 #: includes/rest/class-rest-controller.php:576
 msgid "Medical Care"
 msgstr ""
@@ -3608,7 +3608,7 @@ msgid "Invalid template type."
 msgstr ""
 
 #. translators: %s: honoree name
-#: includes/admin/import-export/class-legacy-memorial-parser.php:314
+#: includes/admin/import-export/class-legacy-memorial-parser.php:321
 #, php-format
 msgid "Memorial for \"%s\" by this donor already exists."
 msgstr ""
@@ -3735,19 +3735,19 @@ msgid "— Select Campaign —"
 msgstr ""
 
 #: includes/blocks/register-editor.php:108
-#: includes/core/helpers.php:1031
+#: includes/core/helpers.php:1042
 #: includes/rest/class-rest-controller.php:577
 msgid "Food & Supplies"
 msgstr ""
 
 #: includes/blocks/register-editor.php:109
-#: includes/core/helpers.php:1032
+#: includes/core/helpers.php:1043
 #: includes/rest/class-rest-controller.php:578
 msgid "Facility Improvements"
 msgstr ""
 
 #: includes/blocks/register-editor.php:110
-#: includes/core/helpers.php:1033
+#: includes/core/helpers.php:1044
 #: includes/rest/class-rest-controller.php:579
 msgid "Rescue Operations"
 msgstr ""
