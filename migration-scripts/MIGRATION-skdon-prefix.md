@@ -78,10 +78,17 @@ Also look for a theme file named `single-sd_memorial.php`, `.html` or
 
 ## 3. Decide about the activity log's history
 
-This release is the first in which the activity log's 90-day cleanup
-actually runs. On its first run it deletes every entry older than 90 days. To
-keep them, export the table first, or extend the period before upgrading with
-a must-use plugin, for example
+From 3.1.0 the activity log deletes entries once they pass a retention
+period, and the first cleanup removes everything older than that.
+
+**After 3.1.0:** the periods are under **Settings → General → Data
+Management**. Routine entries are kept 90 days and admin actions 2 years
+by default, or choose Forever (#38). The first cleanup runs a day after the
+update, so set them right after upgrading.
+
+**On 3.1.0 itself:** the cleanup runs as soon as the site is updated, and
+the period can only be changed in code. Export the table first, or extend
+the period *before* upgrading with a must-use plugin, for example
 `wp-content/mu-plugins/shelterkit-log-retention.php`:
 
 ```php
@@ -89,7 +96,8 @@ a must-use plugin, for example
 add_filter( 'starter_shelter_activity_log_retention_days', fn() => 3650 );
 ```
 
-Do not return `0`: that deletes every entry.
+On 3.1.0, do not return `0`: that deletes every entry. Later releases
+ignore 0 and negative values.
 
 ## 4. Upgrade
 

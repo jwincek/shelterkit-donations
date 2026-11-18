@@ -159,8 +159,13 @@ class Activity_Log {
         add_action( 'skdon_cleanup_activity_log', [ self::class, 'cleanup_old_logs' ] );
 
         if ( ! wp_next_scheduled( 'skdon_cleanup_activity_log' ) ) {
-            wp_schedule_event( time(), 'daily', 'skdon_cleanup_activity_log' );
+            // A day out, not now: a site that has just updated gets a day to
+            // choose how long to keep its log before the first cleanup (#38).
+            wp_schedule_event( time() + DAY_IN_SECONDS, 'daily', 'skdon_cleanup_activity_log' );
         }
+
+        // Deleting one import's entries (#38).
+        add_action( 'admin_post_skdon_delete_log_run', [ self::class, 'handle_delete_run' ] );
     }
 
     /**
@@ -1043,7 +1048,16 @@ class Activity_Log {
 
             case 'email_sent':
                 /* translators: 1: email type (e.g. Receipt, Renewal reminder); 2: recipient's email address. */
-                return sprintf( __( '%1$s email sent to %2$s', 'shelterkit-donations' ), ucfirst( str_replace( '_', ' ', $text( 'email_type' ) ) ), $text( 'recipient' ) );
+                return sprintf( __( '%1$s email sent to %2$s', 'shelterkit-donations' ), ucfirst( str_replace( '_', ' ', $text( 'email_type' ) ) ), $text( 'recipient' ) ?: __( '(removed)', 'shelterkit-donations' ) );
+
+            case 'log_cleaned':
+                /* translators: %d: number of activity log entries deleted. */
+                return sprintf( _n( 'Cleanup deleted %d entry past its retention period', 'Cleanup deleted %d entries past their retention period', (int) ( $d['deleted'] ?? 0 ), 'shelterkit-donations' ), (int) ( $d['deleted'] ?? 0 ) );
+
+            case 'log_entries_deleted':
+                $run = self::run_labels( [ $text( 'run' ) ] )[ $text( 'run' ) ] ?? __( 'an import', 'shelterkit-donations' );
+                /* translators: 1: number of entries; 2: the import, e.g. "CSV import of gifts.csv: 120 rows, 120 created". */
+                return sprintf( _n( 'Deleted %1$d entry of %2$s', 'Deleted %1$d entries of %2$s', (int) ( $d['deleted'] ?? 0 ), 'shelterkit-donations' ), (int) ( $d['deleted'] ?? 0 ), $run );
 
             case 'settings_changed':
                 if ( isset( $d['changes'] ) ) {
@@ -1107,7 +1121,7 @@ class Activity_Log {
 
             case 'family_notified':
                 /* translators: 1: the name the memorial honours; 2: family member's email address. */
-                return sprintf( __( 'Family notification sent for memorial of %1$s to %2$s', 'shelterkit-donations' ), $text( 'honoree_name' ), $text( 'family_email' ) );
+                return sprintf( __( 'Family notification sent for memorial of %1$s to %2$s', 'shelterkit-donations' ), $text( 'honoree_name' ), $text( 'family_email' ) ?: __( '(removed)', 'shelterkit-donations' ) );
 
             case 'gift_refunded':
                 /* translators: 1: donor's name; 2: gift amount; 3: order number. */
@@ -1250,6 +1264,10 @@ class Activity_Log {
         // Filter dropdown uses the closed enumeration — no scan needed.
         $categories = self::KNOWN_CATEGORIES;
 
+        // An opened import (not a tool) with entries of its own can have them deleted (#38).
+        $run_anchor     = $run_filter ? self::run_anchor( $run_filter ) : null;
+        $can_delete_run = $run_anchor && str_starts_with( (string) $run_anchor->event_type, 'import_' ) && (int) $total_items > 1;
+
         // A record's history shows which run each entry came from.
         $run_labels = $object_filter ? self::run_labels( wp_list_pluck( (array) $logs, 'run_id' ) ) : [];
 
@@ -1267,6 +1285,15 @@ class Activity_Log {
         ?>
         <div class="wrap sd-activity-log">
             <h1><?php esc_html_e( 'Activity Log', 'shelterkit-donations' ); ?></h1>
+            <?php if ( isset( $_GET['deleted'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a notice after a redirect. ?>
+            <div class="notice notice-success is-dismissible"><p>
+                <?php
+                $deleted_count = absint( $_GET['deleted'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a notice after a redirect.
+                /* translators: %d: number of activity log entries deleted. */
+                echo esc_html( sprintf( _n( 'Deleted %d entry. The deletion is recorded in the log.', 'Deleted %d entries. The deletion is recorded in the log.', $deleted_count, 'shelterkit-donations' ), $deleted_count ) );
+                ?>
+            </p></div>
+            <?php endif; ?>
 
             <!-- Filters -->
             <div class="sd-log-filters">
@@ -1342,6 +1369,22 @@ class Activity_Log {
                 <span><strong><?php echo esc_html( $total_items ); ?></strong> <?php esc_html_e( 'total', 'shelterkit-donations' ); ?></span>
                 <?php if ( $run_filter ) : ?>
                 <span><?php esc_html_e( 'Showing one import\'s entries.', 'shelterkit-donations' ); ?> <a href="<?php echo esc_url( remove_query_arg( [ 'run', 'paged' ] ) ); ?>"><?php esc_html_e( 'Show all activity', 'shelterkit-donations' ); ?></a></span>
+                    <?php if ( $can_delete_run ) : ?>
+                    <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sd-log-delete-run" onsubmit="return confirm( <?php echo esc_attr( wp_json_encode( __( 'Delete this import\'s entries? Its own entry stays, and the deletion is recorded.', 'shelterkit-donations' ) ) ); ?> );">
+                        <input type="hidden" name="action" value="skdon_delete_log_run" />
+                        <input type="hidden" name="run" value="<?php echo esc_attr( $run_filter ); ?>" />
+                        <?php wp_nonce_field( 'skdon_delete_log_run_' . $run_filter ); ?>
+                        <button type="submit" class="button-link button-link-delete">
+                            <?php
+                            echo esc_html( sprintf(
+                                /* translators: %d: number of entries. */
+                                _n( 'Delete its %d entry', 'Delete its %d entries', (int) $total_items - 1, 'shelterkit-donations' ),
+                                (int) $total_items - 1
+                            ) );
+                            ?>
+                        </button>
+                    </form>
+                    <?php endif; ?>
                 <?php elseif ( $object_filter ) : ?>
                 <span>
                     <?php
@@ -2093,20 +2136,138 @@ class Activity_Log {
     }
 
     /**
-     * Cleanup old log entries (older than 90 days).
+     * How long entries of one kind are kept, in days, or null for forever.
+     *
+     * Settings → General → Data Management sets both (#38). The filters can
+     * still override them; a filtered value of 0 or less is ignored, where it
+     * used to delete every entry.
+     *
+     * @param string $kind 'routine' or 'admin'.
+     * @return int|null
+     */
+    public static function retention_days( string $kind ): ?int {
+        $admin   = 'admin' === $kind;
+        $setting = Settings::get( $admin ? 'log_retention_admin_days' : 'log_retention_days', $admin ? 730 : 90 );
+        $days    = 'forever' === $setting ? null : max( 30, (int) $setting );
+
+        /**
+         * Filters how many days routine activity log entries are kept.
+         *
+         * @param int|null $days Days, or null to keep them forever.
+         */
+        $filtered = $admin
+            ? apply_filters( 'starter_shelter_activity_log_admin_retention_days', $days )
+            : apply_filters( 'starter_shelter_activity_log_retention_days', $days );
+
+        if ( null === $filtered || 'forever' === $filtered ) {
+            return null;
+        }
+        return is_numeric( $filtered ) && (int) $filtered > 0 ? (int) $filtered : $days;
+    }
+
+    /**
+     * Delete entries past their retention period, once a day.
+     *
+     * Admin actions (the admin category, and every entry an admin tool's run
+     * wrote) follow the admin period; everything else the routine one. A
+     * cleanup that deletes anything says so in the log.
      */
     public static function cleanup_old_logs(): void {
         global $wpdb;
-        $table_name = $wpdb->prefix . self::TABLE_NAME;
+        $table   = $wpdb->prefix . self::TABLE_NAME;
+        $routine = self::retention_days( 'routine' );
+        $admin   = self::retention_days( 'admin' );
+        $deleted = 0;
 
-        $days_to_keep = apply_filters( 'starter_shelter_activity_log_retention_days', 90 );
+        // An entry belongs to a tool's run when its run's own entry is a tool's.
+        $join = "LEFT JOIN $table tool ON tool.run_id = l.run_id AND tool.event_type IN ('tool_started', 'tool_finished')";
 
-        $wpdb->query( $wpdb->prepare(
-            // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the only interpolated parts are $wpdb table properties and a generated %d placeholder list; every user value is bound through $wpdb->prepare().
-            "DELETE FROM $table_name WHERE created_at < DATE_SUB(NOW(), INTERVAL %d DAY)",
-            // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-            $days_to_keep
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the table name is $wpdb->prefix plus a constant; the cutoff is bound.
+        if ( null !== $routine ) {
+            $deleted += (int) $wpdb->query( $wpdb->prepare(
+                "DELETE l FROM $table l $join WHERE l.created_at < %s AND l.event_category <> 'admin' AND tool.id IS NULL",
+                self::cutoff( $routine )
+            ) );
+        }
+        if ( null !== $admin ) {
+            $deleted += (int) $wpdb->query( $wpdb->prepare(
+                "DELETE l FROM $table l $join WHERE l.created_at < %s AND ( l.event_category = 'admin' OR tool.id IS NOT NULL )",
+                self::cutoff( $admin )
+            ) );
+        }
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+
+        if ( $deleted > 0 ) {
+            self::record( 'log_cleaned', 'system', [
+                'deleted'      => $deleted,
+                'routine_days' => $routine,
+                'admin_days'   => $admin,
+            ] );
+        }
+    }
+
+    /**
+     * The moment entries older than some days were written before, in the
+     * site's time, which is how created_at is stored.
+     *
+     * @param int $days Days.
+     * @return string Y-m-d H:i:s.
+     */
+    private static function cutoff( int $days ): string {
+        return ( new \DateTimeImmutable( 'now', wp_timezone() ) )->modify( '-' . $days . ' days' )->format( 'Y-m-d H:i:s' );
+    }
+
+    /**
+     * Delete one import's entries, keeping the import's own entry and noting
+     * the deletion in the log (#38). Only imports: a tool's entries are the
+     * record of what an admin did, and don't go before their time.
+     */
+    public static function handle_delete_run(): void {
+        $run_id = sanitize_text_field( wp_unslash( $_POST['run'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- checked on the next line, against this run.
+        check_admin_referer( 'skdon_delete_log_run_' . $run_id );
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( esc_html__( 'Permission denied.', 'shelterkit-donations' ), 403 );
+        }
+
+        $result = self::delete_run_entries( $run_id );
+        if ( is_wp_error( $result ) ) {
+            wp_die( esc_html( $result->get_error_message() ), 400 );
+        }
+
+        wp_safe_redirect( add_query_arg( [ 'page' => self::PAGE_SLUG, 'deleted' => $result ], admin_url( 'admin.php' ) ) );
+        exit;
+    }
+
+    /**
+     * Delete the entries one import wrote, except its own.
+     *
+     * @param string $run_id The import's run.
+     * @return int|\WP_Error How many were deleted.
+     */
+    public static function delete_run_entries( string $run_id ) {
+        global $wpdb;
+        $anchor = wp_is_uuid( $run_id, 4 ) ? self::run_anchor( $run_id ) : null;
+        if ( ! $anchor ) {
+            return new \WP_Error( 'no_run', __( 'That import was not found in the activity log.', 'shelterkit-donations' ) );
+        }
+        if ( ! str_starts_with( (string) $anchor->event_type, 'import_' ) ) {
+            return new \WP_Error( 'not_an_import', __( 'Only an import\'s entries can be deleted. A tool\'s entries are the record of what an admin did.', 'shelterkit-donations' ) );
+        }
+
+        $deleted = (int) $wpdb->query( $wpdb->prepare(
+            "DELETE FROM {$wpdb->prefix}" . self::TABLE_NAME . ' WHERE run_id = %s AND id <> %d', // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- the table name is $wpdb->prefix plus a constant.
+            $run_id,
+            (int) $anchor->id
         ) );
+
+        $data                    = json_decode( (string) $anchor->meta, true ) ?: [];
+        $data['entries_deleted'] = (int) ( $data['entries_deleted'] ?? 0 ) + $deleted;
+        self::update_anchor( (int) $anchor->id, $data, (string) $anchor->event_type );
+
+        // Not part of the run: the deletion is its own admin action.
+        self::record_in_run( null, 'log_entries_deleted', 'admin', [ 'run' => $run_id, 'deleted' => $deleted ] );
+
+        return $deleted;
     }
 
     /**
@@ -2159,6 +2320,7 @@ class Activity_Log {
             .sd-log-table .column-category { width: 120px; }
             .sd-log-table .column-user { width: 150px; }
             .sd-log-table .column-source { width: 130px; }
+            .sd-log-delete-run { display: inline; margin-left: 8px; }
             .sd-log-filters { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
             
             .sd-log-date {
