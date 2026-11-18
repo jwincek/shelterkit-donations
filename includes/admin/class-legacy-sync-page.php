@@ -19,6 +19,7 @@ namespace Starter_Shelter\Admin;
 
 use Starter_Shelter\Admin\Legacy_Sync\{ Order_Scanner, Order_Processor };
 use Starter_Shelter\Core\Config;
+use Starter_Shelter\Admin\Activity_Log;
 
 /**
  * Legacy order sync admin page.
@@ -224,6 +225,10 @@ class Legacy_Sync_Page {
 			'details'   => [],
 		];
 
+		// One log entry for the sync; the records it creates attach to it
+		// (#37). A dry run creates nothing, so it is not logged.
+		$run_id = $dry_run ? '' : Activity_Log::begin_run( 'legacy_order_sync', [ 'force_resync' => $force_resync ] );
+
 		foreach ( $order_ids as $order_id ) {
 			$result = Order_Processor::sync( $order_id, $dry_run, $force_resync );
 
@@ -262,7 +267,31 @@ class Legacy_Sync_Page {
 			}
 		}
 
+		if ( $run_id ) {
+			Activity_Log::finish_run( $run_id, self::run_counts( $results ) );
+		}
+
 		wp_send_json_success( $results );
+	}
+
+	/**
+	 * A sync's counts for its activity log entry (#37).
+	 *
+	 * @param array $results The sync's results.
+	 * @return array<string, int>
+	 */
+	private static function run_counts( array $results ): array {
+		$created = (array) ( $results['created'] ?? [] );
+		return [
+			'orders'      => (int) ( $results['processed'] ?? 0 ),
+			'skipped'     => (int) ( $results['skipped'] ?? 0 ),
+			'errors'      => (int) ( $results['errors'] ?? 0 ),
+			'donations'   => (int) ( $created['donations'] ?? 0 ),
+			'memberships' => (int) ( $created['memberships'] ?? 0 ),
+			'memorials'   => (int) ( $created['memorials'] ?? 0 ),
+			'donors'      => (int) ( $created['donors'] ?? 0 ),
+			'updated'     => (int) ( $created['updated'] ?? 0 ),
+		];
 	}
 
 	/**
@@ -294,6 +323,12 @@ class Legacy_Sync_Page {
 		$batch = array_slice( $order_ids, $offset, $batch_size );
 
 		if ( empty( $batch ) ) {
+			// The list ran out before the offset did: the sync is over, so its
+			// log entry is finished here (#37).
+			$run_id = sanitize_text_field( wp_unslash( $_POST['run_id'] ?? '' ) );
+			if ( $run_id && Activity_Log::resume_run( $run_id ) ) {
+				Activity_Log::finish_run( $run_id );
+			}
 			wp_send_json_success( [
 				'complete'  => true,
 				'processed' => $offset,
@@ -308,6 +343,15 @@ class Legacy_Sync_Page {
 			'errors'    => 0,
 			'created'   => [ 'donations' => 0, 'memberships' => 0, 'memorials' => 0, 'donors' => 0, 'updated' => 0 ],
 		];
+
+		// One log entry for the whole sync. The first batch starts it; the
+		// browser sends its ID back with each later batch (#37).
+		if ( 0 === $offset ) {
+			$run_id = Activity_Log::begin_run( 'legacy_order_sync', [ 'force_resync' => $force_resync ] );
+		} else {
+			$run_id = sanitize_text_field( wp_unslash( $_POST['run_id'] ?? '' ) );
+			$run_id = Activity_Log::resume_run( $run_id ) ? $run_id : '';
+		}
 
 		foreach ( $batch as $order_id ) {
 			$result = Order_Processor::sync( $order_id, false, $force_resync );
@@ -330,7 +374,17 @@ class Legacy_Sync_Page {
 
 		$new_offset = $offset + count( $batch );
 
+		if ( $run_id ) {
+			Activity_Log::add_to_run( $run_id, self::run_counts( $results ) );
+			if ( $new_offset >= $total ) {
+				Activity_Log::finish_run( $run_id );
+			} else {
+				Activity_Log::leave_run();
+			}
+		}
+
 		wp_send_json_success( [
+			'run_id'    => $run_id,
 			'complete'  => $new_offset >= $total,
 			'processed' => $results['processed'],
 			'skipped'   => $results['skipped'],

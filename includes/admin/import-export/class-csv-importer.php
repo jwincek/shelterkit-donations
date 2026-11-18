@@ -27,6 +27,7 @@ declare( strict_types = 1 );
 namespace Starter_Shelter\Admin\Import_Export;
 
 use Starter_Shelter\Core\Config;
+use Starter_Shelter\Admin\Activity_Log;
 use Starter_Shelter\Admin\Shared\Donor_Lookup;
 use Starter_Shelter\Helpers;
 use function Starter_Shelter\Helpers\fputcsv_safe;
@@ -136,12 +137,18 @@ class CSV_Importer {
 			'error_details' => [],
 		];
 
+		// One log entry for the whole file; the records it creates are
+		// attached to it rather than listed one by one (#37).
+		$run_id = Activity_Log::begin_run( 'csv_import', [
+			'entity_type' => $entity_type,
+			'file'        => (string) ( $options['file_name'] ?? '' ),
+		] );
+
 		// Enable internal processing so abilities accept non-WooCommerce callers.
 		Helpers\set_internal_processing( true );
 
+		$row_number = 1; // Row 1 was headers.
 		try {
-			$row_number = 1; // Row 1 was headers.
-
 			while ( ( $data = fgetcsv( $handle ) ) !== false ) {
 				++$row_number;
 
@@ -184,10 +191,29 @@ class CSV_Importer {
 			}
 		} finally {
 			Helpers\set_internal_processing( false );
+			Activity_Log::finish_run( $run_id, self::run_summary( $results, $row_number - 1 ) );
 		}
 
 		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- reading an uploaded CSV for import.
 		return $results;
+	}
+
+	/**
+	 * An import's counts for its activity log entry.
+	 *
+	 * @param array $results Importer results.
+	 * @param int   $rows    Rows read.
+	 * @return array<string, int>
+	 */
+	private static function run_summary( array $results, int $rows ): array {
+		return [
+			'rows'       => $rows,
+			'created'    => (int) $results['created'],
+			'updated'    => (int) $results['updated'],
+			'skipped'    => (int) $results['skipped'] - (int) $results['duplicates'],
+			'duplicates' => (int) $results['duplicates'],
+			'errors'     => (int) $results['errors'],
+		];
 	}
 
 	/**
@@ -315,6 +341,13 @@ class CSV_Importer {
 			],
 		];
 
+		// The run spans every batch request; each one rejoins it (#37).
+		$session['run_id'] = Activity_Log::begin_run( 'csv_import', [
+			'entity_type' => $entity_type,
+			'file'        => (string) ( $options['file_name'] ?? '' ),
+		] );
+		Activity_Log::leave_run();
+
 		set_transient( $import_key, $session, HOUR_IN_SECONDS );
 
 		return [
@@ -382,7 +415,8 @@ class CSV_Importer {
 			}
 		}
 
-		// Process this batch.
+		// Process this batch, attached to the import's log entry.
+		Activity_Log::resume_run( (string) ( $session['run_id'] ?? '' ) );
 		Helpers\set_internal_processing( true );
 
 		try {
@@ -433,6 +467,7 @@ class CSV_Importer {
 			}
 		} finally {
 			Helpers\set_internal_processing( false );
+			Activity_Log::leave_run();
 		}
 
 		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- reading an uploaded CSV for import.
@@ -443,6 +478,8 @@ class CSV_Importer {
 		$done = $session['processed'] >= $session['total_rows'];
 
 		if ( $done ) {
+			Activity_Log::finish_run( (string) ( $session['run_id'] ?? '' ), self::run_summary( $results, (int) $session['processed'] ) );
+
 			// Clean up the temp file.
 			wp_delete_file( $filepath );
 

@@ -51,7 +51,7 @@ final class ActivityLogTableTest extends WP_UnitTestCase {
 
         Activator::activate();
 
-        $this->assertSame( '1', get_option( self::VERSION_OPTION ), 'Activation ran create_table(), which records the schema version.' );
+        $this->assertSame( '2', get_option( self::VERSION_OPTION ), 'Activation ran create_table(), which records the schema version.' );
     }
 
     public function test_a_site_activated_before_the_fix_gets_the_table_on_its_next_request(): void {
@@ -62,11 +62,11 @@ final class ActivityLogTableTest extends WP_UnitTestCase {
         Activity_Log::maybe_create_table();
 
         $this->assertNotEmpty( $this->ddl, 'dbDelta() ran.' );
-        $this->assertSame( '1', get_option( self::VERSION_OPTION ) );
+        $this->assertSame( '2', get_option( self::VERSION_OPTION ) );
     }
 
     public function test_a_current_schema_costs_no_queries_against_the_table(): void {
-        update_option( self::VERSION_OPTION, '1' );
+        update_option( self::VERSION_OPTION, '2' );
         add_filter( 'query', [ $this, 'capture_ddl' ] );
 
         Activity_Log::maybe_create_table();
