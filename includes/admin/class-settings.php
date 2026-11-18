@@ -150,7 +150,7 @@ class Settings {
         }, self::PAGE_SLUG . '_emails' );
 
         add_settings_section( 'sd_data', __( 'Data Management', 'shelterkit-donations' ), function () {
-            echo '<p>' . esc_html__( 'Control what happens to your data when the plugin is uninstalled.', 'shelterkit-donations' ) . '</p>';
+            echo '<p>' . esc_html__( 'How long the activity log keeps its entries, and what happens to your data when the plugin is uninstalled.', 'shelterkit-donations' ) . '</p>';
         }, self::PAGE_SLUG . '_general' );
     }
 
@@ -201,6 +201,20 @@ class Settings {
             'default' => get_option( 'admin_email' ),
             'description' => __( 'Email address for business logo moderation notifications.', 'shelterkit-donations' ),
         ], 'emails' );
+
+        // Activity log retention (#38). Routine entries can go sooner; admin
+        // actions are kept longer, because the log is the only record of who
+        // did them.
+        self::add_field( 'log_retention_days', __( 'Keep routine log entries', 'shelterkit-donations' ), 'sd_data', 'select', [
+            'options'     => self::retention_options(),
+            'default'     => 90,
+            'description' => __( 'Gifts recorded, emails sent, orders processed. Entries older than this are deleted automatically, once a day.', 'shelterkit-donations' ),
+        ], 'general' );
+        self::add_field( 'log_retention_admin_days', __( 'Keep admin actions', 'shelterkit-donations' ), 'sd_data', 'select', [
+            'options'     => self::retention_options(),
+            'default'     => 730,
+            'description' => __( 'Settings changes, Data Tools runs such as Purge, edits to records, logo decisions and other actions by staff, with what each tool changed.', 'shelterkit-donations' ),
+        ], 'general' );
 
         // Data management — destructive, so off by default.
         self::add_field( 'delete_data_on_uninstall', __( 'Delete all data on uninstall', 'shelterkit-donations' ), 'sd_data', 'checkbox', [
@@ -338,8 +352,46 @@ class Settings {
             case 'feature_annual_statements':
             case 'delete_data_on_uninstall':
                 return ! empty( $raw );
+            case 'log_retention_days':
+                return self::sanitize_retention( $raw, 90 );
+            case 'log_retention_admin_days':
+                return self::sanitize_retention( $raw, 730 );
         }
         return null;
+    }
+
+    /**
+     * How long the activity log keeps entries: whole days, at least 30, or
+     * "forever". Anything else falls back to the default: a period of 0 or
+     * less used to mean "delete every entry" (#38).
+     *
+     * @param mixed $raw     Submitted value.
+     * @param int   $default Default days.
+     * @return int|string Days, or 'forever'.
+     */
+    private static function sanitize_retention( $raw, int $default ) {
+        if ( 'forever' === $raw ) {
+            return 'forever';
+        }
+        $days = is_numeric( $raw ) ? (int) $raw : 0;
+        return $days >= 30 && (string) $days === trim( (string) $raw ) ? $days : $default;
+    }
+
+    /**
+     * The retention periods the settings offer.
+     *
+     * @return array<int|string, string>
+     */
+    public static function retention_options(): array {
+        return [
+            30        => __( '30 days', 'shelterkit-donations' ),
+            90        => __( '90 days', 'shelterkit-donations' ),
+            180       => __( '6 months', 'shelterkit-donations' ),
+            365       => __( '1 year', 'shelterkit-donations' ),
+            730       => __( '2 years', 'shelterkit-donations' ),
+            1825      => __( '5 years', 'shelterkit-donations' ),
+            'forever' => __( 'Forever', 'shelterkit-donations' ),
+        ];
     }
 
     public static function get_defaults(): array {
@@ -361,6 +413,8 @@ class Settings {
             'feature_renewal_reminders'     => true,
             'feature_annual_statements'     => true,
             'delete_data_on_uninstall'      => false,
+            'log_retention_days'            => 90,
+            'log_retention_admin_days'      => 730,
         ];
     }
 

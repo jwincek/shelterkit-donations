@@ -40,6 +40,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Deleting, trashing and restoring a record, a donor's profile or address
     being updated, each order of a Legacy Order Sync and each renewal
     reminder are recorded too.
+- **You choose how long the activity log keeps entries.** Settings →
+  General → Data Management has two periods: routine entries (gifts
+  recorded, emails sent; 90 days by default) and admin actions (settings
+  changes, Data Tools runs and what they changed, edits to records; 2 years
+  by default). Each can be set to Forever. A cleanup that deletes anything
+  says so in the log. The first cleanup after an update waits a day, so a
+  site has time to choose. A period of 0 or less, which used to delete every
+  entry, is ignored. (#38)
+- **Tools → Export / Erase Personal Data cover donors.** Export includes a
+  donor's profile, their gifts and the activity log entries about them.
+  Erase removes their name, address and the IP address from those log
+  entries, which stay so the log still says what happened. Donor and gift
+  records are kept as financial records; the erase result says so, and an
+  admin can delete the donor record if it must go. (#38)
+- **An import's entries can be deleted** from the import's own view in the
+  Activity Log: the import's own entry stays, and the deletion is recorded.
+  A tool's entries can't be deleted, because they are the record of what an
+  admin did. (#38)
 - **Each record shows its own history.** Donation, membership, memorial
   and donor screens have a History panel listing the record's latest
   entries, including what imports and tools did to it, with a link to all of

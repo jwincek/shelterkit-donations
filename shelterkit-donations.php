@@ -333,6 +333,9 @@ add_action( 'plugins_loaded', 'starter_shelter_admin_init', 25 );
  */
 function starter_shelter_activity_log_init(): void {
     Starter_Shelter\Admin\Activity_Log::init();
+
+    // Tools → Export / Erase Personal Data (#38).
+    Starter_Shelter\Admin\Privacy::init();
 }
 add_action( 'plugins_loaded', 'starter_shelter_activity_log_init', 25 );
 
