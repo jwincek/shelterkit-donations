@@ -22,4 +22,3 @@ export * as donations from './donations.js';
 
 // Widget stores
 export * as campaigns from './campaigns.js';
-export * as donor from './donor.js';

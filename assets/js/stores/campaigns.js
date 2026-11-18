@@ -1,148 +1,66 @@
 /**
  * Campaigns Store
  *
- * Handles campaign progress display and refresh.
- * Multi-instance capable for multiple campaign blocks.
+ * Campaign Progress renders every figure on the server. With a refresh
+ * interval set, this re-reads the campaign on that interval and updates the
+ * figures in place. Each block keeps its campaign in its own context, so
+ * several blocks on one page never share figures.
  *
  * @package Starter_Shelter
  * @since 2.0.0
  */
 
-import { store, getContext } from '@wordpress/interactivity';
-import { getSharedConfig, apiRequest, formatCurrency } from './utils.js';
+import { store, getContext, withScope } from '@wordpress/interactivity';
+import { apiRequest } from './utils.js';
 
-const { state, actions } = store( 'shelter-donations/campaign', {
-    state: {
-        campaigns: {},
-        isLoading: false,
-    },
+const numberFormat = new Intl.NumberFormat( document.documentElement.lang || undefined );
 
+const { actions } = store( 'shelter-donations/campaign', {
     actions: {
         /**
-         * Fetch campaign data.
+         * Re-read this block's campaign. A failed request leaves the figures
+         * already shown.
          */
-        *fetchCampaign() {
+        *refresh() {
             const ctx = getContext();
-            const campaignId = ctx.campaignId;
-            if ( ! campaignId ) return;
-
-            state.isLoading = true;
+            if ( ! ctx.campaignId ) {
+                return;
+            }
 
             try {
-                const result = yield apiRequest( `campaigns/${ campaignId }` );
-                state.campaigns[ campaignId ] = result;
+                // The route is campaign/{id}; it was requested as campaigns/{id} (#42).
+                const campaign = yield apiRequest( `campaign/${ ctx.campaignId }` );
+                const progress = Number( campaign.progress ) || 0;
+                ctx.campaign = {
+                    raisedFormatted: campaign.raised_formatted,
+                    progress: Math.round( progress ),
+                    progressLabel: `${ Math.round( progress ) }%`,
+                    progressWidth: `${ progress }%`,
+                    donorCount: numberFormat.format( Number( campaign.donor_count ) || 0 ),
+                };
             } catch ( error ) {
-                console.error( 'Failed to fetch campaign:', error );
-            } finally {
-                state.isLoading = false;
-            }
-        },
-
-        /**
-         * Refresh campaign progress.
-         */
-        *refreshProgress() {
-            const ctx = getContext();
-            if ( ctx.campaignId ) {
-                yield actions.fetchCampaign();
-            }
-        },
-
-        /**
-         * Start auto-refresh interval.
-         */
-        startAutoRefresh() {
-            const ctx = getContext();
-            if ( ctx.refreshInterval && ctx.refreshInterval > 0 ) {
-                ctx._refreshTimer = setInterval( () => {
-                    actions.fetchCampaign();
-                }, ctx.refreshInterval * 1000 );
-            }
-        },
-
-        /**
-         * Stop auto-refresh interval.
-         */
-        stopAutoRefresh() {
-            const ctx = getContext();
-            if ( ctx._refreshTimer ) {
-                clearInterval( ctx._refreshTimer );
-                ctx._refreshTimer = null;
+                // Keep what's on screen; the next tick tries again.
             }
         },
     },
 
     callbacks: {
-        getCampaign() {
-            const ctx = getContext();
-            return state.campaigns[ ctx.campaignId ] || null;
-        },
-
-        getProgressPercentage() {
-            const ctx = getContext();
-            const campaign = state.campaigns[ ctx.campaignId ];
-            if ( ! campaign?.goal ) return 0;
-            return Math.min( 100, ( campaign.raised / campaign.goal ) * 100 );
-        },
-
-        getProgressWidth() {
-            const ctx = getContext();
-            const campaign = state.campaigns[ ctx.campaignId ];
-            if ( ! campaign?.goal ) return 'width: 0%';
-            const pct = Math.min( 100, ( campaign.raised / campaign.goal ) * 100 );
-            return `width: ${ pct }%`;
-        },
-
-        getRaisedFormatted() {
-            const ctx = getContext();
-            const campaign = state.campaigns[ ctx.campaignId ];
-            return formatCurrency( campaign?.raised || 0 );
-        },
-
-        getGoalFormatted() {
-            const ctx = getContext();
-            const campaign = state.campaigns[ ctx.campaignId ];
-            return formatCurrency( campaign?.goal || 0 );
-        },
-
-        getRemainingFormatted() {
-            const ctx = getContext();
-            const campaign = state.campaigns[ ctx.campaignId ];
-            if ( ! campaign?.goal ) return formatCurrency( 0 );
-            const remaining = Math.max( 0, campaign.goal - ( campaign.raised || 0 ) );
-            return formatCurrency( remaining );
-        },
-
-        getDonorCount() {
-            const ctx = getContext();
-            const campaign = state.campaigns[ ctx.campaignId ];
-            return campaign?.donor_count || 0;
-        },
-
-        getDaysRemaining() {
-            const ctx = getContext();
-            const campaign = state.campaigns[ ctx.campaignId ];
-            if ( ! campaign?.end_date ) return null;
-
-            const end = new Date( campaign.end_date );
-            const now = new Date();
-            const diff = Math.ceil( ( end - now ) / ( 1000 * 60 * 60 * 24 ) );
-            return Math.max( 0, diff );
-        },
-
-        isGoalReached() {
-            const ctx = getContext();
-            const campaign = state.campaigns[ ctx.campaignId ];
-            return campaign && campaign.raised >= campaign.goal;
-        },
-
-        hasEnded() {
-            const ctx = getContext();
-            const campaign = state.campaigns[ ctx.campaignId ];
-            if ( ! campaign?.end_date ) return false;
-            return new Date( campaign.end_date ) < new Date();
+        /**
+         * Start refreshing (data-wp-init, only when an interval is set).
+         *
+         * @return {Function|undefined} Cleanup that stops the timer.
+         */
+        startAutoRefresh() {
+            const seconds = Number( getContext().refreshInterval ) || 0;
+            if ( seconds <= 0 ) {
+                return undefined;
+            }
+            // withScope: a timer runs outside the block's scope, where
+            // getContext() throws (the bug #41 fixed in Donor Statistics).
+            const timer = setInterval( withScope( () => actions.refresh() ), seconds * 1000 );
+            return () => clearInterval( timer );
         },
     },
 } );
 
-export { state, actions };
+export { actions };
