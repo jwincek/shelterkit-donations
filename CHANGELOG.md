@@ -66,7 +66,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and **Export CSV** downloads the current view: the same filters, every
   page, and cells starting with "=" made safe for spreadsheets. (#39)
 
+- **Three feature switches now do what they say.** Allow Anonymous
+  Donations, Enable Donation Dedications and Enable Memorial Family
+  Notifications (Settings → General → Features) did nothing: the forms and
+  the checkout kept offering all three. Turned off, each is now off on every
+  form, whatever that form's own block settings say, and at checkout, and
+  the cart ignores it if it's posted anyway. Gifts already marked anonymous
+  stay anonymous, staff can still mark one by hand or notify a family from
+  the memorial's screen, and orders placed earlier still show their values.
+  Until #50 was fixed, saving another tab stored these switches as off, so
+  the update turns each one stored as off back on, once: the site keeps
+  offering what it always has, and a notice names what was turned on. (#49)
+- **The Emails tab says where the sender is set.** The plugin's emails are
+  WooCommerce emails, so their sender name and address are the ones under
+  WooCommerce → Settings → Emails → Email sender options. (#49)
+
+### Removed
+- **Settings that did nothing.** (#49)
+  - Email From Name and Email From Address. See the Emails tab.
+  - Logo Moderation Notifications. No such email existed. Pending logos
+    show on the dashboard and in the menu badge, as before.
+  - Send Annual Giving Statements. Nothing sent statements automatically.
+    The statement in My Account and the donors list's Send Statement action
+    work as before.
+
+  Their stored values are deleted when you update.
+- **The donors list's View Dashboard action.** It read a setting no screen
+  offered, so it never appeared. Had it appeared, it would have shown the
+  admin's own dashboard: the Donor Dashboard shows the logged-in donor. (#49)
+- **Five sections of `config/settings.json` nothing read:** `fiscal_year`,
+  `currency`, `organization`, `features` and `defaults`. Their settings live
+  under Settings, Shelter Details and WooCommerce. (#49)
+
 ### Fixed
+- **Reports' Fiscal Year ignored the Fiscal Year Start Month setting** and
+  always ran from July 1. It now starts on the 1st of the month set. And
+  with no year chosen, it used the calendar year, so from January until the
+  start month it showed a fiscal year that hadn't begun, with nothing in it.
+  It now shows the one today falls in. The same goes for the dashboard
+  statistics and the Donor Stats block's Fiscal Year. (#49)
 - **Every memorial was "created" twice.** Each memorial bought at checkout
   sent the donor two "Your memorial … has been created" emails, and its
   amount was added to the donor's lifetime giving twice. The legacy memorial

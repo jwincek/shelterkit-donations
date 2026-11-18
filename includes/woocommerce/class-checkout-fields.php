@@ -11,6 +11,7 @@ declare( strict_types = 1 );
 
 namespace Starter_Shelter\WooCommerce;
 
+use Starter_Shelter\Admin\Settings;
 use Starter_Shelter\Core\{ Config, Field_Manifest };
 
 /**
@@ -216,6 +217,23 @@ class Checkout_Fields {
     }
 
     /**
+     * Whether checkout offers a field: some belong to a feature that can be
+     * switched off under Settings → General (#49). Only the checkout asks;
+     * an order placed while a feature was on still shows its value.
+     *
+     * @param string $key Field key.
+     * @return bool
+     */
+    private static function is_offered( string $key ): bool {
+        return match ( true ) {
+            'is_anonymous' === $key                   => Settings::is_feature_enabled( 'anonymous_donations' ),
+            'dedication' === $key                     => Settings::is_feature_enabled( 'dedications' ),
+            str_starts_with( $key, 'notify_family_' ) => Settings::is_feature_enabled( 'family_notifications' ),
+            default                                   => true,
+        };
+    }
+
+    /**
      * Get fields applicable to the given product types.
      *
      * @since 1.0.0
@@ -227,6 +245,10 @@ class Checkout_Fields {
         $fields = [];
 
         foreach ( self::get_field_definitions() as $key => $field ) {
+            if ( ! self::is_offered( (string) $key ) ) {
+                continue;
+            }
+
             // Fields without product_types apply to all.
             if ( empty( $field['product_types'] ) ) {
                 $fields[ $key ] = $field;
@@ -402,6 +424,9 @@ class Checkout_Fields {
         }
 
         foreach ( self::get_field_definitions() as $key => $field ) {
+            if ( ! self::is_offered( (string) $key ) ) {
+                continue; // Not on the form, so not saved, even if posted.
+            }
             $field_name = 'sd_' . $key;
             $meta_key = $field['meta_key'] ?? '_skdon_' . $key;
 

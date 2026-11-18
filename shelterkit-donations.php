@@ -447,6 +447,10 @@ add_action( 'admin_init', 'starter_shelter_maybe_setup_products' );
 // a fresh site's variations exist to be linked.
 add_action( 'admin_init', [ Starter_Shelter\Core\Allocations::class, 'maybe_migrate' ], 20 );
 
+// One-time settings upgrade (#49). On every request, before any form or the
+// checkout reads a feature switch.
+add_action( 'init', [ Starter_Shelter\Admin\Settings::class, 'maybe_upgrade' ], 1 );
+
 /**
  * Show admin notice if products need setup.
  *
