@@ -790,6 +790,35 @@ function update_donor_lifetime_giving( int $donor_id, float $amount ): float {
 }
 
 /**
+ * Recompute a donor's lifetime giving from their counted records.
+ *
+ * Only published records count, so a refunded gift (status skdon_refunded)
+ * drops out, and a partly refunded one counts at its net amount (#34).
+ *
+ * @param int $donor_id The donor post ID.
+ * @return float The new total.
+ */
+function recalculate_donor_lifetime_giving( int $donor_id ): float {
+    global $wpdb;
+
+    $total = (float) $wpdb->get_var( $wpdb->prepare(
+        "SELECT COALESCE(SUM(CAST(pm_amount.meta_value AS DECIMAL(15,2))), 0)
+         FROM {$wpdb->posts} p
+         INNER JOIN {$wpdb->postmeta} pm_donor ON p.ID = pm_donor.post_id
+             AND pm_donor.meta_key = '_skdon_donor_id' AND pm_donor.meta_value = %s
+         INNER JOIN {$wpdb->postmeta} pm_amount ON p.ID = pm_amount.post_id
+             AND pm_amount.meta_key = '_skdon_amount'
+         WHERE p.post_type IN ('skdon_donation', 'skdon_memorial', 'skdon_membership')
+         AND p.post_status = 'publish'",
+        (string) $donor_id
+    ) );
+
+    update_post_meta( $donor_id, '_skdon_lifetime_giving', $total );
+
+    return $total;
+}
+
+/**
  * Get membership benefits by tier.
  *
  * @since 1.0.0

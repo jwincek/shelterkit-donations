@@ -412,6 +412,79 @@ class Product_Mapper {
     }
 
     /**
+     * The donation, membership or memorial an order line produced, if any.
+     *
+     * Records carry their order line from this release on (#35). An older
+     * record carries only its order, which identifies the line only when the
+     * order has a single line of that kind; such a record is matched, and
+     * linked to the line for next time. Used by Reprocess and by refunds.
+     *
+     * @param \WC_Order      $order The order.
+     * @param \WC_Order_Item $item  The order line.
+     * @return int Post ID, or 0.
+     */
+    public static function line_record_id( \WC_Order $order, \WC_Order_Item $item ): int {
+        $product      = $item instanceof \WC_Order_Item_Product ? $item->get_product() : null;
+        $config       = $product ? self::find_by_sku( $product->get_sku() ) : null;
+        $product_type = (string) ( $config['product_type'] ?? '' );
+        $post_type    = self::post_type_for( $product_type );
+
+        $find = static fn ( array $meta_query, string $type ): array => get_posts( [
+            'post_type'      => '' !== $type ? $type : [ 'skdon_donation', 'skdon_membership', 'skdon_memorial' ],
+            'post_status'    => 'any',
+            'posts_per_page' => 1,
+            'fields'         => 'ids',
+            'meta_query'     => $meta_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- one order's lines.
+        ] );
+
+        // A stamped record identifies its line whatever its type.
+        $found = $find( [ [ 'key' => self::ORDER_ITEM_META, 'value' => $item->get_id(), 'type' => 'NUMERIC' ] ], $post_type );
+        if ( $found ) {
+            return (int) $found[0];
+        }
+        if ( '' === $post_type ) {
+            return 0;
+        }
+
+        $same_kind = 0;
+        foreach ( $order->get_items() as $line ) {
+            $line_product = $line instanceof \WC_Order_Item_Product ? $line->get_product() : null;
+            $line_config  = $line_product ? self::find_by_sku( $line_product->get_sku() ) : null;
+            if ( $line_config && $product_type === ( $line_config['product_type'] ?? '' ) ) {
+                ++$same_kind;
+            }
+        }
+        if ( 1 !== $same_kind ) {
+            return 0;
+        }
+
+        $found = $find( [
+            [ 'key' => '_skdon_wc_order_id', 'value' => $order->get_id(), 'type' => 'NUMERIC' ],
+            [ 'key' => self::ORDER_ITEM_META, 'compare' => 'NOT EXISTS' ],
+        ], $post_type );
+        if ( ! $found ) {
+            return 0;
+        }
+        update_post_meta( (int) $found[0], self::ORDER_ITEM_META, (int) $item->get_id() );
+        return (int) $found[0];
+    }
+
+    /**
+     * The post type a product type records into.
+     *
+     * @param string $product_type donation, membership or memorial.
+     * @return string Post type, or '' for anything else.
+     */
+    public static function post_type_for( string $product_type ): string {
+        return match ( $product_type ) {
+            'donation'   => 'skdon_donation',
+            'membership' => 'skdon_membership',
+            'memorial'   => 'skdon_memorial',
+            default      => '',
+        };
+    }
+
+    /**
      * The record an ability result refers to.
      *
      * @param mixed $result An ability's create or update result.

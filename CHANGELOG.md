@@ -24,6 +24,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   fields in place of the single nested value nothing else reads. (#30)
 
 ### Fixed
+- **Refunded and cancelled gifts kept counting.** The plugin listened only
+  for orders being paid, so a refund or cancellation left its donation,
+  membership or memorial in Reports, Donor Statistics, the donor's lifetime
+  giving and the annual giving statement. Now:
+  - A gift refunded in full, or on an order that is cancelled or fully
+    refunded, gets the status **Refunded**. It stays in the admin lists,
+    keeps its amount for the history, and no total counts it.
+  - A gift refunded in part counts for what the shelter kept; its original
+    amount and the refunded amount are kept beside it.
+  - A refund that names no order lines is applied when the order has one
+    line. On an order with several, it is flagged, and **Data Tools → Order
+    Records** asks which gift it returned.
+  - Deleting a refund, or moving an order back out of Cancelled or
+    Refunded, undoes the change.
+  - Every change is in the activity log.
+  - **Data Tools → Order Records → Apply past refunds** applies refunds
+    and cancellations made before this release.
+
+  Statements already sent are not re-sent. (#34)
 - **Legacy Order Sync emailed donors about past gifts**, and so would CSV
   import, which creates records the same way. Every record sent the same
   email as a new gift: a donation receipt, "Your memorial … has been
