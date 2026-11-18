@@ -12,6 +12,7 @@ declare( strict_types = 1 );
 defined( 'ABSPATH' ) || exit;
 
 use Starter_Shelter\Core\Entity_Hydrator;
+use Starter_Shelter\Core\Query;
 use Starter_Shelter\Helpers;
 use Starter_Shelter\Blocks;
 
@@ -37,12 +38,25 @@ $membership = null;
 if ( $donor_id ) {
     $donor = Entity_Hydrator::get( 'skdon_donor', $donor_id );
 
-    // Get stats.
+    // Gift count and first gift, from the records. Nothing ever wrote the
+    // _skdon_donation_count or _skdon_first_gift_date this used to read, so
+    // it always said 0 gifts and never showed "Donor Since" (#42). Query
+    // counts published records only, like lifetime giving.
+    $gift_count = 0;
+    $first_gift = '';
+    foreach ( [ 'skdon_donation' => 'donation_date', 'skdon_membership' => 'start_date', 'skdon_memorial' => 'donation_date' ] as $type => $date_field ) {
+        $gift_count += Query::for( $type )->where( 'donor_id', $donor_id )->count();
+        $earliest    = Query::for( $type )->where( 'donor_id', $donor_id )->orderBy( $date_field, 'ASC', 'DATE' )->first();
+        $date        = (string) ( $earliest[ $date_field ] ?? '' );
+        if ( '' !== $date && ( '' === $first_gift || $date < $first_gift ) ) {
+            $first_gift = $date;
+        }
+    }
+
     $stats = [
         'lifetime_giving' => (float) get_post_meta( $donor_id, '_skdon_lifetime_giving', true ),
-        'donation_count'  => (int) get_post_meta( $donor_id, '_skdon_donation_count', true ),
-        'first_gift_date' => get_post_meta( $donor_id, '_skdon_first_gift_date', true ),
-        'last_gift_date'  => get_post_meta( $donor_id, '_skdon_last_gift_date', true ),
+        'donation_count'  => $gift_count,
+        'first_gift_date' => $first_gift,
     ];
 
     // Get recent donations.
@@ -102,16 +116,6 @@ if ( $donor_id ) {
     }
 }
 
-// Set state.
-wp_interactivity_state( 'shelter-donations/donor', [
-    'isLoading'   => false,
-    'isLoggedIn'  => $is_logged_in,
-    'donor'       => $donor,
-    'stats'       => $stats,
-    'recentGifts' => $recent_gifts,
-    'membership'  => $membership,
-] );
-
 // Wrapper attributes.
 $classes = [
     'sd-donor-dashboard',
@@ -119,10 +123,13 @@ $classes = [
     ! $is_logged_in ? 'is-guest' : '',
 ];
 
+// Rendered in full here, with no script (#42). The client store this block
+// used to load re-fetched everything from routes that don't exist, its
+// start-up callback didn't exist either, and its defaults overrode this
+// render's data, so the dashboard stayed on "Loading…" for good. Nothing on
+// it changes after the page loads.
 $wrapper_attributes = get_block_wrapper_attributes( [
-    'class'               => implode( ' ', array_filter( $classes ) ),
-    'data-wp-interactive' => wp_json_encode( [ 'namespace' => 'shelter-donations/donor' ] ),
-    'data-wp-init'        => 'callbacks.init',
+    'class' => implode( ' ', array_filter( $classes ) ),
 ] );
 ?>
 
@@ -141,14 +148,8 @@ $wrapper_attributes = get_block_wrapper_attributes( [
     </div>
 
     <?php else : ?>
-    <!-- Loading State -->
-    <div class="sd-dashboard-loading" data-wp-bind--hidden="!state.isLoading">
-        <div class="sd-spinner"></div>
-        <p><?php esc_html_e( 'Loading your dashboard...', 'shelterkit-donations' ); ?></p>
-    </div>
-
     <!-- Dashboard Content -->
-    <div class="sd-dashboard-content" data-wp-bind--hidden="state.isLoading">
+    <div class="sd-dashboard-content">
         
         <!-- Header -->
         <header class="sd-dashboard-header">
@@ -158,13 +159,13 @@ $wrapper_attributes = get_block_wrapper_attributes( [
                     printf(
                         /* translators: %s: donor name */
                         esc_html__( 'Welcome back, %s!', 'shelterkit-donations' ),
-                        '<span data-wp-text="state.donor.display_name">' . esc_html( $donor['display_name'] ?? __( 'Friend', 'shelterkit-donations' ) ) . '</span>'
+                        '<span>' . esc_html( $donor['display_name'] ?? __( 'Friend', 'shelterkit-donations' ) ) . '</span>'
                     );
                     ?>
                 </h2>
                 
                 <?php if ( $show_donor_level && isset( $donor['donor_level'] ) ) : ?>
-                <span class="sd-donor-level" data-wp-text="callbacks.donorLevelLabel">
+                <span class="sd-donor-level">
                     <?php
                     $levels = [
                         'new' => __( 'New Donor', 'shelterkit-donations' ),
@@ -187,14 +188,14 @@ $wrapper_attributes = get_block_wrapper_attributes( [
             
             <div class="sd-stats-grid">
                 <div class="sd-stat-card">
-                    <span class="sd-stat-value" data-wp-text="callbacks.lifetimeGivingFormatted">
+                    <span class="sd-stat-value">
                         <?php echo esc_html( Helpers\format_currency( $stats['lifetime_giving'] ) ); ?>
                     </span>
                     <span class="sd-stat-label"><?php esc_html_e( 'Lifetime Giving', 'shelterkit-donations' ); ?></span>
                 </div>
                 
                 <div class="sd-stat-card">
-                    <span class="sd-stat-value" data-wp-text="state.stats.donation_count">
+                    <span class="sd-stat-value">
                         <?php echo esc_html( number_format_i18n( $stats['donation_count'] ) ); ?>
                     </span>
                     <span class="sd-stat-label"><?php esc_html_e( 'Total Gifts', 'shelterkit-donations' ); ?></span>
@@ -223,7 +224,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
                     <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
                         <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" fill="currentColor"/>
                     </svg>
-                    <span data-wp-text="state.membership.tier">
+                    <span>
                         <?php echo esc_html( ucfirst( $membership['tier'] ?? '' ) ); ?>
                     </span>
                 </div>

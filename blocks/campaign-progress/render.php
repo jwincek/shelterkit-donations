@@ -49,7 +49,6 @@ $donor_count = Blocks\calculate_campaign_donors( $campaign->term_id );
 
 // Calculate progress.
 $progress = $goal > 0 ? min( 100, ( $raised / $goal ) * 100 ) : 0;
-$remaining = max( 0, $goal - $raised );
 
 // Is campaign active?
 $is_active = ! $end_date || strtotime( $end_date ) >= time();
@@ -60,29 +59,20 @@ if ( $end_date && $is_active ) {
     $days_remaining = max( 0, ceil( ( strtotime( $end_date ) - time() ) / DAY_IN_SECONDS ) );
 }
 
-// Set state for this campaign.
-wp_interactivity_state( 'shelter-donations/campaign', [
-    'campaigns' => [
-        $campaign_id => [
-            'id'            => $campaign_id,
-            'name'          => $campaign->name,
-            'description'   => $campaign->description,
-            'goal'          => $goal,
-            'raised'        => $raised,
-            'progress'      => round( $progress, 1 ),
-            'remaining'     => $remaining,
-            'donorCount'    => $donor_count,
-            'endDate'       => $end_date,
-            'isActive'      => $is_active,
-            'daysRemaining' => $days_remaining,
-        ],
-    ],
-] );
-
-// Context.
+// Context. The figures a refresh can change live here, ready to display,
+// so each directive is a plain path (the runtime can't follow
+// `state.campaigns[context.campaignId]`) and each block on a page keeps its
+// own campaign (#42). The refresh replaces `campaign` with the same shape.
 $context = [
     'campaignId'      => $campaign_id,
     'refreshInterval' => $refresh_interval,
+    'campaign'        => [
+        'raisedFormatted' => Helpers\format_currency( $raised ),
+        'progress'        => (int) round( $progress ),
+        'progressLabel'   => round( $progress ) . '%',
+        'progressWidth'   => round( $progress, 1 ) . '%',
+        'donorCount'      => number_format_i18n( $donor_count ),
+    ],
 ];
 
 // Wrapper attributes.
@@ -100,7 +90,7 @@ $wrapper_attrs = [
 ];
 
 if ( $refresh_interval > 0 ) {
-    $wrapper_attrs['data-wp-watch'] = 'callbacks.autoRefresh';
+    $wrapper_attrs['data-wp-init'] = 'callbacks.startAutoRefresh';
 }
 
 $wrapper_attributes = get_block_wrapper_attributes( $wrapper_attrs );
@@ -126,17 +116,17 @@ $wrapper_attributes = get_block_wrapper_attributes( $wrapper_attrs );
             aria-valuemax="100"
             aria-label="<?php esc_attr_e( 'Campaign progress', 'shelterkit-donations' ); ?>"
             style="height: <?php echo (int) $bar_height; ?>px;"
-            data-wp-bind--aria-valuenow="state.campaigns[context.campaignId].progress"
+            data-wp-bind--aria-valuenow="context.campaign.progress"
         >
             <div 
                 class="sd-progress-fill"
-                style="width: <?php echo esc_attr( $progress ); ?>%; background-color: <?php echo esc_attr( $bar_color ); ?>;"
-                data-wp-style--width="callbacks.getProgressWidth"
+                style="width: <?php echo esc_attr( (string) round( $progress, 1 ) ); ?>%; background-color: <?php echo esc_attr( $bar_color ); ?>;"
+                data-wp-style--width="context.campaign.progressWidth"
             >
                 <?php if ( $show_percentage ) : ?>
                 <span 
                     class="sd-progress-label"
-                    data-wp-text="callbacks.getProgressLabel"
+                    data-wp-text="context.campaign.progressLabel"
                 >
                     <?php echo esc_html( round( $progress ) . '%' ); ?>
                 </span>
@@ -148,7 +138,7 @@ $wrapper_attributes = get_block_wrapper_attributes( $wrapper_attrs );
     <!-- Stats -->
     <div class="sd-campaign-stats">
         <div class="sd-stat sd-stat-raised">
-            <span class="sd-stat-value" data-wp-text="callbacks.getRaisedFormatted">
+            <span class="sd-stat-value" data-wp-text="context.campaign.raisedFormatted">
                 <?php echo esc_html( Helpers\format_currency( $raised ) ); ?>
             </span>
             <span class="sd-stat-label"><?php esc_html_e( 'raised', 'shelterkit-donations' ); ?></span>
@@ -164,7 +154,7 @@ $wrapper_attributes = get_block_wrapper_attributes( $wrapper_attrs );
 
         <?php if ( $show_donors ) : ?>
         <div class="sd-stat sd-stat-donors">
-            <span class="sd-stat-value" data-wp-text="state.campaigns[context.campaignId].donorCount">
+            <span class="sd-stat-value" data-wp-text="context.campaign.donorCount">
                 <?php echo esc_html( number_format_i18n( $donor_count ) ); ?>
             </span>
             <span class="sd-stat-label"><?php esc_html_e( 'donors', 'shelterkit-donations' ); ?></span>

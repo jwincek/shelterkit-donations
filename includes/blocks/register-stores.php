@@ -194,23 +194,6 @@ function register_interactivity_stores(): void {
             'dateTo'     => '',
         ],
     ] );
-
-    // --- Campaign progress ---------------------------------------------------
-    wp_interactivity_state( 'shelter-donations/campaign', [
-        'campaigns' => [],
-        'isLoading' => false,
-    ] );
-
-    // --- Donor dashboard -----------------------------------------------------
-    wp_interactivity_state( 'shelter-donations/donor', [
-        'isLoading'   => true,
-        'isLoggedIn'  => is_user_logged_in(),
-        'donor'       => null,
-        'stats'       => null,
-        'recentGifts' => [],
-        'membership'  => null,
-        'error'       => null,
-    ] );
 }
 
 /*

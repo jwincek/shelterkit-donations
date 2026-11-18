@@ -62,7 +62,6 @@
             "showMembership": true
         }
     },
-    "viewScriptModule": "file:./view.js",
     "editorScript": "file:./edit.js",
     "style": "file:./style.css",
     "render": "file:./render.php"

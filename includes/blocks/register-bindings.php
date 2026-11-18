@@ -314,7 +314,12 @@ function get_current_user_donor_id(): ?int {
     $donor_id = get_transient( $cache_key );
 
     if ( false !== $donor_id ) {
-        return $donor_id ?: null;
+        // Cast: without a persistent object cache the transient comes back
+        // from the database as a string, and returning "57" from an ?int
+        // function under strict_types is a fatal TypeError. Since #41 the
+        // shared config calls this on every front-end page, so a donor's
+        // second page view within the hour died in wp_head (#42).
+        return (int) $donor_id ?: null;
     }
 
     $donors = get_posts( [
@@ -330,7 +335,7 @@ function get_current_user_donor_id(): ?int {
         'no_found_rows'  => true,
     ] );
 
-    $donor_id = $donors[0] ?? 0;
+    $donor_id = (int) ( $donors[0] ?? 0 );
 
     // Cache for 1 hour.
     set_transient( $cache_key, $donor_id, HOUR_IN_SECONDS );
