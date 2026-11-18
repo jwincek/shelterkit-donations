@@ -131,6 +131,10 @@ The first admin page after the move shows a notice with what moved. Then:
   SEOPress, Rank Math or similar.
 - **Screen options** such as hidden columns and closed boxes carry over. A
   bookmark to `edit.php?post_type=sd_…` needs updating.
+- **ShelterKit Donations → Settings → General.** Before #50 was fixed,
+  saving the Emails tab turned renewal reminders off, reset the reminder
+  period to 30 days and cleared the Donation and Membership pages. If anyone
+  has ever saved the Emails tab, check those four and save General again.
 - **ShelterKit Donations → Data Tools → Order Records.** Both steps are safe
   to run more than once, and neither emails a donor.
   - If this site ever ran Legacy Order Sync, check the list of records it

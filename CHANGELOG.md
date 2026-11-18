@@ -42,6 +42,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     reminder are recorded too.
 
 ### Fixed
+- **Saving one Settings tab reset the other.** The screen saves one tab at a
+  time, and each save rebuilt every setting from that tab alone. Saving the
+  Emails tab turned renewal reminders off (so the reminder emails stopped),
+  set the reminder period back to 30 days, and cleared the Donation and
+  Membership pages behind the donate and join links. Saving General emptied
+  the Emails settings. A save now changes only the tab that was saved. A
+  site that has saved the Emails tab should check Settings → General after
+  updating, because values lost before this fix can't be recovered. (#50)
 - **Data Tools → Purge never finished when a record was in the trash.** It
   deleted everything except trashed records, but counted them as remaining,
   so it kept asking for batches that deleted nothing. Trashed records are now

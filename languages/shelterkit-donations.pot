@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-18T19:42:00+00:00\n"
+"POT-Creation-Date: 2026-11-18T21:04:51+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: shelterkit-donations\n"
@@ -312,7 +312,7 @@ msgstr ""
 #: includes/admin/class-reports.php:1099
 #: includes/admin/class-reports.php:1245
 #: includes/admin/class-reports.php:1345
-#: includes/admin/class-settings.php:400
+#: includes/admin/class-settings.php:447
 #: includes/blocks/register-stores.php:119
 #: assets/js/admin-legacy-sync.js:301
 msgid "Donor"
@@ -1512,7 +1512,7 @@ msgid "Payment webhook"
 msgstr ""
 
 #: includes/admin/class-activity-log.php:1641
-#: includes/admin/class-settings.php:401
+#: includes/admin/class-settings.php:448
 msgid "Admin"
 msgstr ""
 
@@ -2213,7 +2213,7 @@ msgstr ""
 #: includes/admin/class-reports.php:771
 #: includes/admin/class-reports.php:1192
 #: includes/admin/class-reports.php:1377
-#: includes/admin/class-settings.php:819
+#: includes/admin/class-settings.php:866
 #: assets/js/admin-import-export.js:194
 #: assets/js/admin-legacy-sync.js:199
 msgid "Status"
@@ -2249,7 +2249,7 @@ msgstr ""
 #: includes/admin/class-reports.php:1246
 #: includes/admin/class-reports.php:1346
 #: includes/admin/class-reports.php:1372
-#: includes/admin/class-settings.php:414
+#: includes/admin/class-settings.php:461
 #: includes/shelterkit/class-shelterkit-profile.php:98
 msgid "Email"
 msgstr ""
@@ -2990,8 +2990,8 @@ msgid "Ends"
 msgstr ""
 
 #: includes/admin/class-reports.php:772
-#: includes/admin/class-settings.php:418
-#: includes/admin/class-settings.php:821
+#: includes/admin/class-settings.php:465
+#: includes/admin/class-settings.php:868
 #: assets/js/admin-legacy-sync.js:200
 msgid "Actions"
 msgstr ""
@@ -3153,272 +3153,272 @@ msgstr ""
 msgid "When enabled, uninstalling the plugin permanently deletes all donations, memberships, memorials, donors, campaigns, and the activity log. Leave OFF to preserve your records — this cannot be undone. Before enabling, download a full backup from Import / Export. WooCommerce products and the media library are always kept."
 msgstr ""
 
-#: includes/admin/class-settings.php:334
+#: includes/admin/class-settings.php:379
 msgid "Configuration saved. Sync check cache cleared."
 msgstr ""
 
-#: includes/admin/class-settings.php:336
+#: includes/admin/class-settings.php:381
 msgid "Products have been created successfully."
 msgstr ""
 
-#: includes/admin/class-settings.php:338
+#: includes/admin/class-settings.php:383
 msgid "Product settings have been saved."
 msgstr ""
 
-#: includes/admin/class-settings.php:362
+#: includes/admin/class-settings.php:409
 msgid "Save Settings"
 msgstr ""
 
-#: includes/admin/class-settings.php:402
-#: includes/admin/class-settings.php:525
+#: includes/admin/class-settings.php:449
+#: includes/admin/class-settings.php:572
 msgid "Custom"
 msgstr ""
 
-#: includes/admin/class-settings.php:407
+#: includes/admin/class-settings.php:454
 msgid "Email Templates"
 msgstr ""
 
-#: includes/admin/class-settings.php:408
+#: includes/admin/class-settings.php:455
 msgid "These emails are triggered automatically by plugin events. Click \"Configure\" to customize subjects, headings, and enable/disable individual emails in WooCommerce."
 msgstr ""
 
-#: includes/admin/class-settings.php:415
+#: includes/admin/class-settings.php:462
 #: includes/emails/class-config-email.php:497
 msgid "Subject"
 msgstr ""
 
-#: includes/admin/class-settings.php:416
+#: includes/admin/class-settings.php:463
 msgid "Recipient"
 msgstr ""
 
-#: includes/admin/class-settings.php:417
+#: includes/admin/class-settings.php:464
 msgid "Trigger"
 msgstr ""
 
-#: includes/admin/class-settings.php:434
+#: includes/admin/class-settings.php:481
 msgid "Enabled"
 msgstr ""
 
-#: includes/admin/class-settings.php:436
+#: includes/admin/class-settings.php:483
 msgid "Disabled"
 msgstr ""
 
-#: includes/admin/class-settings.php:450
+#: includes/admin/class-settings.php:497
 msgid "Conditional"
 msgstr ""
 
-#: includes/admin/class-settings.php:460
+#: includes/admin/class-settings.php:507
 msgid "Configure"
 msgstr ""
 
-#: includes/admin/class-settings.php:463
+#: includes/admin/class-settings.php:510
 msgid "Not registered"
 msgstr ""
 
-#: includes/admin/class-settings.php:474
+#: includes/admin/class-settings.php:521
 msgid "WooCommerce Email Settings"
 msgstr ""
 
-#: includes/admin/class-settings.php:502
+#: includes/admin/class-settings.php:549
 msgid "Donation Allocations"
 msgstr ""
 
-#: includes/admin/class-settings.php:503
+#: includes/admin/class-settings.php:550
 msgid "Fund designations that donors can direct their gifts to."
 msgstr ""
 
-#: includes/admin/class-settings.php:504
+#: includes/admin/class-settings.php:551
 msgid "A saved fund's slug cannot be changed, because past gifts are filed under it. Removing a fund retires it: it leaves the donation form, and gifts already made to it keep their fund."
 msgstr ""
 
-#: includes/admin/class-settings.php:508
-#: includes/admin/class-settings.php:554
-#: includes/admin/class-settings.php:581
-#: includes/admin/class-settings.php:608
+#: includes/admin/class-settings.php:555
+#: includes/admin/class-settings.php:601
+#: includes/admin/class-settings.php:628
+#: includes/admin/class-settings.php:655
 msgid "Slug"
 msgstr ""
 
-#: includes/admin/class-settings.php:509
-#: includes/admin/class-settings.php:609
+#: includes/admin/class-settings.php:556
+#: includes/admin/class-settings.php:656
 #: assets/js/memorial-panel.js:366
 msgid "Display Name"
 msgstr ""
 
-#: includes/admin/class-settings.php:518
+#: includes/admin/class-settings.php:565
 msgid "Retire"
 msgstr ""
 
-#: includes/admin/class-settings.php:523
+#: includes/admin/class-settings.php:570
 msgid "+ Add Allocation"
 msgstr ""
 
-#: includes/admin/class-settings.php:529
+#: includes/admin/class-settings.php:576
 msgid "Retired Funds"
 msgstr ""
 
-#: includes/admin/class-settings.php:530
+#: includes/admin/class-settings.php:577
 msgid "Not offered on the donation form. Past gifts, reports and filters still use them."
 msgstr ""
 
-#: includes/admin/class-settings.php:538
+#: includes/admin/class-settings.php:585
 msgid "Restore"
 msgstr ""
 
-#: includes/admin/class-settings.php:549
+#: includes/admin/class-settings.php:596
 msgid "Individual Membership Tiers"
 msgstr ""
 
-#: includes/admin/class-settings.php:550
+#: includes/admin/class-settings.php:597
 msgid "Membership levels for individual supporters."
 msgstr ""
 
-#: includes/admin/class-settings.php:555
-#: includes/admin/class-settings.php:582
+#: includes/admin/class-settings.php:602
+#: includes/admin/class-settings.php:629
 #: blocks/contribution-tabs/edit.js:41
 msgid "Label"
 msgstr ""
 
-#: includes/admin/class-settings.php:556
-#: includes/admin/class-settings.php:583
+#: includes/admin/class-settings.php:603
+#: includes/admin/class-settings.php:630
 msgid "Price"
 msgstr ""
 
-#: includes/admin/class-settings.php:571
-#: includes/admin/class-settings.php:598
+#: includes/admin/class-settings.php:618
+#: includes/admin/class-settings.php:645
 msgid "+ Add Tier"
 msgstr ""
 
-#: includes/admin/class-settings.php:576
+#: includes/admin/class-settings.php:623
 msgid "Business Membership Tiers"
 msgstr ""
 
-#: includes/admin/class-settings.php:577
+#: includes/admin/class-settings.php:624
 msgid "Membership levels for business/corporate supporters."
 msgstr ""
 
-#: includes/admin/class-settings.php:603
+#: includes/admin/class-settings.php:650
 #: assets/js/memorial-panel.js:148
 msgid "Pet Species"
 msgstr ""
 
-#: includes/admin/class-settings.php:604
+#: includes/admin/class-settings.php:651
 msgid "Species options for pet memorials."
 msgstr ""
 
-#: includes/admin/class-settings.php:623
+#: includes/admin/class-settings.php:670
 msgid "+ Add Species"
 msgstr ""
 
-#: includes/admin/class-settings.php:628
+#: includes/admin/class-settings.php:675
 msgid "Donor Recognition Levels"
 msgstr ""
 
-#: includes/admin/class-settings.php:629
+#: includes/admin/class-settings.php:676
 msgid "Lifetime giving thresholds for donor recognition tiers."
 msgstr ""
 
-#: includes/admin/class-settings.php:633
+#: includes/admin/class-settings.php:680
 msgid "Level Name"
 msgstr ""
 
-#: includes/admin/class-settings.php:634
+#: includes/admin/class-settings.php:681
 msgid "Minimum ($)"
 msgstr ""
 
-#: includes/admin/class-settings.php:648
+#: includes/admin/class-settings.php:695
 msgid "+ Add Level"
 msgstr ""
 
-#: includes/admin/class-settings.php:651
+#: includes/admin/class-settings.php:698
 msgid "Save Data Configuration"
 msgstr ""
 
-#: includes/admin/class-settings.php:795
+#: includes/admin/class-settings.php:842
 msgid "WooCommerce is required to manage donation products."
 msgstr ""
 
-#: includes/admin/class-settings.php:802
+#: includes/admin/class-settings.php:849
 msgid "WooCommerce Product Configuration"
 msgstr ""
 
-#: includes/admin/class-settings.php:803
+#: includes/admin/class-settings.php:850
 msgid "Configure which WooCommerce products are used for donations, memberships, and memorials."
 msgstr ""
 
-#: includes/admin/class-settings.php:807
+#: includes/admin/class-settings.php:854
 msgid "Auto-Create Missing Products"
 msgstr ""
 
-#: includes/admin/class-settings.php:809
+#: includes/admin/class-settings.php:856
 msgid "Creates variable WooCommerce products with standard variations for any missing products."
 msgstr ""
 
-#: includes/admin/class-settings.php:818
+#: includes/admin/class-settings.php:865
 #: assets/js/admin-legacy-sync.js:97
 msgid "Product Type"
 msgstr ""
 
-#: includes/admin/class-settings.php:820
+#: includes/admin/class-settings.php:867
 msgid "WooCommerce Product"
 msgstr ""
 
-#: includes/admin/class-settings.php:833
+#: includes/admin/class-settings.php:880
 msgid "Configured"
 msgstr ""
 
-#: includes/admin/class-settings.php:835
+#: includes/admin/class-settings.php:882
 msgid "Not Set"
 msgstr ""
 
-#: includes/admin/class-settings.php:840
+#: includes/admin/class-settings.php:887
 msgid "— Select Product —"
 msgstr ""
 
-#: includes/admin/class-settings.php:851
+#: includes/admin/class-settings.php:898
 msgid "Edit"
 msgstr ""
 
-#: includes/admin/class-settings.php:861
+#: includes/admin/class-settings.php:908
 msgid "Save Product Settings"
 msgstr ""
 
-#: includes/admin/class-settings.php:866
+#: includes/admin/class-settings.php:913
 msgid "Product Requirements"
 msgstr ""
 
-#: includes/admin/class-settings.php:867
+#: includes/admin/class-settings.php:914
 msgid "Each product type requires a Variable Product with specific attributes:"
 msgstr ""
 
-#: includes/admin/class-settings.php:872
+#: includes/admin/class-settings.php:919
 msgid "Product"
 msgstr ""
 
-#: includes/admin/class-settings.php:873
+#: includes/admin/class-settings.php:920
 msgid "SKU"
 msgstr ""
 
-#: includes/admin/class-settings.php:874
+#: includes/admin/class-settings.php:921
 msgid "Attribute"
 msgstr ""
 
-#: includes/admin/class-settings.php:875
+#: includes/admin/class-settings.php:922
 msgid "Variations"
 msgstr ""
 
-#: includes/admin/class-settings.php:892
+#: includes/admin/class-settings.php:939
 msgid "General donations with allocation options."
 msgstr ""
 
-#: includes/admin/class-settings.php:893
+#: includes/admin/class-settings.php:940
 msgid "Individual membership tiers."
 msgstr ""
 
-#: includes/admin/class-settings.php:894
+#: includes/admin/class-settings.php:941
 msgid "Business/corporate membership tiers."
 msgstr ""
 
-#: includes/admin/class-settings.php:895
+#: includes/admin/class-settings.php:942
 msgid "Memorial donations for people or pets."
 msgstr ""
 
