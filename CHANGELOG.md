@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.1.0] - 2026-11-17
+
 ### Changed
 - **Stored data moves from the `sd_` prefix to `skdon_`.** WordPress.org asks
   for prefixes of at least four characters, and other plugins use `sd_`.
