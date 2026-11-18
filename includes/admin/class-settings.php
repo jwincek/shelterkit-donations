@@ -209,7 +209,16 @@ class Settings {
         ], 'general' );
     }
 
+    /**
+     * Which tab each field is on, filled as the fields are registered. The
+     * sanitiser uses it to change only the tab that was saved (#50).
+     *
+     * @var array<string, string>
+     */
+    private static array $field_tabs = [];
+
     private static function add_field( string $id, string $title, string $section, string $type, array $args = [], string $tab = 'general' ): void {
+        self::$field_tabs[ $id ] = $tab;
         add_settings_field( $id, $title, [ self::class, 'render_field' ], self::PAGE_SLUG . '_' . $tab, $section,
             array_merge( $args, [ 'id' => $id, 'type' => $type ] )
         );
@@ -262,39 +271,75 @@ class Settings {
         }
     }
 
-    public static function sanitize_settings( array $input ): array {
-        $sanitized = [];
+    /**
+     * Sanitise a save of the settings form.
+     *
+     * The form shows one tab at a time, so a save posts only that tab's
+     * fields. This used to rebuild the whole option from them, so saving the
+     * Emails tab turned renewal reminders off and cleared the donation and
+     * membership pages on the General tab (#50). Now it starts from the
+     * stored settings and changes only the fields of the tab that was saved:
+     * the form says which in `_tab`, because an unchecked box is not posted
+     * and would otherwise look like a field from another tab.
+     *
+     * A save made in code, with no `_tab`, changes only the keys it passes.
+     * Anything else stored, such as the organisation fields that moved to
+     * Shelter Details in 3.0.0, is kept as it is.
+     *
+     * @param mixed $input The posted settings.
+     * @return array
+     */
+    public static function sanitize_settings( $input ): array {
+        $input  = is_array( $input ) ? $input : [];
+        $stored = get_option( self::OPTION_NAME, [] );
+        $out    = is_array( $stored ) ? $stored : [];
 
-        foreach ( [ 'email_from_name' ] as $f ) {
-            $sanitized[ $f ] = sanitize_text_field( $input[ $f ] ?? '' );
-        }
+        $tab  = sanitize_key( (string) ( $input['_tab'] ?? '' ) );
+        $keys = '' !== $tab
+            ? array_keys( self::$field_tabs, $tab, true )
+            : array_keys( array_intersect_key( $input, self::get_defaults() ) );
 
-        // The organisation fields moved to the shared Shelter Details screen in
-        // 3.0.0 and are no longer on this form. Carry the stored values forward
-        // rather than reading $input: sanitise() rebuilds the option from
-        // scratch, so anything not carried is deleted, and the receipt helpers
-        // still fall back to these for installs that filled them in before the
-        // profile existed.
-        $existing = get_option( self::OPTION_NAME, [] );
-        $existing = is_array( $existing ) ? $existing : [];
-        foreach ( [ 'org_name', 'org_ein', 'org_phone', 'org_address' ] as $f ) {
-            if ( isset( $existing[ $f ] ) ) {
-                $sanitized[ $f ] = $existing[ $f ];
+        foreach ( $keys as $key ) {
+            $value = self::sanitize_field( $key, $input[ $key ] ?? null );
+            if ( null !== $value ) {
+                $out[ $key ] = $value;
             }
         }
-        foreach ( [ 'email_from_address', 'logo_moderation_email' ] as $f ) {
-            $sanitized[ $f ] = sanitize_email( $input[ $f ] ?? '' );
-        }
-        $sanitized['fiscal_year_start_month'] = absint( $input['fiscal_year_start_month'] ?? 7 );
-        $sanitized['renewal_reminder_days'] = min( 90, max( 7, absint( $input['renewal_reminder_days'] ?? 30 ) ) );
-        $sanitized['donation_page']   = absint( $input['donation_page'] ?? 0 );
-        $sanitized['membership_page'] = absint( $input['membership_page'] ?? 0 );
 
-        foreach ( [ 'feature_anonymous_donations', 'feature_dedications', 'feature_family_notifications', 'feature_renewal_reminders', 'feature_annual_statements' ] as $f ) {
-            $sanitized[ $f ] = ! empty( $input[ $f ] );
+        unset( $out['_tab'] );
+        return $out;
+    }
+
+    /**
+     * One setting's value as stored. A checkbox missing from a save is off.
+     *
+     * @param string $key Setting key.
+     * @param mixed  $raw Posted value, or null when not posted.
+     * @return mixed The value to store, or null for a key this screen doesn't own.
+     */
+    private static function sanitize_field( string $key, $raw ) {
+        switch ( $key ) {
+            case 'email_from_name':
+                return sanitize_text_field( (string) ( $raw ?? '' ) );
+            case 'email_from_address':
+            case 'logo_moderation_email':
+                return sanitize_email( (string) ( $raw ?? '' ) );
+            case 'fiscal_year_start_month':
+                return min( 12, max( 1, absint( $raw ?? 7 ) ) );
+            case 'renewal_reminder_days':
+                return min( 90, max( 7, absint( $raw ?? 30 ) ) );
+            case 'donation_page':
+            case 'membership_page':
+                return absint( $raw ?? 0 );
+            case 'feature_anonymous_donations':
+            case 'feature_dedications':
+            case 'feature_family_notifications':
+            case 'feature_renewal_reminders':
+            case 'feature_annual_statements':
+            case 'delete_data_on_uninstall':
+                return ! empty( $raw );
         }
-        $sanitized['delete_data_on_uninstall'] = ! empty( $input['delete_data_on_uninstall'] );
-        return $sanitized;
+        return null;
     }
 
     public static function get_defaults(): array {
@@ -358,6 +403,8 @@ class Settings {
                     <form action="options.php" method="post">
                         <?php
                         settings_fields( self::OPTION_GROUP );
+                        // Which tab this is, so a save changes this tab's fields only (#50).
+                        printf( '<input type="hidden" name="%s[_tab]" value="%s" />', esc_attr( self::OPTION_NAME ), esc_attr( $current_tab ) );
                         do_settings_sections( self::PAGE_SLUG . '_' . $current_tab );
                         submit_button( __( 'Save Settings', 'shelterkit-donations' ) );
                         ?>
