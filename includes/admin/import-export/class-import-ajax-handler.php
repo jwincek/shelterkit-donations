@@ -26,6 +26,7 @@ declare( strict_types = 1 );
 
 namespace Starter_Shelter\Admin\Import_Export;
 
+use Starter_Shelter\Admin\Activity_Log;
 use Starter_Shelter\Core\Config;
 use function Starter_Shelter\Helpers\fputcsv_safe;
 
@@ -143,6 +144,8 @@ class Import_Ajax_Handler {
 			'update_existing' => ! empty( $_POST['update_existing'] ),
 			'skip_errors'     => ! empty( $_POST['skip_errors'] ),
 			'skip_duplicates' => ! empty( $_POST['skip_duplicates'] ),
+			// For the activity log's entry for this import (#37).
+			'file_name'       => sanitize_file_name( (string) ( $file['name'] ?? '' ) ),
 		];
 
 		$results = CSV_Importer::process( $entity_type, $file['tmp_name'], $options );
@@ -203,6 +206,10 @@ class Import_Ajax_Handler {
 		$default_amount  = (float) ( $_POST['default_amount'] ?? 0 );
 		// phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 
+		// One log entry for the file; the memorials it creates attach to it (#37).
+		$run_id  = Activity_Log::begin_run( 'legacy_memorial_import', [
+			'file' => sanitize_file_name( (string) ( $file['name'] ?? '' ) ),
+		] );
 		$results = Legacy_Memorial_Parser::import(
 			$file['tmp_name'],
 			$year,
@@ -211,8 +218,17 @@ class Import_Ajax_Handler {
 		);
 
 		if ( is_wp_error( $results ) ) {
+			Activity_Log::finish_run( $run_id, [ 'errors' => 1 ] );
 			wp_send_json_error( $results->get_error_message() );
 		}
+
+		Activity_Log::finish_run( $run_id, [
+			'rows'    => $results['created'] + $results['skipped'] + $results['errors'],
+			'created' => $results['created'],
+			'skipped' => $results['skipped'],
+			'errors'  => $results['errors'],
+			'donors'  => $results['donors_created'],
+		] );
 
 		wp_send_json_success( $results );
 	}
@@ -247,6 +263,8 @@ class Import_Ajax_Handler {
 			'update_existing' => ! empty( $_POST['update_existing'] ),
 			'skip_errors'     => ! empty( $_POST['skip_errors'] ),
 			'skip_duplicates' => ! empty( $_POST['skip_duplicates'] ),
+			// For the activity log's entry for this import (#37).
+			'file_name'       => sanitize_file_name( (string) ( $file['name'] ?? '' ) ),
 		];
 
 		$result = CSV_Importer::start_import( $entity_type, $file['tmp_name'], $options );

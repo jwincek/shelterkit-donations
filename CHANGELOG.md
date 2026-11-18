@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **The activity log shows an import as one entry.** A CSV import, a
+  legacy memorial import or a Legacy Order Sync used to add one entry per
+  record, which buried everything else: 275 of the development site's 357
+  entries came from six test imports. Each run is now one line, such as
+  "CSV import of spring-gifts.csv: 120 rows, 100 created, 20 skipped",
+  with a link to the entries it wrote. A run left unfinished still shows,
+  as started. (#37)
+- **Every entry records where it came from:** checkout, a payment webhook,
+  an admin screen, an import, a scheduled task, WP-CLI, the REST API or the
+  website. The log can be filtered by it. (#37)
+- **Entries store what happened, not a finished sentence.** The sentence is
+  written when the log is shown, in the viewer's language, and a donor is
+  stored by ID, not by name, so their current name is shown. Searching by a
+  donor's name still finds their entries. Entries written before this
+  update keep the sentence they were written with. (#37)
+
 ## [3.1.0] - 2026-11-17
 
 ### Changed

@@ -609,11 +609,13 @@
                 },
             };
 
-            const syncBatch = ( offset = 0 ) => {
+            const syncBatch = ( offset = 0, runId = '' ) => {
                 const formData = new FormData();
                 formData.append( 'action', 'skdon_sync_all_legacy_orders' );
                 formData.append( 'nonce', config.nonce );
                 formData.append( 'offset', offset );
+                // The activity log's entry for this sync, from the first batch (#37).
+                formData.append( 'run_id', runId );
                 formData.append( 'batch_size', 50 );
                 
                 // Pass current filters.
@@ -661,7 +663,7 @@
                             });
                         } else {
                             // Process next batch.
-                            syncBatch( data.data.offset );
+                            syncBatch( data.data.offset, data.data.run_id || '' );
                         }
                     } else {
                         setIsSyncing( false );
