@@ -49,6 +49,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   page, and cells starting with "=" made safe for spreadsheets. (#39)
 
 ### Fixed
+- **Every memorial was "created" twice.** Each memorial bought at checkout
+  sent the donor two "Your memorial … has been created" emails, and its
+  amount was added to the donor's lifetime giving twice. The legacy memorial
+  import counted each memorial twice too. A memorial added in wp-admin was
+  "created" as an empty draft and never when it was published, so it didn't
+  count toward lifetime giving at all. Each memorial is now created once.
+  Memorials entered in wp-admin or imported from history still email no one
+  by themselves. Lifetime giving already stored is too high by the
+  memorials counted twice: run **Data Tools → Recalculate** after updating
+  to rebuild it from the records. (#53)
 - **Saving one Settings tab reset the other.** The screen saves one tab at a
   time, and each save rebuilt every setting from that tab alone. Saving the
   Emails tab turned renewal reminders off (so the reminder emails stopped),

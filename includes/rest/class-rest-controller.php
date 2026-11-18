@@ -723,25 +723,35 @@ function get_donor_id_for_current_user(): ?int {
 add_action( 'rest_api_init', __NAMESPACE__ . '\\register_routes' );
 
 /**
- * Post-save processing for memorials.
+ * Post-save processing for a memorial saved in the editor.
  *
- * Delegates to the shared Helpers\process_memorial_save() so the same
- * business logic (title sync, donor resolution, year taxonomy, lifetime
- * giving, email hooks) runs regardless of whether the memorial was
- * created via the block editor, ability, or import.
+ * Delegates to the shared Helpers\process_memorial_save(): title sync, donor
+ * resolution, year taxonomy, and for a new memorial lifetime giving and the
+ * "created" hook that sends its emails.
  *
- * Runs on save_post_skdon_memorial (fires on both classic POST and REST saves)
- * at a late priority so all meta is already written.
+ * Only saves made in the editor. Code that creates memorials (the ability,
+ * the legacy import) runs the post-processing itself after inserting; when
+ * this ran too, every memorial was "created" twice: two confirmation emails,
+ * and its amount added twice to the donor's lifetime giving (#53).
+ *
+ * In the editor a memorial is new when it is first published, not when Add
+ * New inserts its empty auto-draft: that fired "created" with no data, and
+ * publishing it never fired it at all.
  *
  * @since 2.1.0
  *
- * @param int      $post_id Post ID.
- * @param \WP_Post $post    Post object.
- * @param bool     $update  Whether this is an update (false = new post).
+ * @param int $post_id Post ID.
  */
-function process_memorial_save( int $post_id, \WP_Post $post, bool $update ): void {
+function process_memorial_save( int $post_id ): void {
     // Skip autosaves and revisions.
     if ( ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) || wp_is_post_revision( $post_id ) ) {
+        return;
+    }
+
+    // Saves from the editor's form (and Quick Edit) post the post's ID; WordPress
+    // checked their nonce before saving.
+    // phpcs:ignore WordPress.Security.NonceVerification.Missing -- reads which post the form saved; post.php verified it.
+    if ( ! isset( $_POST['post_ID'] ) || absint( wp_unslash( $_POST['post_ID'] ) ) !== $post_id ) {
         return;
     }
 
@@ -752,16 +762,49 @@ function process_memorial_save( int $post_id, \WP_Post $post, bool $update ): vo
     }
     $processing[ $post_id ] = true;
 
-    \Starter_Shelter\Helpers\process_memorial_save( $post_id, [
-        'is_new'        => ! $update,
-        'import_source' => 'admin_editor',
-    ] );
+    // A memorial an admin enters by hand counts toward lifetime giving and
+    // gets its "created" entry, but sends no email by itself, as before:
+    // the memorial screen has its own Notify Family action, and an admin
+    // keying in past gifts shouldn't email anyone.
+    $is_new = memorial_first_published( $post_id );
+    $was    = Helpers\is_internal_processing();
+    Helpers\set_internal_processing( $was || $is_new );
+    try {
+        Helpers\process_memorial_save( $post_id, [
+            'is_new'        => $is_new,
+            'import_source' => 'admin_editor',
+        ] );
+    } finally {
+        Helpers\set_internal_processing( $was );
+    }
 
     unset( $processing[ $post_id ] );
 }
+
+/**
+ * Note a memorial being published for the first time in this request, or
+ * ask whether it was. Runs on transition_post_status, which fires before
+ * save_post.
+ *
+ * @param string|int    $new_status New status, or (when asking) the post ID.
+ * @param string|null   $old_status Old status.
+ * @param \WP_Post|null $post       The post.
+ * @return bool When asking: whether the memorial was first published now.
+ */
+function memorial_first_published( $new_status, $old_status = null, $post = null ): bool {
+    static $first = [];
+    if ( null === $post ) {
+        return isset( $first[ (int) $new_status ] );
+    }
+    if ( $post instanceof \WP_Post && 'skdon_memorial' === $post->post_type && 'publish' === $new_status && 'publish' !== $old_status ) {
+        $first[ $post->ID ] = true;
+    }
+    return false;
+}
+add_action( 'transition_post_status', __NAMESPACE__ . '\\memorial_first_published', 10, 3 );
 // skdon_memorial uses the classic editor; meta-box save handlers write
 // meta before this priority-20 hook, so reading _skdon_* here is safe.
 // (If the block editor is ever re-enabled via memorial-panel.js, a
 // rest_after_insert_skdon_memorial companion is needed because REST saves
 // commit meta after save_post — see that file's header note.)
-add_action( 'save_post_skdon_memorial', __NAMESPACE__ . '\\process_memorial_save', 20, 3 );
+add_action( 'save_post_skdon_memorial', __NAMESPACE__ . '\\process_memorial_save', 20 );

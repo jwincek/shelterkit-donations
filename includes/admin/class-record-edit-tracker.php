@@ -51,8 +51,14 @@ final class Record_Edit_Tracker {
 		'wc_order_item_id',
 	];
 
-	/** Entries that describe a change to their record themselves. */
+	/**
+	 * Entries that describe a change to their record themselves. A record
+	 * "created" in a request is described by that: a memorial added in the
+	 * editor was inserted as a draft in an earlier request, so its fields
+	 * being filled in would otherwise also read as an edit (#53).
+	 */
 	public const DESCRIBING_EVENTS = [
+		'donation_created', 'membership_created', 'memorial_created',
 		'membership_cancelled', 'membership_extended', 'membership_renewed', 'logo_approved', 'logo_rejected',
 		'family_notified', 'gift_refunded', 'gift_partly_refunded', 'gift_refund_undone',
 		'donor_profile_updated', 'donor_address_updated',
