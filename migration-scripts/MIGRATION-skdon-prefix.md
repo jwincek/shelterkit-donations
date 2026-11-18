@@ -1,6 +1,6 @@
 # Upgrading a live 2.x install past the `skdon_` storage move
 
-This release moves everything the plugin stores from the `sd_` prefix to
+3.1.0 moves everything the plugin stores from the `sd_` prefix to
 `skdon_` (#30). WordPress.org asks for prefixes of at least four characters,
 and other plugins use `sd_`. The move runs by itself on the first request
 after the upgrade and takes well under a second on a shelter-sized site.
@@ -131,6 +131,13 @@ The first admin page after the move shows a notice with what moved. Then:
   SEOPress, Rank Math or similar.
 - **Screen options** such as hidden columns and closed boxes carry over. A
   bookmark to `edit.php?post_type=sd_…` needs updating.
+- **ShelterKit Donations → Data Tools → Order Records.** Both steps are safe
+  to run more than once, and neither emails a donor.
+  - If this site ever ran Legacy Order Sync, check the list of records it
+    merged and press **Repair** (#40).
+  - Press **Apply past refunds** so refunds and cancellations made before
+    3.1.0 stop counting (#34). Then match any refund it lists by choosing
+    the gift it returned.
 
 ---
 

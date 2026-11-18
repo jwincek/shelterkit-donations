@@ -3,7 +3,7 @@ Contributors: jeromewincek
 Tags: donations, memberships, memorials, animal-shelter, nonprofit
 Requires at least: 6.9
 Tested up to: 7.1
-Stable tag: 3.0.0
+Stable tag: 3.1.0
 Requires PHP: 8.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -81,6 +81,17 @@ Even when you opt in, the WooCommerce products the plugin created (and their ima
 
 == Changelog ==
 
+= 3.1.0 =
+* Refunds and cancellations now reach your records. A gift refunded in full is marked Refunded and leaves every total, the donor's lifetime giving and their annual statement. A gift refunded in part counts for what you kept.
+* Every paid order line now becomes exactly one record. Fixed: Legacy Order Sync merged an order's second line into its first, and emailed donors about gifts made long ago. Data Tools → Order Records repairs earlier merges.
+* Fixed: sites upgraded from 2.x stopped recording donations and memorials after 3.0.0.
+* Fixed: gifts to most funds were rejected when their order was processed.
+* Fixed: no block could be inserted on a fresh install, and on classic themes the forms, walls and dashboard did nothing.
+* Fixed: the forms never showed their confirmation, the Donor Dashboard never got past "Loading", Campaign Progress lost its figures, and Donor Statistics never refreshed.
+* Amounts follow your store's currency settings everywhere.
+* Fixed: the activity log missed most events, and Export Selected and Data Tools → Reset Sync Flags did nothing.
+* Stored data moves from the `sd_` prefix to `skdon_` on the first request after updating. Existing installs: read migration-scripts/MIGRATION-skdon-prefix.md first.
+
 = 3.0.0 =
 * Renamed to **ShelterKit Donations**, joining ShelterKit Pets in the ShelterKit family. Your data is unaffected — donations, donors, memberships, memorials, settings and every placed block carry over untouched.
 * New shared **Shelter Details** screen holding your shelter's name, address, contact details and tax ID. Enter them once; every ShelterKit plugin you install reads the same record.
@@ -107,6 +118,9 @@ Even when you opt in, the WooCommerce products the plugin created (and their ima
 Full changelog: https://github.com/jwincek/shelterkit-donations/blob/main/CHANGELOG.md
 
 == Upgrade Notice ==
+
+= 3.1.0 =
+Moves stored data to new names on the first request, and makes refunds count. Back up first. From 2.x, follow migration-scripts/MIGRATION-skdon-prefix.md; afterwards, run Data Tools → Order Records.
 
 = 3.0.0 =
 Renamed to ShelterKit Donations. Your data carries over untouched and placed blocks keep working. Fixes an emailed annual statement that printed "[EIN Number]" in place of your tax ID — re-enter it under Shelter Details after upgrading. Existing installs: follow migration-scripts/MIGRATION-3.0.0.md.
