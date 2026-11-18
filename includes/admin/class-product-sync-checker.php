@@ -870,7 +870,13 @@ class Product_Sync_Checker {
 				return;
 			}
 
+			$run           = Activity_Log::begin_run( 'product_repair', [], 'tool' );
 			$repair_result = self::repair();
+			Activity_Log::finish_run(
+				$run,
+				[ 'repaired' => $repair_result['repaired'], 'skipped' => $repair_result['skipped'] ],
+				[ 'details' => array_slice( (array) $repair_result['details'], 0, 50 ) ]
+			);
 			set_transient( 'skdon_repair_result', $repair_result, 60 );
 			wp_safe_redirect( add_query_arg( 'sd-repaired', '1', remove_query_arg( [ 'action', '_wpnonce' ] ) ) );
 			exit;

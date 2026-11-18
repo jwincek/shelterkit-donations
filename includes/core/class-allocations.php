@@ -208,8 +208,19 @@ final class Allocations {
             }
         }
 
+        $old_retired = self::retired();
         Config::save_override( 'settings', 'allocations', $active );
         Config::save_override( 'settings', 'retired_allocations', array_diff_key( $retired, $active ) );
+
+        /**
+         * Fires after the fund list is saved: funds added, retired, restored or renamed.
+         *
+         * @param array<string,string> $previous    Active funds before, slug => label.
+         * @param array<string,string> $active      Active funds now.
+         * @param array<string,string> $old_retired Retired funds before.
+         * @param array<string,string> $retired     Retired funds now.
+         */
+        do_action( 'starter_shelter_funds_saved', $previous, $active, $old_retired, array_diff_key( $retired, $active ) );
 
         self::sync_variations();
 

@@ -86,8 +86,10 @@ class Data_Integrity {
 			wp_send_json_error( __( 'Permission denied.', 'shelterkit-donations' ), 403 );
 		}
 
+		$run      = Activity_Log::begin_run( 'merge_repair', [], 'tool' );
 		$result   = \Starter_Shelter\Admin\Legacy_Sync\Merge_Repair::repair_all();
 		$repaired = count( $result['repaired'] );
+		Activity_Log::finish_run( $run, [ 'repaired' => $repaired, 'failed' => count( $result['failed'] ) ] );
 
 		wp_send_json_success( [
 			'repaired' => $repaired,
@@ -120,7 +122,9 @@ class Data_Integrity {
 			wp_send_json_error( __( 'That order or refund was not found.', 'shelterkit-donations' ), 400 );
 		}
 
+		$run    = Activity_Log::begin_run( 'assign_refund', [ 'order_id' => $order_id, 'refund_id' => $refund_id, 'record' => $record ], 'tool' );
 		$result = \Starter_Shelter\WooCommerce\Refund_Handler::assign_refund( $order, $refund_id, $record );
+		Activity_Log::finish_run( $run, [], is_wp_error( $result ) ? [ 'error' => $result->get_error_message() ] : [] );
 		if ( is_wp_error( $result ) ) {
 			wp_send_json_error( $result->get_error_message(), 400 );
 		}
@@ -148,7 +152,9 @@ class Data_Integrity {
 			wp_send_json_error( __( 'WooCommerce is not active.', 'shelterkit-donations' ), 400 );
 		}
 
+		$run    = Activity_Log::begin_run( 'apply_refunds', [], 'tool' );
 		$result = \Starter_Shelter\WooCommerce\Refund_Handler::reconcile_all();
+		Activity_Log::finish_run( $run, $result );
 
 		$message = sprintf(
 			/* translators: %d: number of orders. */
@@ -183,7 +189,9 @@ class Data_Integrity {
 			wp_send_json_error( __( 'Permission denied.', 'shelterkit-donations' ), 403 );
 		}
 
+		$run   = Activity_Log::begin_run( 'reset_sync_flags', [], 'tool' );
 		$count = \Starter_Shelter\Admin\Legacy_Sync\Order_Scanner::reset_sync_flags();
+		Activity_Log::finish_run( $run, [ 'orders' => $count ] );
 
 		wp_send_json_success( [
 			'count'   => $count,
@@ -818,6 +826,10 @@ class Data_Integrity {
 		$prefix = $config['meta_prefix'] ?? '_skdon_';
 		$fields = $config['fields'] ?? [];
 
+		// One log entry for the whole Backfill, across its record types and
+		// batches; the browser sends the run back with each request (#36).
+		$run_id = Activity_Log::join_run( sanitize_text_field( wp_unslash( $_POST['run_id'] ?? '' ) ), 'backfill' );
+
 		// Get batch of posts.
 		$posts = get_posts( [
 			'post_type'      => $post_type,
@@ -859,13 +871,18 @@ class Data_Integrity {
 		$total = wp_count_posts( $post_type );
 		$total_count = ( $total->publish ?? 0 ) + ( $total->draft ?? 0 ) + ( $total->private ?? 0 );
 		$new_offset  = $offset + count( $posts );
+		$done        = count( $posts ) < self::BATCH_SIZE;
+
+		// The last record type's last batch finishes the run.
+		Activity_Log::end_batch( $run_id, [ 'records' => $processed, 'fixed' => $fixed ], $done && ! empty( $_POST['final'] ) );
 
 		wp_send_json_success( [
 			'processed' => $processed,
 			'fixed'     => $fixed,
 			'offset'    => $new_offset,
 			'total'     => $total_count,
-			'done'      => count( $posts ) < self::BATCH_SIZE,
+			'done'      => $done,
+			'run_id'    => $run_id,
 		] );
 	}
 
@@ -1241,10 +1258,19 @@ class Data_Integrity {
 			wp_send_json_error( __( 'Confirmation does not match. Type the exact post type slug.', 'shelterkit-donations' ) );
 		}
 
+		// One log entry for the purge, across its batches (#36). Each record
+		// it deletes also gets an entry, attached to it.
+		$run_id = Activity_Log::join_run( sanitize_text_field( wp_unslash( $_POST['run_id'] ?? '' ) ), 'purge', [ 'post_type' => $post_type ] );
+
+		// Every status, the trash included. 'any' leaves the trash out while
+		// the remaining count included it, so one trashed record kept the
+		// purge asking for batches that deleted nothing, for ever (#36).
+		$statuses = array_values( array_diff( get_post_stati(), [ 'auto-draft' ] ) );
+
 		// Get a batch of posts to delete.
 		$posts = get_posts( [
 			'post_type'      => $post_type,
-			'post_status'    => 'any',
+			'post_status'    => $statuses,
 			'posts_per_page' => self::BATCH_SIZE,
 			'fields'         => 'ids',
 		] );
@@ -1255,17 +1281,21 @@ class Data_Integrity {
 			++$deleted;
 		}
 
-		// Check remaining.
-		$remaining_counts = wp_count_posts( $post_type );
-		$remaining = ( $remaining_counts->publish ?? 0 )
-			+ ( $remaining_counts->draft ?? 0 )
-			+ ( $remaining_counts->private ?? 0 )
-			+ ( $remaining_counts->trash ?? 0 );
+		// Check remaining, counted over the same statuses.
+		$remaining = ( new \WP_Query( [
+			'post_type'      => $post_type,
+			'post_status'    => $statuses,
+			'posts_per_page' => 1,
+			'fields'         => 'ids',
+		] ) )->found_posts;
+
+		Activity_Log::end_batch( $run_id, [ 'deleted' => $deleted ], 0 === $remaining );
 
 		wp_send_json_success( [
 			'deleted'   => $deleted,
 			'remaining' => $remaining,
 			'done'      => $remaining === 0,
+			'run_id'    => $run_id,
 		] );
 	}
 
@@ -1289,6 +1319,8 @@ class Data_Integrity {
 		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- check_ajax_referer() and current_user_can() run at the top of this handler.
 		$offset = max( 0, (int) ( $_POST['offset'] ?? 0 ) );
 		// phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+
+		$run_id = Activity_Log::join_run( sanitize_text_field( wp_unslash( $_POST['run_id'] ?? '' ) ), 'recalc_donors' );
 
 		$donors = get_posts( [
 			'post_type'      => 'skdon_donor',
@@ -1320,12 +1352,15 @@ class Data_Integrity {
 		$total_donors = ( $total_counts->publish ?? 0 ) + ( $total_counts->draft ?? 0 );
 		$new_offset   = $offset + count( $donors );
 
+		Activity_Log::end_batch( $run_id, [ 'processed' => $processed, 'updated' => $updated ], count( $donors ) < self::BATCH_SIZE );
+
 		wp_send_json_success( [
 			'processed' => $processed,
 			'updated'   => $updated,
 			'offset'    => $new_offset,
 			'total'     => $total_donors,
 			'done'      => count( $donors ) < self::BATCH_SIZE,
+			'run_id'    => $run_id,
 		] );
 	}
 }

@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-18T17:50:05+00:00\n"
+"POT-Creation-Date: 2026-11-18T19:42:00+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: shelterkit-donations\n"
@@ -20,8 +20,8 @@ msgstr ""
 #: includes/admin/class-menu.php:55
 #: includes/admin/class-menu.php:93
 #: includes/emails/class-email-factory.php:77
-#: includes/woocommerce/class-order-handler.php:497
-#: includes/woocommerce/class-order-handler.php:508
+#: includes/woocommerce/class-order-handler.php:498
+#: includes/woocommerce/class-order-handler.php:509
 #: shelterkit-donations.php:128
 #: shelterkit-donations.php:362
 msgid "ShelterKit Donations"
@@ -303,6 +303,7 @@ msgid "Platinum"
 msgstr ""
 
 #: blocks/donor-dashboard/render.php:177
+#: includes/admin/class-activity-log.php:1535
 #: includes/admin/class-list-columns.php:115
 #: includes/admin/class-list-columns.php:153
 #: includes/admin/class-quick-actions.php:322
@@ -336,6 +337,7 @@ msgid "Donor Since"
 msgstr ""
 
 #: blocks/donor-dashboard/render.php:219
+#: includes/admin/class-activity-log.php:1533
 #: includes/admin/class-list-columns.php:126
 #: includes/admin/class-list-columns.php:157
 #: includes/admin/class-reports.php:805
@@ -496,7 +498,7 @@ msgstr ""
 
 #: blocks/membership-form/render.php:296
 #: includes/blocks/register-stores.php:116
-#: includes/woocommerce/class-order-handler.php:610
+#: includes/woocommerce/class-order-handler.php:611
 msgid "Processing..."
 msgstr ""
 
@@ -693,7 +695,7 @@ msgstr ""
 #. translators: %d: number of memorials
 #. translators: %d: number of memorials created.
 #: blocks/memorial-wall/render.php:343
-#: includes/admin/class-activity-log.php:811
+#: includes/admin/class-activity-log.php:1183
 #, php-format
 msgid "%d memorial"
 msgid_plural "%d memorials"
@@ -912,160 +914,212 @@ msgid_plural "%d to go"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/admin/class-activity-log.php:211
-#: includes/admin/class-activity-log.php:212
-#: includes/admin/class-activity-log.php:933
+#: includes/admin/class-activity-log.php:229
+#: includes/admin/class-activity-log.php:230
+#: includes/admin/class-activity-log.php:1305
 msgid "Activity Log"
 msgstr ""
 
 #. translators: 1: donor's name; 2: amount.
-#: includes/admin/class-activity-log.php:690
+#: includes/admin/class-activity-log.php:1013
 #, php-format
 msgid "%1$s donated %2$s"
 msgstr ""
 
 #. translators: 1: donor's name; 2: membership tier; 3: membership type (individual, business).
-#: includes/admin/class-activity-log.php:694
+#: includes/admin/class-activity-log.php:1017
 #, php-format
 msgid "%1$s joined as %2$s %3$s member"
 msgstr ""
 
 #. translators: 1: donor's name; 2: the name the memorial honours.
-#: includes/admin/class-activity-log.php:698
+#: includes/admin/class-activity-log.php:1021
 #, php-format
 msgid "%1$s created memorial for %2$s"
 msgstr ""
 
 #. translators: %s: donor's name.
-#: includes/admin/class-activity-log.php:702
+#: includes/admin/class-activity-log.php:1025
 #, php-format
 msgid "%s renewed membership"
 msgstr ""
 
 #. translators: %s: business name.
-#: includes/admin/class-activity-log.php:706
+#: includes/admin/class-activity-log.php:1029
 #, php-format
 msgid "Logo approved for %s"
 msgstr ""
 
 #. translators: %s: business name.
 #. translators: 1: business name; 2: reason.
-#: includes/admin/class-activity-log.php:706
-#: includes/admin/class-activity-log.php:710
+#: includes/admin/class-activity-log.php:1029
+#: includes/admin/class-activity-log.php:1033
 msgid "Unknown Business"
 msgstr ""
 
 #. translators: 1: business name; 2: reason.
-#: includes/admin/class-activity-log.php:710
+#: includes/admin/class-activity-log.php:1033
 #, php-format
 msgid "Logo rejected for %1$s: %2$s"
 msgstr ""
 
 #. translators: %d: WooCommerce order ID.
-#: includes/admin/class-activity-log.php:715
+#: includes/admin/class-activity-log.php:1038
 #, php-format
 msgid "Order #%d processed with errors"
 msgstr ""
 
 #. translators: %d: WooCommerce order ID.
-#: includes/admin/class-activity-log.php:717
+#: includes/admin/class-activity-log.php:1040
 #, php-format
 msgid "Order #%d processed successfully"
 msgstr ""
 
 #. translators: 1: email type (e.g. Receipt, Renewal reminder); 2: recipient's email address.
-#: includes/admin/class-activity-log.php:721
+#: includes/admin/class-activity-log.php:1044
 #, php-format
 msgid "%1$s email sent to %2$s"
 msgstr ""
 
+#. translators: %s: the changes, e.g. "renewal_reminder_days: 30 → 14".
 #. translators: %s: comma-separated list of changed setting keys.
-#: includes/admin/class-activity-log.php:725
+#: includes/admin/class-activity-log.php:1049
+#: includes/admin/class-activity-log.php:1052
 #, php-format
 msgid "Settings updated: %s"
 msgstr ""
 
+#. translators: %s: name of a setting group, e.g. Membership tiers.
+#: includes/admin/class-activity-log.php:1057
+#, php-format
+msgid "%s reset to the defaults"
+msgstr ""
+
+#. translators: 1: name of a setting group, e.g. Membership tiers; 2: the changes.
+#: includes/admin/class-activity-log.php:1059
+#, php-format
+msgid "%1$s changed: %2$s"
+msgstr ""
+
+#. translators: 1: record type, e.g. Membership; 2: the changes, e.g. "tier: single → family".
+#: includes/admin/class-activity-log.php:1066
+#, php-format
+msgid "%1$s edited: %2$s"
+msgstr ""
+
+#. translators: %s: record type, e.g. Donation.
+#: includes/admin/class-activity-log.php:1073
+#, php-format
+msgid "%s moved to the trash"
+msgstr ""
+
+#. translators: %s: record type, e.g. Donation.
+#: includes/admin/class-activity-log.php:1077
+#, php-format
+msgid "%s restored from the trash"
+msgstr ""
+
+#. translators: 1: donor's name; 2: comma-separated list of the fields changed.
+#: includes/admin/class-activity-log.php:1081
+#, php-format
+msgid "Profile updated for %1$s: %2$s"
+msgstr ""
+
+#. translators: 1: donor's name; 2: where the address came from (checkout, profile, import…).
+#: includes/admin/class-activity-log.php:1085
+#, php-format
+msgid "Address updated for %1$s (from %2$s)"
+msgstr ""
+
+#. translators: 1: donor's name; 2: membership end date.
+#: includes/admin/class-activity-log.php:1093
+#, php-format
+msgid "Renewal reminder sent to %1$s (membership ends %2$s)"
+msgstr ""
+
 #. translators: 1: donor's name; 2: new end date.
-#: includes/admin/class-activity-log.php:729
+#: includes/admin/class-activity-log.php:1097
 #, php-format
 msgid "Membership for %1$s extended to %2$s"
 msgstr ""
 
 #. translators: 1: donor's name; 2: cancellation reason.
-#: includes/admin/class-activity-log.php:734
+#: includes/admin/class-activity-log.php:1102
 #, php-format
 msgid "%1$s cancelled membership: %2$s"
 msgstr ""
 
 #. translators: %s: donor's name.
-#: includes/admin/class-activity-log.php:736
+#: includes/admin/class-activity-log.php:1104
 #, php-format
 msgid "%s cancelled membership"
 msgstr ""
 
 #. translators: 1: the name the memorial honours; 2: family member's email address.
-#: includes/admin/class-activity-log.php:740
+#: includes/admin/class-activity-log.php:1108
 #, php-format
 msgid "Family notification sent for memorial of %1$s to %2$s"
 msgstr ""
 
 #. translators: 1: donor's name; 2: gift amount; 3: order number.
-#: includes/admin/class-activity-log.php:744
+#: includes/admin/class-activity-log.php:1112
 #, php-format
 msgid "Refunded: %1$s's gift of %2$s (order #%3$d)"
 msgstr ""
 
 #. translators: 1: amount refunded; 2: donor's name; 3: gift amount; 4: order number.
-#: includes/admin/class-activity-log.php:748
+#: includes/admin/class-activity-log.php:1116
 #, php-format
 msgid "Partly refunded: %1$s of %2$s's gift of %3$s (order #%4$d)"
 msgstr ""
 
 #. translators: 1: donor's name; 2: gift amount; 3: order number.
-#: includes/admin/class-activity-log.php:752
+#: includes/admin/class-activity-log.php:1120
 #, php-format
 msgid "Refund undone: %1$s's gift of %2$s counts again (order #%3$d)"
 msgstr ""
 
 #. translators: %s: event type identifier.
-#: includes/admin/class-activity-log.php:760
+#: includes/admin/class-activity-log.php:1132
 #, php-format
 msgid "Event: %s"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:772
+#: includes/admin/class-activity-log.php:1144
 msgid "CSV import"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:773
+#: includes/admin/class-activity-log.php:1145
 msgid "Legacy memorial import"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:774
+#: includes/admin/class-activity-log.php:1146
 #: includes/admin/class-legacy-sync-page.php:73
 #: includes/admin/class-legacy-sync-page.php:150
 msgid "Legacy Order Sync"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:776
-#: includes/admin/class-activity-log.php:1099
+#: includes/admin/class-activity-log.php:1148
+#: includes/admin/class-activity-log.php:1642
 msgid "Import"
 msgstr ""
 
 #. translators: 1: kind of import (e.g. CSV import); 2: file name.
-#: includes/admin/class-activity-log.php:781
+#: includes/admin/class-activity-log.php:1153
 #, php-format
 msgid "%1$s of %2$s"
 msgstr ""
 
 #. translators: %s: the import, e.g. "CSV import of donations.csv".
-#: includes/admin/class-activity-log.php:786
+#. translators: %s: tool name, e.g. Purge.
+#: includes/admin/class-activity-log.php:1158
+#: includes/admin/class-activity-log.php:1584
 #, php-format
 msgid "%s started and has not finished"
 msgstr ""
 
 #. translators: %d: number of rows in the file.
-#: includes/admin/class-activity-log.php:793
+#: includes/admin/class-activity-log.php:1165
 #, php-format
 msgid "%d row"
 msgid_plural "%d rows"
@@ -1073,7 +1127,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of orders read.
-#: includes/admin/class-activity-log.php:795
+#: includes/admin/class-activity-log.php:1167
 #, php-format
 msgid "%d order"
 msgid_plural "%d orders"
@@ -1081,7 +1135,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of records created.
-#: includes/admin/class-activity-log.php:797
+#: includes/admin/class-activity-log.php:1169
 #, php-format
 msgid "%d created"
 msgid_plural "%d created"
@@ -1089,7 +1143,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of records updated.
-#: includes/admin/class-activity-log.php:799
+#: includes/admin/class-activity-log.php:1171
 #, php-format
 msgid "%d updated"
 msgid_plural "%d updated"
@@ -1097,7 +1151,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of rows skipped.
-#: includes/admin/class-activity-log.php:801
+#: includes/admin/class-activity-log.php:1173
 #, php-format
 msgid "%d skipped"
 msgid_plural "%d skipped"
@@ -1105,7 +1159,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of duplicate rows.
-#: includes/admin/class-activity-log.php:803
+#: includes/admin/class-activity-log.php:1175
 #, php-format
 msgid "%d duplicate"
 msgid_plural "%d duplicates"
@@ -1113,7 +1167,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of rows or orders that failed.
-#: includes/admin/class-activity-log.php:805
+#: includes/admin/class-activity-log.php:1177
 #, php-format
 msgid "%d failed"
 msgid_plural "%d failed"
@@ -1121,7 +1175,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of donations created.
-#: includes/admin/class-activity-log.php:807
+#: includes/admin/class-activity-log.php:1179
 #, php-format
 msgid "%d donation"
 msgid_plural "%d donations"
@@ -1129,7 +1183,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of memberships created.
-#: includes/admin/class-activity-log.php:809
+#: includes/admin/class-activity-log.php:1181
 #, php-format
 msgid "%d membership"
 msgid_plural "%d memberships"
@@ -1137,7 +1191,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of donors created.
-#: includes/admin/class-activity-log.php:813
+#: includes/admin/class-activity-log.php:1185
 #, php-format
 msgid "%d new donor"
 msgid_plural "%d new donors"
@@ -1145,109 +1199,109 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: 1: the import, e.g. "CSV import of donations.csv"; 2: its counts, e.g. "120 rows, 100 created, 20 skipped".
-#: includes/admin/class-activity-log.php:825
+#: includes/admin/class-activity-log.php:1197
 #, php-format
 msgid "%1$s: %2$s"
 msgstr ""
 
 #. translators: %s: the import, e.g. "CSV import of donations.csv".
-#: includes/admin/class-activity-log.php:827
+#: includes/admin/class-activity-log.php:1199
 #, php-format
 msgid "%s finished with nothing to do"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:941
+#: includes/admin/class-activity-log.php:1313
 msgid "All Categories"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:950
+#: includes/admin/class-activity-log.php:1322
 #: includes/admin/class-reports.php:192
 #: assets/js/admin-import-export.js:915
 #: blocks/donor-stats/edit.js:36
 msgid "All Time"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:951
+#: includes/admin/class-activity-log.php:1323
 #: includes/admin/class-dashboard-widget.php:133
 #: includes/admin/class-dashboard-widget.php:255
 #: includes/admin/class-reports.php:174
 msgid "Today"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:952
+#: includes/admin/class-activity-log.php:1324
 msgid "Last 7 Days"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:953
+#: includes/admin/class-activity-log.php:1325
 msgid "Last 30 Days"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:957
+#: includes/admin/class-activity-log.php:1329
 msgid "All Sources"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:967
+#: includes/admin/class-activity-log.php:1339
 msgid "Search..."
 msgstr ""
 
-#: includes/admin/class-activity-log.php:969
+#: includes/admin/class-activity-log.php:1341
 #: includes/admin/class-reports.php:217
 msgid "Filter"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:981
+#: includes/admin/class-activity-log.php:1353
 msgid "today"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:982
+#: includes/admin/class-activity-log.php:1354
 msgid "this week"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:983
+#: includes/admin/class-activity-log.php:1355
 msgid "total"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:985
+#: includes/admin/class-activity-log.php:1357
 msgid "Showing one import's entries."
 msgstr ""
 
-#: includes/admin/class-activity-log.php:985
+#: includes/admin/class-activity-log.php:1357
 msgid "Show all activity"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:993
+#: includes/admin/class-activity-log.php:1365
 msgid "No activity logged yet."
 msgstr ""
 
-#: includes/admin/class-activity-log.php:999
+#: includes/admin/class-activity-log.php:1371
 msgid "Time"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1000
+#: includes/admin/class-activity-log.php:1372
 msgid "Category"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1001
+#: includes/admin/class-activity-log.php:1373
 msgid "Activity"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1002
+#: includes/admin/class-activity-log.php:1374
 msgid "Source"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1003
+#: includes/admin/class-activity-log.php:1375
 msgid "User"
 msgstr ""
 
 #. translators: %d: number of log entries the import wrote.
-#: includes/admin/class-activity-log.php:1041
+#: includes/admin/class-activity-log.php:1413
 #, php-format
 msgid "View its %d entry"
 msgid_plural "View its %d entries"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/admin/class-activity-log.php:1053
+#: includes/admin/class-activity-log.php:1425
 #: includes/admin/class-list-columns.php:444
 #: includes/admin/class-reports.php:414
 #: includes/admin/class-reports.php:575
@@ -1256,46 +1310,235 @@ msgstr[1] ""
 msgid "Unknown"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1055
+#: includes/admin/class-activity-log.php:1427
 msgid "System"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1096
+#: includes/admin/class-activity-log.php:1468
+msgid "(empty)"
+msgstr ""
+
+#. translators: 1: field name; 2: old value; 3: new value.
+#: includes/admin/class-activity-log.php:1478
+#, php-format
+msgid "%1$s: %2$s → %3$s"
+msgstr ""
+
+#: includes/admin/class-activity-log.php:1490
+msgid "Membership tiers"
+msgstr ""
+
+#: includes/admin/class-activity-log.php:1491
+msgid "Pet species"
+msgstr ""
+
+#: includes/admin/class-activity-log.php:1492
+msgid "Donor levels"
+msgstr ""
+
+#. translators: %s: fund names.
+#: includes/admin/class-activity-log.php:1507
+#, php-format
+msgid "added %s"
+msgstr ""
+
+#. translators: %s: fund names.
+#: includes/admin/class-activity-log.php:1511
+#, php-format
+msgid "retired %s"
+msgstr ""
+
+#. translators: %s: fund names.
+#: includes/admin/class-activity-log.php:1515
+#, php-format
+msgid "restored %s"
+msgstr ""
+
+#. translators: 1: old fund name; 2: new fund name.
+#: includes/admin/class-activity-log.php:1519
+#, php-format
+msgid "renamed %1$s to %2$s"
+msgstr ""
+
+#. translators: %s: the changes, e.g. "added Medical Care; retired General Fund".
+#: includes/admin/class-activity-log.php:1522
+#, php-format
+msgid "Funds changed: %s"
+msgstr ""
+
+#: includes/admin/class-activity-log.php:1532
+#: includes/admin/class-list-columns.php:113
+#: includes/admin/class-reports.php:806
+msgid "Donation"
+msgstr ""
+
+#: includes/admin/class-activity-log.php:1534
+#: includes/admin/class-list-columns.php:140
+msgid "Memorial"
+msgstr ""
+
+#. translators: %s: record type, e.g. Donor.
+#: includes/admin/class-activity-log.php:1551
+#, php-format
+msgid "%s deleted"
+msgstr ""
+
+#. translators: 1: record type, e.g. Donation; 2: amount; 3: donor's name.
+#: includes/admin/class-activity-log.php:1554
+#, php-format
+msgid "%1$s deleted: %2$s from %3$s"
+msgstr ""
+
+#: includes/admin/class-activity-log.php:1569
+msgid "Backfill & Repair"
+msgstr ""
+
+#: includes/admin/class-activity-log.php:1570
+msgid "Purge"
+msgstr ""
+
+#: includes/admin/class-activity-log.php:1571
+msgid "Recalculate donor totals"
+msgstr ""
+
+#: includes/admin/class-activity-log.php:1572
+#: includes/admin/class-data-integrity.php:414
+msgid "Reset Sync Flags"
+msgstr ""
+
+#: includes/admin/class-activity-log.php:1573
+msgid "Repair merged records"
+msgstr ""
+
+#: includes/admin/class-activity-log.php:1574
+#: includes/admin/class-data-integrity.php:563
+msgid "Apply past refunds"
+msgstr ""
+
+#: includes/admin/class-activity-log.php:1575
+msgid "Match a refund"
+msgstr ""
+
+#: includes/admin/class-activity-log.php:1576
+msgid "Product Sync repair"
+msgstr ""
+
+#: includes/admin/class-activity-log.php:1577
+msgid "Reprocess order"
+msgstr ""
+
+#: includes/admin/class-activity-log.php:1578
+msgid "Renewal reminders"
+msgstr ""
+
+#. translators: 1: tool name; 2: error message.
+#: includes/admin/class-activity-log.php:1588
+#, php-format
+msgid "%1$s failed: %2$s"
+msgstr ""
+
+#. translators: 1: number of fields filled in; 2: number of records checked.
+#: includes/admin/class-activity-log.php:1594
+#, php-format
+msgid "Backfill & Repair: %1$d fields filled in across %2$d records"
+msgstr ""
+
+#. translators: 1: number of records; 2: record type, e.g. Memorial.
+#: includes/admin/class-activity-log.php:1597
+#, php-format
+msgid "Purged %1$d records: %2$s"
+msgstr ""
+
+#. translators: 1: number of donors; 2: number whose totals changed.
+#: includes/admin/class-activity-log.php:1600
+#, php-format
+msgid "Recalculated donor totals: %1$d donors, %2$d changed"
+msgstr ""
+
+#. translators: 1: number of records repaired; 2: number that failed.
+#: includes/admin/class-activity-log.php:1606
+#, php-format
+msgid "Repaired records Legacy Order Sync merged: %1$d repaired, %2$d failed"
+msgstr ""
+
+#. translators: 1: orders checked; 2: gifts changed; 3: refunds left to match.
+#: includes/admin/class-activity-log.php:1609
+#, php-format
+msgid "Applied past refunds: %1$d orders checked, %2$d gifts changed, %3$d refunds to match"
+msgstr ""
+
+#. translators: 1: refund ID; 2: order number; 3: record ID.
+#: includes/admin/class-activity-log.php:1613
+#, php-format
+msgid "Refund #%1$d on order #%2$d matched to #%3$d"
+msgstr ""
+
+#. translators: 1: refund ID; 2: order number.
+#: includes/admin/class-activity-log.php:1615
+#, php-format
+msgid "Refund #%1$d on order #%2$d marked as returning no gift"
+msgstr ""
+
+#. translators: 1: products repaired; 2: products skipped.
+#: includes/admin/class-activity-log.php:1618
+#, php-format
+msgid "Product Sync repair: %1$d repaired, %2$d skipped"
+msgstr ""
+
+#. translators: 1: order number; 2: lines recorded now; 3: lines already recorded; 4: lines not recorded.
+#: includes/admin/class-activity-log.php:1621
+#, php-format
+msgid "Reprocessed order #%1$d: %2$d recorded, %3$d already recorded, %4$d not recorded"
+msgstr ""
+
+#. translators: 1: reminders sent; 2: memberships skipped; 3: the end date they share.
+#: includes/admin/class-activity-log.php:1624
+#, php-format
+msgid "Renewal reminders: %1$d sent, %2$d skipped (memberships ending %3$s)"
+msgstr ""
+
+#. translators: %s: tool name.
+#: includes/admin/class-activity-log.php:1628
+#, php-format
+msgid "%s finished"
+msgstr ""
+
+#: includes/admin/class-activity-log.php:1639
 msgid "Checkout"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1097
+#: includes/admin/class-activity-log.php:1640
 msgid "Payment webhook"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1098
+#: includes/admin/class-activity-log.php:1641
 #: includes/admin/class-settings.php:401
 msgid "Admin"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1100
+#: includes/admin/class-activity-log.php:1643
 msgid "Admin tool"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1101
+#: includes/admin/class-activity-log.php:1644
 msgid "Scheduled task"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1102
+#: includes/admin/class-activity-log.php:1645
 msgid "WP-CLI"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1103
+#: includes/admin/class-activity-log.php:1646
 msgid "REST API"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1104
+#: includes/admin/class-activity-log.php:1647
 #: includes/shelterkit/class-shelterkit-profile.php:99
 msgid "Website"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1148
-#: includes/admin/class-activity-log.php:1151
+#: includes/admin/class-activity-log.php:1691
+#: includes/admin/class-activity-log.php:1694
 msgid "Unknown Donor"
 msgstr ""
 
@@ -1472,9 +1715,9 @@ msgid "New Members"
 msgstr ""
 
 #: includes/admin/class-data-integrity.php:86
-#: includes/admin/class-data-integrity.php:111
-#: includes/admin/class-data-integrity.php:145
-#: includes/admin/class-data-integrity.php:183
+#: includes/admin/class-data-integrity.php:113
+#: includes/admin/class-data-integrity.php:149
+#: includes/admin/class-data-integrity.php:189
 #: includes/admin/class-import-export-page.php:144
 #: includes/admin/class-import-export-page.php:170
 #: includes/admin/class-legacy-sync-page.php:146
@@ -1484,7 +1727,7 @@ msgstr ""
 #: includes/admin/class-legacy-sync-page.php:303
 #: includes/admin/class-legacy-sync-page.php:406
 #: includes/admin/class-legacy-sync-page.php:417
-#: includes/admin/class-legacy-sync-page.php:446
+#: includes/admin/class-legacy-sync-page.php:449
 #: includes/admin/class-logo-moderation.php:489
 #: includes/admin/class-logo-moderation.php:523
 #: includes/admin/class-logo-moderation.php:584
@@ -1497,40 +1740,40 @@ msgstr ""
 #: includes/admin/import-export/class-import-ajax-handler.php:288
 #: includes/admin/import-export/class-import-ajax-handler.php:314
 #: includes/admin/import-export/class-import-ajax-handler.php:351
-#: includes/woocommerce/class-order-handler.php:646
+#: includes/woocommerce/class-order-handler.php:647
 msgid "Permission denied."
 msgstr ""
 
 #. translators: %d: number of order lines given their own record.
-#: includes/admin/class-data-integrity.php:97
+#: includes/admin/class-data-integrity.php:99
 #, php-format
 msgid "Repaired %d merged record."
 msgid_plural "Repaired %d merged records."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/admin/class-data-integrity.php:120
+#: includes/admin/class-data-integrity.php:122
 msgid "That order or refund was not found."
 msgstr ""
 
 #. translators: 1: record ID; 2: order number.
-#: includes/admin/class-data-integrity.php:131
+#: includes/admin/class-data-integrity.php:135
 #, php-format
 msgid "Refund applied to #%1$d on order #%2$s."
 msgstr ""
 
 #. translators: %s: order number.
-#: includes/admin/class-data-integrity.php:133
+#: includes/admin/class-data-integrity.php:137
 #, php-format
 msgid "Refund on order #%s marked as not returning a gift."
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:148
+#: includes/admin/class-data-integrity.php:152
 msgid "WooCommerce is not active."
 msgstr ""
 
 #. translators: %d: number of orders.
-#: includes/admin/class-data-integrity.php:155
+#: includes/admin/class-data-integrity.php:161
 #, php-format
 msgid "Checked %d refunded or cancelled order with gifts."
 msgid_plural "Checked %d refunded or cancelled orders with gifts."
@@ -1538,7 +1781,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of donations, memberships and memorials.
-#: includes/admin/class-data-integrity.php:159
+#: includes/admin/class-data-integrity.php:165
 #, php-format
 msgid "%d gift changed."
 msgid_plural "%d gifts changed."
@@ -1546,7 +1789,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of refunds.
-#: includes/admin/class-data-integrity.php:165
+#: includes/admin/class-data-integrity.php:171
 #, php-format
 msgid "%d refund needs you to choose its gift below."
 msgid_plural "%d refunds need you to choose their gift below."
@@ -1554,244 +1797,236 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of WooCommerce orders.
-#: includes/admin/class-data-integrity.php:192
+#: includes/admin/class-data-integrity.php:200
 #, php-format
 msgid "Sync flags reset on %d order. Run Legacy Order Sync to process it again."
 msgid_plural "Sync flags reset on %d orders. Run Legacy Order Sync to process them again."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/admin/class-data-integrity.php:209
-#: includes/admin/class-data-integrity.php:210
-#: includes/admin/class-data-integrity.php:260
+#: includes/admin/class-data-integrity.php:217
+#: includes/admin/class-data-integrity.php:218
+#: includes/admin/class-data-integrity.php:268
 msgid "Data Tools"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:237
+#: includes/admin/class-data-integrity.php:245
 msgid "Scanning…"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:238
+#: includes/admin/class-data-integrity.php:246
 msgid "Backfilling…"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:239
+#: includes/admin/class-data-integrity.php:247
 msgid "Deleting…"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:240
+#: includes/admin/class-data-integrity.php:248
 msgid "Recalculating…"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:241
+#: includes/admin/class-data-integrity.php:249
 msgid "Complete!"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:242
+#: includes/admin/class-data-integrity.php:250
 msgid "Type the post type slug to confirm:"
 msgstr ""
 
 #. translators: %s: record type label.
-#: includes/admin/class-data-integrity.php:244
+#: includes/admin/class-data-integrity.php:252
 #, php-format
 msgid "This will permanently delete ALL %s records. This cannot be undone."
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:245
+#: includes/admin/class-data-integrity.php:253
 msgid "All records look good — no missing fields found."
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:263
+#: includes/admin/class-data-integrity.php:271
 msgid "Backfill &amp; Repair"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:264
-#: includes/admin/class-data-integrity.php:340
+#: includes/admin/class-data-integrity.php:272
+#: includes/admin/class-data-integrity.php:348
 msgid "Purge Records"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:265
+#: includes/admin/class-data-integrity.php:273
 msgid "Recalculate"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:266
+#: includes/admin/class-data-integrity.php:274
 msgid "Order Records"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:304
+#: includes/admin/class-data-integrity.php:312
 msgid "Backfill Missing Fields"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:307
+#: includes/admin/class-data-integrity.php:315
 msgid "Scans all records and reports missing or empty meta fields based on the entity schema. You can then backfill defaults, denormalized fields, and taxonomy terms in batches."
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:316
+#: includes/admin/class-data-integrity.php:324
 msgid "Scan All Records"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:324
+#: includes/admin/class-data-integrity.php:332
 msgid "Backfill All Issues"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:327
+#: includes/admin/class-data-integrity.php:335
 msgid "Fills in missing defaults, display names, and taxonomy terms. Does not overwrite existing values."
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:344
+#: includes/admin/class-data-integrity.php:352
 msgid "Warning:"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:346
+#: includes/admin/class-data-integrity.php:354
 msgid "This permanently deletes posts and their meta. Use this to start fresh before re-running Legacy Order Sync or CSV imports. WooCommerce orders and donor records are not affected unless you explicitly choose them."
 msgstr ""
 
 #. translators: %s: post type slug
-#: includes/admin/class-data-integrity.php:368
+#: includes/admin/class-data-integrity.php:376
 #, php-format
 msgid "Post type: %s"
 msgstr ""
 
 #. translators: %s: record type label
-#: includes/admin/class-data-integrity.php:384
+#: includes/admin/class-data-integrity.php:392
 #, php-format
 msgid "Delete All %s"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:395
+#: includes/admin/class-data-integrity.php:403
 msgid "Reset Legacy Sync Flags"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:398
+#: includes/admin/class-data-integrity.php:406
 msgid "Clears the \"_skdon_legacy_synced\" flag on all WooCommerce orders so they can be re-processed by the Legacy Order Sync tool. Does NOT delete any records."
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:406
-msgid "Reset Sync Flags"
-msgstr ""
-
-#: includes/admin/class-data-integrity.php:421
+#: includes/admin/class-data-integrity.php:429
 msgid "Recalculate Donor Stats"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:424
+#: includes/admin/class-data-integrity.php:432
 msgid "Recalculates lifetime_giving for every donor by summing their donations, memorials, and memberships. Use this after bulk imports or if stats look incorrect."
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:432
+#: includes/admin/class-data-integrity.php:440
 msgid "Recalculate All Donors"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:448
+#: includes/admin/class-data-integrity.php:456
 msgid "Orders with lines that weren't recorded"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:449
+#: includes/admin/class-data-integrity.php:457
 msgid "A paid line from one of the plugin's products that produced no donation, membership or memorial. Fix the cause shown, then use Reprocess on the order: lines already recorded are skipped."
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:451
-#: includes/admin/class-data-integrity.php:515
+#: includes/admin/class-data-integrity.php:459
+#: includes/admin/class-data-integrity.php:523
 msgid "None."
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:454
-#: includes/admin/class-data-integrity.php:518
+#: includes/admin/class-data-integrity.php:462
+#: includes/admin/class-data-integrity.php:526
 #: assets/js/admin-legacy-sync.js:194
 msgid "Order"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:454
+#: includes/admin/class-data-integrity.php:462
 msgid "Lines not recorded"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:454
+#: includes/admin/class-data-integrity.php:462
 msgid "Reason"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:476
+#: includes/admin/class-data-integrity.php:484
 msgid "Records merged by Legacy Order Sync"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:477
+#: includes/admin/class-data-integrity.php:485
 msgid "Before this release, an order with two lines of the same kind (an individual and a business membership, say) had its second line overwrite the record its first line created. Repair restores each record to the line that created it and gives the other line its own record. No donor is emailed."
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:479
+#: includes/admin/class-data-integrity.php:487
 msgid "None found."
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:482
+#: includes/admin/class-data-integrity.php:490
 msgid "Record"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:482
+#: includes/admin/class-data-integrity.php:490
 msgid "Belongs to"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:482
+#: includes/admin/class-data-integrity.php:490
 msgid "Overwritten by"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:493
+#: includes/admin/class-data-integrity.php:501
 msgid "Repair"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:512
+#: includes/admin/class-data-integrity.php:520
 msgid "Refunds to match to a gift"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:513
+#: includes/admin/class-data-integrity.php:521
 msgid "A refund that names no order lines, on an order with more than one, could have returned any of them. Choose the gift it returned, or \"Not a gift\" if it returned shipping or another product. Until then, every gift on the order counts in full."
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:518
+#: includes/admin/class-data-integrity.php:526
 msgid "Refund"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:518
-#: includes/admin/class-data-integrity.php:538
+#: includes/admin/class-data-integrity.php:526
+#: includes/admin/class-data-integrity.php:546
 msgid "Gift it returned"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:542
+#: includes/admin/class-data-integrity.php:550
 msgid "Not a gift (shipping, another product)"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:545
+#: includes/admin/class-data-integrity.php:553
 #: includes/admin/class-logo-moderation.php:229
 msgid "Apply"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:553
+#: includes/admin/class-data-integrity.php:561
 msgid "Refunds made before this update"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:554
+#: includes/admin/class-data-integrity.php:562
 msgid "Until this release a refunded or cancelled order left its gifts counting in full. This applies the same rules to every order with a refund or a cancelled or refunded status. Running it again changes nothing."
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:555
-msgid "Apply past refunds"
-msgstr ""
-
 #. translators: 1: record type (Donation, Membership, Memorial); 2: record ID; 3: formatted amount.
-#: includes/admin/class-data-integrity.php:570
+#: includes/admin/class-data-integrity.php:578
 #, php-format
 msgid "%1$s #%2$d: %3$s"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:571
+#: includes/admin/class-data-integrity.php:579
 msgid "Gift"
 msgstr ""
 
 #. translators: 1: order number; 2: order line name.
-#: includes/admin/class-data-integrity.php:589
+#: includes/admin/class-data-integrity.php:597
 #, php-format
 msgid "Order #%1$s: %2$s"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:1241
+#: includes/admin/class-data-integrity.php:1258
 msgid "Confirmation does not match. Type the exact post type slug."
 msgstr ""
 
@@ -1838,7 +2073,7 @@ msgid "Sync complete!"
 msgstr ""
 
 #: includes/admin/class-legacy-sync-page.php:130
-#: includes/woocommerce/class-order-handler.php:620
+#: includes/woocommerce/class-order-handler.php:621
 msgid "An error occurred."
 msgstr ""
 
@@ -1855,9 +2090,9 @@ msgid "Sync past WooCommerce orders to create donation, membership, and memorial
 msgstr ""
 
 #: includes/admin/class-legacy-sync-page.php:196
-#: includes/admin/class-legacy-sync-page.php:453
+#: includes/admin/class-legacy-sync-page.php:456
 #: includes/admin/legacy-sync/class-order-processor.php:55
-#: includes/woocommerce/class-order-handler.php:653
+#: includes/woocommerce/class-order-handler.php:654
 msgid "Order not found."
 msgstr ""
 
@@ -1873,23 +2108,18 @@ msgstr ""
 msgid "Sync complete."
 msgstr ""
 
-#: includes/admin/class-legacy-sync-page.php:425
+#: includes/admin/class-legacy-sync-page.php:426
 msgid "All sync status has been reset."
 msgstr ""
 
 #. translators: %d: number of orders.
-#: includes/admin/class-legacy-sync-page.php:431
+#: includes/admin/class-legacy-sync-page.php:434
 #, php-format
 msgid "Sync status reset for %d order(s)."
 msgstr ""
 
-#: includes/admin/class-legacy-sync-page.php:436
+#: includes/admin/class-legacy-sync-page.php:439
 msgid "No orders specified."
-msgstr ""
-
-#: includes/admin/class-list-columns.php:113
-#: includes/admin/class-reports.php:806
-msgid "Donation"
 msgstr ""
 
 #: includes/admin/class-list-columns.php:114
@@ -1995,10 +2225,6 @@ msgstr ""
 
 #: includes/admin/class-list-columns.php:132
 msgid "Logo"
-msgstr ""
-
-#: includes/admin/class-list-columns.php:140
-msgid "Memorial"
 msgstr ""
 
 #: includes/admin/class-list-columns.php:141
@@ -2406,17 +2632,17 @@ msgstr ""
 msgid "Repair Issues"
 msgstr ""
 
-#: includes/admin/class-product-sync-checker.php:899
+#: includes/admin/class-product-sync-checker.php:905
 msgid "ShelterKit Donations — Repair Complete:"
 msgstr ""
 
 #. translators: 1: number of products repaired; 2: number of products skipped.
-#: includes/admin/class-product-sync-checker.php:903
+#: includes/admin/class-product-sync-checker.php:909
 #, php-format
 msgid "%1$d product(s) repaired, %2$d skipped."
 msgstr ""
 
-#: includes/admin/class-product-sync-checker.php:911
+#: includes/admin/class-product-sync-checker.php:917
 msgid "View details"
 msgstr ""
 
@@ -3953,84 +4179,84 @@ msgid "Ability \"%s\" not found."
 msgstr ""
 
 #. translators: %d: post ID of the existing record.
-#: includes/woocommerce/class-order-handler.php:291
+#: includes/woocommerce/class-order-handler.php:292
 #, php-format
 msgid "Already recorded as #%d"
 msgstr ""
 
-#: includes/woocommerce/class-order-handler.php:358
+#: includes/woocommerce/class-order-handler.php:359
 msgid "Memorial missing required fields (honoree name). Item may have been added directly without using the memorial form. Please use the memorial tribute form to add this item."
 msgstr ""
 
-#: includes/woocommerce/class-order-handler.php:378
+#: includes/woocommerce/class-order-handler.php:379
 msgid "Memorial tribute is missing the honoree name."
 msgstr ""
 
-#: includes/woocommerce/class-order-handler.php:392
+#: includes/woocommerce/class-order-handler.php:393
 msgid "Membership is missing the tier selection."
 msgstr ""
 
-#: includes/woocommerce/class-order-handler.php:436
+#: includes/woocommerce/class-order-handler.php:437
 msgid "ShelterKit Donations Processing:"
 msgstr ""
 
-#: includes/woocommerce/class-order-handler.php:439
+#: includes/woocommerce/class-order-handler.php:440
 msgid "⚠️ Some items had errors. Please review and reprocess if needed."
 msgstr ""
 
 #. translators: %d: donation ID
-#: includes/woocommerce/class-order-handler.php:457
+#: includes/woocommerce/class-order-handler.php:458
 #, php-format
 msgid "Donation #%d created"
 msgstr ""
 
 #. translators: 1: membership ID, 2: tier label
-#: includes/woocommerce/class-order-handler.php:466
+#: includes/woocommerce/class-order-handler.php:467
 #, php-format
 msgid "Membership #%1$d created (%2$s)"
 msgstr ""
 
 #. translators: 1: memorial ID, 2: honoree name
-#: includes/woocommerce/class-order-handler.php:476
+#: includes/woocommerce/class-order-handler.php:477
 #, php-format
 msgid "Memorial #%1$d created for %2$s"
 msgstr ""
 
-#: includes/woocommerce/class-order-handler.php:482
+#: includes/woocommerce/class-order-handler.php:483
 #: assets/js/admin-legacy-sync.js:165
 #: assets/js/admin-legacy-sync.js:355
 msgid "Processed"
 msgstr ""
 
-#: includes/woocommerce/class-order-handler.php:560
+#: includes/woocommerce/class-order-handler.php:561
 msgid "No shelter products in this order."
 msgstr ""
 
-#: includes/woocommerce/class-order-handler.php:568
-#: includes/woocommerce/class-order-handler.php:629
+#: includes/woocommerce/class-order-handler.php:569
+#: includes/woocommerce/class-order-handler.php:630
 msgid "Status:"
 msgstr ""
 
 #. translators: %s: processing date
-#: includes/woocommerce/class-order-handler.php:572
+#: includes/woocommerce/class-order-handler.php:573
 #, php-format
 msgid "Processed on %s"
 msgstr ""
 
-#: includes/woocommerce/class-order-handler.php:595
-#: includes/woocommerce/class-order-handler.php:621
+#: includes/woocommerce/class-order-handler.php:596
+#: includes/woocommerce/class-order-handler.php:622
 msgid "Reprocess Order"
 msgstr ""
 
-#: includes/woocommerce/class-order-handler.php:605
+#: includes/woocommerce/class-order-handler.php:606
 msgid "Are you sure you want to reprocess this order? This may create duplicate records."
 msgstr ""
 
-#: includes/woocommerce/class-order-handler.php:631
+#: includes/woocommerce/class-order-handler.php:632
 msgid "Pending processing"
 msgstr ""
 
-#: includes/woocommerce/class-order-handler.php:633
+#: includes/woocommerce/class-order-handler.php:634
 msgid "Order will be processed when status changes to Processing or Completed."
 msgstr ""
 

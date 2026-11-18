@@ -286,9 +286,10 @@ class Order_Handler {
         $existing = Product_Mapper::line_record_id( $order, $item );
         if ( $existing ) {
             return [
-                'id'     => $existing,
+                'id'       => $existing,
+                'existing' => true,
                 /* translators: %d: post ID of the existing record. */
-                'status' => sprintf( __( 'Already recorded as #%d', 'shelterkit-donations' ), $existing ),
+                'status'   => sprintf( __( 'Already recorded as #%d', 'shelterkit-donations' ), $existing ),
             ];
         }
 
@@ -653,6 +654,9 @@ class Order_Handler {
             wp_send_json_error( __( 'Order not found.', 'shelterkit-donations' ) );
         }
 
+        // One log entry for the reprocess; the records it creates attach to it (#36).
+        $run = \Starter_Shelter\Admin\Activity_Log::begin_run( 'reprocess_order', [ 'order_id' => $order_id ], 'tool' );
+
         // Clear processed flag to allow reprocessing.
         $order->delete_meta_data( self::PROCESSED_META_KEY );
         $order->delete_meta_data( self::RESULTS_META_KEY );
@@ -660,6 +664,18 @@ class Order_Handler {
 
         // Reprocess.
         self::process_order( $order_id );
+
+        $counts = [ 'recorded' => 0, 'already' => 0, 'failed' => 0 ];
+        foreach ( (array) wc_get_order( $order_id )->get_meta( self::RESULTS_META_KEY ) as $result ) {
+            if ( is_wp_error( $result ) ) {
+                ++$counts['failed'];
+            } elseif ( is_array( $result ) && ! empty( $result['existing'] ) ) {
+                ++$counts['already'];
+            } else {
+                ++$counts['recorded'];
+            }
+        }
+        \Starter_Shelter\Admin\Activity_Log::finish_run( $run, $counts );
 
         wp_send_json_success();
     }

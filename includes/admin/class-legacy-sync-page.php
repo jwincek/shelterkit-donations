@@ -421,10 +421,13 @@ class Legacy_Sync_Page {
 		$reset_all = ! empty( $_POST['reset_all'] );
 
 		if ( $reset_all ) {
-			Order_Scanner::reset_sync_flags();
+			$run = Activity_Log::begin_run( 'reset_sync_flags', [], 'tool' );
+			Activity_Log::finish_run( $run, [ 'orders' => Order_Scanner::reset_sync_flags() ] );
 			wp_send_json_success( [ 'message' => __( 'All sync status has been reset.', 'shelterkit-donations' ) ] );
 		} elseif ( ! empty( $order_ids ) ) {
+			$run   = Activity_Log::begin_run( 'reset_sync_flags', [], 'tool' );
 			$count = Order_Scanner::reset_sync_flags( $order_ids );
+			Activity_Log::finish_run( $run, [ 'orders' => $count ] );
 			wp_send_json_success( [
 				'message' => sprintf(
 					/* translators: %d: number of orders. */
