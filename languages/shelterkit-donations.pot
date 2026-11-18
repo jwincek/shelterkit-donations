@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-17T23:30:12+00:00\n"
+"POT-Creation-Date: 2026-11-18T03:35:55+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: shelterkit-donations\n"
@@ -138,35 +138,35 @@ msgstr ""
 msgid "Donate Now"
 msgstr ""
 
-#: blocks/campaign-progress/render.php:127
+#: blocks/campaign-progress/render.php:117
 msgid "Campaign progress"
 msgstr ""
 
-#: blocks/campaign-progress/render.php:154
+#: blocks/campaign-progress/render.php:144
 msgid "raised"
 msgstr ""
 
-#: blocks/campaign-progress/render.php:158
+#: blocks/campaign-progress/render.php:148
 msgid "of"
 msgstr ""
 
-#: blocks/campaign-progress/render.php:162
+#: blocks/campaign-progress/render.php:152
 msgid "goal"
 msgstr ""
 
-#: blocks/campaign-progress/render.php:170
+#: blocks/campaign-progress/render.php:160
 msgid "donors"
 msgstr ""
 
-#: blocks/campaign-progress/render.php:179
+#: blocks/campaign-progress/render.php:169
 msgid "days left"
 msgstr ""
 
-#: blocks/campaign-progress/render.php:183
+#: blocks/campaign-progress/render.php:173
 msgid "Campaign ended"
 msgstr ""
 
-#: blocks/campaign-progress/render.php:193
+#: blocks/campaign-progress/render.php:183
 msgid "Goal reached! Thank you!"
 msgstr ""
 
@@ -239,26 +239,22 @@ msgstr ""
 msgid "Secure donation powered by WooCommerce"
 msgstr ""
 
-#: blocks/donor-dashboard/render.php:25
+#: blocks/donor-dashboard/render.php:26
 msgid "Please log in to view your donor dashboard."
 msgstr ""
 
-#: blocks/donor-dashboard/render.php:139
+#: blocks/donor-dashboard/render.php:146
 msgid "Log In"
 msgstr ""
 
-#: blocks/donor-dashboard/render.php:147
-msgid "Loading your dashboard..."
-msgstr ""
-
 #. translators: %s: donor name
-#: blocks/donor-dashboard/render.php:160
+#: blocks/donor-dashboard/render.php:161
 #, php-format
 msgid "Welcome back, %s!"
 msgstr ""
 
 #. translators: %s: donor first name
-#: blocks/donor-dashboard/render.php:161
+#: blocks/donor-dashboard/render.php:162
 #: templates/emails/donation-receipt-plain.php:20
 #: templates/emails/donation-receipt.php:31
 #: templates/emails/donor-annual-summary-plain.php:23
@@ -273,40 +269,40 @@ msgstr ""
 msgid "Friend"
 msgstr ""
 
-#: blocks/donor-dashboard/render.php:170
+#: blocks/donor-dashboard/render.php:171
 #: includes/blocks/register-stores.php:120
 msgid "New Donor"
 msgstr ""
 
-#: blocks/donor-dashboard/render.php:171
+#: blocks/donor-dashboard/render.php:172
 #: includes/admin/class-list-columns.php:513
 #: includes/admin/class-quick-actions.php:672
 #: includes/blocks/register-stores.php:121
 msgid "Bronze"
 msgstr ""
 
-#: blocks/donor-dashboard/render.php:172
+#: blocks/donor-dashboard/render.php:173
 #: includes/admin/class-list-columns.php:514
 #: includes/admin/class-quick-actions.php:673
 #: includes/blocks/register-stores.php:122
 msgid "Silver"
 msgstr ""
 
-#: blocks/donor-dashboard/render.php:173
+#: blocks/donor-dashboard/render.php:174
 #: includes/admin/class-list-columns.php:515
 #: includes/admin/class-quick-actions.php:674
 #: includes/blocks/register-stores.php:123
 msgid "Gold"
 msgstr ""
 
-#: blocks/donor-dashboard/render.php:174
+#: blocks/donor-dashboard/render.php:175
 #: includes/admin/class-list-columns.php:516
 #: includes/admin/class-quick-actions.php:675
 #: includes/blocks/register-stores.php:124
 msgid "Platinum"
 msgstr ""
 
-#: blocks/donor-dashboard/render.php:176
+#: blocks/donor-dashboard/render.php:177
 #: includes/admin/class-list-columns.php:115
 #: includes/admin/class-list-columns.php:153
 #: includes/admin/class-quick-actions.php:322
@@ -321,64 +317,64 @@ msgstr ""
 msgid "Donor"
 msgstr ""
 
-#: blocks/donor-dashboard/render.php:186
+#: blocks/donor-dashboard/render.php:187
 msgid "Your Impact"
 msgstr ""
 
-#: blocks/donor-dashboard/render.php:193
+#: blocks/donor-dashboard/render.php:194
 #: includes/admin/class-list-columns.php:155
 #: templates/myaccount/donor-dashboard.php:47
 msgid "Lifetime Giving"
 msgstr ""
 
-#: blocks/donor-dashboard/render.php:200
+#: blocks/donor-dashboard/render.php:201
 msgid "Total Gifts"
 msgstr ""
 
-#: blocks/donor-dashboard/render.php:208
+#: blocks/donor-dashboard/render.php:209
 msgid "Donor Since"
 msgstr ""
 
-#: blocks/donor-dashboard/render.php:218
+#: blocks/donor-dashboard/render.php:219
 #: includes/admin/class-list-columns.php:126
 #: includes/admin/class-list-columns.php:157
 #: includes/admin/class-reports.php:805
 msgid "Membership"
 msgstr ""
 
-#: blocks/donor-dashboard/render.php:231
+#: blocks/donor-dashboard/render.php:232
 msgid "Active Member"
 msgstr ""
 
 #. translators: %s: expiration date
-#: blocks/donor-dashboard/render.php:236
+#: blocks/donor-dashboard/render.php:237
 #, php-format
 msgid "Renews: %s"
 msgstr ""
 
-#: blocks/donor-dashboard/render.php:245
+#: blocks/donor-dashboard/render.php:246
 msgid "You are not currently a member."
 msgstr ""
 
-#: blocks/donor-dashboard/render.php:247
+#: blocks/donor-dashboard/render.php:248
 #: blocks/membership-form/render.php:24
 #: templates/myaccount/my-memberships.php:131
 msgid "Become a Member"
 msgstr ""
 
-#: blocks/donor-dashboard/render.php:257
+#: blocks/donor-dashboard/render.php:258
 msgid "Recent Gifts"
 msgstr ""
 
-#: blocks/donor-dashboard/render.php:270
+#: blocks/donor-dashboard/render.php:271
 msgid "View All Gifts →"
 msgstr ""
 
-#: blocks/donor-dashboard/render.php:280
+#: blocks/donor-dashboard/render.php:281
 msgid "Make a Gift"
 msgstr ""
 
-#: blocks/donor-dashboard/render.php:284
+#: blocks/donor-dashboard/render.php:285
 msgid "Update Profile"
 msgstr ""
 

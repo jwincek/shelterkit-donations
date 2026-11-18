@@ -24,6 +24,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   fields in place of the single nested value nothing else reads. (#30)
 
 ### Fixed
+- **The Donor Dashboard never showed the dashboard.** A donor saw "Loading
+  your dashboard…" and nothing else: the block asked its script for a
+  start-up step and two values that didn't exist, and the data it would
+  have fetched came from routes that don't exist. Nothing on the dashboard
+  changes after the page loads, so it is now rendered in full on the server
+  and loads no script. Its gift count and "Donor Since" now come from the
+  donor's records; they read stored totals nothing ever wrote, so it always
+  said 0 gifts. (#42)
+- **A donor's page broke on their second visit within the hour.** The
+  plugin caches which donor record belongs to the logged-in user, and on a
+  site without a persistent object cache the cached value came back in a
+  form that stopped PHP with an error. The Donor Dashboard page, and any
+  page with a block bound to the donor's details, then broke part-way
+  through. (#42)
+- **Campaign Progress lost its percentage, donor count and progress value
+  for screen readers** as soon as the page's scripts loaded, and **its
+  auto-refresh never ran**. With a refresh interval set, the figures now
+  update in place. (#42)
 - **Legacy Order Sync emailed donors about past gifts**, and so would CSV
   import, which creates records the same way. Every record sent the same
   email as a new gift: a donation receipt, "Your memorial … has been
