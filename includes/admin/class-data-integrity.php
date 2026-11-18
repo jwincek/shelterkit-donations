@@ -71,6 +71,8 @@ class Data_Integrity {
 		add_action( 'wp_ajax_skdon_integrity_recalc_donors', [ self::class, 'ajax_recalc_donors' ] );
 		add_action( 'wp_ajax_skdon_legacy_sync_reset', [ self::class, 'ajax_reset_sync_flags' ] );
 		add_action( 'wp_ajax_skdon_integrity_repair_merges', [ self::class, 'ajax_repair_merges' ] );
+		add_action( 'wp_ajax_skdon_integrity_assign_refund', [ self::class, 'ajax_assign_refund' ] );
+		add_action( 'wp_ajax_skdon_integrity_apply_refunds', [ self::class, 'ajax_apply_refunds' ] );
 	}
 
 	/**
@@ -96,6 +98,76 @@ class Data_Integrity {
 				$repaired
 			),
 		] );
+	}
+
+	/**
+	 * Order Records tab → say which gift a refund returned, for a refund that
+	 * named no lines on an order with several (#34).
+	 */
+	public static function ajax_assign_refund(): void {
+		check_ajax_referer( self::NONCE, 'nonce' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( __( 'Permission denied.', 'shelterkit-donations' ), 403 );
+		}
+
+		// intval, not absint: a negative ID must not become a real one.
+		$order_id  = isset( $_POST['order_id'] ) ? intval( wp_unslash( $_POST['order_id'] ) ) : 0;
+		$refund_id = isset( $_POST['refund_id'] ) ? intval( wp_unslash( $_POST['refund_id'] ) ) : 0;
+		$record    = isset( $_POST['record'] ) ? intval( wp_unslash( $_POST['record'] ) ) : -1;
+		$order     = $order_id > 0 && function_exists( 'wc_get_order' ) ? wc_get_order( $order_id ) : null;
+		if ( ! $order instanceof \WC_Order || $refund_id <= 0 || $record < 0 ) {
+			wp_send_json_error( __( 'That order or refund was not found.', 'shelterkit-donations' ), 400 );
+		}
+
+		$result = \Starter_Shelter\WooCommerce\Refund_Handler::assign_refund( $order, $refund_id, $record );
+		if ( is_wp_error( $result ) ) {
+			wp_send_json_error( $result->get_error_message(), 400 );
+		}
+
+		wp_send_json_success( [
+			'message' => $record
+				/* translators: 1: record ID; 2: order number. */
+				? sprintf( __( 'Refund applied to #%1$d on order #%2$s.', 'shelterkit-donations' ), $record, $order->get_order_number() )
+				/* translators: %s: order number. */
+				: sprintf( __( 'Refund on order #%s marked as not returning a gift.', 'shelterkit-donations' ), $order->get_order_number() ),
+		] );
+	}
+
+	/**
+	 * Order Records tab → apply refunds and cancellations made before
+	 * refunds reached the records (#34).
+	 */
+	public static function ajax_apply_refunds(): void {
+		check_ajax_referer( self::NONCE, 'nonce' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( __( 'Permission denied.', 'shelterkit-donations' ), 403 );
+		}
+		if ( ! function_exists( 'wc_get_orders' ) ) {
+			wp_send_json_error( __( 'WooCommerce is not active.', 'shelterkit-donations' ), 400 );
+		}
+
+		$result = \Starter_Shelter\WooCommerce\Refund_Handler::reconcile_all();
+
+		$message = sprintf(
+			/* translators: %d: number of orders. */
+			_n( 'Checked %d refunded or cancelled order with gifts.', 'Checked %d refunded or cancelled orders with gifts.', $result['orders'], 'shelterkit-donations' ),
+			$result['orders']
+		) . ' ' . sprintf(
+			/* translators: %d: number of donations, memberships and memorials. */
+			_n( '%d gift changed.', '%d gifts changed.', $result['changed'], 'shelterkit-donations' ),
+			$result['changed']
+		);
+		if ( $result['review'] ) {
+			$message .= ' ' . sprintf(
+				/* translators: %d: number of refunds. */
+				_n( '%d refund needs you to choose its gift below.', '%d refunds need you to choose their gift below.', $result['review'], 'shelterkit-donations' ),
+				$result['review']
+			);
+		}
+
+		wp_send_json_success( [ 'message' => $message ] );
 	}
 
 	/**
@@ -420,8 +492,86 @@ class Data_Integrity {
 				</table>
 				<p><button type="button" id="sd-repair-merges" class="button button-primary"><?php esc_html_e( 'Repair', 'shelterkit-donations' ); ?></button></p>
 			<?php endif; ?>
+
+			<?php self::render_refund_review(); ?>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Order Records tab, refunds (#34): refunds to match to a gift, and
+	 * applying refunds made before this release.
+	 */
+	private static function render_refund_review(): void {
+		if ( ! function_exists( 'wc_get_order' ) ) {
+			return;
+		}
+		$handler = \Starter_Shelter\WooCommerce\Refund_Handler::class;
+		$orders  = array_filter( array_map( 'wc_get_order', Helpers\order_ids_with_meta( $handler::REVIEW_META, 50 ) ) );
+		?>
+		<h2><?php esc_html_e( 'Refunds to match to a gift', 'shelterkit-donations' ); ?></h2>
+		<p class="description"><?php esc_html_e( 'A refund that names no order lines, on an order with more than one, could have returned any of them. Choose the gift it returned, or "Not a gift" if it returned shipping or another product. Until then, every gift on the order counts in full.', 'shelterkit-donations' ); ?></p>
+		<?php if ( ! $orders ) : ?>
+			<p><?php esc_html_e( 'None.', 'shelterkit-donations' ); ?></p>
+		<?php else : ?>
+			<table class="widefat striped" style="max-width:900px">
+				<thead><tr><th><?php esc_html_e( 'Order', 'shelterkit-donations' ); ?></th><th><?php esc_html_e( 'Refund', 'shelterkit-donations' ); ?></th><th><?php esc_html_e( 'Gift it returned', 'shelterkit-donations' ); ?></th><th></th></tr></thead>
+				<tbody>
+				<?php foreach ( $orders as $order ) : ?>
+					<?php
+					$records = $handler::records_for_order( $order->get_id() );
+					foreach ( array_map( 'intval', (array) $order->get_meta( $handler::REVIEW_META ) ) as $refund_id ) :
+						$refund = wc_get_order( $refund_id );
+						if ( ! $refund instanceof \WC_Order_Refund ) {
+							continue;
+						}
+						?>
+						<tr>
+							<td><a href="<?php echo esc_url( $order->get_edit_order_url() ); ?>">#<?php echo esc_html( $order->get_order_number() ); ?></a></td>
+							<td>
+								<?php echo esc_html( Helpers\format_currency( abs( (float) $refund->get_amount() ), $order->get_currency() ) ); ?>
+								<?php if ( $refund->get_reason() ) : ?>
+									<br><span class="description"><?php echo esc_html( $refund->get_reason() ); ?></span>
+								<?php endif; ?>
+							</td>
+							<td>
+								<select class="sd-refund-record" aria-label="<?php esc_attr_e( 'Gift it returned', 'shelterkit-donations' ); ?>">
+									<?php foreach ( $records as $record ) : ?>
+										<option value="<?php echo esc_attr( (string) $record ); ?>"><?php echo esc_html( self::record_label( $record, $order->get_currency() ) ); ?></option>
+									<?php endforeach; ?>
+									<option value="0"><?php esc_html_e( 'Not a gift (shipping, another product)', 'shelterkit-donations' ); ?></option>
+								</select>
+							</td>
+							<td><button type="button" class="button sd-assign-refund" data-order="<?php echo esc_attr( (string) $order->get_id() ); ?>" data-refund="<?php echo esc_attr( (string) $refund_id ); ?>"><?php esc_html_e( 'Apply', 'shelterkit-donations' ); ?></button></td>
+						</tr>
+					<?php endforeach; ?>
+				<?php endforeach; ?>
+				</tbody>
+			</table>
+		<?php endif; ?>
+
+		<h2><?php esc_html_e( 'Refunds made before this update', 'shelterkit-donations' ); ?></h2>
+		<p class="description"><?php esc_html_e( 'Until this release a refunded or cancelled order left its gifts counting in full. This applies the same rules to every order with a refund or a cancelled or refunded status. Running it again changes nothing.', 'shelterkit-donations' ); ?></p>
+		<p><button type="button" id="sd-apply-refunds" class="button"><?php esc_html_e( 'Apply past refunds', 'shelterkit-donations' ); ?></button></p>
+		<?php
+	}
+
+	/**
+	 * "Donation #812: $50.00" for the refund matcher.
+	 *
+	 * @param int    $record   Record post ID.
+	 * @param string $currency The order's currency.
+	 * @return string
+	 */
+	private static function record_label( int $record, string $currency ): string {
+		$type = get_post_type_object( (string) get_post_type( $record ) );
+		return sprintf(
+			/* translators: 1: record type (Donation, Membership, Memorial); 2: record ID; 3: formatted amount. */
+			__( '%1$s #%2$d: %3$s', 'shelterkit-donations' ),
+			$type ? $type->labels->singular_name : __( 'Gift', 'shelterkit-donations' ),
+			$record,
+			Helpers\format_currency( \Starter_Shelter\WooCommerce\Refund_Handler::original_amount( $record ), $currency )
+		);
 	}
 
 	/**
@@ -1150,8 +1300,6 @@ class Data_Integrity {
 			'fields'         => 'ids',
 		] );
 
-		global $wpdb;
-
 		$processed = 0;
 		$updated   = 0;
 
@@ -1160,22 +1308,9 @@ class Data_Integrity {
 
 			// Sum amounts across all three entity types in a single query.
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-			$total = (float) $wpdb->get_var( $wpdb->prepare(
-				"SELECT COALESCE(SUM(CAST(pm_amount.meta_value AS DECIMAL(15,2))), 0)
-				 FROM {$wpdb->posts} p
-				 INNER JOIN {$wpdb->postmeta} pm_donor ON p.ID = pm_donor.post_id
-				     AND pm_donor.meta_key = '_skdon_donor_id' AND pm_donor.meta_value = %s
-				 INNER JOIN {$wpdb->postmeta} pm_amount ON p.ID = pm_amount.post_id
-				     AND pm_amount.meta_key = '_skdon_amount'
-				 WHERE p.post_type IN ('skdon_donation', 'skdon_memorial', 'skdon_membership')
-				 AND p.post_status = 'publish'",
-				$donor_id
-			) );
-
 			$current = (float) get_post_meta( $donor_id, '_skdon_lifetime_giving', true );
 
-			if ( abs( $total - $current ) > 0.005 ) {
-				update_post_meta( $donor_id, '_skdon_lifetime_giving', $total );
+			if ( abs( Helpers\recalculate_donor_lifetime_giving( (int) $donor_id ) - $current ) > 0.005 ) {
 				++$updated;
 			}
 		}

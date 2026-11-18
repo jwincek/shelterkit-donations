@@ -41,6 +41,7 @@ class Menu {
         add_action( 'starter_shelter_logo_approved', [ self::class, 'invalidate_pending_cache' ] );
         add_action( 'starter_shelter_logo_rejected', [ self::class, 'invalidate_pending_cache' ] );
         add_action( 'starter_shelter_memorial_family_notification', [ self::class, 'invalidate_pending_cache' ] );
+        add_action( 'starter_shelter_refunds_changed', [ self::class, 'invalidate_pending_cache' ] );
     }
 
     /**

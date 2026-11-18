@@ -349,6 +349,49 @@
 		} );
 	} );
 
+	// ── Refunds (#34) ───────────────────────────────────────────
+
+	function showResult( response, reload ) {
+		var data    = response && response.data ? response.data : {};
+		var message = response.success ? data.message : ( data || 'Failed.' );
+		$results.empty().append(
+			$( '<div class="notice"><p></p></div>' )
+				.addClass( response.success ? 'notice-success' : 'notice-error' )
+				.find( 'p' ).text( message ).end()
+		);
+		if ( response.success && reload ) {
+			window.setTimeout( function() { window.location.reload(); }, 1500 );
+		}
+		return response.success;
+	}
+
+	$( '.sd-assign-refund' ).on( 'click', function() {
+		var $btn = $( this ).prop( 'disabled', true );
+		post( 'skdon_integrity_assign_refund', {
+			order_id: $btn.data( 'order' ),
+			refund_id: $btn.data( 'refund' ),
+			record: $btn.closest( 'tr' ).find( '.sd-refund-record' ).val(),
+		} ).done( function( response ) {
+			if ( ! showResult( response, true ) ) {
+				$btn.prop( 'disabled', false );
+			}
+		} ).fail( function() {
+			$btn.prop( 'disabled', false );
+			$results.html( '<div class="notice notice-error"><p>Request failed.</p></div>' );
+		} );
+	} );
+
+	$( '#sd-apply-refunds' ).on( 'click', function() {
+		var $btn = $( this ).prop( 'disabled', true );
+		post( 'skdon_integrity_apply_refunds' ).done( function( response ) {
+			showResult( response, false );
+			$btn.prop( 'disabled', false );
+		} ).fail( function() {
+			$btn.prop( 'disabled', false );
+			$results.html( '<div class="notice notice-error"><p>Request failed.</p></div>' );
+		} );
+	} );
+
 	// ── Recalculate Donors ──────────────────────────────────────
 
 	$( '#sd-recalc-btn' ).on( 'click', function() {

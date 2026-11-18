@@ -27,6 +27,7 @@ namespace Starter_Shelter\Admin\Legacy_Sync;
 use Starter_Shelter\Core\Config;
 use Starter_Shelter\Helpers;
 use Starter_Shelter\WooCommerce\Product_Mapper;
+use Starter_Shelter\WooCommerce\Refund_Handler;
 use Starter_Shelter\Admin\Shared\Donor_Lookup;
 use WP_Error;
 
@@ -454,6 +455,12 @@ class Order_Processor {
 			],
 			default => [],
 		};
+
+		// Once refunds reached a record its amount is theirs to set (#34):
+		// the order line's amount would count a refunded gift in full again.
+		if ( metadata_exists( 'post', $post_id, Refund_Handler::REFUNDS_META ) ) {
+			unset( $field_map['amount'] );
+		}
 
 		$updated_fields = [];
 

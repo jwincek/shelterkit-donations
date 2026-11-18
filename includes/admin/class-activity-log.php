@@ -109,6 +109,7 @@ class Activity_Log {
         add_action( 'starter_shelter_membership_extended', [ self::class, 'log_membership_extended' ], 10, 2 );
         add_action( 'starter_shelter_family_notified', [ self::class, 'log_family_notified' ], 10, 2 );
         add_action( 'starter_shelter_membership_cancelled', [ self::class, 'log_membership_cancelled' ], 10, 3 );
+        add_action( 'starter_shelter_gift_refunded', [ self::class, 'log_gift_refunded' ], 10, 4 );
 
         // Cleanup old logs.
         add_action( 'skdon_cleanup_activity_log', [ self::class, 'cleanup_old_logs' ] );
@@ -494,6 +495,48 @@ class Activity_Log {
                 'donor_id' => $donor_id,
                 'reason'   => $reason,
                 'tier'     => $membership['tier'] ?? '',
+            ]
+        );
+    }
+
+    /**
+     * Log a gift refunded in part or in full, or a refund undone (#34).
+     *
+     * @param int   $record   The donation, membership or memorial.
+     * @param int   $order_id Its order.
+     * @param float $refunded Refunded now, in total.
+     * @param float $original The gift's amount before any refund.
+     */
+    public static function log_gift_refunded( int $record, int $order_id, float $refunded, float $original ): void {
+        $type       = (string) get_post_type( $record );
+        $donor_id   = (int) get_post_meta( $record, '_skdon_donor_id', true );
+        $donor_name = $donor_id ? self::get_donor_name( $donor_id ) : __( 'Unknown', 'shelterkit-donations' );
+
+        if ( $refunded <= 0 ) {
+            $event = 'gift_refund_undone';
+            /* translators: 1: donor's display name; 2: formatted gift amount; 3: order number. */
+            $message = sprintf( __( 'Refund undone: %1$s\'s gift of %2$s counts again (order #%3$d)', 'shelterkit-donations' ), $donor_name, Helpers\format_currency( $original ), $order_id );
+        } elseif ( $refunded + 0.005 >= $original ) {
+            $event = 'gift_refunded';
+            /* translators: 1: donor's display name; 2: formatted gift amount; 3: order number. */
+            $message = sprintf( __( 'Refunded: %1$s\'s gift of %2$s (order #%3$d)', 'shelterkit-donations' ), $donor_name, Helpers\format_currency( $original ), $order_id );
+        } else {
+            $event = 'gift_partly_refunded';
+            /* translators: 1: formatted amount refunded; 2: donor's display name; 3: formatted gift amount; 4: order number. */
+            $message = sprintf( __( 'Partly refunded: %1$s of %2$s\'s gift of %3$s (order #%4$d)', 'shelterkit-donations' ), Helpers\format_currency( $refunded ), $donor_name, Helpers\format_currency( $original ), $order_id );
+        }
+
+        self::log(
+            $event,
+            'skdon_membership' === $type ? 'membership' : 'donation',
+            $message,
+            $type,
+            $record,
+            [
+                'donor_id' => $donor_id,
+                'order_id' => $order_id,
+                'refunded' => $refunded,
+                'original' => $original,
             ]
         );
     }

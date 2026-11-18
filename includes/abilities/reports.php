@@ -654,6 +654,18 @@ function action_items( array $input = [] ): array {
                 'url'          => admin_url( 'admin.php?page=shelterkit-donations-data-tools#orders' ),
             ];
         }
+
+        // Refunds that named no lines on an order with several gifts (#34).
+        $refund_review = count( Helpers\order_ids_with_meta( \Starter_Shelter\WooCommerce\Refund_Handler::REVIEW_META ) );
+        if ( $refund_review > 0 ) {
+            $items[] = [
+                'type'         => 'refunds_to_review',
+                'count'        => $refund_review,
+                'label'        => __( 'order with a refund to match to a gift', 'shelterkit-donations' ),
+                'label_plural' => __( 'orders with a refund to match to a gift', 'shelterkit-donations' ),
+                'url'          => admin_url( 'admin.php?page=shelterkit-donations-data-tools#orders' ),
+            ];
+        }
     }
 
     return [ 'items' => $items ];
