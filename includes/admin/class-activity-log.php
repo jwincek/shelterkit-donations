@@ -112,6 +112,8 @@ class Activity_Log {
 
         // Add admin page.
         add_action( 'admin_menu', [ self::class, 'add_menu_page' ] );
+        add_action( 'add_meta_boxes', [ self::class, 'register_history_box' ] );
+        add_action( 'admin_post_skdon_export_activity_log', [ self::class, 'handle_export' ] );
         add_action( 'admin_enqueue_scripts', [ self::class, 'enqueue_assets' ] );
 
         // Log events.
@@ -1215,63 +1217,22 @@ class Activity_Log {
             self::create_table();
         }
 
-        // Filters.
-        $category_filter = sanitize_key( $_GET['category'] ?? '' );
-        $date_filter = sanitize_key( $_GET['date'] ?? '' );
-        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- read-only admin screen behind current_user_can(); the only interpolated parts are $wpdb table properties and a generated %d placeholder list; every user value is bound through $wpdb->prepare().
-        $search = sanitize_text_field( $_GET['s'] ?? '' );
-        $source_filter = sanitize_key( $_GET['source'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a read-only list filter, like the ones above.
-        $run_filter    = sanitize_text_field( wp_unslash( $_GET['run'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a read-only list filter, like the ones above.
-        $run_filter    = wp_is_uuid( $run_filter, 4 ) ? $run_filter : '';
+        // Filters, shared with the CSV export (#39).
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- read-only admin screen behind current_user_can(); the only interpolated parts are $wpdb table properties and a generated %d placeholder list; every user value is bound through $wpdb->prepare().
+        $filters         = self::request_filters( $_GET ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only list filters.
+        $category_filter = $filters['category'];
+        $date_filter     = $filters['date'];
+        $search          = $filters['s'];
+        $source_filter   = $filters['source'];
+        $run_filter      = $filters['run'];
+        $object_filter   = $filters['object'];
 
         // Pagination.
         $per_page = 50;
-        $current_page = max( 1, absint( $_GET['paged'] ?? 1 ) );
+        $current_page = max( 1, absint( $_GET['paged'] ?? 1 ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only pagination.
         $offset = ( $current_page - 1 ) * $per_page;
 
-        // Build query. A run shows as its one entry unless it is opened (#37).
-        $where  = $run_filter ? 'run_id = %s' : self::COLLAPSE_RUNS;
-        $params = $run_filter ? [ $run_filter ] : [];
-
-        if ( $source_filter ) {
-            $where .= ' AND source = %s';
-            $params[] = $source_filter;
-        }
-
-        if ( $category_filter ) {
-            $where .= ' AND event_category = %s';
-            $params[] = $category_filter;
-        }
-
-        if ( $date_filter ) {
-            switch ( $date_filter ) {
-                case 'today':
-                    $where .= ' AND DATE(created_at) = CURDATE()';
-                    break;
-                case 'week':
-                    $where .= ' AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)';
-                    break;
-                case 'month':
-                    $where .= ' AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)';
-                    break;
-            }
-        }
-
-        if ( $search ) {
-            // Entries since #37 keep their data, not a sentence, and name a
-            // donor by ID: match the data, and the IDs of donors so named.
-            $like      = '%' . $wpdb->esc_like( $search ) . '%';
-            $clauses   = [ 'message LIKE %s', 'meta LIKE %s' ];
-            $params[]  = $like;
-            $params[]  = $like;
-            foreach ( self::donor_ids_named( $search ) as $donor_id ) {
-                $clauses[] = 'meta LIKE %s';
-                $params[]  = '%' . $wpdb->esc_like( '"donor_id":' . $donor_id . ',' ) . '%';
-                $clauses[] = 'meta LIKE %s';
-                $params[]  = '%' . $wpdb->esc_like( '"donor_id":' . $donor_id . '}' ) . '%';
-            }
-            $where .= ' AND (' . implode( ' OR ', $clauses ) . ')';
-        }
+        [ $where, $params ] = self::filter_sql( $filters );
 
         // Get total count.
         $count_query = "SELECT COUNT(*) FROM $table_name WHERE $where";
@@ -1279,7 +1240,7 @@ class Activity_Log {
         $total_items = $params ? $wpdb->get_var( $wpdb->prepare( $count_query, $params ) ) : $wpdb->get_var( $count_query );
 
         // Get logs.
-        $query = "SELECT * FROM $table_name WHERE $where ORDER BY created_at DESC LIMIT %d OFFSET %d";
+        $query = "SELECT * FROM $table_name WHERE $where ORDER BY created_at DESC, id DESC LIMIT %d OFFSET %d";
         $params[] = $per_page;
         $params[] = $offset;
 
@@ -1288,6 +1249,9 @@ class Activity_Log {
 
         // Filter dropdown uses the closed enumeration — no scan needed.
         $categories = self::KNOWN_CATEGORIES;
+
+        // A record's history shows which run each entry came from.
+        $run_labels = $object_filter ? self::run_labels( wp_list_pluck( (array) $logs, 'run_id' ) ) : [];
 
         // How many entries each run on this page holds, for its link.
         $run_sizes = [];
@@ -1335,10 +1299,33 @@ class Activity_Log {
                     <?php if ( $run_filter ) : ?>
                     <input type="hidden" name="run" value="<?php echo esc_attr( $run_filter ); ?>" />
                     <?php endif; ?>
+                    <?php if ( $object_filter ) : ?>
+                    <input type="hidden" name="object" value="<?php echo esc_attr( $object_filter[0] . ':' . $object_filter[1] ); ?>" />
+                    <?php endif; ?>
 
                     <input type="search" name="s" value="<?php echo esc_attr( $search ); ?>" placeholder="<?php esc_attr_e( 'Search...', 'shelterkit-donations' ); ?>" />
 
                     <button type="submit" class="button"><?php esc_html_e( 'Filter', 'shelterkit-donations' ); ?></button>
+                </form>
+
+                <!-- The current view as CSV, every page (#39). -->
+                <form method="get" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sd-log-export">
+                    <input type="hidden" name="action" value="skdon_export_activity_log" />
+                    <?php wp_nonce_field( 'skdon_export_activity_log', '_wpnonce', false ); ?>
+                    <?php
+                    $export_args = [
+                        'category' => $category_filter,
+                        'date'     => $date_filter,
+                        'source'   => $source_filter,
+                        's'        => $search,
+                        'run'      => $run_filter,
+                        'object'   => $object_filter ? $object_filter[0] . ':' . $object_filter[1] : '',
+                    ];
+                    foreach ( array_filter( $export_args ) as $name => $value ) :
+                        ?>
+                    <input type="hidden" name="<?php echo esc_attr( $name ); ?>" value="<?php echo esc_attr( $value ); ?>" />
+                    <?php endforeach; ?>
+                    <button type="submit" class="button"><?php esc_html_e( 'Export CSV', 'shelterkit-donations' ); ?></button>
                 </form>
             </div>
 
@@ -1355,6 +1342,14 @@ class Activity_Log {
                 <span><strong><?php echo esc_html( $total_items ); ?></strong> <?php esc_html_e( 'total', 'shelterkit-donations' ); ?></span>
                 <?php if ( $run_filter ) : ?>
                 <span><?php esc_html_e( 'Showing one import\'s entries.', 'shelterkit-donations' ); ?> <a href="<?php echo esc_url( remove_query_arg( [ 'run', 'paged' ] ) ); ?>"><?php esc_html_e( 'Show all activity', 'shelterkit-donations' ); ?></a></span>
+                <?php elseif ( $object_filter ) : ?>
+                <span>
+                    <?php
+                    /* translators: 1: record type, e.g. Membership; 2: its ID. */
+                    echo esc_html( sprintf( __( 'Showing the history of %1$s #%2$d.', 'shelterkit-donations' ), self::type_label( $object_filter[0] ), $object_filter[1] ) );
+                    ?>
+                    <a href="<?php echo esc_url( remove_query_arg( [ 'object', 'paged' ] ) ); ?>"><?php esc_html_e( 'Show all activity', 'shelterkit-donations' ); ?></a>
+                </span>
                 <?php endif; ?>
             </div>
 
@@ -1400,12 +1395,16 @@ class Activity_Log {
                         </td>
                         <td class="column-message">
                             <?php echo esc_html( self::render_message( $log ) ); ?>
-                            <?php if ( $log->object_type && $log->object_id ) : ?>
-                            <a href="<?php echo esc_url( get_edit_post_link( $log->object_id ) ); ?>" class="sd-log-link">
-                                #<?php echo esc_html( $log->object_id ); ?>
-                            </a>
+                            <?php self::print_links( $log ); ?>
+                            <?php if ( isset( $run_labels[ $log->run_id ] ) && ! in_array( $log->event_type, self::RUN_TYPES, true ) ) : ?>
+                            <br><span class="description">
+                                <?php
+                                /* translators: %s: the import or tool run the entry belongs to. */
+                                echo esc_html( sprintf( __( 'Part of: %s', 'shelterkit-donations' ), $run_labels[ $log->run_id ] ) );
+                                ?>
+                            </span>
                             <?php endif; ?>
-                            <?php if ( ! empty( $run_sizes[ $log->run_id ] ) ) : ?>
+                            <?php if ( ! empty( $run_sizes[ $log->run_id ] ) && in_array( $log->event_type, self::RUN_TYPES, true ) ) : ?>
                             <a href="<?php echo esc_url( add_query_arg( 'run', $log->run_id, remove_query_arg( 'paged' ) ) ); ?>" class="sd-log-link">
                                 <?php
                                 echo esc_html( sprintf(
@@ -1628,6 +1627,356 @@ class Activity_Log {
         return sprintf( __( '%s finished', 'shelterkit-donations' ), $name );
     }
 
+    // ─────────────────────────────────────────────────────────────
+    // Filters, links, record history and CSV export (#39)
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * The list's filters, read from a request.
+     *
+     * @param array $q Request parameters ($_GET).
+     * @return array{category: string, date: string, s: string, source: string, run: string, object: array{0: string, 1: int}|null}
+     */
+    public static function request_filters( array $q ): array {
+        $run    = sanitize_text_field( wp_unslash( (string) ( $q['run'] ?? '' ) ) );
+        $object = sanitize_text_field( wp_unslash( (string) ( $q['object'] ?? '' ) ) );
+        $object = preg_match( '/^([a-z_]+):(\d+)$/', $object, $m )
+            && ( in_array( $m[1], Record_Edit_Tracker::POST_TYPES, true ) || 'shop_order' === $m[1] )
+            ? [ $m[1], (int) $m[2] ]
+            : null;
+
+        return [
+            'category' => sanitize_key( (string) ( $q['category'] ?? '' ) ),
+            'date'     => sanitize_key( (string) ( $q['date'] ?? '' ) ),
+            's'        => sanitize_text_field( wp_unslash( (string) ( $q['s'] ?? '' ) ) ),
+            'source'   => sanitize_key( (string) ( $q['source'] ?? '' ) ),
+            'run'      => wp_is_uuid( $run, 4 ) ? $run : '',
+            'object'   => $object,
+        ];
+    }
+
+    /**
+     * WHERE clause and parameters for a set of filters. A run shows as its
+     * one entry unless it is opened, or unless one record's history is shown,
+     * which includes what runs did to it.
+     *
+     * @param array $f From request_filters().
+     * @return array{0: string, 1: array}
+     */
+    public static function filter_sql( array $f ): array {
+        global $wpdb;
+
+        if ( $f['run'] ) {
+            $where  = 'run_id = %s';
+            $params = [ $f['run'] ];
+        } elseif ( $f['object'] ) {
+            [ $where, $params ] = self::object_sql( $f['object'][0], $f['object'][1] );
+        } else {
+            $where  = self::COLLAPSE_RUNS;
+            $params = [];
+        }
+
+        if ( $f['source'] ) {
+            $where   .= ' AND source = %s';
+            $params[] = $f['source'];
+        }
+        if ( $f['category'] ) {
+            $where   .= ' AND event_category = %s';
+            $params[] = $f['category'];
+        }
+        $dates = [
+            'today' => ' AND DATE(created_at) = CURDATE()',
+            'week'  => ' AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)',
+            'month' => ' AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)',
+        ];
+        $where .= $dates[ $f['date'] ] ?? '';
+
+        if ( $f['s'] ) {
+            // Entries since #37 keep their data, not a sentence, and name a
+            // donor by ID: match the data, and the IDs of donors so named.
+            $like     = '%' . $wpdb->esc_like( $f['s'] ) . '%';
+            $clauses  = [ 'message LIKE %s', 'meta LIKE %s' ];
+            $params[] = $like;
+            $params[] = $like;
+            foreach ( self::donor_ids_named( $f['s'] ) as $donor_id ) {
+                [ $clause, $donor_params ] = self::data_names( 'donor_id', $donor_id );
+                $clauses[]                 = $clause;
+                $params                    = array_merge( $params, $donor_params );
+            }
+            $where .= ' AND (' . implode( ' OR ', $clauses ) . ')';
+        }
+
+        return [ $where, $params ];
+    }
+
+    /**
+     * Entries about one record: those whose object it is, and for a donor
+     * the entries naming them (their gifts), for an order those naming it.
+     *
+     * @param string $type Post type, or shop_order.
+     * @param int    $id   ID.
+     * @return array{0: string, 1: array}
+     */
+    private static function object_sql( string $type, int $id ): array {
+        $clauses = [ '(object_type = %s AND object_id = %d)' ];
+        $params  = [ $type, $id ];
+        $key     = [ 'skdon_donor' => 'donor_id', 'shop_order' => 'order_id' ][ $type ] ?? '';
+        if ( $key ) {
+            [ $clause, $more ] = self::data_names( $key, $id );
+            $clauses[]         = $clause;
+            $params            = array_merge( $params, $more );
+        }
+        return [ '(' . implode( ' OR ', $clauses ) . ')', $params ];
+    }
+
+    /**
+     * A clause matching entries whose data has `"$key":$id`, as JSON writes it.
+     *
+     * @param string $key Data key.
+     * @param int    $id  Its value.
+     * @return array{0: string, 1: array}
+     */
+    private static function data_names( string $key, int $id ): array {
+        global $wpdb;
+        return [
+            '(meta LIKE %s OR meta LIKE %s)',
+            [
+                '%' . $wpdb->esc_like( '"' . $key . '":' . $id . ',' ) . '%',
+                '%' . $wpdb->esc_like( '"' . $key . '":' . $id . '}' ) . '%',
+            ],
+        ];
+    }
+
+    /**
+     * Links for an entry: the record it is about (while it exists) and the
+     * order behind it.
+     *
+     * @param object $row A row of the log table.
+     * @return array<int, array{0: string, 1: string}> [ label, URL ], URL '' when gone.
+     */
+    public static function entry_links( object $row ): array {
+        $links = [];
+        $type  = (string) $row->object_type;
+        $id    = (int) $row->object_id;
+        $data  = json_decode( (string) $row->meta, true ) ?: [];
+
+        if ( $id && in_array( $type, Record_Edit_Tracker::POST_TYPES, true ) ) {
+            $links[] = [ '#' . $id, get_post( $id ) ? (string) get_edit_post_link( $id, 'url' ) : '' ];
+        }
+
+        $order = 'shop_order' === $type ? $id : (int) ( $data['order_id'] ?? 0 );
+        if ( ! $order && $id && in_array( $type, [ 'skdon_donation', 'skdon_membership', 'skdon_memorial' ], true ) ) {
+            $order = (int) get_post_meta( $id, '_skdon_wc_order_id', true );
+        }
+        if ( $order > 0 ) {
+            /* translators: %d: WooCommerce order number. */
+            $links[] = [ sprintf( __( 'order #%d', 'shelterkit-donations' ), $order ), self::order_url( $order ) ];
+        }
+
+        return $links;
+    }
+
+    /**
+     * An order's edit screen, whichever storage WooCommerce uses.
+     *
+     * @param int $order_id Order ID.
+     * @return string URL, or '' without WooCommerce.
+     */
+    private static function order_url( int $order_id ): string {
+        if ( class_exists( \Automattic\WooCommerce\Utilities\OrderUtil::class ) ) {
+            return (string) \Automattic\WooCommerce\Utilities\OrderUtil::get_order_admin_edit_url( $order_id );
+        }
+        return function_exists( 'wc_get_order' ) ? admin_url( 'post.php?post=' . $order_id . '&action=edit' ) : '';
+    }
+
+    /**
+     * Print an entry's links.
+     *
+     * @param object $row A row of the log table.
+     */
+    private static function print_links( object $row ): void {
+        foreach ( self::entry_links( $row ) as [ $label, $url ] ) {
+            if ( '' === $url ) {
+                echo ' <span class="sd-log-link">' . esc_html( $label ) . '</span>';
+            } else {
+                echo ' <a href="' . esc_url( $url ) . '" class="sd-log-link">' . esc_html( $label ) . '</a>';
+            }
+        }
+    }
+
+    /**
+     * The sentence of each run's own entry, by run ID.
+     *
+     * @param string[] $run_ids Run IDs.
+     * @return array<string, string>
+     */
+    private static function run_labels( array $run_ids ): array {
+        global $wpdb;
+        $run_ids = array_values( array_unique( array_filter( $run_ids ) ) );
+        if ( ! $run_ids ) {
+            return [];
+        }
+        $table        = $wpdb->prefix . self::TABLE_NAME;
+        $placeholders = implode( ',', array_fill( 0, count( $run_ids ), '%s' ) );
+        $labels       = [];
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- the table name is $wpdb->prefix plus a constant; $placeholders is a generated %s list, one per run ID passed.
+        $rows = $wpdb->get_results( $wpdb->prepare(
+            "SELECT * FROM $table WHERE run_id IN ($placeholders) AND event_type IN ('import_started', 'import_finished', 'tool_started', 'tool_finished')",
+            $run_ids
+        ) );
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+        foreach ( (array) $rows as $row ) {
+            $labels[ $row->run_id ] = self::render_message( $row );
+        }
+        return $labels;
+    }
+
+    /**
+     * The History panel on donation, membership, memorial and donor screens.
+     */
+    public static function register_history_box(): void {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            return; // The log itself is for administrators.
+        }
+        foreach ( Record_Edit_Tracker::POST_TYPES as $type ) {
+            add_meta_box( 'skdon-activity-history', __( 'History', 'shelterkit-donations' ), [ self::class, 'render_history_box' ], $type, 'normal', 'low' );
+        }
+    }
+
+    /**
+     * The record's latest entries, including what imports and tools did to it.
+     *
+     * @param \WP_Post $post The record.
+     */
+    public static function render_history_box( $post ): void {
+        global $wpdb;
+        if ( ! $post instanceof \WP_Post || ! current_user_can( 'manage_options' ) ) {
+            return;
+        }
+        $table              = $wpdb->prefix . self::TABLE_NAME;
+        [ $where, $params ] = self::object_sql( $post->post_type, $post->ID );
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- the table name is $wpdb->prefix plus a constant; $where is built from fixed clauses whose %s/%d placeholders take $params.
+        $total = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $table WHERE $where", $params ) );
+        $rows  = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table WHERE $where ORDER BY created_at DESC, id DESC LIMIT 20", $params ) );
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+
+        if ( ! $rows ) {
+            echo '<p>' . esc_html__( 'No activity recorded for this record yet.', 'shelterkit-donations' ) . '</p>';
+            return;
+        }
+
+        $runs = self::run_labels( wp_list_pluck( $rows, 'run_id' ) );
+        echo '<table class="widefat striped sd-history"><tbody>';
+        foreach ( $rows as $row ) {
+            $ts = (int) mysql2date( 'U', $row->created_at );
+            echo '<tr><td style="white-space:nowrap">' . esc_html( wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $ts ) ) . '</td><td>';
+            echo esc_html( self::render_message( $row ) );
+            self::print_links( $row );
+            if ( $row->run_id && isset( $runs[ $row->run_id ] ) && ! in_array( $row->event_type, self::RUN_TYPES, true ) ) {
+                $url = add_query_arg( [ 'page' => self::PAGE_SLUG, 'run' => $row->run_id ], admin_url( 'admin.php' ) );
+                /* translators: %s: the import or tool run the entry belongs to. */
+                echo '<br><span class="description">' . esc_html( sprintf( __( 'Part of: %s', 'shelterkit-donations' ), $runs[ $row->run_id ] ) ) . '</span> <a href="' . esc_url( $url ) . '">' . esc_html__( 'View', 'shelterkit-donations' ) . '</a>';
+            }
+            echo '</td><td style="white-space:nowrap">' . esc_html( self::user_label( $row ) ) . '<br><span class="description">' . esc_html( $row->source ? self::source_label( (string) $row->source ) : '' ) . '</span></td></tr>';
+        }
+        echo '</tbody></table>';
+
+        $all = add_query_arg( [ 'page' => self::PAGE_SLUG, 'object' => $post->post_type . ':' . $post->ID ], admin_url( 'admin.php' ) );
+        echo '<p><a href="' . esc_url( $all ) . '">' . esc_html( sprintf(
+            /* translators: %d: number of activity log entries. */
+            _n( 'View its %d entry in the Activity Log', 'View all %d entries in the Activity Log', $total, 'shelterkit-donations' ),
+            $total
+        ) ) . '</a></p>';
+    }
+
+    /**
+     * Who wrote an entry: a user's name, or System.
+     *
+     * @param object $row A row of the log table.
+     */
+    private static function user_label( object $row ): string {
+        if ( ! $row->user_id ) {
+            return __( 'System', 'shelterkit-donations' );
+        }
+        $user = get_user_by( 'id', (int) $row->user_id );
+        return $user ? $user->display_name : __( 'Unknown', 'shelterkit-donations' );
+    }
+
+    /**
+     * Download the current view as CSV: same filters, every page.
+     */
+    public static function handle_export(): void {
+        check_admin_referer( 'skdon_export_activity_log' );
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( esc_html__( 'Permission denied.', 'shelterkit-donations' ), 403 );
+        }
+
+        $filters = self::request_filters( $_GET );
+        nocache_headers();
+        header( 'Content-Type: text/csv; charset=utf-8' );
+        header( 'Content-Disposition: attachment; filename=activity-log-' . wp_date( 'Y-m-d' ) . '.csv' );
+        $out = fopen( 'php://output', 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- streaming a download.
+        self::write_csv( $out, $filters );
+        fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- streaming a download.
+        exit;
+    }
+
+    /**
+     * Write the entries matching some filters as CSV, newest first, a chunk
+     * at a time. Every text cell goes through fputcsv_safe(), so a donor
+     * name or message that starts with "=" is not run as a formula.
+     *
+     * @param resource $handle  Where to write.
+     * @param array    $filters From request_filters().
+     */
+    public static function write_csv( $handle, array $filters ): void {
+        global $wpdb;
+        $table              = $wpdb->prefix . self::TABLE_NAME;
+        [ $where, $params ] = self::filter_sql( $filters );
+
+        Helpers\fputcsv_safe( $handle, [
+            __( 'Date', 'shelterkit-donations' ),
+            __( 'Category', 'shelterkit-donations' ),
+            __( 'Source', 'shelterkit-donations' ),
+            __( 'Activity', 'shelterkit-donations' ),
+            __( 'Record', 'shelterkit-donations' ),
+            __( 'Order', 'shelterkit-donations' ),
+            __( 'User', 'shelterkit-donations' ),
+            __( 'Part of', 'shelterkit-donations' ),
+            __( 'Event', 'shelterkit-donations' ),
+            __( 'Data', 'shelterkit-donations' ),
+        ] );
+
+        $offset = 0;
+        do {
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- the table name is $wpdb->prefix plus a constant; $where is built from fixed clauses with every value bound.
+            $rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table WHERE $where ORDER BY created_at DESC, id DESC LIMIT 500 OFFSET %d", array_merge( $params, [ $offset ] ) ) );
+            $runs = self::run_labels( wp_list_pluck( $rows, 'run_id' ) );
+            foreach ( $rows as $row ) {
+                $order = '';
+                foreach ( self::entry_links( $row ) as [ $label ] ) {
+                    if ( ! str_starts_with( $label, '#' ) ) {
+                        $order = $label;
+                    }
+                }
+                Helpers\fputcsv_safe( $handle, [
+                    $row->created_at,
+                    $row->event_category,
+                    $row->source ? self::source_label( (string) $row->source ) : '',
+                    self::render_message( $row ),
+                    $row->object_id ? self::type_label( (string) $row->object_type ) . ' #' . $row->object_id : '',
+                    $order,
+                    self::user_label( $row ),
+                    in_array( $row->event_type, self::RUN_TYPES, true ) ? '' : ( $runs[ $row->run_id ] ?? '' ),
+                    $row->event_type,
+                    (string) $row->meta,
+                ] );
+            }
+            $offset += 500;
+            $more    = 500 === count( $rows );
+        } while ( $more );
+    }
+
     /**
      * A source's label.
      *
@@ -1810,6 +2159,7 @@ class Activity_Log {
             .sd-log-table .column-category { width: 120px; }
             .sd-log-table .column-user { width: 150px; }
             .sd-log-table .column-source { width: 130px; }
+            .sd-log-filters { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
             
             .sd-log-date {
                 display: block;

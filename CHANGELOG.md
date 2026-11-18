@@ -40,6 +40,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Deleting, trashing and restoring a record, a donor's profile or address
     being updated, each order of a Legacy Order Sync and each renewal
     reminder are recorded too.
+- **Each record shows its own history.** Donation, membership, memorial
+  and donor screens have a History panel listing the record's latest
+  entries, including what imports and tools did to it, with a link to all of
+  them in the Activity Log. A donor's history includes their gifts. (#39)
+- **Activity Log entries link to the record and the order they're about,**
+  and **Export CSV** downloads the current view: the same filters, every
+  page, and cells starting with "=" made safe for spreadsheets. (#39)
 
 ### Fixed
 - **Saving one Settings tab reset the other.** The screen saves one tab at a
