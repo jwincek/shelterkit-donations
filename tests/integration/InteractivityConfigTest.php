@@ -27,4 +27,21 @@ final class InteractivityConfigTest extends WP_UnitTestCase {
 		$this->assertNotEmpty( $config['nonce'] ?? '' );
 		$this->assertSame( '%1$s%2$s', $config['currency']['format'] ?? null, 'Without WooCommerce: "$1,234.50".' );
 	}
+
+	public function test_a_donor_whose_id_is_cached_still_gets_the_page(): void {
+		$user  = self::factory()->user->create();
+		$donor = self::factory()->post->create( [ 'post_type' => 'skdon_donor', 'post_status' => 'publish' ] );
+		update_post_meta( $donor, '_skdon_user_id', $user );
+		wp_set_current_user( $user );
+
+		// What get_transient() returns on a later request when there is no
+		// persistent object cache: the database's string. Returning it from
+		// an ?int function under strict_types killed every front-end page
+		// for the donor, mid-<head> (#42).
+		set_transient( "skdon_donor_id_{$user}", (string) $donor, HOUR_IN_SECONDS );
+
+		do_action( 'wp_enqueue_scripts' );
+
+		$this->assertSame( $donor, wp_interactivity_config( 'shelterkit-donations' )['donorId'] ?? null );
+	}
 }
