@@ -153,6 +153,8 @@
 		var queue = Object.keys( config.entityTypes );
 		var totalFixed = 0;
 		var totalProcessed = 0;
+		// The activity log's entry for this whole Backfill (#36).
+		var run = { id: '' };
 
 		function processNext() {
 			if ( queue.length === 0 ) {
@@ -164,7 +166,7 @@
 			var postType = queue[0];
 			var label = config.entityTypes[ postType ];
 
-			backfillBatch( postType, label, 0, function( batchProcessed, batchFixed ) {
+			backfillBatch( postType, label, 0, run, 1 === queue.length, function( batchProcessed, batchFixed ) {
 				totalProcessed += batchProcessed;
 				totalFixed += batchFixed;
 				queue.shift();
@@ -175,7 +177,7 @@
 		processNext();
 	} );
 
-	function backfillBatch( postType, label, offset, onComplete ) {
+	function backfillBatch( postType, label, offset, run, isLast, onComplete ) {
 		var batchProcessed = 0;
 		var batchFixed = 0;
 
@@ -188,6 +190,8 @@
 			post( 'skdon_integrity_backfill', {
 				post_type: postType,
 				offset: currentOffset,
+				run_id: run.id,
+				final: isLast ? 1 : 0,
 			} ).done( function( response ) {
 				if ( ! response.success ) {
 					showProgress( 'Error: ' + ( response.data || 'Unknown' ), 0 );
@@ -196,6 +200,7 @@
 				}
 
 				var d = response.data;
+				run.id = d.run_id || run.id;
 				batchProcessed += d.processed;
 				batchFixed += d.fixed;
 
@@ -246,11 +251,13 @@
 
 	function purgeBatch( postType, label, confirmation ) {
 		var totalDeleted = 0;
+		var runId = '';
 
 		function nextBatch() {
 			post( 'skdon_integrity_purge', {
 				post_type: postType,
 				confirmation: confirmation,
+				run_id: runId,
 			} ).done( function( response ) {
 				if ( ! response.success ) {
 					showProgress( 'Error: ' + ( response.data || 'Unknown' ), 0 );
@@ -259,6 +266,7 @@
 				}
 
 				var d = response.data;
+				runId = d.run_id || runId;
 				totalDeleted += d.deleted;
 
 				if ( d.done ) {
@@ -398,9 +406,10 @@
 		disableButtons( true );
 		var totalUpdated = 0;
 		var totalProcessed = 0;
+		var runId = '';
 
 		function nextBatch( offset ) {
-			post( 'skdon_integrity_recalc_donors', { offset: offset } ).done( function( response ) {
+			post( 'skdon_integrity_recalc_donors', { offset: offset, run_id: runId } ).done( function( response ) {
 				if ( ! response.success ) {
 					showProgress( 'Error: ' + ( response.data || 'Unknown' ), 0 );
 					disableButtons( false );
@@ -408,6 +417,7 @@
 				}
 
 				var d = response.data;
+				runId = d.run_id || runId;
 				totalProcessed += d.processed;
 				totalUpdated += d.updated;
 

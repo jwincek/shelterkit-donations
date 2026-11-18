@@ -73,13 +73,13 @@ class Activity_Log {
     /**
      * Event types that stand for a whole run in the list.
      */
-    private const RUN_TYPES = [ 'import_started', 'import_finished' ];
+    private const RUN_TYPES = [ 'import_started', 'import_finished', 'tool_started', 'tool_finished' ];
 
     /**
      * The list's default WHERE: entries outside any run, plus each run's own
      * entry. A run's other entries show when the run is opened.
      */
-    private const COLLAPSE_RUNS = "(run_id IS NULL OR event_type IN ('import_started', 'import_finished'))";
+    private const COLLAPSE_RUNS = "(run_id IS NULL OR event_type IN ('import_started', 'import_finished', 'tool_started', 'tool_finished'))";
 
     /**
      * The run entries are being attached to, if any.
@@ -128,12 +128,30 @@ class Activity_Log {
 
         // Settings changes.
         add_action( 'update_option_starter_shelter_options', [ self::class, 'log_settings_changed' ], 10, 2 );
+        // A site's first save adds the option rather than updating it.
+        add_action( 'add_option_starter_shelter_options', [ self::class, 'log_settings_first_saved' ], 10, 2 );
 
         // Manual admin actions.
         add_action( 'starter_shelter_membership_extended', [ self::class, 'log_membership_extended' ], 10, 2 );
         add_action( 'starter_shelter_family_notified', [ self::class, 'log_family_notified' ], 10, 2 );
         add_action( 'starter_shelter_membership_cancelled', [ self::class, 'log_membership_cancelled' ], 10, 3 );
         add_action( 'starter_shelter_gift_refunded', [ self::class, 'log_gift_refunded' ], 10, 4 );
+
+        // Settings kept as Config overrides, and the fund list (#36).
+        add_action( 'starter_shelter_config_override_saved', [ self::class, 'log_config_changed' ], 10, 4 );
+        add_action( 'starter_shelter_funds_saved', [ self::class, 'log_funds_changed' ], 10, 4 );
+
+        // Gift and donor records: edits, deletions, trash (#36).
+        Record_Edit_Tracker::init();
+        add_action( 'before_delete_post', [ self::class, 'log_record_deleted' ], 10, 2 );
+        add_action( 'trashed_post', [ self::class, 'log_record_trashed' ] );
+        add_action( 'untrashed_post', [ self::class, 'log_record_untrashed' ] );
+        add_action( 'starter_shelter_donor_profile_updated', [ self::class, 'log_donor_profile_updated' ], 10, 2 );
+        add_action( 'starter_shelter_donor_address_updated', [ self::class, 'log_donor_address_updated' ], 10, 3 );
+
+        // Events inside runs: one order of a Legacy Order Sync, one reminder.
+        add_action( 'starter_shelter_legacy_order_synced', [ self::class, 'log_legacy_order_synced' ], 10, 3 );
+        add_action( 'starter_shelter_renewal_reminder_sent', [ self::class, 'log_renewal_reminder_sent' ], 10, 3 );
 
         // Cleanup old logs.
         add_action( 'skdon_cleanup_activity_log', [ self::class, 'cleanup_old_logs' ] );
@@ -273,6 +291,46 @@ class Activity_Log {
             ],
             [ '%s', '%s', '%s', '%s', '%d', '%d', '%s', '%s', '%s', '%s', '%s' ]
         );
+
+        // This entry says what happened to its record, so the edit tracker
+        // doesn't also write a generic "edited" entry for it (#36).
+        if ( $object_id && in_array( $event_type, Record_Edit_Tracker::DESCRIBING_EVENTS, true ) ) {
+            Record_Edit_Tracker::describe( $object_id );
+        }
+    }
+
+    /**
+     * Write an entry attached to a given run, whatever run is current. The
+     * edit tracker writes changes it noted during a run after the fact.
+     *
+     * @param string|null $run_id      Run ID, or null for none.
+     * @param string      $event_type  Event type.
+     * @param string      $category    Event category.
+     * @param array       $data        The event's data.
+     * @param string|null $object_type Related object type.
+     * @param int|null    $object_id   Related object ID.
+     */
+    public static function record_in_run( ?string $run_id, string $event_type, string $category, array $data = [], ?string $object_type = null, ?int $object_id = null ): void {
+        $current   = self::$run;
+        self::$run = null;
+        if ( $run_id ) {
+            $anchor    = self::run_anchor( $run_id );
+            self::$run = $anchor ? [ 'id' => $run_id, 'source' => (string) ( $anchor->source ?: 'tool' ) ] : null;
+        }
+        try {
+            self::record( $event_type, $category, $data, $object_type, $object_id );
+        } finally {
+            self::$run = $current;
+        }
+    }
+
+    /**
+     * The current run's ID, if entries are being attached to one.
+     *
+     * @return string|null
+     */
+    public static function current_run(): ?string {
+        return self::$run['id'] ?? null;
     }
 
     /**
@@ -304,19 +362,53 @@ class Activity_Log {
      * entry written until finish_run() or leave_run() to it, so the log shows
      * an import as one line instead of one line per record (#37).
      *
-     * @param string $kind   csv_import, legacy_memorial_import or legacy_order_sync.
+     * An import (source "import") is an import_started entry; anything else,
+     * an admin tool or a scheduled task, is tool_started (#36).
+     *
+     * @param string $kind   What runs: csv_import, legacy_order_sync, purge, backfill and so on.
      * @param array  $data   What the run covers: entity type, file name, filters.
      * @param string $source The source its entries carry.
      * @return string The run ID, to resume the run in a later request.
      */
     public static function begin_run( string $kind, array $data = [], string $source = 'import' ): string {
         $run_id    = wp_generate_uuid4();
+        $source    = sanitize_key( $source ) ?: 'import';
         self::$run = [
             'id'     => $run_id,
-            'source' => sanitize_key( $source ) ?: 'import',
+            'source' => $source,
         ];
-        self::record( 'import_started', 'admin', array_merge( [ 'kind' => $kind ], $data ) );
+        self::record( 'import' === $source ? 'import_started' : 'tool_started', 'admin', array_merge( [ 'kind' => $kind ], $data ) );
         return $run_id;
+    }
+
+    /**
+     * For a tool that runs in batches, one request each: rejoin the run the
+     * browser sent back, or start one on the first batch.
+     *
+     * @param string $run_id The run ID the request carried, or ''.
+     * @param string $kind   The tool, for a new run.
+     * @param array  $data   What it covers, for a new run.
+     * @param string $source Source, for a new run.
+     * @return string The run ID, to send back to the browser.
+     */
+    public static function join_run( string $run_id, string $kind, array $data = [], string $source = 'tool' ): string {
+        return ( '' !== $run_id && self::resume_run( $run_id ) ) ? $run_id : self::begin_run( $kind, $data, $source );
+    }
+
+    /**
+     * The end of one batch: add its counts, and finish the run if it was the last.
+     *
+     * @param string            $run_id   The run.
+     * @param array<string,int> $counts   This batch's counts.
+     * @param bool              $finished Whether the whole run is done.
+     */
+    public static function end_batch( string $run_id, array $counts, bool $finished ): void {
+        self::add_to_run( $run_id, $counts );
+        if ( $finished ) {
+            self::finish_run( $run_id );
+        } else {
+            self::leave_run();
+        }
     }
 
     /**
@@ -342,6 +434,9 @@ class Activity_Log {
      * end of one batch.
      */
     public static function leave_run(): void {
+        if ( self::$run ) {
+            Record_Edit_Tracker::flush( self::$run['id'] );
+        }
         self::$run = null;
     }
 
@@ -370,14 +465,16 @@ class Activity_Log {
      *
      * @param string $run_id  From begin_run().
      * @param array  $summary Final counts (rows, created, updated, skipped, errors…).
+     * @param array  $details Other data learned by the end, such as a tool's notes.
      */
-    public static function finish_run( string $run_id, array $summary = [] ): void {
+    public static function finish_run( string $run_id, array $summary = [], array $details = [] ): void {
+        Record_Edit_Tracker::flush( $run_id );
         $anchor = self::run_anchor( $run_id );
         if ( $anchor ) {
-            $data           = json_decode( (string) $anchor->meta, true ) ?: [];
-            $data['totals'] = array_merge( (array) ( $data['totals'] ?? [] ), array_map( 'intval', $summary ) );
+            $data                = array_merge( json_decode( (string) $anchor->meta, true ) ?: [], $details );
+            $data['totals']      = array_merge( (array) ( $data['totals'] ?? [] ), array_map( 'intval', $summary ) );
             $data['finished_at'] = current_time( 'mysql' );
-            self::update_anchor( (int) $anchor->id, $data, 'import_finished' );
+            self::update_anchor( (int) $anchor->id, $data, str_replace( '_started', '_finished', (string) $anchor->event_type ) );
         }
         self::$run = null;
     }
@@ -393,7 +490,7 @@ class Activity_Log {
         $table = $wpdb->prefix . self::TABLE_NAME;
         $row   = $wpdb->get_row( $wpdb->prepare(
             // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the table name is $wpdb->prefix plus a constant.
-            "SELECT id, event_type, source, meta FROM $table WHERE run_id = %s AND event_type IN ('import_started', 'import_finished') ORDER BY id ASC LIMIT 1",
+            "SELECT id, event_type, source, meta FROM $table WHERE run_id = %s AND event_type IN ('import_started', 'import_finished', 'tool_started', 'tool_finished') ORDER BY id ASC LIMIT 1",
             $run_id
         ) );
         return $row ?: null;
@@ -590,16 +687,37 @@ class Activity_Log {
         $new_arr  = is_array( $new_value ) ? $new_value : [];
         $all_keys = array_unique( array_merge( array_keys( $old_arr ), array_keys( $new_arr ) ) );
 
-        $changed = [];
+        $changes = [];
         foreach ( $all_keys as $key ) {
-            if ( ( $old_arr[ $key ] ?? null ) !== ( $new_arr[ $key ] ?? null ) ) {
-                $changed[] = $key;
+            $old = $old_arr[ $key ] ?? null;
+            $new = $new_arr[ $key ] ?? null;
+            // As text, so 30 and "30" (a default and the form's value) agree,
+            // and so do a missing value and an empty one.
+            if ( ( self::scalar_text( $old ) ?? '' ) !== ( self::scalar_text( $new ) ?? '' ) ) {
+                // Old → new, except for anything that looks like a credential.
+                $changes[ $key ] = preg_match( '/key|secret|token|password/i', (string) $key )
+                    ? null
+                    : [ self::scalar_text( $old ), self::scalar_text( $new ) ];
             }
         }
 
-        if ( $changed ) {
-            self::record( 'settings_changed', 'admin', [ 'changed_fields' => $changed ] );
+        if ( $changes ) {
+            self::record( 'settings_changed', 'admin', [
+                'changed_fields' => array_keys( $changes ),
+                'changes'        => $changes,
+            ] );
         }
+    }
+
+    /**
+     * Log a site's first settings save, against the defaults it replaces.
+     *
+     * @param string $option The option name.
+     * @param mixed  $value  The settings saved.
+     */
+    public static function log_settings_first_saved( $option, $value ): void {
+        // Only the settings saved: a default the form doesn't send isn't changed.
+        self::log_settings_changed( array_intersect_key( Settings::get_defaults(), (array) $value ), $value );
     }
 
     /**
@@ -658,6 +776,211 @@ class Activity_Log {
             'family_email' => $family_email,
             'honoree_name' => (string) get_post_meta( $memorial_id, '_skdon_honoree_name', true ),
         ], 'skdon_memorial', $memorial_id );
+    }
+
+    /**
+     * Log a Config override saved: the fund list, membership tiers, pet
+     * species, donor levels (#36). Funds have their own entry.
+     *
+     * @param string $name Config file name.
+     * @param string $key  Overridden key.
+     * @param mixed  $old  Value before, or null.
+     * @param mixed  $new  Value after, or null when the override was removed.
+     */
+    public static function log_config_changed( string $name, string $key, $old, $new ): void {
+        if ( 'settings' === $name && in_array( $key, [ 'allocations', 'retired_allocations', 'allocation_aliases' ], true ) ) {
+            return; // log_funds_changed() says it better.
+        }
+        $changes = self::diff( (array) ( $old ?? [] ), (array) ( $new ?? [] ) );
+        if ( $changes ) {
+            self::record( 'config_changed', 'admin', [
+                'config'  => $name . '.' . $key,
+                'changes' => $changes,
+                'reset'   => null === $new,
+            ] );
+        }
+    }
+
+    /**
+     * Log funds added, retired, restored or renamed (#36).
+     *
+     * @param array<string,string> $old_active  Active funds before, slug => label.
+     * @param array<string,string> $active      Active funds after.
+     * @param array<string,string> $old_retired Retired funds before.
+     * @param array<string,string> $retired     Retired funds after.
+     */
+    public static function log_funds_changed( array $old_active, array $active, array $old_retired, array $retired ): void {
+        $data = [
+            'added'    => array_diff_key( $active, $old_active, $old_retired ),
+            'retired'  => array_intersect_key( $old_active, array_diff_key( $retired, $old_retired ) ),
+            'restored' => array_intersect_key( $active, $old_retired ),
+            'renamed'  => [],
+        ];
+        foreach ( array_intersect_key( $active, $old_active ) as $slug => $label ) {
+            if ( $label !== $old_active[ $slug ] ) {
+                $data['renamed'][ $slug ] = [ $old_active[ $slug ], $label ];
+            }
+        }
+        if ( array_filter( $data ) ) {
+            self::record( 'funds_changed', 'admin', $data );
+        }
+    }
+
+    /**
+     * Log a donation, membership, memorial or donor being deleted for good.
+     * The record is gone afterwards, so the entry keeps what identified it.
+     *
+     * @param int      $post_id Post ID.
+     * @param \WP_Post $post    The post.
+     */
+    public static function log_record_deleted( $post_id, $post ): void {
+        if ( ! $post instanceof \WP_Post || ! in_array( $post->post_type, Record_Edit_Tracker::POST_TYPES, true ) || 'auto-draft' === $post->post_status ) {
+            return;
+        }
+        $meta = static fn ( string $key ): string => (string) get_post_meta( (int) $post_id, '_skdon_' . $key, true );
+        $data = [ 'status' => $post->post_status ];
+        if ( 'skdon_donor' !== $post->post_type ) {
+            // A donor's details are personal data: the entry keeps only the ID.
+            $data += [
+                'donor_id'     => (int) $meta( 'donor_id' ),
+                'amount'       => (float) $meta( 'amount' ),
+                'allocation'   => $meta( 'allocation' ),
+                'tier'         => $meta( 'tier' ),
+                'honoree_name' => $meta( 'honoree_name' ),
+            ];
+        }
+        self::record( 'record_deleted', self::record_category( $post->post_type ), array_filter( $data ), $post->post_type, (int) $post_id );
+    }
+
+    /**
+     * Log a record moved to the trash.
+     *
+     * @param int $post_id Post ID.
+     */
+    public static function log_record_trashed( $post_id ): void {
+        $type = (string) get_post_type( (int) $post_id );
+        if ( in_array( $type, Record_Edit_Tracker::POST_TYPES, true ) ) {
+            self::record( 'record_trashed', self::record_category( $type ), [], $type, (int) $post_id );
+        }
+    }
+
+    /**
+     * Log a record restored from the trash.
+     *
+     * @param int $post_id Post ID.
+     */
+    public static function log_record_untrashed( $post_id ): void {
+        $type = (string) get_post_type( (int) $post_id );
+        if ( in_array( $type, Record_Edit_Tracker::POST_TYPES, true ) ) {
+            self::record( 'record_untrashed', self::record_category( $type ), [], $type, (int) $post_id );
+        }
+    }
+
+    /**
+     * Log a donor's profile updated (in My Account, or by an admin). Which
+     * fields, not their values: they are personal data.
+     *
+     * @param int   $donor_id Donor ID.
+     * @param array $input    The submitted fields.
+     */
+    public static function log_donor_profile_updated( int $donor_id, array $input ): void {
+        $fields = array_values( array_diff( array_keys( $input ), [ 'donor_id', 'id' ] ) );
+        self::record( 'donor_profile_updated', 'admin', [ 'donor_id' => $donor_id, 'fields' => $fields ], 'skdon_donor', $donor_id );
+    }
+
+    /**
+     * Log a donor's address updated, and from where.
+     *
+     * @param int    $donor_id Donor ID.
+     * @param array  $address  The new address (not stored).
+     * @param string $source   Where it came from (checkout, profile, import…).
+     */
+    public static function log_donor_address_updated( int $donor_id, array $address, string $source ): void {
+        self::record( 'donor_address_updated', 'admin', [ 'donor_id' => $donor_id, 'from' => $source ], 'skdon_donor', $donor_id );
+    }
+
+    /**
+     * Log one order of a Legacy Order Sync (attached to the sync's run).
+     *
+     * @param int   $order_id     The order.
+     * @param array $created      Counts of records created.
+     * @param array $item_results Each line's result.
+     */
+    public static function log_legacy_order_synced( int $order_id, array $created, array $item_results ): void {
+        self::record( 'legacy_order_synced', 'system', [
+            'created' => array_map( 'intval', array_filter( $created, 'is_numeric' ) ),
+            'lines'   => count( $item_results ),
+        ], 'shop_order', $order_id );
+    }
+
+    /**
+     * Log a renewal reminder (attached to the day's reminder run).
+     *
+     * @param int   $membership_id The membership.
+     * @param int   $donor_id      Its donor.
+     * @param array $membership    The membership's data.
+     */
+    public static function log_renewal_reminder_sent( int $membership_id, int $donor_id, array $membership ): void {
+        self::record( 'renewal_reminder_sent', 'membership', [
+            'donor_id' => $donor_id,
+            'end_date' => (string) ( $membership['end_date'] ?? '' ),
+        ], 'skdon_membership', $membership_id );
+    }
+
+    /**
+     * The log category for a record type.
+     *
+     * @param string $post_type Post type.
+     */
+    private static function record_category( string $post_type ): string {
+        return [ 'skdon_membership' => 'membership', 'skdon_donor' => 'admin' ][ $post_type ] ?? 'donation';
+    }
+
+    /**
+     * Old → new for every value that differs between two nested arrays,
+     * keyed by dotted path. At most 50.
+     *
+     * @param array $old Before.
+     * @param array $new After.
+     * @return array<string, array{0: ?string, 1: ?string}>
+     */
+    private static function diff( array $old, array $new ): array {
+        $flatten = static function ( array $array, string $prefix = '' ) use ( &$flatten ): array {
+            $out = [];
+            foreach ( $array as $key => $value ) {
+                $path = '' === $prefix ? (string) $key : $prefix . '.' . $key;
+                $out += is_array( $value ) && $value ? $flatten( $value, $path ) : [ $path => is_scalar( $value ) || null === $value ? $value : wp_json_encode( $value ) ];
+            }
+            return $out;
+        };
+        $before  = $flatten( $old );
+        $after   = $flatten( $new );
+        $changes = [];
+        foreach ( array_unique( array_merge( array_keys( $before ), array_keys( $after ) ) ) as $path ) {
+            $a = array_key_exists( $path, $before ) ? self::scalar_text( $before[ $path ] ) : null;
+            $b = array_key_exists( $path, $after ) ? self::scalar_text( $after[ $path ] ) : null;
+            if ( $a !== $b ) {
+                $changes[ $path ] = [ $a, $b ];
+            }
+        }
+        return array_slice( $changes, 0, 50, true );
+    }
+
+    /**
+     * A setting's value as the log keeps it.
+     *
+     * @param mixed $value A value.
+     * @return string|null
+     */
+    private static function scalar_text( $value ): ?string {
+        if ( null === $value ) {
+            return null;
+        }
+        if ( is_bool( $value ) ) {
+            return $value ? 'true' : 'false';
+        }
+        $text = is_scalar( $value ) ? (string) $value : (string) wp_json_encode( $value );
+        return mb_strlen( $text ) > 100 ? mb_substr( $text, 0, 99 ) . '…' : $text;
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -721,8 +1044,53 @@ class Activity_Log {
                 return sprintf( __( '%1$s email sent to %2$s', 'shelterkit-donations' ), ucfirst( str_replace( '_', ' ', $text( 'email_type' ) ) ), $text( 'recipient' ) );
 
             case 'settings_changed':
+                if ( isset( $d['changes'] ) ) {
+                    /* translators: %s: the changes, e.g. "renewal_reminder_days: 30 → 14". */
+                    return sprintf( __( 'Settings updated: %s', 'shelterkit-donations' ), self::render_changes( (array) $d['changes'] ) );
+                }
                 /* translators: %s: comma-separated list of changed setting keys. */
                 return sprintf( __( 'Settings updated: %s', 'shelterkit-donations' ), implode( ', ', array_map( 'strval', (array) ( $d['changed_fields'] ?? [] ) ) ) );
+
+            case 'config_changed':
+                return ! empty( $d['reset'] )
+                    /* translators: %s: name of a setting group, e.g. Membership tiers. */
+                    ? sprintf( __( '%s reset to the defaults', 'shelterkit-donations' ), self::config_label( $text( 'config' ) ) )
+                    /* translators: 1: name of a setting group, e.g. Membership tiers; 2: the changes. */
+                    : sprintf( __( '%1$s changed: %2$s', 'shelterkit-donations' ), self::config_label( $text( 'config' ) ), self::render_changes( (array) ( $d['changes'] ?? [] ) ) );
+
+            case 'funds_changed':
+                return self::render_funds( $d );
+
+            case 'record_edited':
+                /* translators: 1: record type, e.g. Membership; 2: the changes, e.g. "tier: single → family". */
+                return sprintf( __( '%1$s edited: %2$s', 'shelterkit-donations' ), self::type_label( (string) $row->object_type ), self::render_changes( (array) ( $d['changes'] ?? [] ) ) );
+
+            case 'record_deleted':
+                return self::render_deleted( (string) $row->object_type, $d, $donor );
+
+            case 'record_trashed':
+                /* translators: %s: record type, e.g. Donation. */
+                return sprintf( __( '%s moved to the trash', 'shelterkit-donations' ), self::type_label( (string) $row->object_type ) );
+
+            case 'record_untrashed':
+                /* translators: %s: record type, e.g. Donation. */
+                return sprintf( __( '%s restored from the trash', 'shelterkit-donations' ), self::type_label( (string) $row->object_type ) );
+
+            case 'donor_profile_updated':
+                /* translators: 1: donor's name; 2: comma-separated list of the fields changed. */
+                return sprintf( __( 'Profile updated for %1$s: %2$s', 'shelterkit-donations' ), $donor(), implode( ', ', array_map( 'strval', (array) ( $d['fields'] ?? [] ) ) ) );
+
+            case 'donor_address_updated':
+                /* translators: 1: donor's name; 2: where the address came from (checkout, profile, import…). */
+                return sprintf( __( 'Address updated for %1$s (from %2$s)', 'shelterkit-donations' ), $donor(), $text( 'from' ) );
+
+            case 'legacy_order_synced':
+                /* translators: 1: order number; 2: number of lines on it. */
+                return sprintf( _n( 'Order #%1$d synced: %2$d line', 'Order #%1$d synced: %2$d lines', (int) ( $d['lines'] ?? 0 ), 'shelterkit-donations' ), (int) $row->object_id, (int) ( $d['lines'] ?? 0 ) );
+
+            case 'renewal_reminder_sent':
+                /* translators: 1: donor's name; 2: membership end date. */
+                return sprintf( __( 'Renewal reminder sent to %1$s (membership ends %2$s)', 'shelterkit-donations' ), $donor(), $text( 'end_date' ) );
 
             case 'membership_extended':
                 /* translators: 1: donor's name; 2: new end date. */
@@ -754,6 +1122,10 @@ class Activity_Log {
             case 'import_started':
             case 'import_finished':
                 return self::render_run( (string) $row->event_type, $d );
+
+            case 'tool_started':
+            case 'tool_finished':
+                return self::render_tool( 'tool_finished' === $row->event_type, $d );
         }
 
         /* translators: %s: event type identifier. */
@@ -1083,6 +1455,177 @@ class Activity_Log {
             <?php endif; ?>
         </div>
         <?php
+    }
+
+    /**
+     * "tier: single → family; amount: 10 → 50". A change kept without its
+     * values (a donor's details, a credential) shows its name only.
+     *
+     * @param array<string, array{0: ?string, 1: ?string}|null> $changes Field => [ old, new ].
+     * @return string
+     */
+    private static function render_changes( array $changes ): string {
+        $empty = __( '(empty)', 'shelterkit-donations' );
+        $parts = [];
+        foreach ( $changes as $field => $pair ) {
+            if ( ! is_array( $pair ) ) {
+                $parts[] = (string) $field;
+                continue;
+            }
+            $old     = null === $pair[0] || '' === $pair[0] ? $empty : (string) $pair[0];
+            $new     = null === $pair[1] || '' === $pair[1] ? $empty : (string) $pair[1];
+            /* translators: 1: field name; 2: old value; 3: new value. */
+            $parts[] = sprintf( __( '%1$s: %2$s → %3$s', 'shelterkit-donations' ), $field, $old, $new );
+        }
+        return implode( '; ', $parts );
+    }
+
+    /**
+     * A Config override's name.
+     *
+     * @param string $config name.key.
+     */
+    private static function config_label( string $config ): string {
+        $labels = [
+            'tiers.tiers'           => __( 'Membership tiers', 'shelterkit-donations' ),
+            'settings.pet_species'  => __( 'Pet species', 'shelterkit-donations' ),
+            'settings.donor_levels' => __( 'Donor levels', 'shelterkit-donations' ),
+        ];
+        return $labels[ $config ] ?? $config;
+    }
+
+    /**
+     * "Funds changed: added Medical Care; retired General Fund".
+     *
+     * @param array $d The entry's data.
+     */
+    private static function render_funds( array $d ): string {
+        $list  = static fn ( $funds ): string => implode( ', ', array_map( 'strval', (array) $funds ) );
+        $parts = [];
+        if ( ! empty( $d['added'] ) ) {
+            /* translators: %s: fund names. */
+            $parts[] = sprintf( __( 'added %s', 'shelterkit-donations' ), $list( $d['added'] ) );
+        }
+        if ( ! empty( $d['retired'] ) ) {
+            /* translators: %s: fund names. */
+            $parts[] = sprintf( __( 'retired %s', 'shelterkit-donations' ), $list( $d['retired'] ) );
+        }
+        if ( ! empty( $d['restored'] ) ) {
+            /* translators: %s: fund names. */
+            $parts[] = sprintf( __( 'restored %s', 'shelterkit-donations' ), $list( $d['restored'] ) );
+        }
+        foreach ( (array) ( $d['renamed'] ?? [] ) as $pair ) {
+            /* translators: 1: old fund name; 2: new fund name. */
+            $parts[] = sprintf( __( 'renamed %1$s to %2$s', 'shelterkit-donations' ), (string) ( $pair[0] ?? '' ), (string) ( $pair[1] ?? '' ) );
+        }
+        /* translators: %s: the changes, e.g. "added Medical Care; retired General Fund". */
+        return sprintf( __( 'Funds changed: %s', 'shelterkit-donations' ), implode( '; ', $parts ) );
+    }
+
+    /**
+     * A record type's name: Donation, Membership, Memorial, Donor.
+     *
+     * @param string $post_type Post type.
+     */
+    private static function type_label( string $post_type ): string {
+        $labels = [
+            'skdon_donation'   => __( 'Donation', 'shelterkit-donations' ),
+            'skdon_membership' => __( 'Membership', 'shelterkit-donations' ),
+            'skdon_memorial'   => __( 'Memorial', 'shelterkit-donations' ),
+            'skdon_donor'      => __( 'Donor', 'shelterkit-donations' ),
+        ];
+        return $labels[ $post_type ] ?? $post_type;
+    }
+
+    /**
+     * "Deleted donation: $50.00 from Pat Donor".
+     *
+     * @param string   $post_type Post type.
+     * @param array    $d         The entry's data.
+     * @param callable $donor     Returns the donor's name.
+     */
+    private static function render_deleted( string $post_type, array $d, callable $donor ): string {
+        $type = self::type_label( $post_type );
+        if ( 'skdon_donor' === $post_type || empty( $d['donor_id'] ) ) {
+            /* translators: %s: record type, e.g. Donor. */
+            return sprintf( __( '%s deleted', 'shelterkit-donations' ), $type );
+        }
+        /* translators: 1: record type, e.g. Donation; 2: amount; 3: donor's name. */
+        return sprintf( __( '%1$s deleted: %2$s from %3$s', 'shelterkit-donations' ), $type, Helpers\format_currency( (float) ( $d['amount'] ?? 0 ) ), $donor() );
+    }
+
+    /**
+     * The sentence for an admin tool's or a scheduled task's run.
+     *
+     * @param bool  $finished Whether it finished.
+     * @param array $d        The run's data.
+     * @return string
+     */
+    private static function render_tool( bool $finished, array $d ): string {
+        $t     = array_map( 'intval', (array) ( $d['totals'] ?? [] ) );
+        $n     = static fn ( string $key ): int => $t[ $key ] ?? 0;
+        $kind  = (string) ( $d['kind'] ?? '' );
+        $names = [
+            'backfill'          => __( 'Backfill & Repair', 'shelterkit-donations' ),
+            'purge'             => __( 'Purge', 'shelterkit-donations' ),
+            'recalc_donors'     => __( 'Recalculate donor totals', 'shelterkit-donations' ),
+            'reset_sync_flags'  => __( 'Reset Sync Flags', 'shelterkit-donations' ),
+            'merge_repair'      => __( 'Repair merged records', 'shelterkit-donations' ),
+            'apply_refunds'     => __( 'Apply past refunds', 'shelterkit-donations' ),
+            'assign_refund'     => __( 'Match a refund', 'shelterkit-donations' ),
+            'product_repair'    => __( 'Product Sync repair', 'shelterkit-donations' ),
+            'reprocess_order'   => __( 'Reprocess order', 'shelterkit-donations' ),
+            'renewal_reminders' => __( 'Renewal reminders', 'shelterkit-donations' ),
+        ];
+        $name = $names[ $kind ] ?? $kind;
+
+        if ( ! $finished ) {
+            /* translators: %s: tool name, e.g. Purge. */
+            return sprintf( __( '%s started and has not finished', 'shelterkit-donations' ), $name );
+        }
+        if ( ! empty( $d['error'] ) ) {
+            /* translators: 1: tool name; 2: error message. */
+            return sprintf( __( '%1$s failed: %2$s', 'shelterkit-donations' ), $name, (string) $d['error'] );
+        }
+
+        switch ( $kind ) {
+            case 'backfill':
+                /* translators: 1: number of fields filled in; 2: number of records checked. */
+                return sprintf( __( 'Backfill & Repair: %1$d fields filled in across %2$d records', 'shelterkit-donations' ), $n( 'fixed' ), $n( 'records' ) );
+            case 'purge':
+                /* translators: 1: number of records; 2: record type, e.g. Memorial. */
+                return sprintf( __( 'Purged %1$d records: %2$s', 'shelterkit-donations' ), $n( 'deleted' ), self::type_label( (string) ( $d['post_type'] ?? '' ) ) );
+            case 'recalc_donors':
+                /* translators: 1: number of donors; 2: number whose totals changed. */
+                return sprintf( __( 'Recalculated donor totals: %1$d donors, %2$d changed', 'shelterkit-donations' ), $n( 'processed' ), $n( 'updated' ) );
+            case 'reset_sync_flags':
+                /* translators: %d: number of orders. */
+                return sprintf( _n( 'Reset Legacy Order Sync flags on %d order', 'Reset Legacy Order Sync flags on %d orders', $n( 'orders' ), 'shelterkit-donations' ), $n( 'orders' ) );
+            case 'merge_repair':
+                /* translators: 1: number of records repaired; 2: number that failed. */
+                return sprintf( __( 'Repaired records Legacy Order Sync merged: %1$d repaired, %2$d failed', 'shelterkit-donations' ), $n( 'repaired' ), $n( 'failed' ) );
+            case 'apply_refunds':
+                /* translators: 1: orders checked; 2: gifts changed; 3: refunds left to match. */
+                return sprintf( __( 'Applied past refunds: %1$d orders checked, %2$d gifts changed, %3$d refunds to match', 'shelterkit-donations' ), $n( 'orders' ), $n( 'changed' ), $n( 'review' ) );
+            case 'assign_refund':
+                return (int) ( $d['record'] ?? 0 )
+                    /* translators: 1: refund ID; 2: order number; 3: record ID. */
+                    ? sprintf( __( 'Refund #%1$d on order #%2$d matched to #%3$d', 'shelterkit-donations' ), (int) ( $d['refund_id'] ?? 0 ), (int) ( $d['order_id'] ?? 0 ), (int) $d['record'] )
+                    /* translators: 1: refund ID; 2: order number. */
+                    : sprintf( __( 'Refund #%1$d on order #%2$d marked as returning no gift', 'shelterkit-donations' ), (int) ( $d['refund_id'] ?? 0 ), (int) ( $d['order_id'] ?? 0 ) );
+            case 'product_repair':
+                /* translators: 1: products repaired; 2: products skipped. */
+                return sprintf( __( 'Product Sync repair: %1$d repaired, %2$d skipped', 'shelterkit-donations' ), $n( 'repaired' ), $n( 'skipped' ) );
+            case 'reprocess_order':
+                /* translators: 1: order number; 2: lines recorded now; 3: lines already recorded; 4: lines not recorded. */
+                return sprintf( __( 'Reprocessed order #%1$d: %2$d recorded, %3$d already recorded, %4$d not recorded', 'shelterkit-donations' ), (int) ( $d['order_id'] ?? 0 ), $n( 'recorded' ), $n( 'already' ), $n( 'failed' ) );
+            case 'renewal_reminders':
+                /* translators: 1: reminders sent; 2: memberships skipped; 3: the end date they share. */
+                return sprintf( __( 'Renewal reminders: %1$d sent, %2$d skipped (memberships ending %3$s)', 'shelterkit-donations' ), $n( 'sent' ), $n( 'skipped' ), (string) ( $d['end_date'] ?? '' ) );
+        }
+
+        /* translators: %s: tool name. */
+        return sprintf( __( '%s finished', 'shelterkit-donations' ), $name );
     }
 
     /**

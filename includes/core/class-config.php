@@ -263,8 +263,21 @@ class Config {
             return false;
         }
 
+        $old = get_option( 'skdon_config_' . $name . '_' . $key, null );
         update_option( 'skdon_config_' . $name . '_' . $key, $value );
         self::clear_cache( $name );
+
+        if ( $old !== $value ) {
+            /**
+             * Fires after an admin override of a config key is saved.
+             *
+             * @param string     $name  Config file name.
+             * @param string     $key   Overridden key.
+             * @param array|null $old   The override before, or null.
+             * @param array|null $value The override now, or null when removed.
+             */
+            do_action( 'starter_shelter_config_override_saved', $name, $key, $old, $value );
+        }
 
         return true;
     }
@@ -278,8 +291,14 @@ class Config {
      * @param string $key  Top-level key to revert.
      */
     public static function delete_override( string $name, string $key ): void {
+        $old = get_option( 'skdon_config_' . $name . '_' . $key, null );
         delete_option( 'skdon_config_' . $name . '_' . $key );
         self::clear_cache( $name );
+
+        if ( null !== $old ) {
+            /** This action is documented in includes/core/class-config.php */
+            do_action( 'starter_shelter_config_override_saved', $name, $key, $old, null );
+        }
     }
 
     /**

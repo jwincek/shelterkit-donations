@@ -105,8 +105,17 @@ class Renewal_Reminder {
         // Query memberships expiring on the target date.
         $expiring_memberships = self::get_expiring_memberships( $target_date );
 
+        // One log entry for the day's reminders, only on a day that has any (#36).
+        $run    = $expiring_memberships ? \Starter_Shelter\Admin\Activity_Log::begin_run( 'renewal_reminders', [ 'end_date' => $target_date ], 'cron' ) : '';
+        $before = did_action( 'starter_shelter_renewal_reminder_sent' );
+
         foreach ( $expiring_memberships as $membership ) {
             self::send_reminder( $membership );
+        }
+
+        if ( $run ) {
+            $sent = did_action( 'starter_shelter_renewal_reminder_sent' ) - $before;
+            \Starter_Shelter\Admin\Activity_Log::finish_run( $run, [ 'sent' => $sent, 'skipped' => count( $expiring_memberships ) - $sent ] );
         }
 
         /**

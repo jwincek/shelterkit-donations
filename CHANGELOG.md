@@ -23,6 +23,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   stored by ID, not by name, so their current name is shown. Searching by a
   donor's name still finds their entries. Entries written before this
   update keep the sentence they were written with. (#37)
+- **The activity log records admin tools, settings and edits.** (#36)
+  - Purge, Backfill & Repair, Recalculate, Reset Sync Flags, Repair merged
+    records, Apply past refunds, matching a refund, Product Sync repair,
+    reprocessing an order and the daily renewal reminders are each one entry
+    saying who ran it and what it changed, for example "Purged 41 records:
+    Memorial". Each record a tool changed or deleted has an entry under it.
+  - Settings show old → new values (anything that looks like a credential
+    keeps its name only). Membership tiers, pet species and donor levels are
+    logged too, and funds added, retired, restored or renamed.
+  - An edit to a donation, membership, memorial or donor records each field
+    with its old and new value, in one entry per record. A donor's entry names
+    the fields without their values. Totals and flags the plugin maintains
+    itself, and changes another entry already describes (a refund, a
+    cancellation), are left out.
+  - Deleting, trashing and restoring a record, a donor's profile or address
+    being updated, each order of a Legacy Order Sync and each renewal
+    reminder are recorded too.
+
+### Fixed
+- **Data Tools → Purge never finished when a record was in the trash.** It
+  deleted everything except trashed records, but counted them as remaining,
+  so it kept asking for batches that deleted nothing. Trashed records are now
+  purged too. (#36)
 
 ## [3.1.0] - 2026-11-17
 
