@@ -70,6 +70,32 @@ class Data_Integrity {
 		add_action( 'wp_ajax_skdon_integrity_purge', [ self::class, 'ajax_purge' ] );
 		add_action( 'wp_ajax_skdon_integrity_recalc_donors', [ self::class, 'ajax_recalc_donors' ] );
 		add_action( 'wp_ajax_skdon_legacy_sync_reset', [ self::class, 'ajax_reset_sync_flags' ] );
+		add_action( 'wp_ajax_skdon_integrity_repair_merges', [ self::class, 'ajax_repair_merges' ] );
+	}
+
+	/**
+	 * Order Records tab → Repair: give each record Legacy Order Sync merged
+	 * back to its own order line (#40).
+	 */
+	public static function ajax_repair_merges(): void {
+		check_ajax_referer( self::NONCE, 'nonce' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( __( 'Permission denied.', 'shelterkit-donations' ), 403 );
+		}
+
+		$result   = \Starter_Shelter\Admin\Legacy_Sync\Merge_Repair::repair_all();
+		$repaired = count( $result['repaired'] );
+
+		wp_send_json_success( [
+			'repaired' => $repaired,
+			'failed'   => $result['failed'],
+			'message'  => sprintf(
+				/* translators: %d: number of order lines given their own record. */
+				_n( 'Repaired %d merged record.', 'Repaired %d merged records.', $repaired, 'shelterkit-donations' ),
+				$repaired
+			),
+		] );
 	}
 
 	/**
@@ -165,11 +191,13 @@ class Data_Integrity {
 				<a href="#backfill" class="nav-tab nav-tab-active"><?php esc_html_e( 'Backfill &amp; Repair', 'shelterkit-donations' ); ?></a>
 				<a href="#purge" class="nav-tab"><?php esc_html_e( 'Purge Records', 'shelterkit-donations' ); ?></a>
 				<a href="#recalc" class="nav-tab"><?php esc_html_e( 'Recalculate', 'shelterkit-donations' ); ?></a>
+				<a href="#orders" class="nav-tab"><?php esc_html_e( 'Order Records', 'shelterkit-donations' ); ?></a>
 			</nav>
 
 			<?php self::render_backfill_tab(); ?>
 			<?php self::render_purge_tab(); ?>
 			<?php self::render_recalc_tab(); ?>
+			<?php self::render_orders_tab(); ?>
 
 			<div id="sd-progress-area" style="display:none; margin-top: 20px;">
 				<div class="sd-progress-bar-wrap" style="background:#ddd; border-radius:4px; height:24px; max-width:600px;">
@@ -334,6 +362,84 @@ class Data_Integrity {
 			</p>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Render the Order Records tab: orders with lines that weren't recorded
+	 * (#35), and records Legacy Order Sync merged (#40).
+	 */
+	private static function render_orders_tab(): void {
+		$with_errors = array_filter( array_map( 'wc_get_order', Helpers\order_ids_with_meta( \Starter_Shelter\WooCommerce\Order_Handler::ERRORS_META_KEY, 50 ) ) );
+		$merged = \Starter_Shelter\Admin\Legacy_Sync\Merge_Repair::find();
+		?>
+		<div id="tab-orders" class="sd-tool-section">
+			<h2><?php esc_html_e( 'Orders with lines that weren\'t recorded', 'shelterkit-donations' ); ?></h2>
+			<p class="description"><?php esc_html_e( 'A paid line from one of the plugin\'s products that produced no donation, membership or memorial. Fix the cause shown, then use Reprocess on the order: lines already recorded are skipped.', 'shelterkit-donations' ); ?></p>
+			<?php if ( ! $with_errors ) : ?>
+				<p><?php esc_html_e( 'None.', 'shelterkit-donations' ); ?></p>
+			<?php else : ?>
+				<table class="widefat striped" style="max-width:900px">
+					<thead><tr><th><?php esc_html_e( 'Order', 'shelterkit-donations' ); ?></th><th><?php esc_html_e( 'Lines not recorded', 'shelterkit-donations' ); ?></th><th><?php esc_html_e( 'Reason', 'shelterkit-donations' ); ?></th></tr></thead>
+					<tbody>
+					<?php foreach ( $with_errors as $order ) : ?>
+						<?php
+						$reason = '';
+						foreach ( (array) $order->get_meta( '_skdon_processing_results' ) as $result ) {
+							if ( is_wp_error( $result ) ) {
+								$reason = $result->get_error_message();
+								break;
+							}
+						}
+						?>
+						<tr>
+							<td><a href="<?php echo esc_url( $order->get_edit_order_url() ); ?>">#<?php echo esc_html( $order->get_order_number() ); ?></a></td>
+							<td><?php echo esc_html( (string) (int) $order->get_meta( \Starter_Shelter\WooCommerce\Order_Handler::ERRORS_META_KEY ) ); ?></td>
+							<td><?php echo esc_html( $reason ); ?></td>
+						</tr>
+					<?php endforeach; ?>
+					</tbody>
+				</table>
+			<?php endif; ?>
+
+			<h2><?php esc_html_e( 'Records merged by Legacy Order Sync', 'shelterkit-donations' ); ?></h2>
+			<p class="description"><?php esc_html_e( 'Before this release, an order with two lines of the same kind (an individual and a business membership, say) had its second line overwrite the record its first line created. Repair restores each record to the line that created it and gives the other line its own record. No donor is emailed.', 'shelterkit-donations' ); ?></p>
+			<?php if ( ! $merged ) : ?>
+				<p><?php esc_html_e( 'None found.', 'shelterkit-donations' ); ?></p>
+			<?php else : ?>
+				<table class="widefat striped" style="max-width:900px">
+					<thead><tr><th><?php esc_html_e( 'Record', 'shelterkit-donations' ); ?></th><th><?php esc_html_e( 'Belongs to', 'shelterkit-donations' ); ?></th><th><?php esc_html_e( 'Overwritten by', 'shelterkit-donations' ); ?></th></tr></thead>
+					<tbody>
+					<?php foreach ( $merged as $merge ) : ?>
+						<tr>
+							<td><a href="<?php echo esc_url( (string) get_edit_post_link( $merge['record'] ) ); ?>">#<?php echo esc_html( (string) $merge['record'] ); ?></a></td>
+							<td><?php echo esc_html( self::order_line_label( $merge['order_id'], $merge['item_id'] ) ); ?></td>
+							<td><?php echo esc_html( self::order_line_label( $merge['by_order'], $merge['by_item'] ) ); ?></td>
+						</tr>
+					<?php endforeach; ?>
+					</tbody>
+				</table>
+				<p><button type="button" id="sd-repair-merges" class="button button-primary"><?php esc_html_e( 'Repair', 'shelterkit-donations' ); ?></button></p>
+			<?php endif; ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * "Order #877: Shelter Memberships - Single Membership - $10".
+	 *
+	 * @param int $order_id Order ID.
+	 * @param int $item_id  Order line ID.
+	 * @return string
+	 */
+	private static function order_line_label( int $order_id, int $item_id ): string {
+		$order = wc_get_order( $order_id );
+		$item  = $order ? $order->get_item( $item_id ) : null;
+		return sprintf(
+			/* translators: 1: order number; 2: order line name. */
+			__( 'Order #%1$s: %2$s', 'shelterkit-donations' ),
+			$order ? $order->get_order_number() : $order_id,
+			$item ? $item->get_name() : '?'
+		);
 	}
 
 	// ─────────────────────────────────────────────────────────────

@@ -50,14 +50,16 @@ class Legacy_Input_Builder {
 	 * @var array<string, string[]>
 	 */
 	private const TIER_NAME_PATTERNS = [
-		'single'       => [ 'single membership', 'single - ' ],
-		'family'       => [ 'family membership', 'family - ' ],
-		'contributing' => [ 'contributing membership', 'contributing - ' ],
-		'supporting'   => [ 'supporting membership', 'supporting - ' ],
-		'donor'        => [ 'donor membership', 'donor - ' ],
-		'sustaining'   => [ 'sustaining membership', 'sustaining - ' ],
-		'patron'       => [ 'patron membership', 'patron - ' ],
-		'benefactor'   => [ 'benefactor membership', 'benefactor - ' ],
+		// "Membership - Family" is how the older, singular product names put
+		// it: "Shelter Membership - Family" (#13).
+		'single'       => [ 'single membership', 'single - ', 'membership - single' ],
+		'family'       => [ 'family membership', 'family - ', 'membership - family' ],
+		'contributing' => [ 'contributing membership', 'contributing - ', 'membership - contributing' ],
+		'supporting'   => [ 'supporting membership', 'supporting - ', 'membership - supporting' ],
+		'donor'        => [ 'donor membership', 'donor - ', 'membership - donor' ],
+		'sustaining'   => [ 'sustaining membership', 'sustaining - ', 'membership - sustaining' ],
+		'patron'       => [ 'patron membership', 'patron - ', 'membership - patron' ],
+		'benefactor'   => [ 'benefactor membership', 'benefactor - ', 'membership - benefactor' ],
 	];
 
 	/**
@@ -246,6 +248,18 @@ class Legacy_Input_Builder {
 		foreach ( [ 'pa_membership-level', 'membership-level', 'Membership Level' ] as $key ) {
 			if ( ! empty( $item_data['meta'][ $key ] ) ) {
 				return Helpers\normalize_tier( $item_data['meta'][ $key ] );
+			}
+		}
+
+		// Older singular products stored the tier as "membership-type"
+		// ("Family"). Elsewhere that attribute can mean individual or
+		// business, so take it only when it names a tier (#13).
+		foreach ( [ 'pa_membership-type', 'membership-type', 'Membership Type' ] as $key ) {
+			if ( ! empty( $item_data['meta'][ $key ] ) ) {
+				$tier = Helpers\normalize_tier( (string) $item_data['meta'][ $key ] );
+				if ( isset( self::TIER_NAME_PATTERNS[ $tier ] ) ) {
+					return $tier;
+				}
 			}
 		}
 

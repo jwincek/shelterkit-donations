@@ -24,6 +24,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   fields in place of the single nested value nothing else reads. (#30)
 
 ### Fixed
+- **Legacy Order Sync emailed donors about past gifts**, and so would CSV
+  import, which creates records the same way. Every record sent the same
+  email as a new gift: a donation receipt, "Your memorial … has been
+  created", a membership welcome, a family notification. Records made from
+  history now send nothing; checkout still sends every email.
+- **Legacy Order Sync merged an order's second line into its first line's
+  record.** An order with an individual and a business membership ended up
+  with one membership holding the individual line's values; two gifts to
+  different funds became one donation; a memorial could be taken over by
+  another order from the same donor for the same honoree. Every record now
+  carries the order line it came from, and the sync matches by line. **Data
+  Tools → Order Records** lists the records earlier syncs merged and
+  repairs them: each goes back to the line that created it, and the other
+  line gets its own record. (#40)
+- **A paid line from one of the plugin's products was skipped without a
+  word when its SKU matched no product mapping**, and the order was logged as
+  processed successfully; with no line matching at all, the order was not
+  processed or noted. The plugin now knows its products by ID, so such a line
+  is an error on the order and in the activity log, Data Tools → Order
+  Records lists the order, and the dashboard counts it. (#35)
+- **Reprocess recorded the lines that had already succeeded a second time.**
+  A line that already has its record is now skipped.
+- **Legacy Order Sync lost the tier of older, singular membership products**
+  ("Shelter Membership - Family"), so those lines failed. It now reads the
+  tier from that name form and from a `membership-type` attribute that names
+  a tier. A line it doesn't recognise is now listed by name in the order's
+  sync results and note instead of being passed over. The unused name
+  patterns in `config/sync.json` are removed. (#13)
 - **Export Selected did nothing on Donations and Memorials, and opened a
   blank "0" page on Memberships.** It now downloads the same CSV as the
   Export page, limited to the checked records. Like that page, it is

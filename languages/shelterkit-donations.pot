@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-17T22:49:11+00:00\n"
+"POT-Creation-Date: 2026-11-17T23:30:12+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: shelterkit-donations\n"
@@ -20,8 +20,8 @@ msgstr ""
 #: includes/admin/class-menu.php:54
 #: includes/admin/class-menu.php:92
 #: includes/emails/class-email-factory.php:77
-#: includes/woocommerce/class-order-handler.php:452
-#: includes/woocommerce/class-order-handler.php:463
+#: includes/woocommerce/class-order-handler.php:557
+#: includes/woocommerce/class-order-handler.php:568
 #: shelterkit-donations.php:124
 #: shelterkit-donations.php:355
 msgid "ShelterKit Donations"
@@ -189,14 +189,14 @@ msgstr ""
 
 #: blocks/donation-form/render.php:46
 #: includes/blocks/register-editor.php:106
-#: includes/core/helpers.php:965
+#: includes/core/helpers.php:1000
 #: includes/rest/class-rest-controller.php:575
 msgid "General Fund"
 msgstr ""
 
 #: blocks/donation-form/render.php:47
 #: includes/blocks/register-editor.php:107
-#: includes/core/helpers.php:966
+#: includes/core/helpers.php:1001
 #: includes/rest/class-rest-controller.php:576
 msgid "Medical Care"
 msgstr ""
@@ -500,7 +500,7 @@ msgstr ""
 
 #: blocks/membership-form/render.php:296
 #: includes/blocks/register-stores.php:116
-#: includes/woocommerce/class-order-handler.php:565
+#: includes/woocommerce/class-order-handler.php:670
 msgid "Processing..."
 msgstr ""
 
@@ -532,7 +532,7 @@ msgstr ""
 #: blocks/memorial-form/render.php:87
 #: blocks/memorial-wall/render.php:300
 #: includes/blocks/register-stores.php:110
-#: includes/core/helpers.php:478
+#: includes/core/helpers.php:513
 #: includes/woocommerce/class-cart-handler.php:516
 #: templates/emails/memorial-confirmation.php:53
 #: assets/js/admin-import-export.js:765
@@ -545,7 +545,7 @@ msgstr ""
 #: blocks/memorial-wall/render.php:301
 #: includes/admin/class-quick-actions.php:629
 #: includes/blocks/register-stores.php:109
-#: includes/core/helpers.php:477
+#: includes/core/helpers.php:512
 #: includes/woocommerce/class-cart-handler.php:515
 #: assets/js/memorial-panel.js:132
 #: blocks/memorial-form/edit.js:63
@@ -562,7 +562,7 @@ msgstr ""
 #: includes/admin/class-list-columns.php:420
 #: includes/admin/class-quick-actions.php:627
 #: includes/blocks/register-stores.php:114
-#: includes/core/helpers.php:422
+#: includes/core/helpers.php:457
 #: includes/woocommerce/class-cart-handler.php:528
 #: assets/js/memorial-panel.js:141
 #: blocks/memorial-form/edit.js:71
@@ -576,7 +576,7 @@ msgstr ""
 #: includes/admin/class-quick-actions.php:628
 #: includes/blocks/register-stores.php:113
 #: includes/blocks/register-stores.php:115
-#: includes/core/helpers.php:421
+#: includes/core/helpers.php:456
 #: includes/woocommerce/class-cart-handler.php:529
 #: assets/js/memorial-panel.js:142
 #: blocks/memorial-form/edit.js:72
@@ -720,7 +720,7 @@ msgid "Loading…"
 msgstr ""
 
 #: blocks/memorial-wall/render.php:512
-#: includes/core/helpers.php:189
+#: includes/core/helpers.php:224
 msgid "A Friend"
 msgstr ""
 
@@ -868,21 +868,29 @@ msgstr ""
 msgid "family notifications pending"
 msgstr ""
 
-#: includes/abilities/reports.php:763
-#: includes/abilities/reports.php:1020
+#: includes/abilities/reports.php:652
+msgid "order with a line not recorded"
+msgstr ""
+
+#: includes/abilities/reports.php:653
+msgid "orders with lines not recorded"
+msgstr ""
+
+#: includes/abilities/reports.php:777
+#: includes/abilities/reports.php:1034
 msgid "Valid campaign ID is required."
 msgstr ""
 
-#: includes/abilities/reports.php:772
-#: includes/abilities/reports.php:1029
+#: includes/abilities/reports.php:786
+#: includes/abilities/reports.php:1043
 #: includes/rest/class-rest-controller.php:267
 msgid "Campaign not found."
 msgstr ""
 
 #. translators: %d: number of members goal.
-#: includes/abilities/reports.php:818
-#: includes/abilities/reports.php:987
-#: includes/abilities/reports.php:1055
+#: includes/abilities/reports.php:832
+#: includes/abilities/reports.php:1001
+#: includes/abilities/reports.php:1069
 #, php-format
 msgid "%d member"
 msgid_plural "%d members"
@@ -890,8 +898,8 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of members remaining to reach the goal.
-#: includes/abilities/reports.php:829
-#: includes/abilities/reports.php:998
+#: includes/abilities/reports.php:843
+#: includes/abilities/reports.php:1012
 #, php-format
 msgid "%d to go"
 msgid_plural "%d to go"
@@ -1256,7 +1264,8 @@ msgstr ""
 msgid "New Members"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:85
+#: includes/admin/class-data-integrity.php:84
+#: includes/admin/class-data-integrity.php:111
 #: includes/admin/class-import-export-page.php:144
 #: includes/admin/class-import-export-page.php:170
 #: includes/admin/class-legacy-sync-page.php:145
@@ -1279,136 +1288,207 @@ msgstr ""
 #: includes/admin/import-export/class-import-ajax-handler.php:270
 #: includes/admin/import-export/class-import-ajax-handler.php:296
 #: includes/admin/import-export/class-import-ajax-handler.php:333
-#: includes/woocommerce/class-order-handler.php:601
+#: includes/woocommerce/class-order-handler.php:706
 msgid "Permission denied."
 msgstr ""
 
+#. translators: %d: number of order lines given their own record.
+#: includes/admin/class-data-integrity.php:95
+#, php-format
+msgid "Repaired %d merged record."
+msgid_plural "Repaired %d merged records."
+msgstr[0] ""
+msgstr[1] ""
+
 #. translators: %d: number of WooCommerce orders.
-#: includes/admin/class-data-integrity.php:94
+#: includes/admin/class-data-integrity.php:120
 #, php-format
 msgid "Sync flags reset on %d order. Run Legacy Order Sync to process it again."
 msgid_plural "Sync flags reset on %d orders. Run Legacy Order Sync to process them again."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/admin/class-data-integrity.php:111
-#: includes/admin/class-data-integrity.php:112
-#: includes/admin/class-data-integrity.php:162
+#: includes/admin/class-data-integrity.php:137
+#: includes/admin/class-data-integrity.php:138
+#: includes/admin/class-data-integrity.php:188
 msgid "Data Tools"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:139
+#: includes/admin/class-data-integrity.php:165
 msgid "Scanning…"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:140
+#: includes/admin/class-data-integrity.php:166
 msgid "Backfilling…"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:141
+#: includes/admin/class-data-integrity.php:167
 msgid "Deleting…"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:142
+#: includes/admin/class-data-integrity.php:168
 msgid "Recalculating…"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:143
+#: includes/admin/class-data-integrity.php:169
 msgid "Complete!"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:144
+#: includes/admin/class-data-integrity.php:170
 msgid "Type the post type slug to confirm:"
 msgstr ""
 
 #. translators: %s: record type label.
-#: includes/admin/class-data-integrity.php:146
+#: includes/admin/class-data-integrity.php:172
 #, php-format
 msgid "This will permanently delete ALL %s records. This cannot be undone."
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:147
+#: includes/admin/class-data-integrity.php:173
 msgid "All records look good — no missing fields found."
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:165
+#: includes/admin/class-data-integrity.php:191
 msgid "Backfill &amp; Repair"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:166
-#: includes/admin/class-data-integrity.php:240
+#: includes/admin/class-data-integrity.php:192
+#: includes/admin/class-data-integrity.php:268
 msgid "Purge Records"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:167
+#: includes/admin/class-data-integrity.php:193
 msgid "Recalculate"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:204
+#: includes/admin/class-data-integrity.php:194
+msgid "Order Records"
+msgstr ""
+
+#: includes/admin/class-data-integrity.php:232
 msgid "Backfill Missing Fields"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:207
+#: includes/admin/class-data-integrity.php:235
 msgid "Scans all records and reports missing or empty meta fields based on the entity schema. You can then backfill defaults, denormalized fields, and taxonomy terms in batches."
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:216
+#: includes/admin/class-data-integrity.php:244
 msgid "Scan All Records"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:224
+#: includes/admin/class-data-integrity.php:252
 msgid "Backfill All Issues"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:227
+#: includes/admin/class-data-integrity.php:255
 msgid "Fills in missing defaults, display names, and taxonomy terms. Does not overwrite existing values."
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:244
+#: includes/admin/class-data-integrity.php:272
 msgid "Warning:"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:246
+#: includes/admin/class-data-integrity.php:274
 msgid "This permanently deletes posts and their meta. Use this to start fresh before re-running Legacy Order Sync or CSV imports. WooCommerce orders and donor records are not affected unless you explicitly choose them."
 msgstr ""
 
 #. translators: %s: post type slug
-#: includes/admin/class-data-integrity.php:268
+#: includes/admin/class-data-integrity.php:296
 #, php-format
 msgid "Post type: %s"
 msgstr ""
 
 #. translators: %s: record type label
-#: includes/admin/class-data-integrity.php:284
+#: includes/admin/class-data-integrity.php:312
 #, php-format
 msgid "Delete All %s"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:295
+#: includes/admin/class-data-integrity.php:323
 msgid "Reset Legacy Sync Flags"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:298
+#: includes/admin/class-data-integrity.php:326
 msgid "Clears the \"_skdon_legacy_synced\" flag on all WooCommerce orders so they can be re-processed by the Legacy Order Sync tool. Does NOT delete any records."
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:306
+#: includes/admin/class-data-integrity.php:334
 msgid "Reset Sync Flags"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:321
+#: includes/admin/class-data-integrity.php:349
 msgid "Recalculate Donor Stats"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:324
+#: includes/admin/class-data-integrity.php:352
 msgid "Recalculates lifetime_giving for every donor by summing their donations, memorials, and memberships. Use this after bulk imports or if stats look incorrect."
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:332
+#: includes/admin/class-data-integrity.php:360
 msgid "Recalculate All Donors"
 msgstr ""
 
-#: includes/admin/class-data-integrity.php:985
+#: includes/admin/class-data-integrity.php:376
+msgid "Orders with lines that weren't recorded"
+msgstr ""
+
+#: includes/admin/class-data-integrity.php:377
+msgid "A paid line from one of the plugin's products that produced no donation, membership or memorial. Fix the cause shown, then use Reprocess on the order: lines already recorded are skipped."
+msgstr ""
+
+#: includes/admin/class-data-integrity.php:379
+msgid "None."
+msgstr ""
+
+#: includes/admin/class-data-integrity.php:382
+#: assets/js/admin-legacy-sync.js:194
+msgid "Order"
+msgstr ""
+
+#: includes/admin/class-data-integrity.php:382
+msgid "Lines not recorded"
+msgstr ""
+
+#: includes/admin/class-data-integrity.php:382
+msgid "Reason"
+msgstr ""
+
+#: includes/admin/class-data-integrity.php:404
+msgid "Records merged by Legacy Order Sync"
+msgstr ""
+
+#: includes/admin/class-data-integrity.php:405
+msgid "Before this release, an order with two lines of the same kind (an individual and a business membership, say) had its second line overwrite the record its first line created. Repair restores each record to the line that created it and gives the other line its own record. No donor is emailed."
+msgstr ""
+
+#: includes/admin/class-data-integrity.php:407
+msgid "None found."
+msgstr ""
+
+#: includes/admin/class-data-integrity.php:410
+msgid "Record"
+msgstr ""
+
+#: includes/admin/class-data-integrity.php:410
+msgid "Belongs to"
+msgstr ""
+
+#: includes/admin/class-data-integrity.php:410
+msgid "Overwritten by"
+msgstr ""
+
+#: includes/admin/class-data-integrity.php:421
+msgid "Repair"
+msgstr ""
+
+#. translators: 1: order number; 2: order line name.
+#: includes/admin/class-data-integrity.php:439
+#, php-format
+msgid "Order #%1$s: %2$s"
+msgstr ""
+
+#: includes/admin/class-data-integrity.php:1091
 msgid "Confirmation does not match. Type the exact post type slug."
 msgstr ""
 
@@ -1460,7 +1540,7 @@ msgid "Sync complete!"
 msgstr ""
 
 #: includes/admin/class-legacy-sync-page.php:129
-#: includes/woocommerce/class-order-handler.php:575
+#: includes/woocommerce/class-order-handler.php:680
 msgid "An error occurred."
 msgstr ""
 
@@ -1479,7 +1559,7 @@ msgstr ""
 #: includes/admin/class-legacy-sync-page.php:195
 #: includes/admin/class-legacy-sync-page.php:399
 #: includes/admin/legacy-sync/class-order-processor.php:54
-#: includes/woocommerce/class-order-handler.php:608
+#: includes/woocommerce/class-order-handler.php:713
 msgid "Order not found."
 msgstr ""
 
@@ -2427,14 +2507,14 @@ msgid "%1$d of %2$d expired memberships renewed in the last 12 months."
 msgstr ""
 
 #: includes/admin/class-reports.php:1171
-#: includes/emails/class-config-email.php:337
+#: includes/emails/class-config-email.php:346
 #: includes/woocommerce/class-cart-handler.php:557
 #: includes/woocommerce/class-checkout-fields.php:560
 msgid "Yes"
 msgstr ""
 
 #: includes/admin/class-reports.php:1171
-#: includes/emails/class-config-email.php:337
+#: includes/emails/class-config-email.php:346
 #: includes/woocommerce/class-checkout-fields.php:560
 msgid "No"
 msgstr ""
@@ -2587,7 +2667,7 @@ msgid "These emails are triggered automatically by plugin events. Click \"Config
 msgstr ""
 
 #: includes/admin/class-settings.php:415
-#: includes/emails/class-config-email.php:488
+#: includes/emails/class-config-email.php:497
 msgid "Subject"
 msgstr ""
 
@@ -2867,7 +2947,7 @@ msgstr ""
 
 #. translators: %s: ability name.
 #: includes/admin/import-export/class-csv-importer.php:582
-#: includes/admin/legacy-sync/class-order-processor.php:204
+#: includes/admin/legacy-sync/class-order-processor.php:150
 #, php-format
 msgid "Ability \"%s\" could not be loaded."
 msgstr ""
@@ -2956,8 +3036,26 @@ msgstr ""
 msgid "Memorial for \"%s\" by this donor already exists."
 msgstr ""
 
-#: includes/admin/legacy-sync/class-legacy-input-builder.php:162
+#: includes/admin/legacy-sync/class-legacy-input-builder.php:164
 msgid "In Loving Memory"
+msgstr ""
+
+#: includes/admin/legacy-sync/class-merge-repair.php:120
+msgid "One of the orders no longer exists."
+msgstr ""
+
+#: includes/admin/legacy-sync/class-merge-repair.php:126
+msgid "One of the order lines no longer exists or is no longer recognised."
+msgstr ""
+
+#: includes/admin/legacy-sync/class-merge-repair.php:132
+msgid "The ability that creates this record could not be loaded."
+msgstr ""
+
+#. translators: 1: order line name; 2: the record it had overwritten; 3: its new record.
+#: includes/admin/legacy-sync/class-merge-repair.php:170
+#, php-format
+msgid "ShelterKit Donations: Legacy Order Sync had recorded \"%1$s\" over record #%2$d, which belongs to another line. #%2$d is restored, and this line now has its own record, #%3$d."
 msgstr ""
 
 #: includes/admin/legacy-sync/class-order-processor.php:60
@@ -2969,24 +3067,24 @@ msgid "Already processed by order handler."
 msgstr ""
 
 #. translators: 1: ability name; 2: order item name.
-#: includes/admin/legacy-sync/class-order-processor.php:136
+#: includes/admin/legacy-sync/class-order-processor.php:121
 #, php-format
 msgid "Ability \"%1$s\" not found for item \"%2$s\""
 msgstr ""
 
 #. translators: 1: order item name; 2: error message.
-#: includes/admin/legacy-sync/class-order-processor.php:213
+#: includes/admin/legacy-sync/class-order-processor.php:159
 #, php-format
 msgid "Error processing \"%1$s\": %2$s"
 msgstr ""
 
 #. translators: 1: donations, 2: memberships, 3: memorials, 4: updated
-#: includes/admin/legacy-sync/class-order-processor.php:461
+#: includes/admin/legacy-sync/class-order-processor.php:519
 #, php-format
 msgid "ShelterKit Donations legacy sync completed: %1$d donation(s), %2$d membership(s), %3$d memorial(s), %4$d updated"
 msgstr ""
 
-#: includes/admin/legacy-sync/class-order-processor.php:469
+#: includes/admin/legacy-sync/class-order-processor.php:527
 msgid "Errors:"
 msgstr ""
 
@@ -3029,7 +3127,7 @@ msgstr ""
 
 #: includes/admin/shared/class-donor-lookup.php:571
 #: includes/admin/shared/class-donor-lookup.php:574
-#: includes/core/helpers.php:177
+#: includes/core/helpers.php:212
 msgid "Anonymous Donor"
 msgstr ""
 
@@ -3060,19 +3158,19 @@ msgid "— Select Campaign —"
 msgstr ""
 
 #: includes/blocks/register-editor.php:108
-#: includes/core/helpers.php:967
+#: includes/core/helpers.php:1002
 #: includes/rest/class-rest-controller.php:577
 msgid "Food & Supplies"
 msgstr ""
 
 #: includes/blocks/register-editor.php:109
-#: includes/core/helpers.php:968
+#: includes/core/helpers.php:1003
 #: includes/rest/class-rest-controller.php:578
 msgid "Facility Improvements"
 msgstr ""
 
 #: includes/blocks/register-editor.php:110
-#: includes/core/helpers.php:969
+#: includes/core/helpers.php:1004
 #: includes/rest/class-rest-controller.php:579
 msgid "Rescue Operations"
 msgstr ""
@@ -3171,38 +3269,38 @@ msgstr ""
 msgid "ShelterKit Donations moved its stored data to the new skdon_ names."
 msgstr ""
 
-#: includes/core/helpers.php:679
+#: includes/core/helpers.php:714
 msgid "A valid email address is required."
 msgstr ""
 
-#: includes/emails/class-config-email.php:381
+#: includes/emails/class-config-email.php:390
 msgid "Notification from {site_name}"
 msgstr ""
 
-#: includes/emails/class-config-email.php:482
+#: includes/emails/class-config-email.php:491
 msgid "Enable/Disable"
 msgstr ""
 
-#: includes/emails/class-config-email.php:484
+#: includes/emails/class-config-email.php:493
 msgid "Enable this email notification"
 msgstr ""
 
 #. translators: %s: placeholder list
-#: includes/emails/class-config-email.php:493
-#: includes/emails/class-config-email.php:505
+#: includes/emails/class-config-email.php:502
+#: includes/emails/class-config-email.php:514
 #, php-format
 msgid "Available placeholders: %s"
 msgstr ""
 
-#: includes/emails/class-config-email.php:500
+#: includes/emails/class-config-email.php:509
 msgid "Email heading"
 msgstr ""
 
-#: includes/emails/class-config-email.php:512
+#: includes/emails/class-config-email.php:521
 msgid "Email type"
 msgstr ""
 
-#: includes/emails/class-config-email.php:514
+#: includes/emails/class-config-email.php:523
 msgid "Choose which format of email to send."
 msgstr ""
 
@@ -3556,85 +3654,97 @@ msgstr ""
 msgid "You don't have a donor profile yet. Make your first donation to get started!"
 msgstr ""
 
+#. translators: %s: the product's current SKU.
+#: includes/woocommerce/class-order-handler.php:263
+#, php-format
+msgid "Not recorded: this is one of the plugin's products, but its SKU \"%s\" matches no product mapping. Restore the SKU (Product Sync → Repair Issues), then reprocess the order."
+msgstr ""
+
 #. translators: %s: ability name
-#: includes/woocommerce/class-order-handler.php:248
+#: includes/woocommerce/class-order-handler.php:277
 #, php-format
 msgid "Ability \"%s\" not found."
 msgstr ""
 
-#: includes/woocommerce/class-order-handler.php:313
+#. translators: %d: post ID of the existing record.
+#: includes/woocommerce/class-order-handler.php:291
+#, php-format
+msgid "Already recorded as #%d"
+msgstr ""
+
+#: includes/woocommerce/class-order-handler.php:418
 msgid "Memorial missing required fields (honoree name). Item may have been added directly without using the memorial form. Please use the memorial tribute form to add this item."
 msgstr ""
 
-#: includes/woocommerce/class-order-handler.php:333
+#: includes/woocommerce/class-order-handler.php:438
 msgid "Memorial tribute is missing the honoree name."
 msgstr ""
 
-#: includes/woocommerce/class-order-handler.php:347
+#: includes/woocommerce/class-order-handler.php:452
 msgid "Membership is missing the tier selection."
 msgstr ""
 
-#: includes/woocommerce/class-order-handler.php:391
+#: includes/woocommerce/class-order-handler.php:496
 msgid "ShelterKit Donations Processing:"
 msgstr ""
 
-#: includes/woocommerce/class-order-handler.php:394
+#: includes/woocommerce/class-order-handler.php:499
 msgid "⚠️ Some items had errors. Please review and reprocess if needed."
 msgstr ""
 
 #. translators: %d: donation ID
-#: includes/woocommerce/class-order-handler.php:412
+#: includes/woocommerce/class-order-handler.php:517
 #, php-format
 msgid "Donation #%d created"
 msgstr ""
 
 #. translators: 1: membership ID, 2: tier label
-#: includes/woocommerce/class-order-handler.php:421
+#: includes/woocommerce/class-order-handler.php:526
 #, php-format
 msgid "Membership #%1$d created (%2$s)"
 msgstr ""
 
 #. translators: 1: memorial ID, 2: honoree name
-#: includes/woocommerce/class-order-handler.php:431
+#: includes/woocommerce/class-order-handler.php:536
 #, php-format
 msgid "Memorial #%1$d created for %2$s"
 msgstr ""
 
-#: includes/woocommerce/class-order-handler.php:437
+#: includes/woocommerce/class-order-handler.php:542
 #: assets/js/admin-legacy-sync.js:165
 #: assets/js/admin-legacy-sync.js:355
 msgid "Processed"
 msgstr ""
 
-#: includes/woocommerce/class-order-handler.php:515
+#: includes/woocommerce/class-order-handler.php:620
 msgid "No shelter products in this order."
 msgstr ""
 
-#: includes/woocommerce/class-order-handler.php:523
-#: includes/woocommerce/class-order-handler.php:584
+#: includes/woocommerce/class-order-handler.php:628
+#: includes/woocommerce/class-order-handler.php:689
 msgid "Status:"
 msgstr ""
 
 #. translators: %s: processing date
-#: includes/woocommerce/class-order-handler.php:527
+#: includes/woocommerce/class-order-handler.php:632
 #, php-format
 msgid "Processed on %s"
 msgstr ""
 
-#: includes/woocommerce/class-order-handler.php:550
-#: includes/woocommerce/class-order-handler.php:576
+#: includes/woocommerce/class-order-handler.php:655
+#: includes/woocommerce/class-order-handler.php:681
 msgid "Reprocess Order"
 msgstr ""
 
-#: includes/woocommerce/class-order-handler.php:560
+#: includes/woocommerce/class-order-handler.php:665
 msgid "Are you sure you want to reprocess this order? This may create duplicate records."
 msgstr ""
 
-#: includes/woocommerce/class-order-handler.php:586
+#: includes/woocommerce/class-order-handler.php:691
 msgid "Pending processing"
 msgstr ""
 
-#: includes/woocommerce/class-order-handler.php:588
+#: includes/woocommerce/class-order-handler.php:693
 msgid "Order will be processed when status changes to Processing or Completed."
 msgstr ""
 
@@ -4775,10 +4885,6 @@ msgstr ""
 
 #: assets/js/admin-legacy-sync.js:164
 msgid "Synced"
-msgstr ""
-
-#: assets/js/admin-legacy-sync.js:194
-msgid "Order"
 msgstr ""
 
 #: assets/js/admin-legacy-sync.js:196

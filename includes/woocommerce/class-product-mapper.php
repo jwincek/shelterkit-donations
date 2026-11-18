@@ -22,6 +22,27 @@ use Starter_Shelter\Helpers;
 class Product_Mapper {
 
     /**
+     * Meta key linking a donation, membership or memorial to the order line
+     * it was created from. Checkout and Legacy Order Sync both stamp it, and
+     * the sync matches existing records by it (#35, #40).
+     *
+     * @var string
+     */
+    public const ORDER_ITEM_META = '_skdon_wc_order_item_id';
+
+    /**
+     * Options holding the IDs of the products the activator created.
+     *
+     * @var string[]
+     */
+    private const PRODUCT_ID_OPTIONS = [
+        'skdon_donation_product_id',
+        'skdon_membership_product_id',
+        'skdon_business_membership_product_id',
+        'skdon_memorial_product_id',
+    ];
+
+    /**
      * Cached products configuration.
      *
      * @since 1.0.0
@@ -363,12 +384,62 @@ class Product_Mapper {
     public static function order_has_shelter_products( \WC_Order $order ): bool {
         foreach ( $order->get_items() as $item ) {
             $product = $item->get_product();
-            if ( $product && self::find_by_sku( $product->get_sku() ) ) {
+            if ( $product && ( self::find_by_sku( $product->get_sku() ) || self::is_plugin_product( $product ) ) ) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    /**
+     * Whether a product is one the plugin created (or one of its variations),
+     * whatever its SKU says now.
+     *
+     * Matching by SKU alone treated a plugin product whose SKU had changed
+     * like any shop product, so its order lines were skipped without a word
+     * (#35, and #16 before it).
+     *
+     * @param \WC_Product|null|false $product The product.
+     * @return bool
+     */
+    public static function is_plugin_product( $product ): bool {
+        if ( ! $product instanceof \WC_Product ) {
+            return false;
+        }
+        $ids = array_filter( array_map( static fn ( string $option ): int => (int) get_option( $option, 0 ), self::PRODUCT_ID_OPTIONS ) );
+        return in_array( $product->get_id(), $ids, true ) || in_array( $product->get_parent_id(), $ids, true );
+    }
+
+    /**
+     * The record an ability result refers to.
+     *
+     * @param mixed $result An ability's create or update result.
+     * @return int Post ID, or 0.
+     */
+    public static function record_id( $result ): int {
+        if ( ! is_array( $result ) ) {
+            return 0;
+        }
+        foreach ( [ 'donation_id', 'membership_id', 'memorial_id', 'id' ] as $key ) {
+            if ( ! empty( $result[ $key ] ) ) {
+                return (int) $result[ $key ];
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Link the record an ability result refers to with its order line.
+     *
+     * @param mixed $result  The ability result.
+     * @param int   $item_id The order line's item ID.
+     */
+    public static function stamp_order_line( $result, int $item_id ): void {
+        $record = self::record_id( $result );
+        if ( $record && $item_id > 0 ) {
+            update_post_meta( $record, self::ORDER_ITEM_META, $item_id );
+        }
     }
 
     /**
