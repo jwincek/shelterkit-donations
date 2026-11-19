@@ -70,14 +70,16 @@ Even when you opt in, the WooCommerce products the plugin created (and their ima
 
 == Screenshots ==
 
-1. The reports dashboard. Totals, a donation trend over time, and a breakdown by fund — filterable by period and by campaign, with a CSV export of whatever is on screen.
-2. The contribution form on the front end. One block offers giving, joining and honouring a loved one as tabs; checkout runs through the WooCommerce checkout the site already uses.
-3. The memorial wall. Visitors search and filter tributes by type, dedication and year, light a candle on one, and open a full memorial page for any of them.
-4. The members wall, grouping members by tier. Members opt out of appearing here from their own account.
-5. Campaign reporting. Each drive shows its goal, live progress and end date, and every other report can be narrowed to one campaign.
-6. Donation allocations are configured, not hard-coded — as are membership tiers and donor levels, so the plugin fits an organisation other than the one it was built for.
-7. The WooCommerce products the plugin uses are mapped here, and can be created for you if they do not exist yet.
-8. CSV export for every record type, plus a full-backup ZIP to take before uninstalling.
+1. The donation form. Donors choose an amount and the fund it goes to, and can add a dedication or give anonymously; checkout runs through WooCommerce.
+2. The memorial wall. Tributes to people and pets, searchable and filtered by type, dedication and year, with candles visitors light.
+3. Members grouped by tier, with business supporters' logos and a slideshow of them. Members can leave the wall from their own account.
+4. Campaign cards. Each drive shows its goal, progress, deadline and a button to give or join.
+5. A donor's own dashboard: lifetime giving, membership and renewal date, and recent gifts.
+6. Reports. Totals, a donation trend and a breakdown by fund, for any period or campaign, with a CSV export.
+7. Quick Add, for memorial gifts that arrive by mail or in person, one or several at once. The donor and the family are emailed only when you tick it.
+8. Every record keeps its history: here, a memorial bought at checkout, the family emailed, then the tribute edited.
+9. Funds, membership tiers, pet species and donor levels are settings, not code, so the plugin fits your shelter.
+10. Export any record type as CSV, or download a full backup before uninstalling.
 
 == Changelog ==
 
