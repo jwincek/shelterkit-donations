@@ -3,7 +3,7 @@ Contributors: jeromewincek
 Tags: donations, memberships, memorials, animal-shelter, nonprofit
 Requires at least: 6.9
 Tested up to: 7.1
-Stable tag: 3.1.0
+Stable tag: 3.2.0
 Requires PHP: 8.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -83,6 +83,16 @@ Even when you opt in, the WooCommerce products the plugin created (and their ima
 
 == Changelog ==
 
+= 3.2.0 =
+* New: Quick Add enters one memorial or several from the Memorials list, finding or creating each donor, with an optional confirmation email.
+* The donation form has an optional Dedication line, and the memorial form asks for a pet's species. Both now reach your records on WooCommerce's block checkout, which never showed the old checkout fields.
+* Fixed: a family the donor asked to be told was never emailed, at checkout or by Notify Family, though the memorial was marked notified. Updating re-offers those memorials.
+* Fixed: on a site not set to UTC, dates showed hours early, or a day early, and saving a donation in the editor moved its date back each time. Times already moved can't be recovered.
+* Fixed: every memorial was created twice, emailing the donor twice and counting twice towards their lifetime giving. Run Data Tools → Recalculate after updating.
+* Fixed: saving one Settings tab reset the others, and several settings did nothing. Three switches that never worked are turned back on, and a notice names them.
+* Fixed: several Campaign Cards or Donor Stats blocks on one page all showed the last one's figures; the Donor Dashboard's "View All Gifts" link was a dead link.
+* The activity log records admin tools, settings and edits, shows each record's history, and keeps entries for as long as you choose. Donors are covered by WordPress's personal data export and erasure.
+
 = 3.1.0 =
 * Refunds and cancellations now reach your records. A gift refunded in full is marked Refunded and leaves every total, the donor's lifetime giving and their annual statement. A gift refunded in part counts for what you kept.
 * Every paid order line now becomes exactly one record. Fixed: Legacy Order Sync merged an order's second line into its first, and emailed donors about gifts made long ago. Data Tools → Order Records repairs earlier merges.
@@ -120,6 +130,9 @@ Even when you opt in, the WooCommerce products the plugin created (and their ima
 Full changelog: https://github.com/jwincek/shelterkit-donations/blob/main/CHANGELOG.md
 
 == Upgrade Notice ==
+
+= 3.2.0 =
+Fixes family emails, dates on sites not set to UTC, and double-counted memorials. From 2.x, follow migration-scripts/MIGRATION-skdon-prefix.md. After updating: Data Tools → Recalculate, check Settings → General, and review Memorials waiting to notify the family.
 
 = 3.1.0 =
 Moves stored data to new names on the first request, and makes refunds count. Back up first. From 2.x, follow migration-scripts/MIGRATION-skdon-prefix.md; afterwards, run Data Tools → Order Records.
