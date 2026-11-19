@@ -43,7 +43,7 @@ function create( array $input ): array|WP_Error {
     // `donation_date`; `date` accepted as legacy input for callers that
     // haven't migrated yet (CC-2 read-both, write-canonical).
     $donation_date = $input['donation_date'] ?? $input['date'] ?? wp_date( 'Y-m-d H:i:s' );
-    $display_date = wp_date( 'Y-m-d', strtotime( $donation_date ) );
+    $display_date = Helpers\local_date( (string) $donation_date )?->format( 'Y-m-d' ) ?? wp_date( 'Y-m-d' );
 
     // Create donation post. The pre-resolved donor_id path (importers,
     // sync) may supply neither donor_name nor donor_email, so fall back

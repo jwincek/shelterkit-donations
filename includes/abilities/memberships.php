@@ -48,13 +48,13 @@ function create( array $input ): array|WP_Error {
     $amount = $input['amount'] ?? Helpers\get_tier_amount( $tier, $type );
 
     // Calculate dates - use provided date or current time for start.
-    $start_date = isset( $input['date'] )
-        ? wp_date( 'Y-m-d', strtotime( $input['date'] ) )
-        : wp_date( 'Y-m-d' );
-    $end_date = wp_date( 'Y-m-d', strtotime( $start_date . ' +1 year' ) );
+    // Read in the site's time zone: the date is a local day (#62).
+    $start      = ( isset( $input['date'] ) ? Helpers\local_date( (string) $input['date'] ) : null ) ?? Helpers\local_date( 'now' );
+    $start_date = $start->format( 'Y-m-d' );
+    $end_date   = $start->modify( '+1 year' )->format( 'Y-m-d' );
 
     // For display in title, use the year from start date.
-    $start_year = wp_date( 'Y', strtotime( $start_date ) );
+    $start_year = $start->format( 'Y' );
 
     // Create membership post. The pre-resolved donor_id path (importers,
     // sync) may supply neither donor_name nor donor_email, so fall back
@@ -147,7 +147,7 @@ function renew( array $input ): array|WP_Error {
     // If membership is still active, extend from current end date.
     // If expired, extend from today.
     if ( Helpers\is_membership_active( $current_end ) ) {
-        $new_end = wp_date( 'Y-m-d', strtotime( "$current_end +1 year" ) );
+        $new_end = Helpers\local_date( (string) $current_end )?->modify( '+1 year' )->format( 'Y-m-d' ) ?? wp_date( 'Y-m-d', strtotime( '+1 year' ) );
     } else {
         $new_end = wp_date( 'Y-m-d', strtotime( '+1 year' ) );
     }

@@ -57,6 +57,20 @@ class Quick_Actions {
     }
 
     /**
+     * Thirty days on from a membership's end date, or from today if it has
+     * passed. Counted in the site's time zone: the end date is a local day
+     * (#62).
+     *
+     * @param string $end_date The stored end date, or ''.
+     */
+    private static function thirty_days_on( string $end_date ): string {
+        $today = Helpers\local_date( 'today' );
+        $end   = Helpers\local_date( $end_date );
+        $base  = $end && $end > $today ? $end : $today;
+        return $base->modify( '+30 days' )->format( 'Y-m-d' );
+    }
+
+    /**
      * Handle sending renewal reminder.
      */
     public static function handle_send_reminder(): void {
@@ -110,8 +124,7 @@ class Quick_Actions {
 
         if ( $end_date ) {
             // Extend from current end date or today, whichever is later.
-            $base_date = max( strtotime( $end_date ), time() );
-            $new_end_date = wp_date( 'Y-m-d', strtotime( '+30 days', $base_date ) );
+            $new_end_date = self::thirty_days_on( (string) $end_date );
         } else {
             $new_end_date = wp_date( 'Y-m-d', strtotime( '+30 days' ) );
         }
@@ -455,8 +468,7 @@ class Quick_Actions {
             case 'sd_extend_30_days':
                 foreach ( $post_ids as $membership_id ) {
                     $end_date = get_post_meta( $membership_id, '_skdon_end_date', true );
-                    $base_date = $end_date ? max( strtotime( $end_date ), time() ) : time();
-                    $new_end_date = wp_date( 'Y-m-d', strtotime( '+30 days', $base_date ) );
+                    $new_end_date = self::thirty_days_on( (string) $end_date );
                     update_post_meta( $membership_id, '_skdon_end_date', $new_end_date );
                     do_action( 'starter_shelter_membership_extended', $membership_id, $new_end_date );
                     ++$count;

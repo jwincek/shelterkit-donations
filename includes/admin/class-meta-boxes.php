@@ -215,14 +215,14 @@ class Meta_Boxes {
                 break;
 
             case 'date':
-                printf( '<input type="date" id="sd_%s" name="sd_%s" value="%s" />', esc_attr( $field_id ), esc_attr( $field_id ), esc_attr( $value ? wp_date( 'Y-m-d', strtotime( $value ) ) : '' ) );
+                printf( '<input type="date" id="sd_%s" name="sd_%s" value="%s" />', esc_attr( $field_id ), esc_attr( $field_id ), esc_attr( Helpers\local_date( (string) $value )?->format( 'Y-m-d' ) ?? '' ) );
                 break;
 
             case 'datetime':
                 if ( ( $field['default'] ?? '' ) === 'now' && ! $value ) {
 					$value = current_time( 'mysql' );
                 }
-                printf( '<input type="datetime-local" id="sd_%s" name="sd_%s" value="%s" />', esc_attr( $field_id ), esc_attr( $field_id ), esc_attr( $value ? wp_date( 'Y-m-d\TH:i', strtotime( $value ) ) : '' ) );
+                printf( '<input type="datetime-local" id="sd_%s" name="sd_%s" value="%s" />', esc_attr( $field_id ), esc_attr( $field_id ), esc_attr( Helpers\local_date( (string) $value )?->format( 'Y-m-d\TH:i' ) ?? '' ) );
                 break;
 
             case 'image':
@@ -333,6 +333,9 @@ class Meta_Boxes {
                 if ( isset( $_POST[ $key ] ) ) {
                     $value = self::sanitize_field( $_POST[ $key ], $field['type'] );
             // phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+                    if ( 'date' === $field['type'] || 'datetime' === $field['type'] ) {
+                        $value = self::date_to_store( $field['type'], (string) $value, (string) get_post_meta( $post_id, $meta_key, true ) );
+                    }
                     update_post_meta( $post_id, $meta_key, $value );
                 } elseif ( 'checkbox' === $field['type'] ) {
                     update_post_meta( $post_id, $meta_key, 0 );
@@ -378,6 +381,90 @@ class Meta_Boxes {
         }
 
         update_post_meta( $post_id, $target_meta, $object );
+    }
+
+    /**
+     * What a date field's posted value means for the stored one (#62).
+     *
+     * The editor shows a `date` field as the day ("2026-11-19") and a
+     * `datetime` field as the day and minute ("2026-11-19T03:58"), for values
+     * stored as "2026-11-19 03:58:58". Storing what was posted dropped the
+     * time of day, or kept the HTML format with its "T", which the reports'
+     * text comparisons sort after "… 23:59:59". And every save logged a date
+     * change nobody made.
+     *
+     * The same day (or minute) as stored keeps the stored value. A new one is
+     * stored as `Y-m-d H:i:s`, keeping the time of day a `date` field doesn't
+     * show.
+     *
+     * @param string $type   'date' or 'datetime'.
+     * @param string $posted The posted value, sanitised.
+     * @param string $stored The stored value.
+     * @return string
+     */
+    public static function date_to_store( string $type, string $posted, string $stored ): string {
+        $posted = trim( $posted );
+        $stored = trim( $stored );
+        if ( '' === $posted ) {
+            return '';
+        }
+
+        if ( 'datetime' === $type ) {
+            $when = \DateTimeImmutable::createFromFormat( '!Y-m-d\TH:i', $posted )
+                ?: \DateTimeImmutable::createFromFormat( '!Y-m-d H:i:s', $posted )
+                ?: \DateTimeImmutable::createFromFormat( '!Y-m-d H:i', $posted );
+            if ( ! $when ) {
+                return $posted;
+            }
+            return str_starts_with( self::normalise_date( $stored ), $when->format( 'Y-m-d H:i' ) )
+                ? $stored
+                : $when->format( 'Y-m-d H:i:s' );
+        }
+
+        if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $posted ) ) {
+            return $posted;
+        }
+        if ( str_starts_with( $stored, $posted ) ) {
+            return $stored;
+        }
+        $time = substr( self::normalise_date( $stored ), 10 );
+        return $posted . ( preg_match( '/^ \d{2}:\d{2}:\d{2}$/', $time ) ? $time : '' );
+    }
+
+    /**
+     * "2025-12-07T15:17" → "2025-12-07 15:17:00"; anything else unchanged.
+     *
+     * @param string $value A stored date.
+     */
+    public static function normalise_date( string $value ): string {
+        return preg_match( '/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})(:\d{2})?$/', $value, $m )
+            ? $m[1] . ' ' . $m[2] . ( $m[3] ?? ':00' )
+            : $value;
+    }
+
+    /**
+     * Normalise the donation dates earlier editor saves left as "T", once (#62).
+     *
+     * Hooked early on `init`, so the reports see one format.
+     */
+    public static function maybe_normalise_dates(): void {
+        if ( get_option( 'skdon_dates_normalised' ) ) {
+            return;
+        }
+        global $wpdb;
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- once, on update.
+        $rows = $wpdb->get_results( $wpdb->prepare(
+            "SELECT meta_id, meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s AND meta_value LIKE %s",
+            '_skdon_donation_date',
+            '%T%'
+        ) );
+        foreach ( $rows as $row ) {
+            $fixed = self::normalise_date( (string) $row->meta_value );
+            if ( $fixed !== $row->meta_value ) {
+                update_metadata_by_mid( 'post', (int) $row->meta_id, $fixed );
+            }
+        }
+        update_option( 'skdon_dates_normalised', 1 );
     }
 
     /**

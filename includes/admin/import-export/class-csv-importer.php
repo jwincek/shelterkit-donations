@@ -772,7 +772,7 @@ class CSV_Importer {
 			'email'           => sanitize_email( $value ),
 			'email_optional'  => ! empty( $value ) ? sanitize_email( $value ) : '',
 			'url'             => esc_url_raw( $value ),
-			'date'            => wp_date( 'Y-m-d H:i:s', strtotime( $value ) ) ?: $value,
+			'date'            => Helpers\local_date( (string) $value )?->format( 'Y-m-d H:i:s' ) ?? $value,
 			'text'            => sanitize_text_field( $value ),
 			'enum'            => sanitize_key( $value ),
 			default           => sanitize_text_field( $value ),

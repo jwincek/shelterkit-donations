@@ -1085,7 +1085,7 @@ class Data_Integrity {
 			$terms = get_the_terms( $post->ID, 'skdon_memorial_year' );
 			if ( ! $terms || is_wp_error( $terms ) ) {
 				$date = $all_meta['_skdon_donation_date'][0] ?? $post->post_date;
-				$year = wp_date( 'Y', strtotime( $date ) );
+				$year = Helpers\local_date( (string) $date )?->format( 'Y' ) ?? '';
 				if ( $year ) {
 					wp_set_object_terms( $post->ID, [ $year ], 'skdon_memorial_year' );
 					++$fixed;
