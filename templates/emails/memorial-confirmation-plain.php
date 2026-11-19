@@ -13,6 +13,7 @@ use Starter_Shelter\Helpers;
 
 $memorial = $data['memorial'] ?? [];
 $donor = $data['donor'] ?? [];
+$in_honor = 'honor' === ( $memorial['dedication_type'] ?? 'memory' );
 
 echo '= ' . esc_html( $heading ) . " =\n\n";
 
@@ -24,15 +25,18 @@ printf(
 echo "\n\n";
 
 printf(
-    /* translators: %s: honoree name */
-    esc_html__( 'Thank you for your heartfelt memorial tribute in honor of %s.', 'shelterkit-donations' ),
+    $in_honor
+        /* translators: %s: honoree name */
+        ? esc_html__( 'Thank you for your thoughtful tribute in honor of %s.', 'shelterkit-donations' )
+        /* translators: %s: honoree name */
+        : esc_html__( 'Thank you for your heartfelt memorial tribute in honor of %s.', 'shelterkit-donations' ),
     esc_html( $memorial['honoree_name'] ?? '' )
 );
 echo "\n\n";
 
 echo '= ' . esc_html__( 'Memorial Details', 'shelterkit-donations' ) . " =\n\n";
 
-echo esc_html__( 'In Memory Of:', 'shelterkit-donations' ) . ' ' . esc_html( $memorial['honoree_name'] ?? '' ) . "\n";
+echo ( $in_honor ? esc_html__( 'In Honor Of:', 'shelterkit-donations' ) : esc_html__( 'In Memory Of:', 'shelterkit-donations' ) ) . ' ' . esc_html( $memorial['honoree_name'] ?? '' ) . "\n";
 echo esc_html__( 'Memorial Type:', 'shelterkit-donations' ) . ' ' . esc_html( Helpers\get_memorial_type_label( $memorial['memorial_type'] ?? '' ) ) . "\n";
 
 if ( ! empty( $memorial['pet_species'] ) ) {

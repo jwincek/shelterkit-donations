@@ -17,8 +17,9 @@ $notify_family = isset( $memorial['id'] )
     ? Helpers\get_memorial_notify_family( (int) $memorial['id'] )
     : [ 'enabled' => false, 'name' => '', 'email' => '', 'address' => '', 'send_card' => false ];
 
-$family_name = '' !== $notify_family['name'] ? $notify_family['name'] : __( 'Dear Friend', 'shelterkit-donations' );
-$is_anonymous = $memorial['is_anonymous'] ?? false;
+$family_name  = '' !== $notify_family['name'] ? $notify_family['name'] : __( 'Friend', 'shelterkit-donations' );
+$is_anonymous = ! empty( $memorial['is_anonymous'] );
+$in_honor     = 'honor' === ( $memorial['dedication_type'] ?? 'memory' );
 
 echo '= ' . esc_html( $heading ) . " =\n\n";
 
@@ -31,16 +32,22 @@ echo "\n\n";
 
 if ( $is_anonymous ) {
     printf(
-        /* translators: 1: honoree name, 2: site name */
-        esc_html__( 'A generous donor has made a memorial donation to %2$s in loving memory of %1$s.', 'shelterkit-donations' ),
+        $in_honor
+            /* translators: 1: honoree name, 2: site name */
+            ? esc_html__( 'A generous donor has made a gift to %2$s in honor of %1$s.', 'shelterkit-donations' )
+            /* translators: 1: honoree name, 2: site name */
+            : esc_html__( 'A generous donor has made a memorial donation to %2$s in loving memory of %1$s.', 'shelterkit-donations' ),
         esc_html( $memorial['honoree_name'] ?? '' ),
         esc_html( get_bloginfo( 'name' ) )
     );
 } else {
     printf(
-        /* translators: 1: donor name, 2: site name, 3: honoree name */
-        esc_html__( '%1$s has made a memorial donation to %2$s in loving memory of %3$s.', 'shelterkit-donations' ),
-        esc_html( Helpers\get_donor_display_name( $donor['first_name'] ?? '', $donor['last_name'] ?? '' ) ),
+        $in_honor
+            /* translators: 1: donor name, 2: site name, 3: honoree name */
+            ? esc_html__( '%1$s has made a gift to %2$s in honor of %3$s.', 'shelterkit-donations' )
+            /* translators: 1: donor name, 2: site name, 3: honoree name */
+            : esc_html__( '%1$s has made a memorial donation to %2$s in loving memory of %3$s.', 'shelterkit-donations' ),
+        esc_html( $memorial['donor_name'] ?? '' ),
         esc_html( get_bloginfo( 'name' ) ),
         esc_html( $memorial['honoree_name'] ?? '' )
     );
@@ -48,7 +55,7 @@ if ( $is_anonymous ) {
 echo "\n\n";
 
 echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n";
-echo esc_html__( 'In Loving Memory Of', 'shelterkit-donations' ) . "\n";
+echo ( $in_honor ? esc_html__( 'In Honor Of', 'shelterkit-donations' ) : esc_html__( 'In Loving Memory Of', 'shelterkit-donations' ) ) . "\n";
 echo esc_html( $memorial['honoree_name'] ?? '' ) . "\n";
 if ( ! empty( $memorial['memorial_type'] ) ) {
     echo esc_html( Helpers\get_memorial_type_label( $memorial['memorial_type'] ) ) . "\n";
@@ -68,10 +75,12 @@ if ( ! empty( $memorial['id'] ) ) {
     echo esc_url( get_permalink( $memorial['id'] ) ) . "\n\n";
 }
 
-echo esc_html__( 'We send our sincere condolences to you and your family.', 'shelterkit-donations' );
+echo $in_honor
+    ? esc_html__( 'We are delighted to be part of this tribute.', 'shelterkit-donations' )
+    : esc_html__( 'We send our sincere condolences to you and your family.', 'shelterkit-donations' );
 echo "\n\n";
 
-echo esc_html__( 'With heartfelt sympathy,', 'shelterkit-donations' ) . "\n";
+echo ( $in_honor ? esc_html__( 'With warm regards,', 'shelterkit-donations' ) : esc_html__( 'With heartfelt sympathy,', 'shelterkit-donations' ) ) . "\n";
 echo esc_html( get_bloginfo( 'name' ) ) . "\n";
 
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";

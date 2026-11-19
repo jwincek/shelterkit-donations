@@ -678,6 +678,10 @@ class Activity_Log {
      * Log email sent.
      */
     public static function log_email_sent( string $email_type, string $recipient, int $object_id, array $data ): void {
+        // Recorded as family_notified, which names the honoree (#58).
+        if ( \Starter_Shelter\Core\Family_Notification::EMAIL_ID === $email_type ) {
+            return;
+        }
         self::record( 'email_sent', 'email', [
             'email_type' => $email_type,
             'recipient'  => $recipient,
@@ -1058,6 +1062,10 @@ class Activity_Log {
             case 'email_sent':
                 /* translators: 1: email type (e.g. Receipt, Renewal reminder); 2: recipient's email address. */
                 return sprintf( __( '%1$s email sent to %2$s', 'shelterkit-donations' ), ucfirst( str_replace( '_', ' ', $text( 'email_type' ) ) ), $text( 'recipient' ) ?: __( '(removed)', 'shelterkit-donations' ) );
+
+            case 'family_notified_reset':
+                /* translators: %d: number of memorials. */
+                return sprintf( _n( 'Notify Family had never sent its email: %d memorial marked as notified is waiting to notify the family again', 'Notify Family had never sent its email: %d memorials marked as notified are waiting to notify the family again', (int) ( $d['count'] ?? 0 ), 'shelterkit-donations' ), (int) ( $d['count'] ?? 0 ) );
 
             case 'log_cleaned':
                 /* translators: %d: number of activity log entries deleted. */

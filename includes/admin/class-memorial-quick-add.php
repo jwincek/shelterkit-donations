@@ -7,8 +7,8 @@
  * memorial is created with the same ability checkout uses, so it counts
  * toward the donor's lifetime giving, is filed under its year and appears
  * on the memorial wall. No WooCommerce order is created. Nobody is emailed
- * unless staff tick "Email the donor a confirmation", which is off by
- * default. A family the donor asked to be told is recorded on the memorial.
+ * unless staff tick it: the donor's confirmation and the family's
+ * notification each have their own checkbox, off by default.
  *
  * @package Starter_Shelter
  * @subpackage Admin
@@ -20,6 +20,7 @@ namespace Starter_Shelter\Admin;
 
 use Starter_Shelter\Admin\Shared\Donor_Lookup;
 use Starter_Shelter\Core\Config;
+use Starter_Shelter\Core\Family_Notification;
 use Starter_Shelter\Helpers;
 
 /**
@@ -249,6 +250,7 @@ final class Memorial_Quick_Add {
 				'family_email'        => sanitize_text_field( $text( $r, 'family_email' ) ),
 				'family_address'      => sanitize_textarea_field( $text( $r, 'family_address' ) ),
 				'family_send_card'    => $flag( $r, 'family_send_card' ),
+				'email_family'        => $flag( $r, 'email_family' ),
 				'email_donor'         => $flag( $r, 'email_donor' ),
 			];
 
@@ -327,6 +329,8 @@ final class Memorial_Quick_Add {
 
 		if ( $row['notify_family'] && '' !== $row['family_email'] && ! is_email( $row['family_email'] ) ) {
 			$errors['family_email'] = __( 'Enter a valid email address, or leave it empty.', 'shelterkit-donations' );
+		} elseif ( $row['email_family'] && ! ( $row['notify_family'] && is_email( $row['family_email'] ) ) ) {
+			$errors['family_email'] = __( 'Enter the family\'s email address to email them, or untick “Email the family now”.', 'shelterkit-donations' );
 		}
 
 		if ( $row['email_donor'] && ! isset( $errors['donor_id'] ) && ! is_email( self::donor_email( $row ) ) ) {
@@ -337,10 +341,10 @@ final class Memorial_Quick_Add {
 	}
 
 	/**
-	 * Create each row's memorial, then send the confirmations asked for.
+	 * Create each row's memorial, then send the emails that were asked for.
 	 *
 	 * Created as internal processing, as imports are, so the memorial emails
-	 * don't go out by themselves; a confirmation asked for is sent afterwards.
+	 * don't go out by themselves; each one asked for is sent afterwards.
 	 *
 	 * @param array<int, array> $rows Valid rows.
 	 * @return array<int, array> One result per row.
@@ -364,6 +368,10 @@ final class Memorial_Quick_Add {
 			if ( $rows[ $n ]['email_donor'] ) {
 				$sent                         = Helpers\send_memorial_confirmation( $result['memorial_id'] );
 				$results[ $n ]['donor_email'] = true === $sent ? true : $sent->get_error_message();
+			}
+			if ( $rows[ $n ]['email_family'] ) {
+				$sent                          = Family_Notification::send( $result['memorial_id'] );
+				$results[ $n ]['family_email'] = true === $sent ? true : $sent->get_error_message();
 			}
 		}
 		return $results;
@@ -609,6 +617,7 @@ final class Memorial_Quick_Add {
 			'family_email'        => '',
 			'family_address'      => '',
 			'family_send_card'    => false,
+			'email_family'        => false,
 			'email_donor'         => false,
 		];
 	}
@@ -751,6 +760,7 @@ final class Memorial_Quick_Add {
 						</label>
 					</div>
 					<label class="sd-qa-check"><input type="checkbox" name="<?php echo esc_attr( $name( 'family_send_card' ) ); ?>" value="1" <?php checked( $row['family_send_card'] ); ?>> <?php esc_html_e( 'Mail them a card', 'shelterkit-donations' ); ?></label>
+					<label class="sd-qa-check"><input type="checkbox" name="<?php echo esc_attr( $name( 'email_family' ) ); ?>" value="1" <?php checked( $row['email_family'] ); ?>> <?php esc_html_e( 'Email the family now', 'shelterkit-donations' ); ?></label>
 				</div>
 			</div>
 
@@ -840,6 +850,12 @@ final class Memorial_Quick_Add {
 				? __( 'Confirmation emailed.', 'shelterkit-donations' )
 				/* translators: %s: why it wasn't sent. */
 				: sprintf( __( 'Confirmation not sent: %s', 'shelterkit-donations' ), (string) $r['donor_email'] );
+		}
+		if ( array_key_exists( 'family_email', $r ) ) {
+			$parts[] = true === $r['family_email']
+				? __( 'Family emailed.', 'shelterkit-donations' )
+				/* translators: %s: why it wasn't sent. */
+				: sprintf( __( 'Family not emailed: %s', 'shelterkit-donations' ), (string) $r['family_email'] );
 		}
 
 		$text = esc_html( implode( ' ', $parts ) );

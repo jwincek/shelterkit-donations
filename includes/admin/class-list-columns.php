@@ -718,11 +718,13 @@ class List_Columns {
                     break;
 
                 case 'notify_family':
-                    $notify_data    = Helpers\get_memorial_notify_family( (int) $post->ID );
-                    $notify_enabled = $notify_data['enabled'];
-                    $notified       = get_post_meta( $post->ID, '_skdon_family_notified_date', true );
+                    $notify_data = Helpers\get_memorial_notify_family( (int) $post->ID );
+                    $notified    = get_post_meta( $post->ID, '_skdon_family_notified_date', true );
 
-                    if ( $notify_enabled && ! $notified ) {
+                    // Notify Family emails the family, so only where there's an
+                    // address to email; a family with a postal address only
+                    // stays among the pending, for a card (#58).
+                    if ( $notify_data['enabled'] && is_email( $notify_data['email'] ) && ! $notified ) {
                         $new_actions['notify_family'] = sprintf(
                             '<a href="%s" class="sd-action-link">%s</a>',
                             esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=skdon_notify_family&id=' . $post->ID ), 'sd_notify_family_' . $post->ID ) ),

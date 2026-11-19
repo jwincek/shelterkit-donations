@@ -22,7 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     received; a tribute; a campaign; whether to keep the donor's name off
     the memorial; and the family the donor asked to be told.
   - **No emails by default.** The donor's confirmation goes only when "Email
-    the donor a confirmation" is ticked.
+    the donor a confirmation" is ticked, and the family's only when "Email
+    the family now" is.
   - **All or nothing.** One mistake adds nothing, and the screen comes back
     with what was typed and what to fix.
 
@@ -118,6 +119,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   under Settings, Shelter Details and WooCommerce. (#49)
 
 ### Fixed
+- **A family the donor asked to be told was never emailed.** (#58)
+  - **At checkout:** the Memorial Family Notification email's condition read
+    a field nothing stored, so it never went out, whatever the donor asked.
+  - **From the Memorials list:** Notify Family, both the link and the bulk
+    action, fired a hook no email listened to. It still said "Family
+    notification sent", recorded the family as notified and logged it.
+  - **The email itself:** its template would have stopped with an error had
+    it ever been sent.
+
+  Now the family is emailed at checkout when the donor asks. Notify Family
+  sends the email, and if it can't, says why: no family email address, or
+  the email is turned off in WooCommerce. A memorial counts as notified only
+  once the email has gone, from either place, so a family emailed at
+  checkout isn't offered Notify Family again.
+- **Memorials marked "family notified" with no email sent are offered
+  Notify Family again.** Before this fix only the broken action recorded
+  that date, so every date stored says a family was emailed when they
+  weren't. Updating clears those dates once. The memorials appear under
+  Memorials → "Pending" family notifications, a notice says how many, and
+  the activity log records it. (#58)
+- **The memorial emails assumed the honoree had died.**
+  - **The family email** told the family of someone honored while living
+    that the gift was "in loving memory", with condolences. It now follows
+    the gift: in memory of someone, or in honor of someone.
+  - **Its default subject** is "A gift in tribute to …".
+  - **The donor's confirmation** said "In Memory Of" whichever it was.
+
+  (#58)
 - **Reports' Fiscal Year ignored the Fiscal Year Start Month setting** and
   always ran from July 1. It now starts on the 1st of the month set. And
   with no year chosen, it used the calendar year, so from January until the
