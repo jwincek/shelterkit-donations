@@ -1,102 +1,70 @@
 /**
  * Campaign Card Block - Interactivity View Module
  *
+ * Each card keeps its figures in its own context (`context.campaign`,
+ * `context.progressWidth`, `context.progressText`). They used to be one
+ * shared `state.campaign`, so with several cards on a page every card showed
+ * the last one's progress, total and donors once the page loaded (#64).
+ *
  * @package Starter_Shelter
  * @since 1.0.0
  */
 
 import { store, getContext, getElement } from '@wordpress/interactivity';
 
+const percent = ( value ) => `${ value || 0 }%`;
+
 /**
  * Campaign Card Store
  */
-const { state, actions } = store( 'shelter-donations/campaign-card', {
-    state: {
-        // Server-provided state:
-        // - campaign: { id, name, goal, raised, progress, etc. }
-        // - isAnimated: boolean
-
-        /**
-         * Derived state: Progress bar width.
-         */
-        get progressWidth() {
-            return `${state.campaign?.progress || 0}%`;
-        },
-
-        /**
-         * Derived state: Progress text.
-         */
-        get progressText() {
-            return `${state.campaign?.progress || 0}%`;
-        },
-    },
-
+const { actions } = store( 'shelter-donations/campaign-card', {
     actions: {
         /**
          * Handle donate button click.
          */
-        handleDonate( event ) {
+        handleDonate() {
+            const { campaign } = getContext();
+
             // Track the click if analytics is available.
             if ( window.gtag ) {
                 window.gtag( 'event', 'donate_click', {
-                    campaign_id: state.campaign?.id,
-                    campaign_name: state.campaign?.name,
+                    campaign_id: campaign?.id,
+                    campaign_name: campaign?.name,
                 } );
             }
-            
+
             // Let the default link behavior proceed.
         },
 
         /**
-         * Animate progress bar.
-         */
-        animateProgress() {
-            if ( state.isAnimated ) return;
-            
-            const target = state.campaign?.progress || 0;
-            let current = 0;
-            
-            const animate = () => {
-                if ( current < target ) {
-                    current = Math.min( current + 1, target );
-                    state.campaign.progress = current;
-                    requestAnimationFrame( animate );
-                } else {
-                    state.isAnimated = true;
-                }
-            };
-            
-            requestAnimationFrame( animate );
-        },
-
-        /**
-         * Refresh campaign data from server.
+         * Refresh this card's figures from the server.
          */
         *refreshCampaign() {
             const context = getContext();
-            
+
             if ( ! context.campaignId ) return;
-            
+
             try {
                 const response = yield fetch(
-                    `/wp-json/shelter-donations/v1/campaign/${context.campaignId}`
+                    `/wp-json/shelter-donations/v1/campaign/${ context.campaignId }`
                 );
-                
+
                 if ( ! response.ok ) {
                     throw new Error( 'Failed to fetch campaign' );
                 }
-                
+
                 const data = yield response.json();
-                
-                // Update campaign state.
-                state.campaign = {
-                    ...state.campaign,
-                    raised: data.raised || 0,
+
+                context.campaign = {
+                    ...context.campaign,
                     raised_formatted: data.raised_formatted || '$0',
                     progress: data.progress || 0,
                     donor_count: data.donor_count || 0,
                 };
+                context.progressWidth = percent( context.campaign.progress );
+                context.progressText = percent( context.campaign.progress );
             } catch ( error ) {
+                // eslint-disable-next-line no-console
                 console.error( 'Failed to refresh campaign:', error );
             }
         },
@@ -104,29 +72,51 @@ const { state, actions } = store( 'shelter-donations/campaign-card', {
 
     callbacks: {
         /**
-         * Initialize the campaign card.
+         * Fill this card's progress bar once it scrolls into view.
+         *
+         * The animation runs from requestAnimationFrame, outside the card's
+         * scope, so it keeps the card's context rather than calling
+         * getContext() each frame.
          */
         init() {
             const { ref } = getElement();
-            
-            // Animate progress bar when visible.
+            const context = getContext();
+
+            const animate = () => {
+                if ( context.isAnimated ) return;
+
+                const target = context.campaign?.progress || 0;
+                let current = 0;
+                const step = () => {
+                    current = Math.min( current + 1, target );
+                    context.progressWidth = percent( current );
+                    context.progressText = percent( current );
+                    if ( current < target ) {
+                        requestAnimationFrame( step );
+                    } else {
+                        context.progressWidth = percent( target );
+                        context.progressText = percent( target );
+                        context.isAnimated = true;
+                    }
+                };
+                requestAnimationFrame( step );
+            };
+
             const observer = new IntersectionObserver(
                 ( entries ) => {
-                    entries.forEach( ( entry ) => {
-                        if ( entry.isIntersecting && ! state.isAnimated ) {
-                            actions.animateProgress();
-                            observer.disconnect();
-                        }
-                    } );
+                    if ( entries.some( ( entry ) => entry.isIntersecting ) ) {
+                        animate();
+                        observer.disconnect();
+                    }
                 },
                 { threshold: 0.3 }
             );
-            
+
             observer.observe( ref );
-            
+
             return () => observer.disconnect();
         },
     },
 } );
 
-export { state, actions };
+export { actions };

@@ -130,6 +130,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   under Settings, Shelter Details and WooCommerce. (#49)
 
 ### Fixed
+- **Several Campaign Cards on one page all showed the last card's figures.**
+  The page drew each card right, then, once it loaded, gave every card the
+  last card's progress, total and donors. With three cards that read as two
+  donation drives at "$0.00 raised, 0 donors, 18%". Two Donor Stats blocks
+  on one page had the same fault. Each block now keeps its own figures.
+  (#64)
+- **The Donor Dashboard's "View All Gifts" link was a dead link**, to a My
+  Account page that doesn't exist. It now opens Giving History. Its
+  buttons, link and gift list also used class names its stylesheet didn't
+  have, so the link sat under the buttons and the rows didn't line up.
+  (#64)
+- **The donor search on the donation, membership and memorial screens had
+  no styles,** and showed as a plain box. (#64)
 - **The block checkout lost a donation's dedication and a pet's species.**
   The plugin collected both only in checkout fields, which only
   WooCommerce's classic checkout shows, so on the block checkout nothing

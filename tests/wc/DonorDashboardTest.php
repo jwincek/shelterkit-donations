@@ -49,6 +49,28 @@ final class DonorDashboardTest extends WP_UnitTestCase {
 		$this->assertStringNotContainsString( 'data-wp-', $html, 'No directives left for a script to get wrong.' );
 	}
 
+	public function test_its_links_go_somewhere_and_its_buttons_are_styled(): void {
+		$user  = self::factory()->user->create();
+		$donor = self::factory()->post->create( [ 'post_type' => 'skdon_donor', 'post_status' => 'publish', 'post_title' => 'Robin Giver' ] );
+		update_post_meta( $donor, '_skdon_user_id', $user );
+		$gift = self::factory()->post->create( [ 'post_type' => 'skdon_donation', 'post_status' => 'publish' ] );
+		update_post_meta( $gift, '_skdon_donor_id', $donor );
+		update_post_meta( $gift, '_skdon_amount', 25 );
+		update_post_meta( $gift, '_skdon_donation_date', '2026-01-05' );
+		update_option( 'starter_shelter_options', [ 'donation_page' => self::factory()->post->create( [ 'post_type' => 'page', 'post_status' => 'publish' ] ) ] );
+		wp_set_current_user( $user );
+
+		$html = do_blocks( '<!-- wp:shelter-donations/donor-dashboard /-->' );
+
+		$this->assertStringContainsString( esc_url( wc_get_account_endpoint_url( 'giving-history' ) ), $html, 'View All Gifts went to my-account/donations/, a 404 (#64).' );
+		$this->assertStringNotContainsString( 'donations/', str_replace( esc_url( wc_get_account_endpoint_url( 'giving-history' ) ), '', $html ) );
+		$css = (string) file_get_contents( dirname( __DIR__, 2 ) . '/blocks/donor-dashboard/style.css' );
+		foreach ( [ 'sd-view-all', 'sd-quick-actions', 'sd-primary', 'sd-secondary' ] as $class ) {
+			$this->assertStringContainsString( $class, $html, "The markup uses .{$class}…" );
+			$this->assertStringContainsString( '.' . $class, $css, '…which the stylesheet styles. The old names matched no rule, so the link sat under the buttons.' );
+		}
+	}
+
 	public function test_the_block_loads_no_script(): void {
 		$block = \WP_Block_Type_Registry::get_instance()->get_registered( 'shelter-donations/donor-dashboard' );
 

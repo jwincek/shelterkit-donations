@@ -44,39 +44,28 @@ $total_formatted = Helpers\format_currency( $stats );
 // Generate unique ID.
 $block_id = 'donor-stats-' . wp_unique_id();
 
-// Initialize interactivity state if animation is enabled.
-if ( $animate_numbers ) {
-    wp_interactivity_state(
-        'shelter-donations/donor-stats',
-        [
-            'stats' => [
-                'total'   => $stats,
-                'count'   => $count,
-                'donors'  => $donors,
-                'members' => $members,
-            ],
-            'formatted' => [
-                'total'   => $total_formatted,
-                'count'   => number_format( $count ),
-                'donors'  => number_format( $donors ),
-                'members' => number_format( $members ),
-            ],
-            'animated' => [
-                'total'   => 0,
-                'count'   => 0,
-                'donors'  => 0,
-                'members' => 0,
-            ],
-            'isAnimated' => false,
-        ]
-    );
-}
-
 // Context for this block instance.
+// Its figures live in its own context. They used to be shared state, so with
+// two Donor Stats blocks on a page (say, this year and all time) both showed
+// the last one's figures once the page loaded (#64).
 $context = [
     'period'          => $period,
     'refreshInterval' => $refresh_interval,
     'animateNumbers'  => $animate_numbers,
+    'stats'           => [
+        'total'   => $stats,
+        'count'   => $count,
+        'donors'  => $donors,
+        'members' => $members,
+    ],
+    'formatted'       => [
+        'total'   => $total_formatted,
+        'count'   => number_format( $count ),
+        'donors'  => number_format( $donors ),
+        'members' => number_format( $members ),
+    ],
+    'isAnimated'      => false,
+    'isAnimating'     => false,
 ];
 
 // Build wrapper attributes.
@@ -108,8 +97,8 @@ if ( $animate_numbers ) {
             <span 
                 class="sd-stat-value" 
                 <?php if ( $animate_numbers ) : ?>
-                data-wp-text="state.formatted.total"
-                data-wp-class--is-animating="state.isAnimating"
+                data-wp-text="context.formatted.total"
+                data-wp-class--is-animating="context.isAnimating"
                 <?php endif; ?>
             >
                 <?php echo esc_html( $total_formatted ); ?>
@@ -130,7 +119,7 @@ if ( $animate_numbers ) {
             <span 
                 class="sd-stat-value"
                 <?php if ( $animate_numbers ) : ?>
-                data-wp-text="state.formatted.count"
+                data-wp-text="context.formatted.count"
                 <?php endif; ?>
             >
                 <?php echo esc_html( number_format( $count ) ); ?>
@@ -151,7 +140,7 @@ if ( $animate_numbers ) {
             <span 
                 class="sd-stat-value"
                 <?php if ( $animate_numbers ) : ?>
-                data-wp-text="state.formatted.donors"
+                data-wp-text="context.formatted.donors"
                 <?php endif; ?>
             >
                 <?php echo esc_html( number_format( $donors ) ); ?>
@@ -172,7 +161,7 @@ if ( $animate_numbers ) {
             <span 
                 class="sd-stat-value"
                 <?php if ( $animate_numbers ) : ?>
-                data-wp-text="state.formatted.members"
+                data-wp-text="context.formatted.members"
                 <?php endif; ?>
             >
                 <?php echo esc_html( number_format( $members ) ); ?>
