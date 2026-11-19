@@ -132,7 +132,7 @@ Full changelog: https://github.com/jwincek/shelterkit-donations/blob/main/CHANGE
 == Upgrade Notice ==
 
 = 3.2.0 =
-Fixes family emails, dates on sites not set to UTC, and double-counted memorials. From 2.x, follow migration-scripts/MIGRATION-skdon-prefix.md. After updating: Data Tools → Recalculate, check Settings → General, and review Memorials waiting to notify the family.
+Fixes family emails, dates on sites not set to UTC, and double-counted memorials. From 2.x, first read https://github.com/jwincek/shelterkit-donations/blob/main/migration-scripts/MIGRATION-skdon-prefix.md. Then run Data Tools → Recalculate and check Settings → General.
 
 = 3.1.0 =
 Moves stored data to new names on the first request, and makes refunds count. Back up first. From 2.x, follow migration-scripts/MIGRATION-skdon-prefix.md; afterwards, run Data Tools → Order Records.
