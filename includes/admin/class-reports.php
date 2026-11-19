@@ -919,7 +919,7 @@ class Reports {
                         $bar_h = $max_total > 0 ? ( (float) $bucket['total'] / $max_total ) * $chart_h : 0;
                         $x = $i * ( $bar_w + $bar_gap );
                         $y = $chart_h - $bar_h;
-                        $label = wp_date( $label_format, strtotime( $bucket['period_start'] ) );
+                        $label = wp_date( $label_format, (int) \Starter_Shelter\Helpers\local_timestamp( (string) $bucket['period_start'] ) );
 						?>
                     <g>
                         <rect x="<?php echo (int) $x; ?>" y="<?php echo (float) $y; ?>" width="<?php echo (int) $bar_w; ?>" height="<?php echo (float) $bar_h; ?>"
