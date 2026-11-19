@@ -276,10 +276,10 @@ class Logo_Moderation {
                                 printf(
                                     /* translators: %s: date */
                                     esc_html__( 'Uploaded %s', 'shelterkit-donations' ),
-                                    // upload_date is the post_date string (WP TZ);
-                                    // mysql2date('U') converts to UTC epoch so the
-                                    // comparison against time() is timezone-correct.
-                                    esc_html( human_time_diff( (int) mysql2date( 'U', $logo['upload_date'] ), time() ) . ' ago' )
+                                    // upload_date is the post_date string, in the site's
+                                    // zone. mysql2date( 'U' ) adds the zone's offset, so
+                                    // "just uploaded" read "8 hours ago" (#62).
+                                    esc_html( human_time_diff( (int) Helpers\local_timestamp( (string) $logo['upload_date'] ), time() ) . ' ago' )
                                 );
                                 ?>
                             </p>

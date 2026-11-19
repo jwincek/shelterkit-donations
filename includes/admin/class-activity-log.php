@@ -1439,14 +1439,12 @@ class Activity_Log {
                 <tbody>
                     <?php
                     foreach ( $logs as $log ) :
-                        // created_at is stored as the WP site's local time
-                        // (`current_time('mysql')`). mysql2date with format
-                        // 'U' interprets the string in the WP timezone and
-                        // returns a UTC epoch — safe to hand to wp_date,
-                        // which then formats in the WP timezone again.
-                        // Using strtotime() here would apply the server
-                        // PHP timezone offset, which can differ from WP's.
-                        $log_ts = (int) mysql2date( 'U', $log->created_at );
+                        // created_at is the site's local time
+                        // (`current_time('mysql')`). mysql2date( 'U' ) adds
+                        // the zone's offset to the timestamp, and wp_date()
+                        // then applies it again: on a Los Angeles site every
+                        // entry showed eight hours early (#62).
+                        $log_ts = (int) Helpers\local_timestamp( (string) $log->created_at );
                         ?>
                     <tr>
                         <td class="column-time">
@@ -1934,7 +1932,7 @@ class Activity_Log {
         $runs = self::run_labels( wp_list_pluck( $rows, 'run_id' ) );
         echo '<table class="widefat striped sd-history"><tbody>';
         foreach ( $rows as $row ) {
-            $ts = (int) mysql2date( 'U', $row->created_at );
+            $ts = (int) Helpers\local_timestamp( (string) $row->created_at ); // Not mysql2date( 'U' ), which shifts it by the zone's offset (#62).
             echo '<tr><td style="white-space:nowrap">' . esc_html( wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $ts ) ) . '</td><td>';
             echo esc_html( self::render_message( $row ) );
             self::print_links( $row );
