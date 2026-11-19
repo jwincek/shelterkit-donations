@@ -204,7 +204,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
                 <?php if ( $stats['first_gift_date'] ) : ?>
                 <div class="sd-stat-card">
                     <span class="sd-stat-value">
-                        <?php echo esc_html( wp_date( 'M Y', strtotime( $stats['first_gift_date'] ) ) ); ?>
+                        <?php echo esc_html( \Starter_Shelter\Helpers\format_date( (string) $stats['first_gift_date'], 'M Y' ) ); ?>
                     </span>
                     <span class="sd-stat-label"><?php esc_html_e( 'Donor Since', 'shelterkit-donations' ); ?></span>
                 </div>
@@ -235,7 +235,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
                         printf(
                             /* translators: %s: expiration date */
                             esc_html__( 'Renews: %s', 'shelterkit-donations' ),
-                            esc_html( wp_date( get_option( 'date_format' ), strtotime( $membership['end'] ) ) )
+                            esc_html( \Starter_Shelter\Helpers\format_date( (string) $membership['end'] ) )
                         );
                         ?>
                     </p>

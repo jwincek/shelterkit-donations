@@ -86,6 +86,45 @@ function order_ids_with_meta( string $meta_key, int $limit = -1 ): array {
 }
 
 /**
+ * A date the plugin stored, read in the site's time zone (#62).
+ *
+ * Dates are stored as the site's local time: "2026-03-01 14:05:00", or a
+ * day, "2026-03-01". strtotime() reads them as UTC, and wp_date() then shows
+ * that moment in the site's zone. So on a site west of UTC every date showed
+ * hours early, and a day-only date showed as the day before; the editor saved
+ * the shifted value back. This reads the value as the local time it is.
+ *
+ * Anything DateTimeImmutable accepts works, including relative words
+ * ("monday this week") and an explicit offset, which is then converted to
+ * the site's zone.
+ *
+ * @param string $value A stored date.
+ * @return \DateTimeImmutable|null Null when empty or unreadable.
+ */
+function local_date( string $value ): ?\DateTimeImmutable {
+    $value = trim( $value );
+    if ( '' === $value ) {
+        return null;
+    }
+    try {
+        return ( new \DateTimeImmutable( $value, wp_timezone() ) )->setTimezone( wp_timezone() );
+    } catch ( \Exception $e ) {
+        return null;
+    }
+}
+
+/**
+ * The moment a stored local date stands for, as a Unix timestamp (#62).
+ *
+ * @param string $value A stored date.
+ * @return int|null Null when empty or unreadable.
+ */
+function local_timestamp( string $value ): ?int {
+    $date = local_date( $value );
+    return $date ? $date->getTimestamp() : null;
+}
+
+/**
  * Format a date for display.
  *
  * @since 1.0.0
@@ -103,8 +142,8 @@ function format_date( string $date, string $format = '' ): string {
         $format = get_option( 'date_format', 'F j, Y' );
     }
 
-    $timestamp = strtotime( $date );
-    if ( false === $timestamp ) {
+    $timestamp = local_timestamp( $date );
+    if ( null === $timestamp ) {
         return $date;
     }
 
@@ -127,8 +166,8 @@ function format_datetime( string $datetime ): string {
     $date_format = get_option( 'date_format', 'F j, Y' );
     $time_format = get_option( 'time_format', 'g:i a' );
 
-    $timestamp = strtotime( $datetime );
-    if ( false === $timestamp ) {
+    $timestamp = local_timestamp( $datetime );
+    if ( null === $timestamp ) {
         return $datetime;
     }
 
@@ -627,7 +666,7 @@ function get_date_range_for_period(
             'end'   => wp_date( 'Y-m-d' ),
         ],
         'week' => [
-            'start' => wp_date( 'Y-m-d', strtotime( 'monday this week' ) ),
+            'start' => local_date( 'monday this week' )->format( 'Y-m-d' ),
             'end'   => wp_date( 'Y-m-d' ),
         ],
         'month' => [
@@ -748,7 +787,7 @@ function get_current_quarter_range( ?int $year = null ): array {
 
     return [
         'start' => sprintf( '%d-%02d-01', $year, $start_month ),
-        'end'   => wp_date( 'Y-m-t', strtotime( sprintf( '%d-%02d-01', $year, $end_month ) ) ),
+        'end'   => local_date( sprintf( '%d-%02d-01', $year, $end_month ) )->format( 'Y-m-t' ),
     ];
 }
 
