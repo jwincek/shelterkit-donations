@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-19T03:44:21+00:00\n"
+"POT-Creation-Date: 2026-11-19T04:48:03+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: shelterkit-donations\n"
@@ -95,22 +95,22 @@ msgstr ""
 msgid "No active campaign found."
 msgstr ""
 
-#: blocks/campaign-card/render.php:185
+#: blocks/campaign-card/render.php:190
 #: includes/admin/class-reports.php:833
 msgid "Ended"
 msgstr ""
 
-#: blocks/campaign-card/render.php:223
+#: blocks/campaign-card/render.php:228
 #: includes/admin/class-reports.php:1334
 msgid "Joined"
 msgstr ""
 
-#: blocks/campaign-card/render.php:228
+#: blocks/campaign-card/render.php:233
 #: includes/admin/class-reports.php:1332
 msgid "Raised"
 msgstr ""
 
-#: blocks/campaign-card/render.php:238
+#: blocks/campaign-card/render.php:243
 #: includes/admin/class-campaign-admin.php:176
 #: includes/admin/class-campaign-admin.php:218
 #: includes/admin/class-reports.php:768
@@ -118,22 +118,22 @@ msgstr ""
 msgid "Goal"
 msgstr ""
 
-#: blocks/campaign-card/render.php:247
+#: blocks/campaign-card/render.php:252
 #: includes/admin/class-dashboard-widget.php:439
 #: assets/js/admin-import-export.js:937
 msgid "Donors"
 msgstr ""
 
-#: blocks/campaign-card/render.php:256
+#: blocks/campaign-card/render.php:261
 msgid "Deadline"
 msgstr ""
 
-#: blocks/campaign-card/render.php:271
+#: blocks/campaign-card/render.php:276
 #: blocks/membership-form/render.php:27
 msgid "Join Now"
 msgstr ""
 
-#: blocks/campaign-card/render.php:272
+#: blocks/campaign-card/render.php:277
 #: includes/woocommerce/class-my-account.php:1082
 msgid "Donate Now"
 msgstr ""
@@ -189,14 +189,14 @@ msgstr ""
 
 #: blocks/donation-form/render.php:50
 #: includes/blocks/register-editor.php:106
-#: includes/core/helpers.php:1112
+#: includes/core/helpers.php:1151
 #: includes/rest/class-rest-controller.php:575
 msgid "General Fund"
 msgstr ""
 
 #: blocks/donation-form/render.php:51
 #: includes/blocks/register-editor.php:107
-#: includes/core/helpers.php:1113
+#: includes/core/helpers.php:1152
 #: includes/rest/class-rest-controller.php:576
 msgid "Medical Care"
 msgstr ""
@@ -222,7 +222,7 @@ msgid "Direct Your Gift"
 msgstr ""
 
 #: blocks/donation-form/render.php:146
-#: includes/admin/class-quick-actions.php:348
+#: includes/admin/class-quick-actions.php:361
 #: includes/woocommerce/class-cart-handler.php:542
 #: includes/woocommerce/class-cart-handler.php:576
 #: templates/emails/donation-receipt.php:58
@@ -298,28 +298,28 @@ msgstr ""
 
 #: blocks/donor-dashboard/render.php:172
 #: includes/admin/class-list-columns.php:513
-#: includes/admin/class-quick-actions.php:690
+#: includes/admin/class-quick-actions.php:702
 #: includes/blocks/register-stores.php:121
 msgid "Bronze"
 msgstr ""
 
 #: blocks/donor-dashboard/render.php:173
 #: includes/admin/class-list-columns.php:514
-#: includes/admin/class-quick-actions.php:691
+#: includes/admin/class-quick-actions.php:703
 #: includes/blocks/register-stores.php:122
 msgid "Silver"
 msgstr ""
 
 #: blocks/donor-dashboard/render.php:174
 #: includes/admin/class-list-columns.php:515
-#: includes/admin/class-quick-actions.php:692
+#: includes/admin/class-quick-actions.php:704
 #: includes/blocks/register-stores.php:123
 msgid "Gold"
 msgstr ""
 
 #: blocks/donor-dashboard/render.php:175
 #: includes/admin/class-list-columns.php:516
-#: includes/admin/class-quick-actions.php:693
+#: includes/admin/class-quick-actions.php:705
 #: includes/blocks/register-stores.php:124
 msgid "Platinum"
 msgstr ""
@@ -329,7 +329,7 @@ msgstr ""
 #: includes/admin/class-list-columns.php:115
 #: includes/admin/class-list-columns.php:153
 #: includes/admin/class-memorial-quick-add.php:660
-#: includes/admin/class-quick-actions.php:331
+#: includes/admin/class-quick-actions.php:344
 #: includes/admin/class-reports.php:400
 #: includes/admin/class-reports.php:684
 #: includes/admin/class-reports.php:1099
@@ -391,32 +391,32 @@ msgstr ""
 msgid "Recent Gifts"
 msgstr ""
 
-#: blocks/donor-dashboard/render.php:271
+#: blocks/donor-dashboard/render.php:273
 msgid "View All Gifts →"
 msgstr ""
 
-#: blocks/donor-dashboard/render.php:281
+#: blocks/donor-dashboard/render.php:285
 msgid "Make a Gift"
 msgstr ""
 
-#: blocks/donor-dashboard/render.php:285
+#: blocks/donor-dashboard/render.php:289
 msgid "Update Profile"
 msgstr ""
 
-#: blocks/donor-stats/render.php:117
+#: blocks/donor-stats/render.php:106
 #: includes/admin/class-reports.php:316
 msgid "Total Donations"
 msgstr ""
 
-#: blocks/donor-stats/render.php:138
+#: blocks/donor-stats/render.php:127
 msgid "Donations Made"
 msgstr ""
 
-#: blocks/donor-stats/render.php:159
+#: blocks/donor-stats/render.php:148
 msgid "Generous Donors"
 msgstr ""
 
-#: blocks/donor-stats/render.php:180
+#: blocks/donor-stats/render.php:169
 #: includes/admin/class-menu.php:119
 msgid "Active Members"
 msgstr ""
@@ -435,7 +435,7 @@ msgstr ""
 
 #: blocks/membership-form/render.php:125
 #: includes/admin/class-list-columns.php:325
-#: includes/admin/class-quick-actions.php:628
+#: includes/admin/class-quick-actions.php:640
 #: includes/admin/legacy-sync/class-order-scanner.php:441
 #: blocks/membership-form/edit.js:38
 msgid "Individual"
@@ -443,7 +443,7 @@ msgstr ""
 
 #: blocks/membership-form/render.php:131
 #: includes/admin/class-list-columns.php:327
-#: includes/admin/class-quick-actions.php:630
+#: includes/admin/class-quick-actions.php:642
 #: includes/admin/legacy-sync/class-order-scanner.php:440
 msgid "Business"
 msgstr ""
@@ -548,7 +548,7 @@ msgstr ""
 #: blocks/memorial-form/render.php:91
 #: blocks/memorial-wall/render.php:300
 #: includes/blocks/register-stores.php:110
-#: includes/core/helpers.php:513
+#: includes/core/helpers.php:552
 #: includes/woocommerce/class-cart-handler.php:537
 #: templates/emails/memorial-confirmation.php:57
 #: assets/js/admin-import-export.js:765
@@ -559,9 +559,9 @@ msgstr ""
 
 #: blocks/memorial-form/render.php:99
 #: blocks/memorial-wall/render.php:301
-#: includes/admin/class-quick-actions.php:647
+#: includes/admin/class-quick-actions.php:659
 #: includes/blocks/register-stores.php:109
-#: includes/core/helpers.php:512
+#: includes/core/helpers.php:551
 #: includes/woocommerce/class-cart-handler.php:536
 #: templates/emails/memorial-confirmation.php:57
 #: templates/emails/memorial-family-notification-plain.php:58
@@ -580,9 +580,9 @@ msgstr ""
 #: blocks/memorial-wall/render.php:497
 #: includes/admin/class-list-columns.php:420
 #: includes/admin/class-memorial-quick-add.php:875
-#: includes/admin/class-quick-actions.php:645
+#: includes/admin/class-quick-actions.php:657
 #: includes/blocks/register-stores.php:114
-#: includes/core/helpers.php:457
+#: includes/core/helpers.php:496
 #: includes/woocommerce/class-cart-handler.php:549
 #: assets/js/memorial-panel.js:141
 #: blocks/memorial-form/edit.js:71
@@ -594,10 +594,10 @@ msgstr ""
 #: blocks/memorial-wall/render.php:497
 #: includes/admin/class-list-columns.php:421
 #: includes/admin/class-memorial-quick-add.php:875
-#: includes/admin/class-quick-actions.php:646
+#: includes/admin/class-quick-actions.php:658
 #: includes/blocks/register-stores.php:113
 #: includes/blocks/register-stores.php:115
-#: includes/core/helpers.php:456
+#: includes/core/helpers.php:495
 #: includes/woocommerce/class-cart-handler.php:550
 #: assets/js/memorial-panel.js:142
 #: blocks/memorial-form/edit.js:72
@@ -693,8 +693,8 @@ msgid "Search"
 msgstr ""
 
 #: blocks/memorial-wall/render.php:286
-#: includes/admin/class-quick-actions.php:627
-#: includes/admin/class-quick-actions.php:644
+#: includes/admin/class-quick-actions.php:639
+#: includes/admin/class-quick-actions.php:656
 #: assets/js/admin-legacy-sync.js:101
 msgid "All Types"
 msgstr ""
@@ -755,7 +755,7 @@ msgid "Loading…"
 msgstr ""
 
 #: blocks/memorial-wall/render.php:512
-#: includes/core/helpers.php:224
+#: includes/core/helpers.php:263
 msgid "A Friend"
 msgstr ""
 
@@ -827,8 +827,8 @@ msgid "Proceed to Checkout"
 msgstr ""
 
 #: includes/abilities/donations.php:103
-#: includes/admin/class-quick-actions.php:252
-#: includes/admin/class-quick-actions.php:288
+#: includes/admin/class-quick-actions.php:265
+#: includes/admin/class-quick-actions.php:301
 msgid "Donation not found."
 msgstr ""
 
@@ -838,7 +838,7 @@ msgstr ""
 #: includes/abilities/donors.php:176
 #: includes/abilities/donors.php:251
 #: includes/abilities/reports.php:62
-#: includes/admin/class-quick-actions.php:207
+#: includes/admin/class-quick-actions.php:220
 #: includes/rest/class-rest-controller.php:351
 msgid "Donor not found."
 msgstr ""
@@ -854,7 +854,7 @@ msgstr ""
 #: includes/abilities/memberships.php:139
 #: includes/abilities/memberships.php:209
 #: includes/abilities/memberships.php:420
-#: includes/admin/class-quick-actions.php:73
+#: includes/admin/class-quick-actions.php:87
 msgid "Membership not found."
 msgstr ""
 
@@ -1668,7 +1668,7 @@ msgstr ""
 #: includes/admin/class-list-columns.php:145
 #: includes/admin/class-privacy.php:155
 #: includes/admin/class-privacy.php:189
-#: includes/admin/class-quick-actions.php:327
+#: includes/admin/class-quick-actions.php:340
 #: includes/admin/class-reports.php:399
 #: includes/admin/class-reports.php:685
 #: includes/admin/class-reports.php:1098
@@ -1875,7 +1875,7 @@ msgstr ""
 
 #: includes/admin/class-dashboard-widget.php:367
 #: includes/admin/class-list-columns.php:233
-#: includes/admin/class-quick-actions.php:335
+#: includes/admin/class-quick-actions.php:348
 #: includes/admin/class-reports.php:413
 #: includes/admin/class-reports.php:697
 #: includes/admin/class-reports.php:1104
@@ -2315,7 +2315,7 @@ msgid "Amount"
 msgstr ""
 
 #: includes/admin/class-list-columns.php:116
-#: includes/admin/class-quick-actions.php:343
+#: includes/admin/class-quick-actions.php:356
 #: includes/admin/class-reports.php:342
 #: includes/admin/class-reports.php:402
 #: includes/admin/class-reports.php:1102
@@ -2422,7 +2422,7 @@ msgid "Level"
 msgstr ""
 
 #: includes/admin/class-list-columns.php:326
-#: includes/admin/class-quick-actions.php:629
+#: includes/admin/class-quick-actions.php:641
 msgid "Family"
 msgstr ""
 
@@ -2433,7 +2433,7 @@ msgid "Expiring Soon"
 msgstr ""
 
 #: includes/admin/class-list-columns.php:342
-#: includes/admin/class-quick-actions.php:621
+#: includes/admin/class-quick-actions.php:633
 #: includes/admin/class-reports.php:504
 #: includes/admin/class-reports.php:580
 #: includes/admin/class-reports.php:832
@@ -2444,7 +2444,7 @@ msgid "Active"
 msgstr ""
 
 #: includes/admin/class-list-columns.php:345
-#: includes/admin/class-quick-actions.php:623
+#: includes/admin/class-quick-actions.php:635
 #: includes/admin/class-reports.php:580
 #: includes/admin/class-reports.php:1227
 #: includes/admin/class-reports.php:1393
@@ -2478,24 +2478,24 @@ msgid "Review"
 msgstr ""
 
 #: includes/admin/class-list-columns.php:476
-#: includes/admin/class-quick-actions.php:654
+#: includes/admin/class-quick-actions.php:666
 msgid "Not Requested"
 msgstr ""
 
 #: includes/admin/class-list-columns.php:478
-#: includes/admin/class-quick-actions.php:653
+#: includes/admin/class-quick-actions.php:665
 msgid "Sent"
 msgstr ""
 
 #: includes/admin/class-list-columns.php:481
 #: includes/admin/class-logo-moderation.php:196
-#: includes/admin/class-quick-actions.php:652
+#: includes/admin/class-quick-actions.php:664
 #: includes/admin/class-reports.php:703
 msgid "Pending"
 msgstr ""
 
 #: includes/admin/class-list-columns.php:512
-#: includes/admin/class-quick-actions.php:689
+#: includes/admin/class-quick-actions.php:701
 msgid "New"
 msgstr ""
 
@@ -2509,7 +2509,7 @@ msgid "View Receipt"
 msgstr ""
 
 #: includes/admin/class-list-columns.php:691
-#: includes/admin/class-meta-boxes.php:255
+#: includes/admin/class-meta-boxes.php:257
 msgid "View Order"
 msgstr ""
 
@@ -2518,7 +2518,7 @@ msgid "Send Reminder"
 msgstr ""
 
 #: includes/admin/class-list-columns.php:708
-#: includes/admin/class-quick-actions.php:423
+#: includes/admin/class-quick-actions.php:436
 msgid "Extend 30 Days"
 msgstr ""
 
@@ -2814,7 +2814,7 @@ msgid "Memorial %s"
 msgstr ""
 
 #: includes/admin/class-memorial-quick-add.php:657
-#: includes/admin/class-meta-boxes.php:237
+#: includes/admin/class-meta-boxes.php:239
 #: assets/js/admin-import-export.js:142
 msgid "Remove"
 msgstr ""
@@ -3006,29 +3006,29 @@ msgstr ""
 msgid "View Memorials"
 msgstr ""
 
-#: includes/admin/class-meta-boxes.php:190
+#: includes/admin/class-meta-boxes.php:192
 #: assets/js/memorial-panel.js:151
 msgid "— Select —"
 msgstr ""
 
-#: includes/admin/class-meta-boxes.php:202
+#: includes/admin/class-meta-boxes.php:204
 msgid "— Select Tier —"
 msgstr ""
 
-#: includes/admin/class-meta-boxes.php:236
-#: includes/admin/class-meta-boxes.php:427
+#: includes/admin/class-meta-boxes.php:238
+#: includes/admin/class-meta-boxes.php:518
 msgid "Select Image"
 msgstr ""
 
-#: includes/admin/class-meta-boxes.php:250
+#: includes/admin/class-meta-boxes.php:252
 msgid "— No User —"
 msgstr ""
 
-#: includes/admin/class-meta-boxes.php:257
+#: includes/admin/class-meta-boxes.php:259
 msgid "Not linked to an order"
 msgstr ""
 
-#: includes/admin/class-meta-boxes.php:427
+#: includes/admin/class-meta-boxes.php:518
 msgid "Use this image"
 msgstr ""
 
@@ -3136,75 +3136,75 @@ msgstr ""
 msgid "View details"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:68
-#: includes/admin/class-quick-actions.php:106
-#: includes/admin/class-quick-actions.php:158
-#: includes/admin/class-quick-actions.php:202
-#: includes/admin/class-quick-actions.php:247
-#: includes/admin/class-quick-actions.php:283
+#: includes/admin/class-quick-actions.php:82
+#: includes/admin/class-quick-actions.php:120
+#: includes/admin/class-quick-actions.php:171
+#: includes/admin/class-quick-actions.php:215
+#: includes/admin/class-quick-actions.php:260
+#: includes/admin/class-quick-actions.php:296
 msgid "Invalid request."
 msgstr ""
 
 #. translators: 1: new end date, 2: admin user
-#: includes/admin/class-quick-actions.php:126
+#: includes/admin/class-quick-actions.php:139
 #, php-format
 msgid "Membership extended to %1$s by %2$s"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:298
-#: includes/admin/class-quick-actions.php:314
+#: includes/admin/class-quick-actions.php:311
+#: includes/admin/class-quick-actions.php:327
 msgid "Donation Receipt"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:323
+#: includes/admin/class-quick-actions.php:336
 msgid "Receipt #"
 msgstr ""
 
 #. translators: %s: EIN number
-#: includes/admin/class-quick-actions.php:360
+#: includes/admin/class-quick-actions.php:373
 #, php-format
 msgid "Tax ID (EIN): %s"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:366
+#: includes/admin/class-quick-actions.php:379
 msgid "Thank you for your generous support!"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:369
+#: includes/admin/class-quick-actions.php:382
 msgid "Print Receipt"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:395
+#: includes/admin/class-quick-actions.php:408
 msgid "Export Selected"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:422
+#: includes/admin/class-quick-actions.php:435
 msgid "Send Renewal Reminders"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:474
+#: includes/admin/class-quick-actions.php:486
 msgid "Send Family Notifications"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:498
+#: includes/admin/class-quick-actions.php:510
 msgid "Resend Receipts"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:541
+#: includes/admin/class-quick-actions.php:553
 #: includes/core/class-family-notification.php:63
 msgid "The memorial has no family email address."
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:542
+#: includes/admin/class-quick-actions.php:554
 msgid "The Memorial Family Notification email is turned off under WooCommerce → Settings → Emails."
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:544
+#: includes/admin/class-quick-actions.php:556
 msgid "Check that the Memorial Family Notification email is turned on under WooCommerce → Settings → Emails, and that the site can send email."
 msgstr ""
 
 #. translators: %d: number of families.
-#: includes/admin/class-quick-actions.php:549
+#: includes/admin/class-quick-actions.php:561
 #, php-format
 msgid "The family email couldn't be sent for %d memorial."
 msgid_plural "The family email couldn't be sent for %d memorials."
@@ -3212,8 +3212,8 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of renewal reminders sent.
-#: includes/admin/class-quick-actions.php:565
-#: includes/admin/class-quick-actions.php:567
+#: includes/admin/class-quick-actions.php:577
+#: includes/admin/class-quick-actions.php:579
 #, php-format
 msgid "%d renewal reminder sent."
 msgid_plural "%d renewal reminders sent."
@@ -3221,7 +3221,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of memberships extended.
-#: includes/admin/class-quick-actions.php:569
+#: includes/admin/class-quick-actions.php:581
 #, php-format
 msgid "%d membership extended by 30 days."
 msgid_plural "%d memberships extended by 30 days."
@@ -3229,70 +3229,70 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of memberships extended.
-#: includes/admin/class-quick-actions.php:571
+#: includes/admin/class-quick-actions.php:583
 #, php-format
 msgid "%d membership extended."
 msgid_plural "%d memberships extended."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/admin/class-quick-actions.php:572
+#: includes/admin/class-quick-actions.php:584
 msgid "Family notification sent."
 msgstr ""
 
 #. translators: %d: number of family notifications sent.
-#: includes/admin/class-quick-actions.php:574
+#: includes/admin/class-quick-actions.php:586
 #, php-format
 msgid "%d family notification sent."
 msgid_plural "%d family notifications sent."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/admin/class-quick-actions.php:575
+#: includes/admin/class-quick-actions.php:587
 msgid "Annual statement sent."
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:576
+#: includes/admin/class-quick-actions.php:588
 msgid "Donation receipt sent."
 msgstr ""
 
 #. translators: %d: number of receipts sent.
-#: includes/admin/class-quick-actions.php:578
+#: includes/admin/class-quick-actions.php:590
 #, php-format
 msgid "%d receipt sent."
 msgid_plural "%d receipts sent."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/admin/class-quick-actions.php:620
+#: includes/admin/class-quick-actions.php:632
 msgid "All Statuses"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:622
+#: includes/admin/class-quick-actions.php:634
 msgid "Expiring Soon (30 days)"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:651
+#: includes/admin/class-quick-actions.php:663
 msgid "All Notifications"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:669
+#: includes/admin/class-quick-actions.php:681
 msgid "All Allocations"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:688
+#: includes/admin/class-quick-actions.php:700
 msgid "All Levels"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:697
+#: includes/admin/class-quick-actions.php:709
 msgid "All Donors"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:698
+#: includes/admin/class-quick-actions.php:710
 msgid "With Membership"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:699
+#: includes/admin/class-quick-actions.php:711
 msgid "Without Membership"
 msgstr ""
 
@@ -3976,7 +3976,7 @@ msgstr ""
 
 #: includes/admin/class-settings.php:1192
 #: includes/core/class-family-notification.php:142
-#: shelterkit-donations.php:481
+#: shelterkit-donations.php:484
 msgid "ShelterKit Donations:"
 msgstr ""
 
@@ -4229,7 +4229,7 @@ msgstr ""
 
 #: includes/admin/shared/class-donor-lookup.php:578
 #: includes/admin/shared/class-donor-lookup.php:581
-#: includes/core/helpers.php:212
+#: includes/core/helpers.php:251
 msgid "Anonymous Donor"
 msgstr ""
 
@@ -4260,19 +4260,19 @@ msgid "— Select Campaign —"
 msgstr ""
 
 #: includes/blocks/register-editor.php:108
-#: includes/core/helpers.php:1114
+#: includes/core/helpers.php:1153
 #: includes/rest/class-rest-controller.php:577
 msgid "Food & Supplies"
 msgstr ""
 
 #: includes/blocks/register-editor.php:109
-#: includes/core/helpers.php:1115
+#: includes/core/helpers.php:1154
 #: includes/rest/class-rest-controller.php:578
 msgid "Facility Improvements"
 msgstr ""
 
 #: includes/blocks/register-editor.php:110
-#: includes/core/helpers.php:1116
+#: includes/core/helpers.php:1155
 #: includes/rest/class-rest-controller.php:579
 msgid "Rescue Operations"
 msgstr ""
@@ -4383,23 +4383,23 @@ msgstr ""
 msgid "ShelterKit Donations moved its stored data to the new skdon_ names."
 msgstr ""
 
-#: includes/core/helpers.php:561
+#: includes/core/helpers.php:600
 msgid "The donor has no email address."
 msgstr ""
 
-#: includes/core/helpers.php:576
+#: includes/core/helpers.php:615
 msgid "WooCommerce's emails aren't available."
 msgstr ""
 
-#: includes/core/helpers.php:579
+#: includes/core/helpers.php:618
 msgid "This email is turned off under WooCommerce → Settings → Emails."
 msgstr ""
 
-#: includes/core/helpers.php:585
+#: includes/core/helpers.php:624
 msgid "The email could not be sent."
 msgstr ""
 
-#: includes/core/helpers.php:786
+#: includes/core/helpers.php:825
 msgid "A valid email address is required."
 msgstr ""
 
@@ -4897,11 +4897,11 @@ msgstr ""
 msgid "Abilities for generating shelter reports."
 msgstr ""
 
-#: shelterkit-donations.php:482
+#: shelterkit-donations.php:485
 msgid "Some donation products need to be created."
 msgstr ""
 
-#: shelterkit-donations.php:483
+#: shelterkit-donations.php:486
 msgid "Set up products"
 msgstr ""
 

@@ -130,6 +130,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   under Settings, Shelter Details and WooCommerce. (#49)
 
 ### Fixed
+- **Dates were read as UTC, so on a site west of UTC they were wrong.** The
+  plugin stores dates in the site's local time, but read them as UTC and
+  then showed them in the site's time zone. On a site in New York every
+  date showed five hours early, and a day-only date showed as the day
+  before (a membership ending March 1 "ended February 28"). Sites set to
+  UTC saw nothing wrong. (#62)
+  - **The editor saved the shift back.** Opening a donation and pressing
+    Update, with nothing changed, moved it back five hours, each time. On a
+    Pacific-time site, three saves took a gift from 08:04 to 16:04 the day
+    before. Across midnight that moves a gift into another month or year.
+    It also changed the date's format, which made the reports leave a gift
+    out of the last day of a period. Saving a memorial dropped its time.
+    And every save logged a date change nobody made.
+  - **The data it wrote:** CSV imports shifted every date. New memberships
+    could start, and renewals end, a day early. Data Integrity could file a
+    memorial under the wrong year. Reports labelled each month's bar with
+    the month before.
+
+  Dates are now read in the site's time zone everywhere. The editor
+  changes a date only when you do. Dates earlier saves left in the wrong
+  format are put right once, when you update. Times already moved by
+  earlier saves can't be recovered.
 - **Several Campaign Cards on one page all showed the last card's figures.**
   The page drew each card right, then, once it loaded, gave every card the
   last card's progress, total and donors. With three cards that read as two
