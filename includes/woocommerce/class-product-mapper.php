@@ -514,18 +514,4 @@ class Product_Mapper {
             update_post_meta( $record, self::ORDER_ITEM_META, $item_id );
         }
     }
-
-    /**
-     * Get checkout field set for a product type.
-     *
-     * @since 1.0.0
-     *
-     * @param string $product_type The product type (donation, membership, memorial).
-     * @return array Field configuration array.
-     */
-    public static function get_checkout_fields( string $product_type ): array {
-        $field_sets = Config::get_item( 'products', 'checkout_field_sets', [] );
-
-        return $field_sets[ $product_type ] ?? [];
-    }
 }

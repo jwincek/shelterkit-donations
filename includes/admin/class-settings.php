@@ -176,7 +176,7 @@ class Settings {
         }, self::PAGE_SLUG . '_general' );
 
         add_settings_section( 'sd_features', __( 'Features', 'shelterkit-donations' ), function () {
-            echo '<p>' . esc_html__( 'What the donation, membership and memorial forms and the checkout offer. A feature turned off here is off on every form, whatever that form\'s own settings say.', 'shelterkit-donations' ) . '</p>';
+            echo '<p>' . esc_html__( 'What the donation, membership and memorial forms offer. A feature turned off here is off on every form, whatever that form\'s own settings say.', 'shelterkit-donations' ) . '</p>';
         }, self::PAGE_SLUG . '_general' );
 
         add_settings_section( 'sd_data', __( 'Data Management', 'shelterkit-donations' ), function () {
@@ -215,15 +215,15 @@ class Settings {
         // isn't (#49).
         self::add_field( 'feature_anonymous_donations', __( 'Allow Anonymous Donations', 'shelterkit-donations' ), 'sd_features', 'checkbox', [
             'default'     => true,
-            'description' => __( 'Offer donors the choice to keep their name off public lists, on the forms and at checkout. Gifts already marked anonymous stay anonymous, and staff can still mark one by hand.', 'shelterkit-donations' ),
+            'description' => __( 'Offer donors the choice to keep their name off public lists, on the donation, membership and memorial forms. Gifts already marked anonymous stay anonymous, and staff can still mark one by hand.', 'shelterkit-donations' ),
         ], 'general' );
         self::add_field( 'feature_dedications', __( 'Enable Donation Dedications', 'shelterkit-donations' ), 'sd_features', 'checkbox', [
             'default'     => true,
-            'description' => __( 'The optional "Dedication" line at checkout for general donations. Tribute gifts made with the memorial form are not affected.', 'shelterkit-donations' ),
+            'description' => __( 'The optional "Dedication" line on the donation form. Tribute gifts made with the memorial form are not affected.', 'shelterkit-donations' ),
         ], 'general' );
         self::add_field( 'feature_family_notifications', __( 'Enable Memorial Family Notifications', 'shelterkit-donations' ), 'sd_features', 'checkbox', [
             'default'     => true,
-            'description' => __( 'Let donors ask for the honoree\'s family to be told about a tribute gift, on the memorial form and at checkout. Staff can still notify a family from the memorial\'s screen.', 'shelterkit-donations' ),
+            'description' => __( 'Let donors ask for the honoree\'s family to be told about a tribute gift, on the memorial form. Staff can still notify a family from the memorial\'s screen.', 'shelterkit-donations' ),
         ], 'general' );
         self::add_field( 'feature_renewal_reminders', __( 'Send Membership Renewal Reminders', 'shelterkit-donations' ), 'sd_features', 'checkbox', [
             'default' => true,
@@ -1131,7 +1131,7 @@ class Settings {
      * The stored values of the removed settings are deleted.
      *
      * Hooked early on `init` on every request, not only in wp-admin, because
-     * the forms and the checkout read the switches.
+     * the forms and the cart read the switches.
      */
     public static function maybe_upgrade(): void {
         if ( (int) get_option( self::VERSION_OPTION, 0 ) >= self::VERSION ) {

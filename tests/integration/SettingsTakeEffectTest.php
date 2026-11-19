@@ -142,12 +142,15 @@ final class SettingsTakeEffectTest extends WP_UnitTestCase {
 		$on = $this->forms();
 		$this->assertSame( 3, substr_count( $on, 'sd-anonymous-section' ), 'Each form offers it while the site does.' );
 		$this->assertStringContainsString( 'sd-family-section', $on );
+		$this->assertStringContainsString( 'sd-dedication-section', $on, 'The donation form\'s dedication line (#57).' );
+		$this->assertStringContainsString( 'sd-species-section', $on, 'The memorial form asks a pet\'s species (#57).' );
 
-		update_option( self::OPTION, [ 'feature_anonymous_donations' => false, 'feature_family_notifications' => false ] );
+		update_option( self::OPTION, [ 'feature_anonymous_donations' => false, 'feature_family_notifications' => false, 'feature_dedications' => false ] );
 		$off = $this->forms();
 
 		$this->assertStringNotContainsString( 'sd-anonymous-section', $off, 'The site-wide switch beats each form\'s own.' );
 		$this->assertStringNotContainsString( 'sd-family-section', $off );
+		$this->assertStringNotContainsString( 'sd-dedication-section', $off );
 		$this->assertStringContainsString( 'data-wp-interactive', $off, 'The forms themselves still render.' );
 	}
 

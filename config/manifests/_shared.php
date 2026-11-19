@@ -6,12 +6,13 @@
  * manifest" — `Field_Manifest::list_entities()` filters these out so
  * the merged entities.json doesn't accidentally gain a "_shared" entry.
  * `Field_Manifest::list_all_manifests()` includes them; share-aware
- * accessors (`get_checkout_fields`, etc.) iterate the wider list.
+ * accessors iterate the wider list.
  *
- * What belongs here: fields and checkout/admin/email surface declarations
- * that aren't owned by any single entity. Today: just the `is_anonymous`
- * checkout flag, used across all four product types (donation,
- * membership, business_membership, memorial). Future candidates could
+ * What belongs here: fields and admin/email surface declarations that
+ * aren't owned by any single entity. Today: just the `is_anonymous` flag,
+ * used across all four product types (donation, membership,
+ * business_membership, memorial). The forms collect it; there are no
+ * checkout fields (#57). Future candidates could
  * include audit timestamps (created_at, updated_at) or other genuinely
  * cross-cutting concepts.
  *
@@ -41,14 +42,6 @@ return [
 				'input_type'  => 'checkbox',
 				'description' => 'Your name will not be publicly listed.',
 			],
-		],
-	],
-	'checkout_fields' => [
-		'is_anonymous' => [
-			'required' => false,
-			'priority' => 10,
-			'class'    => [ 'form-row-wide' ],
-			// No `product_types`: applies to all checkout flows.
 		],
 	],
 ];

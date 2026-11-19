@@ -23,6 +23,9 @@ $show_send_card        = $attributes['showSendCard'] ?? true;
 $title                 = $attributes['title'] ?? __( 'Give in Memory or Honor', 'shelterkit-donations' );
 $subtitle              = $attributes['subtitle'] ?? __( 'Honor a loved one with a meaningful tribute gift.', 'shelterkit-donations' );
 $submit_text           = $attributes['submitButtonText'] ?? __( 'Add Memorial Gift to Cart', 'shelterkit-donations' );
+// Species for a pet, on the form (#57): it used to be a checkout field, which
+// the block checkout never shows.
+$pet_species           = (array) \Starter_Shelter\Core\Config::get_item( 'settings', 'pet_species', [] );
 $min_amount            = $attributes['minAmount'] ?? 10;
 $max_amount            = $attributes['maxAmount'] ?? 100000;
 
@@ -35,7 +38,7 @@ wp_interactivity_state( 'shelter-donations/memorial-form', [
         $form_id => [
             'amount' => $default_amount, 'customAmount' => '', 'isAnonymous' => false,
             'dedicationType' => $default_ded_type, 'honoreeType' => $default_honoree_type,
-            'honoreeName' => '', 'tributeMessage' => '',
+            'honoreeName' => '', 'petSpecies' => '', 'tributeMessage' => '',
             'notifyFamily' => false, 'familyName' => '', 'familyEmail' => '', 'familyAddress' => '', 'sendCard' => false, 'donorName' => '',
             'isProcessing' => false, 'error' => null, 'success' => null,
         ],
@@ -132,6 +135,25 @@ $wrapper = get_block_wrapper_attributes( [
                 placeholder="<?php esc_attr_e( 'Enter their name...', 'shelterkit-donations' ); ?>"
                 data-wp-on--input="actions.setHonoreeName" data-wp-bind--value="state.form.honoreeName">
         </div>
+
+        <?php if ( $pet_species ) : ?>
+        <!-- Species, for a pet -->
+        <div class="sd-form-section sd-species-section<?php echo 'pet' === $default_honoree_type ? '' : ' sd-collapsed'; ?>"
+            data-wp-class--sd-collapsed="!state.isPetHonoree">
+            <label for="<?php echo esc_attr( $form_id ); ?>-species" class="sd-section-label">
+                <?php esc_html_e( 'Species', 'shelterkit-donations' ); ?>
+                <span class="sd-optional">(<?php esc_html_e( 'Optional', 'shelterkit-donations' ); ?>)</span>
+            </label>
+            <div class="sd-select-wrapper">
+                <select id="<?php echo esc_attr( $form_id ); ?>-species" class="sd-select" data-wp-on--change="actions.setPetSpecies" data-wp-bind--value="state.form.petSpecies">
+                    <option value=""><?php esc_html_e( '—', 'shelterkit-donations' ); ?></option>
+                    <?php foreach ( $pet_species as $value => $label ) : ?>
+                        <option value="<?php echo esc_attr( (string) $value ); ?>"><?php echo esc_html( (string) $label ); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+        </div>
+        <?php endif; ?>
 
         <?php
         // Amount selector (shared partial).

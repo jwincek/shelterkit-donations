@@ -202,9 +202,6 @@ function starter_shelter_woocommerce_init(): void {
     // Refunds and cancellations reach the records orders produced (#34).
     Starter_Shelter\WooCommerce\Refund_Handler::init();
 
-    // Initialize checkout fields (dynamic fields based on cart).
-    Starter_Shelter\WooCommerce\Checkout_Fields::init();
-
     // Initialize cart handler (AJAX add-to-cart for donation forms).
     Starter_Shelter\WooCommerce\Cart_Handler::init();
 

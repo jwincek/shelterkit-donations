@@ -146,7 +146,7 @@ return [
 			'format'      => 'date-time',
 			'description' => 'When the membership was cancelled (if applicable)',
 		],
-		// Declared on the entity (not just the shared checkout field) so it
+		// Declared on the entity (not only in _shared) so it
 		// hydrates and is persisted by create() — required for the public
 		// recognition wall to honor a member's opt-out. Mirrors skdon_memorial.
 		'is_anonymous' => [
@@ -480,7 +480,7 @@ return [
 	 * each one exists in the referenced ability's declared input.
 	 *
 	 * Install-state data (legacy_products.product_ids[]) and cross-product
-	 * configuration (sku_attribute_mapping, checkout_field_sets) stay in
+	 * configuration (sku_attribute_mapping) stay in
 	 * products.json since they're not single-entity definitions.
 	 */
 	'products' => [
@@ -595,29 +595,6 @@ return [
 					'value'  => 'individual',
 				],
 			],
-		],
-	],
-
-	/*
-	 * WooCommerce checkout fields. Each entry overlays per-checkout
-	 * UI attributes (placeholder, required, priority, class,
-	 * product_types, conditional) onto the field's intrinsic `form`
-	 * shape declared in `fields.<name>.form` above. The projector
-	 * derives `meta_key` from `meta_prefix + field_name` and produces
-	 * a config compatible with Checkout_Fields::render_field's
-	 * dispatch.
-	 *
-	 * Common fields (is_anonymous, etc.) are not entity-owned and
-	 * remain in the hard-coded array inside Checkout_Fields until a
-	 * shared-field mechanism exists.
-	 */
-	'checkout_fields' => [
-		'business_name' => [
-			'placeholder'   => 'Your business or organization name',
-			'required'      => true,
-			'priority'      => 10,
-			'class'         => [ 'form-row-wide' ],
-			'product_types' => [ 'business_membership' ],
 		],
 	],
 

@@ -102,6 +102,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   WooCommerce → Settings → Emails → Email sender options. (#49)
 
 ### Removed
+- **The plugin's checkout fields.** (#57)
+  - **Classic checkout:** they asked again for what the forms had already
+    collected. The honoree's name was required there, then ignored.
+  - **Block checkout** (WooCommerce's default): it never showed them.
+
+  Each form now collects everything about its gift. Orders placed through
+  the old fields are still read.
+
+  Also gone is the classic checkout's "Support a Campaign (optional)"
+  choice. A gift is attached to a campaign by the campaign's card or link,
+  or by the donation form's own campaign setting.
 - **Settings that did nothing.** (#49)
   - Email From Name and Email From Address. See the Emails tab.
   - Logo Moderation Notifications. No such email existed. Pending logos
@@ -119,6 +130,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   under Settings, Shelter Details and WooCommerce. (#49)
 
 ### Fixed
+- **The block checkout lost a donation's dedication and a pet's species.**
+  The plugin collected both only in checkout fields, which only
+  WooCommerce's classic checkout shows, so on the block checkout nothing
+  offered them.
+  - **The donation form** now has an optional Dedication line. It follows
+    Settings → General → Enable Donation Dedications, and each form can hide
+    it.
+  - **The memorial form** asks for the species when the gift remembers a
+    pet.
+
+  Both reach the order, and the record, with either checkout. (#57)
 - **A family the donor asked to be told was never emailed.** (#58)
   - **At checkout:** the Memorial Family Notification email's condition read
     a field nothing stored, so it never went out, whatever the donor asked.

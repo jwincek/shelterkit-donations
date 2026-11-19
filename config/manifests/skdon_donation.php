@@ -379,34 +379,6 @@ return [
 	],
 
 	/*
-	 * WooCommerce checkout fields (see skdon_membership.php for rationale).
-	 */
-	'checkout_fields' => [
-		'dedication' => [
-			// Override the field's textarea/admin form: at checkout, dedication
-			// renders as a short text input with a different label.
-			'input_type'    => 'text',
-			'label'         => 'Dedication (optional)',
-			'placeholder'   => 'In honor of...',
-			'required'      => false,
-			'priority'      => 20,
-			'class'         => [ 'form-row-wide' ],
-			'product_types' => [ 'donation' ],
-		],
-		// campaign_id lives as a taxonomy relation on the entity, not a
-		// meta field; this overlay is self-contained.
-		'campaign_id' => [
-			'input_type'    => 'select',
-			'label'         => 'Support a Campaign (optional)',
-			'options'       => 'campaigns',
-			'required'      => false,
-			'priority'      => 30,
-			'class'         => [ 'form-row-wide' ],
-			'product_types' => [ 'donation' ],
-		],
-	],
-
-	/*
 	 * Admin meta boxes (see skdon_membership.php for rationale).
 	 */
 	'meta_boxes' => [

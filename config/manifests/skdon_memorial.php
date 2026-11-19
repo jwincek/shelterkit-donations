@@ -14,9 +14,8 @@
  *   `Helpers\get_memorial_notify_family()` returns and the email
  *   placeholders walk; nothing stores it. Core\Prefix_Migration expands
  *   pre-1.1.2 nested rows into the flat keys (#30).
- *   The audit's CC-2 drift between these and the checkout-fields'
- *   `family_*` shorthand keys is preserved verbatim — see the
- *   checkout_fields block below.
+ *   The memorial form collects them onto the cart item; there are no
+ *   checkout fields (#57).
  * - The ability `shelter-memorials/create.input.notify_family`
  *   uses a `$ref` to `schemas/notify-family.json`. The manifest
  *   passes the ref through; Config::resolve_refs resolves it after
@@ -554,90 +553,6 @@ return [
 					],
 				],
 			],
-		],
-	],
-
-	/*
-	 * Checkout fields. The family-notification entries now use the
-	 * canonical `notify_family_*` names matching the entity fields, so
-	 * they can $entity-ref instead of being self-contained (closes the
-	 * audit-flagged CC-2 cart/entity meta-key divergence). The cart-
-	 * handler and the products composite mapping were updated to use
-	 * the same canonical keys; the products mapping retains a fallback
-	 * to the legacy `_skdon_family_*` keys for in-flight orders.
-	 */
-	'checkout_fields' => [
-		'honoree_name' => [
-			// Checkout uses a more specific label than the admin meta-box.
-			'label'         => 'Name of Person or Pet Being Honored',
-			'placeholder'   => 'Enter name',
-			'required'      => true,
-			'priority'      => 10,
-			'class'         => [ 'form-row-wide' ],
-			'product_types' => [ 'memorial' ],
-		],
-		'pet_species' => [
-			'label'         => 'Species (if pet)',
-			'options'       => [
-				''       => 'Not applicable / Human',
-				'dog'    => 'Dog',
-				'cat'    => 'Cat',
-				'bird'   => 'Bird',
-				'rabbit' => 'Rabbit',
-				'other'  => 'Other',
-			],
-			'required'      => false,
-			'priority'      => 15,
-			'class'         => [ 'form-row-wide' ],
-			'product_types' => [ 'memorial' ],
-		],
-		'tribute_message' => [
-			'placeholder'   => 'Share a memory or message...',
-			'required'      => false,
-			'priority'      => 20,
-			'class'         => [ 'form-row-wide' ],
-			'product_types' => [ 'memorial' ],
-		],
-		'notify_family_enabled' => [
-			'label'         => 'Notify family of this tribute',
-			'description'   => 'We will send a card to the family letting them know of your gift.',
-			'required'      => false,
-			'priority'      => 30,
-			'class'         => [ 'form-row-wide' ],
-			'product_types' => [ 'memorial' ],
-		],
-		'notify_family_name' => [
-			'label'         => 'Family Member Name',
-			'required'      => false,
-			'priority'      => 31,
-			'class'         => [ 'form-row-wide', 'sd-family-field' ],
-			'product_types' => [ 'memorial' ],
-			'conditional'   => 'notify_family_enabled',
-		],
-		'notify_family_email' => [
-			'label'         => 'Family Email (for digital notification)',
-			'required'      => false,
-			'priority'      => 32,
-			'class'         => [ 'form-row-first', 'sd-family-field' ],
-			'product_types' => [ 'memorial' ],
-			'conditional'   => 'notify_family_enabled',
-		],
-		'notify_family_address' => [
-			'label'         => 'Family Address (for mailed card)',
-			'placeholder'   => 'Street address, City, State, ZIP',
-			'required'      => false,
-			'priority'      => 33,
-			'class'         => [ 'form-row-wide', 'sd-family-field' ],
-			'product_types' => [ 'memorial' ],
-			'conditional'   => 'notify_family_enabled',
-		],
-		'notify_family_send_card' => [
-			'label'         => 'Send a physical card (in addition to email)',
-			'required'      => false,
-			'priority'      => 34,
-			'class'         => [ 'form-row-wide', 'sd-family-field' ],
-			'product_types' => [ 'memorial' ],
-			'conditional'   => 'notify_family_enabled',
 		],
 	],
 
