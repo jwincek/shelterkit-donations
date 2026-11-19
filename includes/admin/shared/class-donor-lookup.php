@@ -169,6 +169,7 @@ class Donor_Lookup {
 	 *     @type bool   $is_anonymous  Whether this is an anonymous donor.
 	 *     @type string $import_source Source identifier for auditing (e.g. 'legacy_memorial_csv').
 	 *     @type array  $extra_meta    Additional meta to set on creation.
+	 *     @type bool   $force_new     With no email: create a donor even if one has this name.
 	 * }
 	 * @param bool  $create_if_missing Whether to create a new donor if not found.
 	 * @return array{ id: int, created: bool }|\WP_Error
@@ -208,6 +209,12 @@ class Donor_Lookup {
 
 		// Strategy 2: Lookup by display name (legacy data without email).
 		if ( ! empty( $display_name ) ) {
+			// Someone confirmed this is a different person from any donor
+			// with the same name (memorial Quick Add).
+			if ( ! empty( $data['force_new'] ) ) {
+				return self::create_from_name( $data );
+			}
+
 			$donor_id = self::find_by_name( $display_name );
 
 			if ( $donor_id ) {

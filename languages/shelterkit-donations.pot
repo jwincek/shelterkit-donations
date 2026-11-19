@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-18T23:49:31+00:00\n"
+"POT-Creation-Date: 2026-11-19T00:25:25+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: shelterkit-donations\n"
@@ -23,7 +23,7 @@ msgstr ""
 #: includes/woocommerce/class-order-handler.php:498
 #: includes/woocommerce/class-order-handler.php:509
 #: shelterkit-donations.php:128
-#: shelterkit-donations.php:365
+#: shelterkit-donations.php:368
 msgid "ShelterKit Donations"
 msgstr ""
 
@@ -189,14 +189,14 @@ msgstr ""
 
 #: blocks/donation-form/render.php:47
 #: includes/blocks/register-editor.php:106
-#: includes/core/helpers.php:1073
+#: includes/core/helpers.php:1112
 #: includes/rest/class-rest-controller.php:575
 msgid "General Fund"
 msgstr ""
 
 #: blocks/donation-form/render.php:48
 #: includes/blocks/register-editor.php:107
-#: includes/core/helpers.php:1074
+#: includes/core/helpers.php:1113
 #: includes/rest/class-rest-controller.php:576
 msgid "Medical Care"
 msgstr ""
@@ -306,6 +306,7 @@ msgstr ""
 #: includes/admin/class-activity-log.php:1592
 #: includes/admin/class-list-columns.php:115
 #: includes/admin/class-list-columns.php:153
+#: includes/admin/class-memorial-quick-add.php:651
 #: includes/admin/class-quick-actions.php:322
 #: includes/admin/class-reports.php:400
 #: includes/admin/class-reports.php:684
@@ -558,6 +559,7 @@ msgstr ""
 #: blocks/memorial-wall/render.php:483
 #: blocks/memorial-wall/render.php:497
 #: includes/admin/class-list-columns.php:420
+#: includes/admin/class-memorial-quick-add.php:859
 #: includes/admin/class-quick-actions.php:627
 #: includes/blocks/register-stores.php:114
 #: includes/core/helpers.php:457
@@ -571,6 +573,7 @@ msgstr ""
 #: blocks/memorial-wall/render.php:483
 #: blocks/memorial-wall/render.php:497
 #: includes/admin/class-list-columns.php:421
+#: includes/admin/class-memorial-quick-add.php:859
 #: includes/admin/class-quick-actions.php:628
 #: includes/blocks/register-stores.php:113
 #: includes/blocks/register-stores.php:115
@@ -1437,6 +1440,7 @@ msgstr ""
 
 #: includes/admin/class-activity-log.php:1591
 #: includes/admin/class-list-columns.php:140
+#: includes/admin/class-memorial-quick-add.php:679
 msgid "Memorial"
 msgstr ""
 
@@ -2155,6 +2159,7 @@ msgid "%1$s #%2$d: %3$s"
 msgstr ""
 
 #: includes/admin/class-data-integrity.php:579
+#: includes/admin/class-memorial-quick-add.php:681
 msgid "Gift"
 msgstr ""
 
@@ -2261,6 +2266,7 @@ msgid "No orders specified."
 msgstr ""
 
 #: includes/admin/class-list-columns.php:114
+#: includes/admin/class-memorial-quick-add.php:716
 #: includes/admin/class-privacy.php:156
 #: includes/admin/class-reports.php:401
 #: includes/admin/class-reports.php:686
@@ -2463,6 +2469,7 @@ msgid "New"
 msgstr ""
 
 #: includes/admin/class-list-columns.php:549
+#: includes/admin/class-memorial-quick-add.php:727
 msgid "None"
 msgstr ""
 
@@ -2645,6 +2652,270 @@ msgstr ""
 msgid "Bulk rejection"
 msgstr ""
 
+#: includes/admin/class-memorial-quick-add.php:65
+#: includes/admin/class-memorial-quick-add.php:66
+#: includes/admin/class-memorial-quick-add.php:115
+#: includes/admin/class-memorial-quick-add.php:554
+msgid "Quick Add Memorials"
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:105
+msgid "Quick Add"
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:125
+msgid "You do not have permission to add memorials."
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:166
+msgid "Type 2 or more letters of a name or email"
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:167
+msgid "No donor found. Enter a new donor below."
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:168
+msgid "Searching…"
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:195
+msgid "Enter at least one memorial."
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:210
+msgid "Nothing was added. Fix the highlighted fields, then add them again."
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:281
+msgid "That donor no longer exists. Choose another, or enter a new donor."
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:285
+msgid "Choose a donor in the search, or enter a new donor's name."
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:288
+#: includes/admin/class-memorial-quick-add.php:329
+msgid "Enter a valid email address, or leave it empty."
+msgstr ""
+
+#. translators: %s: donor's name.
+#: includes/admin/class-memorial-quick-add.php:296
+#, php-format
+msgid "A donor named “%s” is already on file. Choose them in the search, or tick “This is a different person”."
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:303
+msgid "Enter the name of the person or pet the gift remembers."
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:306
+msgid "Choose person or pet."
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:309
+msgid "Choose a species from the list."
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:314
+msgid "Enter an amount greater than zero."
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:319
+msgid "Enter the date the gift was received."
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:321
+msgid "The date can't be in the future."
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:325
+msgid "That campaign no longer exists."
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:333
+msgid "This donor has no email address. Add one, or untick “Email the donor a confirmation”."
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:435
+msgid "The memorial ability could not be loaded."
+msgstr ""
+
+#. translators: 1: donor's name; 2: donor's email address.
+#. translators: 1: membership start date, 2: membership end date
+#: includes/admin/class-memorial-quick-add.php:535
+#: templates/myaccount/my-memberships.php:108
+#, php-format
+msgid "%1$s — %2$s"
+msgstr ""
+
+#. translators: %s: donor's name.
+#: includes/admin/class-memorial-quick-add.php:537
+#, php-format
+msgid "%s (no email)"
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:555
+msgid "All Memorials"
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:565
+msgid "For memorial gifts received by mail or in person. Each one counts toward the donor's lifetime giving and appears on the memorial wall, as a gift made online does. No one is emailed unless you tick it."
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:578
+msgid "+ Add another memorial"
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:579
+msgid "Add memorials"
+msgstr ""
+
+#. translators: %s: the memorial's number on this screen.
+#: includes/admin/class-memorial-quick-add.php:645
+#, php-format
+msgid "Memorial %s"
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:648
+#: includes/admin/class-meta-boxes.php:237
+#: assets/js/admin-import-export.js:142
+msgid "Remove"
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:653
+msgid "Donor on file"
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:654
+msgid "Search by name or email"
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:662
+msgid "Or a new donor: name"
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:667
+msgid "Email (optional)"
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:673
+msgid "This is a different person: add a new donor"
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:675
+msgid "Keep the donor's name off the memorial"
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:683
+#: includes/admin/class-memorial-quick-add.php:832
+#: includes/admin/class-privacy.php:159
+msgid "In memory of"
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:684
+#: includes/admin/class-memorial-quick-add.php:832
+msgid "In honor of"
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:687
+#: includes/admin/class-privacy.php:125
+msgid "Name"
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:692
+msgid "Who"
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:698
+#: templates/emails/memorial-confirmation.php:62
+msgid "Species"
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:700
+msgid "—"
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:708
+msgid "Tribute message (optional)"
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:714
+msgid "Gift received"
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:720
+msgid "Date received"
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:725
+msgid "Campaign (optional)"
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:739
+msgid "The donor asked for the family to be told"
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:742
+msgid "Family member's name"
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:745
+msgid "Their email"
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:749
+msgid "Their mailing address"
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:753
+msgid "Mail them a card"
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:758
+msgid "Email the donor a confirmation"
+msgstr ""
+
+#. translators: %d: number of memorials added.
+#: includes/admin/class-memorial-quick-add.php:789
+#, php-format
+msgid "Added %d memorial."
+msgid_plural "Added %d memorials."
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: 1: honoree's name; 2: why it failed.
+#: includes/admin/class-memorial-quick-add.php:807
+#, php-format
+msgid "The memorial for %1$s wasn't added: %2$s"
+msgstr ""
+
+#. translators: 1: "In memory of" or "In honor of"; 2: honoree's name; 3: amount; 4: donor's name.
+#: includes/admin/class-memorial-quick-add.php:831
+#, php-format
+msgid "%1$s %2$s, %3$s, from %4$s"
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:836
+msgid "(new donor)"
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:840
+msgid "Confirmation emailed."
+msgstr ""
+
+#. translators: %s: why it wasn't sent.
+#: includes/admin/class-memorial-quick-add.php:842
+#, php-format
+msgid "Confirmation not sent: %s"
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:847
+#: includes/admin/class-settings.php:996
+msgid "Edit"
+msgstr ""
+
 #: includes/admin/class-menu.php:66
 #: includes/admin/class-menu.php:67
 msgid "Dashboard"
@@ -2709,11 +2980,6 @@ msgstr ""
 msgid "Select Image"
 msgstr ""
 
-#: includes/admin/class-meta-boxes.php:237
-#: assets/js/admin-import-export.js:142
-msgid "Remove"
-msgstr ""
-
 #: includes/admin/class-meta-boxes.php:250
 msgid "— No User —"
 msgstr ""
@@ -2737,10 +3003,6 @@ msgstr ""
 
 #: includes/admin/class-privacy.php:122
 msgid "Donor profile"
-msgstr ""
-
-#: includes/admin/class-privacy.php:125
-msgid "Name"
 msgstr ""
 
 #: includes/admin/class-privacy.php:126
@@ -2774,10 +3036,6 @@ msgstr ""
 
 #: includes/admin/class-privacy.php:157
 msgid "Fund"
-msgstr ""
-
-#: includes/admin/class-privacy.php:159
-msgid "In memory of"
 msgstr ""
 
 #: includes/admin/class-privacy.php:160
@@ -3624,10 +3882,6 @@ msgstr ""
 msgid "— Select Product —"
 msgstr ""
 
-#: includes/admin/class-settings.php:996
-msgid "Edit"
-msgstr ""
-
 #: includes/admin/class-settings.php:1006
 msgid "Save Product Settings"
 msgstr ""
@@ -3673,7 +3927,7 @@ msgid "Memorial donations for people or pets."
 msgstr ""
 
 #: includes/admin/class-settings.php:1192
-#: shelterkit-donations.php:476
+#: shelterkit-donations.php:479
 msgid "ShelterKit Donations:"
 msgstr ""
 
@@ -3908,22 +4162,22 @@ msgid "Unknown record type"
 msgstr ""
 
 #. translators: %s: email address or name searched for
-#: includes/admin/shared/class-donor-lookup.php:200
-#: includes/admin/shared/class-donor-lookup.php:223
+#: includes/admin/shared/class-donor-lookup.php:201
+#: includes/admin/shared/class-donor-lookup.php:230
 #, php-format
 msgid "Donor not found: %s"
 msgstr ""
 
-#: includes/admin/shared/class-donor-lookup.php:234
+#: includes/admin/shared/class-donor-lookup.php:241
 msgid "Either email or display_name is required to find or create a donor."
 msgstr ""
 
-#: includes/admin/shared/class-donor-lookup.php:398
+#: includes/admin/shared/class-donor-lookup.php:405
 msgid "Donor display name is empty after sanitization."
 msgstr ""
 
-#: includes/admin/shared/class-donor-lookup.php:571
-#: includes/admin/shared/class-donor-lookup.php:574
+#: includes/admin/shared/class-donor-lookup.php:578
+#: includes/admin/shared/class-donor-lookup.php:581
 #: includes/core/helpers.php:212
 msgid "Anonymous Donor"
 msgstr ""
@@ -3955,19 +4209,19 @@ msgid "— Select Campaign —"
 msgstr ""
 
 #: includes/blocks/register-editor.php:108
-#: includes/core/helpers.php:1075
+#: includes/core/helpers.php:1114
 #: includes/rest/class-rest-controller.php:577
 msgid "Food & Supplies"
 msgstr ""
 
 #: includes/blocks/register-editor.php:109
-#: includes/core/helpers.php:1076
+#: includes/core/helpers.php:1115
 #: includes/rest/class-rest-controller.php:578
 msgid "Facility Improvements"
 msgstr ""
 
 #: includes/blocks/register-editor.php:110
-#: includes/core/helpers.php:1077
+#: includes/core/helpers.php:1116
 #: includes/rest/class-rest-controller.php:579
 msgid "Rescue Operations"
 msgstr ""
@@ -4066,7 +4320,23 @@ msgstr ""
 msgid "ShelterKit Donations moved its stored data to the new skdon_ names."
 msgstr ""
 
-#: includes/core/helpers.php:747
+#: includes/core/helpers.php:561
+msgid "The donor has no email address."
+msgstr ""
+
+#: includes/core/helpers.php:576
+msgid "WooCommerce's emails aren't available."
+msgstr ""
+
+#: includes/core/helpers.php:579
+msgid "This email is turned off under WooCommerce → Settings → Emails."
+msgstr ""
+
+#: includes/core/helpers.php:585
+msgid "The email could not be sent."
+msgstr ""
+
+#: includes/core/helpers.php:786
 msgid "A valid email address is required."
 msgstr ""
 
@@ -4604,11 +4874,11 @@ msgstr ""
 msgid "Abilities for generating shelter reports."
 msgstr ""
 
-#: shelterkit-donations.php:477
+#: shelterkit-donations.php:480
 msgid "Some donation products need to be created."
 msgstr ""
 
-#: shelterkit-donations.php:478
+#: shelterkit-donations.php:481
 msgid "Set up products"
 msgstr ""
 
@@ -5125,10 +5395,6 @@ msgstr ""
 msgid "Memorial Type"
 msgstr ""
 
-#: templates/emails/memorial-confirmation.php:62
-msgid "Species"
-msgstr ""
-
 #: templates/emails/memorial-confirmation.php:67
 msgid "Donation Amount"
 msgstr ""
@@ -5370,12 +5636,6 @@ msgstr ""
 
 #: templates/myaccount/my-memberships.php:99
 msgid "Past Memberships"
-msgstr ""
-
-#. translators: 1: membership start date, 2: membership end date
-#: templates/myaccount/my-memberships.php:108
-#, php-format
-msgid "%1$s — %2$s"
 msgstr ""
 
 #: templates/myaccount/my-memberships.php:118
