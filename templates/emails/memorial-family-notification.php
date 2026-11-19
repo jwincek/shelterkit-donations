@@ -2,7 +2,9 @@
 /**
  * Memorial family notification email template.
  *
- * Sent to family members when someone creates a memorial in honor of their loved one.
+ * Sent to the honoree's family when the donor asked for them to be told: at
+ * checkout, or by staff (Notify Family, Quick Add). Worded for a gift in
+ * memory of someone or in honor of someone living.
  * Override by copying to yourtheme/shelter-donations/emails/memorial-family-notification.php
  *
  * @package Starter_Shelter
@@ -26,8 +28,11 @@ $notify_family = isset( $memorial['id'] )
     ? Helpers\get_memorial_notify_family( (int) $memorial['id'] )
     : [ 'enabled' => false, 'name' => '', 'email' => '', 'address' => '', 'send_card' => false ];
 
-$family_name = '' !== $notify_family['name'] ? $notify_family['name'] : __( 'Dear Friend', 'shelterkit-donations' );
-$is_anonymous = $memorial['is_anonymous'] ?? false;
+$family_name  = '' !== $notify_family['name'] ? $notify_family['name'] : __( 'Friend', 'shelterkit-donations' );
+$is_anonymous = ! empty( $memorial['is_anonymous'] );
+$in_honor     = 'honor' === ( $memorial['dedication_type'] ?? 'memory' );
+$honoree      = '<strong>' . esc_html( $memorial['honoree_name'] ?? '' ) . '</strong>';
+$site         = esc_html( get_bloginfo( 'name' ) );
 
 do_action( 'woocommerce_email_header', $heading, $email );
 ?>
@@ -46,18 +51,24 @@ do_action( 'woocommerce_email_header', $heading, $email );
     <?php
     if ( $is_anonymous ) {
         printf(
-            /* translators: 1: honoree name, 2: site name */
-            esc_html__( 'We wanted to let you know that a generous donor has made a memorial donation to %2$s in loving memory of %1$s.', 'shelterkit-donations' ),
-            '<strong>' . esc_html( $memorial['honoree_name'] ?? '' ) . '</strong>',
-            esc_html( get_bloginfo( 'name' ) )
+            $in_honor
+                /* translators: 1: honoree name, 2: site name */
+                ? esc_html__( 'We wanted to let you know that a generous donor has made a gift to %2$s in honor of %1$s.', 'shelterkit-donations' )
+                /* translators: 1: honoree name, 2: site name */
+                : esc_html__( 'We wanted to let you know that a generous donor has made a memorial donation to %2$s in loving memory of %1$s.', 'shelterkit-donations' ),
+            $honoree, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above, inside <strong>.
+            $site // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above.
         );
     } else {
         printf(
-            /* translators: 1: donor name, 2: site name, 3: honoree name */
-            esc_html__( '%1$s has made a memorial donation to %2$s in loving memory of %3$s.', 'shelterkit-donations' ),
-            '<strong>' . esc_html( Helpers\get_donor_display_name( $donor['first_name'] ?? '', $donor['last_name'] ?? '' ) ) . '</strong>',
-            esc_html( get_bloginfo( 'name' ) ),
-            '<strong>' . esc_html( $memorial['honoree_name'] ?? '' ) . '</strong>'
+            $in_honor
+                /* translators: 1: donor name, 2: site name, 3: honoree name */
+                ? esc_html__( '%1$s has made a gift to %2$s in honor of %3$s.', 'shelterkit-donations' )
+                /* translators: 1: donor name, 2: site name, 3: honoree name */
+                : esc_html__( '%1$s has made a memorial donation to %2$s in loving memory of %3$s.', 'shelterkit-donations' ),
+            '<strong>' . esc_html( $memorial['donor_name'] ?? '' ) . '</strong>',
+            $site, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above.
+            $honoree // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above, inside <strong>.
         );
     }
     ?>
@@ -65,7 +76,7 @@ do_action( 'woocommerce_email_header', $heading, $email );
 
 <div style="background-color: #f8f9fa; padding: 25px; margin: 25px 0; border-radius: 8px; text-align: center;">
     <p style="font-size: 1.2em; margin-bottom: 10px;">
-        <?php esc_html_e( 'In Loving Memory Of', 'shelterkit-donations' ); ?>
+        <?php echo $in_honor ? esc_html__( 'In Honor Of', 'shelterkit-donations' ) : esc_html__( 'In Loving Memory Of', 'shelterkit-donations' ); ?>
     </p>
     <h2 style="font-size: 1.8em; margin: 10px 0; color: #333;">
         <?php echo esc_html( $memorial['honoree_name'] ?? '' ); ?>
@@ -86,7 +97,11 @@ do_action( 'woocommerce_email_header', $heading, $email );
 <?php endif; ?>
 
 <p>
-    <?php esc_html_e( 'This thoughtful gift will help us provide care and comfort to animals in need, creating a meaningful tribute to your loved one\'s memory.', 'shelterkit-donations' ); ?>
+    <?php
+    echo $in_honor
+        ? esc_html__( 'This thoughtful gift will help us provide care and comfort to animals in need.', 'shelterkit-donations' )
+        : esc_html__( 'This thoughtful gift will help us provide care and comfort to animals in need, creating a meaningful tribute to your loved one\'s memory.', 'shelterkit-donations' );
+    ?>
 </p>
 
 <?php if ( ! empty( $memorial['id'] ) ) : ?>
@@ -97,11 +112,15 @@ do_action( 'woocommerce_email_header', $heading, $email );
 <?php endif; ?>
 
 <p>
-    <?php esc_html_e( 'We are deeply honored to be part of this tribute and send our sincere condolences to you and your family.', 'shelterkit-donations' ); ?>
+    <?php
+    echo $in_honor
+        ? esc_html__( 'We are delighted to be part of this tribute.', 'shelterkit-donations' )
+        : esc_html__( 'We are deeply honored to be part of this tribute and send our sincere condolences to you and your family.', 'shelterkit-donations' );
+    ?>
 </p>
 
 <p>
-    <?php esc_html_e( 'With heartfelt sympathy,', 'shelterkit-donations' ); ?><br>
+    <?php echo $in_honor ? esc_html__( 'With warm regards,', 'shelterkit-donations' ) : esc_html__( 'With heartfelt sympathy,', 'shelterkit-donations' ); ?><br>
     <?php echo esc_html( get_bloginfo( 'name' ) ); ?>
 </p>
 

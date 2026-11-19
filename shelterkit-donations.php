@@ -454,6 +454,11 @@ add_action( 'admin_init', [ Starter_Shelter\Core\Allocations::class, 'maybe_migr
 // checkout reads a feature switch.
 add_action( 'init', [ Starter_Shelter\Admin\Settings::class, 'maybe_upgrade' ], 1 );
 
+// The family notification email: recording it when sent, and the one-time
+// repair of the dates the old Notify Family action recorded without sending
+// anything (#58).
+Starter_Shelter\Core\Family_Notification::init();
+
 /**
  * Show admin notice if products need setup.
  *

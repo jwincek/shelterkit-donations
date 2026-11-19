@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-19T00:25:25+00:00\n"
+"POT-Creation-Date: 2026-11-19T01:32:28+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: shelterkit-donations\n"
@@ -263,8 +263,10 @@ msgstr ""
 #: templates/emails/membership-renewal.php:33
 #: templates/emails/membership-welcome-plain.php:22
 #: templates/emails/membership-welcome.php:33
-#: templates/emails/memorial-confirmation-plain.php:22
-#: templates/emails/memorial-confirmation.php:33
+#: templates/emails/memorial-confirmation-plain.php:23
+#: templates/emails/memorial-confirmation.php:34
+#: templates/emails/memorial-family-notification-plain.php:20
+#: templates/emails/memorial-family-notification.php:31
 #: templates/myaccount/donor-dashboard.php:40
 msgid "Friend"
 msgstr ""
@@ -276,38 +278,38 @@ msgstr ""
 
 #: blocks/donor-dashboard/render.php:172
 #: includes/admin/class-list-columns.php:513
-#: includes/admin/class-quick-actions.php:672
+#: includes/admin/class-quick-actions.php:690
 #: includes/blocks/register-stores.php:121
 msgid "Bronze"
 msgstr ""
 
 #: blocks/donor-dashboard/render.php:173
 #: includes/admin/class-list-columns.php:514
-#: includes/admin/class-quick-actions.php:673
+#: includes/admin/class-quick-actions.php:691
 #: includes/blocks/register-stores.php:122
 msgid "Silver"
 msgstr ""
 
 #: blocks/donor-dashboard/render.php:174
 #: includes/admin/class-list-columns.php:515
-#: includes/admin/class-quick-actions.php:674
+#: includes/admin/class-quick-actions.php:692
 #: includes/blocks/register-stores.php:123
 msgid "Gold"
 msgstr ""
 
 #: blocks/donor-dashboard/render.php:175
 #: includes/admin/class-list-columns.php:516
-#: includes/admin/class-quick-actions.php:675
+#: includes/admin/class-quick-actions.php:693
 #: includes/blocks/register-stores.php:124
 msgid "Platinum"
 msgstr ""
 
 #: blocks/donor-dashboard/render.php:177
-#: includes/admin/class-activity-log.php:1592
+#: includes/admin/class-activity-log.php:1600
 #: includes/admin/class-list-columns.php:115
 #: includes/admin/class-list-columns.php:153
-#: includes/admin/class-memorial-quick-add.php:651
-#: includes/admin/class-quick-actions.php:322
+#: includes/admin/class-memorial-quick-add.php:660
+#: includes/admin/class-quick-actions.php:331
 #: includes/admin/class-reports.php:400
 #: includes/admin/class-reports.php:684
 #: includes/admin/class-reports.php:1099
@@ -338,7 +340,7 @@ msgid "Donor Since"
 msgstr ""
 
 #: blocks/donor-dashboard/render.php:219
-#: includes/admin/class-activity-log.php:1590
+#: includes/admin/class-activity-log.php:1598
 #: includes/admin/class-list-columns.php:126
 #: includes/admin/class-list-columns.php:157
 #: includes/admin/class-reports.php:805
@@ -413,7 +415,7 @@ msgstr ""
 
 #: blocks/membership-form/render.php:125
 #: includes/admin/class-list-columns.php:325
-#: includes/admin/class-quick-actions.php:610
+#: includes/admin/class-quick-actions.php:628
 #: includes/admin/legacy-sync/class-order-scanner.php:441
 #: blocks/membership-form/edit.js:38
 msgid "Individual"
@@ -421,7 +423,7 @@ msgstr ""
 
 #: blocks/membership-form/render.php:131
 #: includes/admin/class-list-columns.php:327
-#: includes/admin/class-quick-actions.php:612
+#: includes/admin/class-quick-actions.php:630
 #: includes/admin/legacy-sync/class-order-scanner.php:440
 msgid "Business"
 msgstr ""
@@ -533,7 +535,7 @@ msgstr ""
 #: includes/blocks/register-stores.php:110
 #: includes/core/helpers.php:513
 #: includes/woocommerce/class-cart-handler.php:519
-#: templates/emails/memorial-confirmation.php:53
+#: templates/emails/memorial-confirmation.php:57
 #: assets/js/admin-import-export.js:765
 #: assets/js/memorial-panel.js:131
 #: blocks/memorial-form/edit.js:62
@@ -542,10 +544,13 @@ msgstr ""
 
 #: blocks/memorial-form/render.php:96
 #: blocks/memorial-wall/render.php:301
-#: includes/admin/class-quick-actions.php:629
+#: includes/admin/class-quick-actions.php:647
 #: includes/blocks/register-stores.php:109
 #: includes/core/helpers.php:512
 #: includes/woocommerce/class-cart-handler.php:518
+#: templates/emails/memorial-confirmation.php:57
+#: templates/emails/memorial-family-notification-plain.php:58
+#: templates/emails/memorial-family-notification.php:79
 #: assets/js/memorial-panel.js:132
 #: blocks/memorial-form/edit.js:63
 msgid "In Honor Of"
@@ -559,8 +564,8 @@ msgstr ""
 #: blocks/memorial-wall/render.php:483
 #: blocks/memorial-wall/render.php:497
 #: includes/admin/class-list-columns.php:420
-#: includes/admin/class-memorial-quick-add.php:859
-#: includes/admin/class-quick-actions.php:627
+#: includes/admin/class-memorial-quick-add.php:875
+#: includes/admin/class-quick-actions.php:645
 #: includes/blocks/register-stores.php:114
 #: includes/core/helpers.php:457
 #: includes/woocommerce/class-cart-handler.php:531
@@ -573,8 +578,8 @@ msgstr ""
 #: blocks/memorial-wall/render.php:483
 #: blocks/memorial-wall/render.php:497
 #: includes/admin/class-list-columns.php:421
-#: includes/admin/class-memorial-quick-add.php:859
-#: includes/admin/class-quick-actions.php:628
+#: includes/admin/class-memorial-quick-add.php:875
+#: includes/admin/class-quick-actions.php:646
 #: includes/blocks/register-stores.php:113
 #: includes/blocks/register-stores.php:115
 #: includes/core/helpers.php:456
@@ -661,8 +666,8 @@ msgid "Search"
 msgstr ""
 
 #: blocks/memorial-wall/render.php:286
-#: includes/admin/class-quick-actions.php:609
-#: includes/admin/class-quick-actions.php:626
+#: includes/admin/class-quick-actions.php:627
+#: includes/admin/class-quick-actions.php:644
 #: assets/js/admin-legacy-sync.js:101
 msgid "All Types"
 msgstr ""
@@ -698,7 +703,7 @@ msgstr ""
 #. translators: %d: number of memorials
 #. translators: %d: number of memorials created.
 #: blocks/memorial-wall/render.php:343
-#: includes/admin/class-activity-log.php:1214
+#: includes/admin/class-activity-log.php:1222
 #, php-format
 msgid "%d memorial"
 msgid_plural "%d memorials"
@@ -795,8 +800,8 @@ msgid "Proceed to Checkout"
 msgstr ""
 
 #: includes/abilities/donations.php:103
-#: includes/admin/class-quick-actions.php:243
-#: includes/admin/class-quick-actions.php:279
+#: includes/admin/class-quick-actions.php:252
+#: includes/admin/class-quick-actions.php:288
 msgid "Donation not found."
 msgstr ""
 
@@ -806,7 +811,7 @@ msgstr ""
 #: includes/abilities/donors.php:176
 #: includes/abilities/donors.php:251
 #: includes/abilities/reports.php:62
-#: includes/admin/class-quick-actions.php:198
+#: includes/admin/class-quick-actions.php:207
 #: includes/rest/class-rest-controller.php:351
 msgid "Donor not found."
 msgstr ""
@@ -822,7 +827,7 @@ msgstr ""
 #: includes/abilities/memberships.php:139
 #: includes/abilities/memberships.php:209
 #: includes/abilities/memberships.php:420
-#: includes/admin/class-quick-actions.php:72
+#: includes/admin/class-quick-actions.php:73
 msgid "Membership not found."
 msgstr ""
 
@@ -839,7 +844,6 @@ msgid "This membership is already cancelled."
 msgstr ""
 
 #: includes/abilities/memorials.php:179
-#: includes/admin/class-quick-actions.php:157
 msgid "Memorial not found."
 msgstr ""
 
@@ -919,225 +923,225 @@ msgstr[1] ""
 
 #: includes/admin/class-activity-log.php:236
 #: includes/admin/class-activity-log.php:237
-#: includes/admin/class-activity-log.php:1302
+#: includes/admin/class-activity-log.php:1310
 msgid "Activity Log"
 msgstr ""
 
 #. translators: 1: donor's name; 2: amount.
-#: includes/admin/class-activity-log.php:1029
+#: includes/admin/class-activity-log.php:1033
 #, php-format
 msgid "%1$s donated %2$s"
 msgstr ""
 
 #. translators: 1: donor's name; 2: membership tier; 3: membership type (individual, business).
-#: includes/admin/class-activity-log.php:1033
+#: includes/admin/class-activity-log.php:1037
 #, php-format
 msgid "%1$s joined as %2$s %3$s member"
 msgstr ""
 
 #. translators: 1: donor's name; 2: the name the memorial honours.
-#: includes/admin/class-activity-log.php:1037
+#: includes/admin/class-activity-log.php:1041
 #, php-format
 msgid "%1$s created memorial for %2$s"
 msgstr ""
 
 #. translators: %s: donor's name.
-#: includes/admin/class-activity-log.php:1041
+#: includes/admin/class-activity-log.php:1045
 #, php-format
 msgid "%s renewed membership"
 msgstr ""
 
 #. translators: %s: business name.
-#: includes/admin/class-activity-log.php:1045
+#: includes/admin/class-activity-log.php:1049
 #, php-format
 msgid "Logo approved for %s"
 msgstr ""
 
 #. translators: %s: business name.
 #. translators: 1: business name; 2: reason.
-#: includes/admin/class-activity-log.php:1045
 #: includes/admin/class-activity-log.php:1049
+#: includes/admin/class-activity-log.php:1053
 msgid "Unknown Business"
 msgstr ""
 
 #. translators: 1: business name; 2: reason.
-#: includes/admin/class-activity-log.php:1049
+#: includes/admin/class-activity-log.php:1053
 #, php-format
 msgid "Logo rejected for %1$s: %2$s"
 msgstr ""
 
 #. translators: %d: WooCommerce order ID.
-#: includes/admin/class-activity-log.php:1054
+#: includes/admin/class-activity-log.php:1058
 #, php-format
 msgid "Order #%d processed with errors"
 msgstr ""
 
 #. translators: %d: WooCommerce order ID.
-#: includes/admin/class-activity-log.php:1056
+#: includes/admin/class-activity-log.php:1060
 #, php-format
 msgid "Order #%d processed successfully"
 msgstr ""
 
 #. translators: 1: email type (e.g. Receipt, Renewal reminder); 2: recipient's email address.
-#: includes/admin/class-activity-log.php:1060
+#: includes/admin/class-activity-log.php:1064
 #, php-format
 msgid "%1$s email sent to %2$s"
 msgstr ""
 
 #. translators: 1: email type (e.g. Receipt, Renewal reminder); 2: recipient's email address.
 #. translators: 1: the name the memorial honours; 2: family member's email address.
-#: includes/admin/class-activity-log.php:1060
-#: includes/admin/class-activity-log.php:1139
+#: includes/admin/class-activity-log.php:1064
+#: includes/admin/class-activity-log.php:1147
 msgid "(removed)"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1067
+#: includes/admin/class-activity-log.php:1075
 msgid "an import"
 msgstr ""
 
 #. translators: %s: comma-separated list of setting keys that no longer exist.
-#: includes/admin/class-activity-log.php:1080
+#: includes/admin/class-activity-log.php:1088
 #, php-format
 msgid "removed %s"
 msgstr ""
 
 #. translators: %s: the changes, e.g. "renewal_reminder_days: 30 → 14".
-#: includes/admin/class-activity-log.php:1083
+#: includes/admin/class-activity-log.php:1091
 #, php-format
 msgid "Settings updated: %s"
 msgstr ""
 
 #. translators: %s: name of a setting group, e.g. Membership tiers.
-#: includes/admin/class-activity-log.php:1088
+#: includes/admin/class-activity-log.php:1096
 #, php-format
 msgid "%s reset to the defaults"
 msgstr ""
 
 #. translators: 1: name of a setting group, e.g. Membership tiers; 2: the changes.
-#: includes/admin/class-activity-log.php:1090
+#: includes/admin/class-activity-log.php:1098
 #, php-format
 msgid "%1$s changed: %2$s"
 msgstr ""
 
 #. translators: 1: record type, e.g. Membership; 2: the changes, e.g. "tier: single → family".
-#: includes/admin/class-activity-log.php:1097
+#: includes/admin/class-activity-log.php:1105
 #, php-format
 msgid "%1$s edited: %2$s"
 msgstr ""
 
 #. translators: %s: record type, e.g. Donation.
-#: includes/admin/class-activity-log.php:1104
+#: includes/admin/class-activity-log.php:1112
 #, php-format
 msgid "%s moved to the trash"
 msgstr ""
 
 #. translators: %s: record type, e.g. Donation.
-#: includes/admin/class-activity-log.php:1108
+#: includes/admin/class-activity-log.php:1116
 #, php-format
 msgid "%s restored from the trash"
 msgstr ""
 
 #. translators: 1: donor's name; 2: comma-separated list of the fields changed.
-#: includes/admin/class-activity-log.php:1112
+#: includes/admin/class-activity-log.php:1120
 #, php-format
 msgid "Profile updated for %1$s: %2$s"
 msgstr ""
 
 #. translators: 1: donor's name; 2: where the address came from (checkout, profile, import…).
-#: includes/admin/class-activity-log.php:1116
+#: includes/admin/class-activity-log.php:1124
 #, php-format
 msgid "Address updated for %1$s (from %2$s)"
 msgstr ""
 
 #. translators: 1: donor's name; 2: membership end date.
-#: includes/admin/class-activity-log.php:1124
+#: includes/admin/class-activity-log.php:1132
 #, php-format
 msgid "Renewal reminder sent to %1$s (membership ends %2$s)"
 msgstr ""
 
 #. translators: 1: donor's name; 2: new end date.
-#: includes/admin/class-activity-log.php:1128
+#: includes/admin/class-activity-log.php:1136
 #, php-format
 msgid "Membership for %1$s extended to %2$s"
 msgstr ""
 
 #. translators: 1: donor's name; 2: cancellation reason.
-#: includes/admin/class-activity-log.php:1133
+#: includes/admin/class-activity-log.php:1141
 #, php-format
 msgid "%1$s cancelled membership: %2$s"
 msgstr ""
 
 #. translators: %s: donor's name.
-#: includes/admin/class-activity-log.php:1135
+#: includes/admin/class-activity-log.php:1143
 #, php-format
 msgid "%s cancelled membership"
 msgstr ""
 
 #. translators: 1: the name the memorial honours; 2: family member's email address.
-#: includes/admin/class-activity-log.php:1139
+#: includes/admin/class-activity-log.php:1147
 #, php-format
 msgid "Family notification sent for memorial of %1$s to %2$s"
 msgstr ""
 
 #. translators: 1: donor's name; 2: gift amount; 3: order number.
-#: includes/admin/class-activity-log.php:1143
+#: includes/admin/class-activity-log.php:1151
 #, php-format
 msgid "Refunded: %1$s's gift of %2$s (order #%3$d)"
 msgstr ""
 
 #. translators: 1: amount refunded; 2: donor's name; 3: gift amount; 4: order number.
-#: includes/admin/class-activity-log.php:1147
+#: includes/admin/class-activity-log.php:1155
 #, php-format
 msgid "Partly refunded: %1$s of %2$s's gift of %3$s (order #%4$d)"
 msgstr ""
 
 #. translators: 1: donor's name; 2: gift amount; 3: order number.
-#: includes/admin/class-activity-log.php:1151
+#: includes/admin/class-activity-log.php:1159
 #, php-format
 msgid "Refund undone: %1$s's gift of %2$s counts again (order #%3$d)"
 msgstr ""
 
 #. translators: %s: event type identifier.
-#: includes/admin/class-activity-log.php:1163
+#: includes/admin/class-activity-log.php:1171
 #, php-format
 msgid "Event: %s"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1175
+#: includes/admin/class-activity-log.php:1183
 msgid "CSV import"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1176
+#: includes/admin/class-activity-log.php:1184
 msgid "Legacy memorial import"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1177
+#: includes/admin/class-activity-log.php:1185
 #: includes/admin/class-legacy-sync-page.php:73
 #: includes/admin/class-legacy-sync-page.php:150
 msgid "Legacy Order Sync"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1179
-#: includes/admin/class-activity-log.php:2049
+#: includes/admin/class-activity-log.php:1187
+#: includes/admin/class-activity-log.php:2057
 msgid "Import"
 msgstr ""
 
 #. translators: 1: kind of import (e.g. CSV import); 2: file name.
-#: includes/admin/class-activity-log.php:1184
+#: includes/admin/class-activity-log.php:1192
 #, php-format
 msgid "%1$s of %2$s"
 msgstr ""
 
 #. translators: %s: the import, e.g. "CSV import of donations.csv".
 #. translators: %s: tool name, e.g. Purge.
-#: includes/admin/class-activity-log.php:1189
-#: includes/admin/class-activity-log.php:1641
+#: includes/admin/class-activity-log.php:1197
+#: includes/admin/class-activity-log.php:1649
 #, php-format
 msgid "%s started and has not finished"
 msgstr ""
 
 #. translators: %d: number of rows in the file.
-#: includes/admin/class-activity-log.php:1196
+#: includes/admin/class-activity-log.php:1204
 #, php-format
 msgid "%d row"
 msgid_plural "%d rows"
@@ -1145,7 +1149,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of orders read.
-#: includes/admin/class-activity-log.php:1198
+#: includes/admin/class-activity-log.php:1206
 #, php-format
 msgid "%d order"
 msgid_plural "%d orders"
@@ -1153,7 +1157,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of records created.
-#: includes/admin/class-activity-log.php:1200
+#: includes/admin/class-activity-log.php:1208
 #, php-format
 msgid "%d created"
 msgid_plural "%d created"
@@ -1161,7 +1165,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of records updated.
-#: includes/admin/class-activity-log.php:1202
+#: includes/admin/class-activity-log.php:1210
 #, php-format
 msgid "%d updated"
 msgid_plural "%d updated"
@@ -1169,7 +1173,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of rows skipped.
-#: includes/admin/class-activity-log.php:1204
+#: includes/admin/class-activity-log.php:1212
 #, php-format
 msgid "%d skipped"
 msgid_plural "%d skipped"
@@ -1177,7 +1181,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of duplicate rows.
-#: includes/admin/class-activity-log.php:1206
+#: includes/admin/class-activity-log.php:1214
 #, php-format
 msgid "%d duplicate"
 msgid_plural "%d duplicates"
@@ -1185,7 +1189,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of rows or orders that failed.
-#: includes/admin/class-activity-log.php:1208
+#: includes/admin/class-activity-log.php:1216
 #, php-format
 msgid "%d failed"
 msgid_plural "%d failed"
@@ -1193,7 +1197,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of donations created.
-#: includes/admin/class-activity-log.php:1210
+#: includes/admin/class-activity-log.php:1218
 #, php-format
 msgid "%d donation"
 msgid_plural "%d donations"
@@ -1201,7 +1205,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of memberships created.
-#: includes/admin/class-activity-log.php:1212
+#: includes/admin/class-activity-log.php:1220
 #, php-format
 msgid "%d membership"
 msgid_plural "%d memberships"
@@ -1209,7 +1213,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of donors created.
-#: includes/admin/class-activity-log.php:1216
+#: includes/admin/class-activity-log.php:1224
 #, php-format
 msgid "%d new donor"
 msgid_plural "%d new donors"
@@ -1217,97 +1221,97 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: 1: the import, e.g. "CSV import of donations.csv"; 2: its counts, e.g. "120 rows, 100 created, 20 skipped".
-#: includes/admin/class-activity-log.php:1228
+#: includes/admin/class-activity-log.php:1236
 #, php-format
 msgid "%1$s: %2$s"
 msgstr ""
 
 #. translators: %s: the import, e.g. "CSV import of donations.csv".
-#: includes/admin/class-activity-log.php:1230
+#: includes/admin/class-activity-log.php:1238
 #, php-format
 msgid "%s finished with nothing to do"
 msgstr ""
 
 #. translators: %d: number of activity log entries deleted.
-#: includes/admin/class-activity-log.php:1308
+#: includes/admin/class-activity-log.php:1316
 #, php-format
 msgid "Deleted %d entry. The deletion is recorded in the log."
 msgid_plural "Deleted %d entries. The deletion is recorded in the log."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/admin/class-activity-log.php:1319
+#: includes/admin/class-activity-log.php:1327
 msgid "All Categories"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1328
+#: includes/admin/class-activity-log.php:1336
 #: includes/admin/class-reports.php:192
 #: assets/js/admin-import-export.js:915
 #: blocks/donor-stats/edit.js:36
 msgid "All Time"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1329
+#: includes/admin/class-activity-log.php:1337
 #: includes/admin/class-dashboard-widget.php:133
 #: includes/admin/class-dashboard-widget.php:255
 #: includes/admin/class-reports.php:174
 msgid "Today"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1330
+#: includes/admin/class-activity-log.php:1338
 msgid "Last 7 Days"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1331
+#: includes/admin/class-activity-log.php:1339
 msgid "Last 30 Days"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1335
+#: includes/admin/class-activity-log.php:1343
 msgid "All Sources"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1348
+#: includes/admin/class-activity-log.php:1356
 msgid "Search..."
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1350
+#: includes/admin/class-activity-log.php:1358
 #: includes/admin/class-reports.php:217
 msgid "Filter"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1370
+#: includes/admin/class-activity-log.php:1378
 #: includes/admin/class-reports.php:222
 #: assets/js/admin-import-export.js:98
 msgid "Export CSV"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1382
+#: includes/admin/class-activity-log.php:1390
 msgid "today"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1383
+#: includes/admin/class-activity-log.php:1391
 msgid "this week"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1384
+#: includes/admin/class-activity-log.php:1392
 msgid "total"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1386
+#: includes/admin/class-activity-log.php:1394
 msgid "Showing one import's entries."
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1386
-#: includes/admin/class-activity-log.php:1409
+#: includes/admin/class-activity-log.php:1394
+#: includes/admin/class-activity-log.php:1417
 msgid "Show all activity"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1388
+#: includes/admin/class-activity-log.php:1396
 msgid "Delete this import's entries? Its own entry stays, and the deletion is recorded."
 msgstr ""
 
 #. translators: %d: number of entries.
-#: includes/admin/class-activity-log.php:1396
+#: includes/admin/class-activity-log.php:1404
 #, php-format
 msgid "Delete its %d entry"
 msgid_plural "Delete its %d entries"
@@ -1315,58 +1319,58 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: 1: record type, e.g. Membership; 2: its ID.
-#: includes/admin/class-activity-log.php:1407
+#: includes/admin/class-activity-log.php:1415
 #, php-format
 msgid "Showing the history of %1$s #%2$d."
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1418
+#: includes/admin/class-activity-log.php:1426
 msgid "No activity logged yet."
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1424
+#: includes/admin/class-activity-log.php:1432
 msgid "Time"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1425
-#: includes/admin/class-activity-log.php:1997
+#: includes/admin/class-activity-log.php:1433
+#: includes/admin/class-activity-log.php:2005
 msgid "Category"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1426
-#: includes/admin/class-activity-log.php:1999
+#: includes/admin/class-activity-log.php:1434
+#: includes/admin/class-activity-log.php:2007
 #: includes/admin/class-privacy.php:190
 msgid "Activity"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1427
-#: includes/admin/class-activity-log.php:1998
+#: includes/admin/class-activity-log.php:1435
+#: includes/admin/class-activity-log.php:2006
 #: includes/admin/class-privacy.php:191
 msgid "Source"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1428
-#: includes/admin/class-activity-log.php:2002
+#: includes/admin/class-activity-log.php:1436
+#: includes/admin/class-activity-log.php:2010
 msgid "User"
 msgstr ""
 
 #. translators: %s: the import or tool run the entry belongs to.
-#: includes/admin/class-activity-log.php:1461
-#: includes/admin/class-activity-log.php:1936
+#: includes/admin/class-activity-log.php:1469
+#: includes/admin/class-activity-log.php:1944
 #, php-format
 msgid "Part of: %s"
 msgstr ""
 
 #. translators: %d: number of log entries the import wrote.
-#: includes/admin/class-activity-log.php:1470
+#: includes/admin/class-activity-log.php:1478
 #, php-format
 msgid "View its %d entry"
 msgid_plural "View its %d entries"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/admin/class-activity-log.php:1482
-#: includes/admin/class-activity-log.php:1960
+#: includes/admin/class-activity-log.php:1490
+#: includes/admin/class-activity-log.php:1968
 #: includes/admin/class-list-columns.php:444
 #: includes/admin/class-reports.php:414
 #: includes/admin/class-reports.php:575
@@ -1375,217 +1379,217 @@ msgstr[1] ""
 msgid "Unknown"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1484
-#: includes/admin/class-activity-log.php:1957
+#: includes/admin/class-activity-log.php:1492
+#: includes/admin/class-activity-log.php:1965
 msgid "System"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1525
+#: includes/admin/class-activity-log.php:1533
 msgid "(empty)"
 msgstr ""
 
 #. translators: 1: field name; 2: old value; 3: new value.
-#: includes/admin/class-activity-log.php:1535
+#: includes/admin/class-activity-log.php:1543
 #, php-format
 msgid "%1$s: %2$s → %3$s"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1547
+#: includes/admin/class-activity-log.php:1555
 msgid "Membership tiers"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1548
+#: includes/admin/class-activity-log.php:1556
 msgid "Pet species"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1549
+#: includes/admin/class-activity-log.php:1557
 msgid "Donor levels"
-msgstr ""
-
-#. translators: %s: fund names.
-#: includes/admin/class-activity-log.php:1564
-#, php-format
-msgid "added %s"
-msgstr ""
-
-#. translators: %s: fund names.
-#: includes/admin/class-activity-log.php:1568
-#, php-format
-msgid "retired %s"
 msgstr ""
 
 #. translators: %s: fund names.
 #: includes/admin/class-activity-log.php:1572
 #, php-format
+msgid "added %s"
+msgstr ""
+
+#. translators: %s: fund names.
+#: includes/admin/class-activity-log.php:1576
+#, php-format
+msgid "retired %s"
+msgstr ""
+
+#. translators: %s: fund names.
+#: includes/admin/class-activity-log.php:1580
+#, php-format
 msgid "restored %s"
 msgstr ""
 
 #. translators: 1: old fund name; 2: new fund name.
-#: includes/admin/class-activity-log.php:1576
+#: includes/admin/class-activity-log.php:1584
 #, php-format
 msgid "renamed %1$s to %2$s"
 msgstr ""
 
 #. translators: %s: the changes, e.g. "added Medical Care; retired General Fund".
-#: includes/admin/class-activity-log.php:1579
+#: includes/admin/class-activity-log.php:1587
 #, php-format
 msgid "Funds changed: %s"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1589
+#: includes/admin/class-activity-log.php:1597
 #: includes/admin/class-list-columns.php:113
 #: includes/admin/class-reports.php:806
 msgid "Donation"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1591
+#: includes/admin/class-activity-log.php:1599
 #: includes/admin/class-list-columns.php:140
-#: includes/admin/class-memorial-quick-add.php:679
+#: includes/admin/class-memorial-quick-add.php:688
 msgid "Memorial"
 msgstr ""
 
 #. translators: %s: record type, e.g. Donor.
-#: includes/admin/class-activity-log.php:1608
+#: includes/admin/class-activity-log.php:1616
 #, php-format
 msgid "%s deleted"
 msgstr ""
 
 #. translators: 1: record type, e.g. Donation; 2: amount; 3: donor's name.
-#: includes/admin/class-activity-log.php:1611
+#: includes/admin/class-activity-log.php:1619
 #, php-format
 msgid "%1$s deleted: %2$s from %3$s"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1626
+#: includes/admin/class-activity-log.php:1634
 msgid "Backfill & Repair"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1627
+#: includes/admin/class-activity-log.php:1635
 msgid "Purge"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1628
+#: includes/admin/class-activity-log.php:1636
 msgid "Recalculate donor totals"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1629
+#: includes/admin/class-activity-log.php:1637
 #: includes/admin/class-data-integrity.php:414
 msgid "Reset Sync Flags"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1630
+#: includes/admin/class-activity-log.php:1638
 msgid "Repair merged records"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1631
+#: includes/admin/class-activity-log.php:1639
 #: includes/admin/class-data-integrity.php:563
 msgid "Apply past refunds"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1632
+#: includes/admin/class-activity-log.php:1640
 msgid "Match a refund"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1633
+#: includes/admin/class-activity-log.php:1641
 msgid "Product Sync repair"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1634
+#: includes/admin/class-activity-log.php:1642
 msgid "Reprocess order"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1635
+#: includes/admin/class-activity-log.php:1643
 msgid "Renewal reminders"
 msgstr ""
 
 #. translators: 1: tool name; 2: error message.
-#: includes/admin/class-activity-log.php:1645
+#: includes/admin/class-activity-log.php:1653
 #, php-format
 msgid "%1$s failed: %2$s"
 msgstr ""
 
 #. translators: 1: number of fields filled in; 2: number of records checked.
-#: includes/admin/class-activity-log.php:1651
+#: includes/admin/class-activity-log.php:1659
 #, php-format
 msgid "Backfill & Repair: %1$d fields filled in across %2$d records"
 msgstr ""
 
 #. translators: 1: number of records; 2: record type, e.g. Memorial.
-#: includes/admin/class-activity-log.php:1654
+#: includes/admin/class-activity-log.php:1662
 #, php-format
 msgid "Purged %1$d records: %2$s"
 msgstr ""
 
 #. translators: 1: number of donors; 2: number whose totals changed.
-#: includes/admin/class-activity-log.php:1657
+#: includes/admin/class-activity-log.php:1665
 #, php-format
 msgid "Recalculated donor totals: %1$d donors, %2$d changed"
 msgstr ""
 
 #. translators: 1: number of records repaired; 2: number that failed.
-#: includes/admin/class-activity-log.php:1663
+#: includes/admin/class-activity-log.php:1671
 #, php-format
 msgid "Repaired records Legacy Order Sync merged: %1$d repaired, %2$d failed"
 msgstr ""
 
 #. translators: 1: orders checked; 2: gifts changed; 3: refunds left to match.
-#: includes/admin/class-activity-log.php:1666
+#: includes/admin/class-activity-log.php:1674
 #, php-format
 msgid "Applied past refunds: %1$d orders checked, %2$d gifts changed, %3$d refunds to match"
 msgstr ""
 
 #. translators: 1: refund ID; 2: order number; 3: record ID.
-#: includes/admin/class-activity-log.php:1670
+#: includes/admin/class-activity-log.php:1678
 #, php-format
 msgid "Refund #%1$d on order #%2$d matched to #%3$d"
 msgstr ""
 
 #. translators: 1: refund ID; 2: order number.
-#: includes/admin/class-activity-log.php:1672
+#: includes/admin/class-activity-log.php:1680
 #, php-format
 msgid "Refund #%1$d on order #%2$d marked as returning no gift"
 msgstr ""
 
 #. translators: 1: products repaired; 2: products skipped.
-#: includes/admin/class-activity-log.php:1675
+#: includes/admin/class-activity-log.php:1683
 #, php-format
 msgid "Product Sync repair: %1$d repaired, %2$d skipped"
 msgstr ""
 
 #. translators: 1: order number; 2: lines recorded now; 3: lines already recorded; 4: lines not recorded.
-#: includes/admin/class-activity-log.php:1678
+#: includes/admin/class-activity-log.php:1686
 #, php-format
 msgid "Reprocessed order #%1$d: %2$d recorded, %3$d already recorded, %4$d not recorded"
 msgstr ""
 
 #. translators: 1: reminders sent; 2: memberships skipped; 3: the end date they share.
-#: includes/admin/class-activity-log.php:1681
+#: includes/admin/class-activity-log.php:1689
 #, php-format
 msgid "Renewal reminders: %1$d sent, %2$d skipped (memberships ending %3$s)"
 msgstr ""
 
 #. translators: %s: tool name.
-#: includes/admin/class-activity-log.php:1685
+#: includes/admin/class-activity-log.php:1693
 #, php-format
 msgid "%s finished"
 msgstr ""
 
 #. translators: %d: WooCommerce order number.
-#: includes/admin/class-activity-log.php:1831
+#: includes/admin/class-activity-log.php:1839
 #, php-format
 msgid "order #%d"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1900
+#: includes/admin/class-activity-log.php:1908
 msgid "History"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1922
+#: includes/admin/class-activity-log.php:1930
 msgid "No activity recorded for this record yet."
 msgstr ""
 
 #. translators: %s: the import or tool run the entry belongs to.
-#: includes/admin/class-activity-log.php:1936
+#: includes/admin/class-activity-log.php:1944
 #: includes/admin/class-reports.php:428
 #: includes/admin/class-reports.php:583
 #: includes/admin/class-reports.php:715
@@ -1593,15 +1597,15 @@ msgid "View"
 msgstr ""
 
 #. translators: %d: number of activity log entries.
-#: includes/admin/class-activity-log.php:1945
+#: includes/admin/class-activity-log.php:1953
 #, php-format
 msgid "View its %d entry in the Activity Log"
 msgid_plural "View all %d entries in the Activity Log"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/admin/class-activity-log.php:1969
-#: includes/admin/class-activity-log.php:2244
+#: includes/admin/class-activity-log.php:1977
+#: includes/admin/class-activity-log.php:2252
 #: includes/admin/class-data-integrity.php:86
 #: includes/admin/class-data-integrity.php:113
 #: includes/admin/class-data-integrity.php:149
@@ -1632,12 +1636,12 @@ msgstr[1] ""
 msgid "Permission denied."
 msgstr ""
 
-#: includes/admin/class-activity-log.php:1996
+#: includes/admin/class-activity-log.php:2004
 #: includes/admin/class-list-columns.php:118
 #: includes/admin/class-list-columns.php:145
 #: includes/admin/class-privacy.php:155
 #: includes/admin/class-privacy.php:189
-#: includes/admin/class-quick-actions.php:318
+#: includes/admin/class-quick-actions.php:327
 #: includes/admin/class-reports.php:399
 #: includes/admin/class-reports.php:685
 #: includes/admin/class-reports.php:1098
@@ -1645,19 +1649,19 @@ msgstr ""
 #: includes/admin/class-reports.php:1344
 #: includes/woocommerce/class-my-account.php:231
 #: templates/emails/donation-receipt.php:49
-#: templates/emails/memorial-confirmation.php:71
+#: templates/emails/memorial-confirmation.php:75
 #: templates/myaccount/giving-history.php:54
 #: assets/js/admin-legacy-sync.js:195
 #: assets/js/memorial-panel.js:386
 msgid "Date"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:2000
+#: includes/admin/class-activity-log.php:2008
 #: includes/admin/class-data-integrity.php:490
 msgid "Record"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:2001
+#: includes/admin/class-activity-log.php:2009
 #: includes/admin/class-data-integrity.php:462
 #: includes/admin/class-data-integrity.php:526
 #: includes/admin/class-privacy.php:161
@@ -1665,62 +1669,62 @@ msgstr ""
 msgid "Order"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:2003
+#: includes/admin/class-activity-log.php:2011
 msgid "Part of"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:2004
+#: includes/admin/class-activity-log.php:2012
 msgid "Event"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:2005
+#: includes/admin/class-activity-log.php:2013
 msgid "Data"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:2046
+#: includes/admin/class-activity-log.php:2054
 msgid "Checkout"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:2047
+#: includes/admin/class-activity-log.php:2055
 msgid "Payment webhook"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:2048
+#: includes/admin/class-activity-log.php:2056
 #: includes/admin/class-settings.php:546
 msgid "Admin"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:2050
+#: includes/admin/class-activity-log.php:2058
 msgid "Admin tool"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:2051
+#: includes/admin/class-activity-log.php:2059
 msgid "Scheduled task"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:2052
+#: includes/admin/class-activity-log.php:2060
 msgid "WP-CLI"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:2053
+#: includes/admin/class-activity-log.php:2061
 msgid "REST API"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:2054
+#: includes/admin/class-activity-log.php:2062
 #: includes/shelterkit/class-shelterkit-profile.php:99
 msgid "Website"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:2098
-#: includes/admin/class-activity-log.php:2101
+#: includes/admin/class-activity-log.php:2106
+#: includes/admin/class-activity-log.php:2109
 msgid "Unknown Donor"
 msgstr ""
 
-#: includes/admin/class-activity-log.php:2266
+#: includes/admin/class-activity-log.php:2274
 msgid "That import was not found in the activity log."
 msgstr ""
 
-#: includes/admin/class-activity-log.php:2269
+#: includes/admin/class-activity-log.php:2277
 msgid "Only an import's entries can be deleted. A tool's entries are the record of what an admin did."
 msgstr ""
 
@@ -1844,7 +1848,7 @@ msgstr ""
 
 #: includes/admin/class-dashboard-widget.php:367
 #: includes/admin/class-list-columns.php:233
-#: includes/admin/class-quick-actions.php:326
+#: includes/admin/class-quick-actions.php:335
 #: includes/admin/class-reports.php:413
 #: includes/admin/class-reports.php:697
 #: includes/admin/class-reports.php:1104
@@ -2159,7 +2163,7 @@ msgid "%1$s #%2$d: %3$s"
 msgstr ""
 
 #: includes/admin/class-data-integrity.php:579
-#: includes/admin/class-memorial-quick-add.php:681
+#: includes/admin/class-memorial-quick-add.php:690
 msgid "Gift"
 msgstr ""
 
@@ -2266,7 +2270,7 @@ msgid "No orders specified."
 msgstr ""
 
 #: includes/admin/class-list-columns.php:114
-#: includes/admin/class-memorial-quick-add.php:716
+#: includes/admin/class-memorial-quick-add.php:725
 #: includes/admin/class-privacy.php:156
 #: includes/admin/class-reports.php:401
 #: includes/admin/class-reports.php:686
@@ -2284,7 +2288,7 @@ msgid "Amount"
 msgstr ""
 
 #: includes/admin/class-list-columns.php:116
-#: includes/admin/class-quick-actions.php:334
+#: includes/admin/class-quick-actions.php:343
 #: includes/admin/class-reports.php:342
 #: includes/admin/class-reports.php:402
 #: includes/admin/class-reports.php:1102
@@ -2391,7 +2395,7 @@ msgid "Level"
 msgstr ""
 
 #: includes/admin/class-list-columns.php:326
-#: includes/admin/class-quick-actions.php:611
+#: includes/admin/class-quick-actions.php:629
 msgid "Family"
 msgstr ""
 
@@ -2402,7 +2406,7 @@ msgid "Expiring Soon"
 msgstr ""
 
 #: includes/admin/class-list-columns.php:342
-#: includes/admin/class-quick-actions.php:603
+#: includes/admin/class-quick-actions.php:621
 #: includes/admin/class-reports.php:504
 #: includes/admin/class-reports.php:580
 #: includes/admin/class-reports.php:832
@@ -2413,7 +2417,7 @@ msgid "Active"
 msgstr ""
 
 #: includes/admin/class-list-columns.php:345
-#: includes/admin/class-quick-actions.php:605
+#: includes/admin/class-quick-actions.php:623
 #: includes/admin/class-reports.php:580
 #: includes/admin/class-reports.php:1227
 #: includes/admin/class-reports.php:1393
@@ -2447,29 +2451,29 @@ msgid "Review"
 msgstr ""
 
 #: includes/admin/class-list-columns.php:476
-#: includes/admin/class-quick-actions.php:636
+#: includes/admin/class-quick-actions.php:654
 msgid "Not Requested"
 msgstr ""
 
 #: includes/admin/class-list-columns.php:478
-#: includes/admin/class-quick-actions.php:635
+#: includes/admin/class-quick-actions.php:653
 msgid "Sent"
 msgstr ""
 
 #: includes/admin/class-list-columns.php:481
 #: includes/admin/class-logo-moderation.php:196
-#: includes/admin/class-quick-actions.php:634
+#: includes/admin/class-quick-actions.php:652
 #: includes/admin/class-reports.php:703
 msgid "Pending"
 msgstr ""
 
 #: includes/admin/class-list-columns.php:512
-#: includes/admin/class-quick-actions.php:671
+#: includes/admin/class-quick-actions.php:689
 msgid "New"
 msgstr ""
 
 #: includes/admin/class-list-columns.php:549
-#: includes/admin/class-memorial-quick-add.php:727
+#: includes/admin/class-memorial-quick-add.php:736
 msgid "None"
 msgstr ""
 
@@ -2487,7 +2491,7 @@ msgid "Send Reminder"
 msgstr ""
 
 #: includes/admin/class-list-columns.php:708
-#: includes/admin/class-quick-actions.php:414
+#: includes/admin/class-quick-actions.php:423
 msgid "Extend 30 Days"
 msgstr ""
 
@@ -2495,12 +2499,12 @@ msgstr ""
 msgid "View Tribute"
 msgstr ""
 
-#: includes/admin/class-list-columns.php:729
+#: includes/admin/class-list-columns.php:731
 #: assets/js/memorial-panel.js:414
 msgid "Notify Family"
 msgstr ""
 
-#: includes/admin/class-list-columns.php:738
+#: includes/admin/class-list-columns.php:740
 msgid "Send Statement"
 msgstr ""
 
@@ -2652,233 +2656,241 @@ msgstr ""
 msgid "Bulk rejection"
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:65
 #: includes/admin/class-memorial-quick-add.php:66
-#: includes/admin/class-memorial-quick-add.php:115
-#: includes/admin/class-memorial-quick-add.php:554
+#: includes/admin/class-memorial-quick-add.php:67
+#: includes/admin/class-memorial-quick-add.php:116
+#: includes/admin/class-memorial-quick-add.php:562
 msgid "Quick Add Memorials"
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:105
+#: includes/admin/class-memorial-quick-add.php:106
 msgid "Quick Add"
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:125
+#: includes/admin/class-memorial-quick-add.php:126
 msgid "You do not have permission to add memorials."
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:166
+#: includes/admin/class-memorial-quick-add.php:167
 msgid "Type 2 or more letters of a name or email"
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:167
+#: includes/admin/class-memorial-quick-add.php:168
 msgid "No donor found. Enter a new donor below."
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:168
+#: includes/admin/class-memorial-quick-add.php:169
 msgid "Searching…"
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:195
+#: includes/admin/class-memorial-quick-add.php:196
 msgid "Enter at least one memorial."
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:210
+#: includes/admin/class-memorial-quick-add.php:211
 msgid "Nothing was added. Fix the highlighted fields, then add them again."
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:281
+#: includes/admin/class-memorial-quick-add.php:283
 msgid "That donor no longer exists. Choose another, or enter a new donor."
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:285
+#: includes/admin/class-memorial-quick-add.php:287
 msgid "Choose a donor in the search, or enter a new donor's name."
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:288
-#: includes/admin/class-memorial-quick-add.php:329
+#: includes/admin/class-memorial-quick-add.php:290
+#: includes/admin/class-memorial-quick-add.php:331
 msgid "Enter a valid email address, or leave it empty."
 msgstr ""
 
 #. translators: %s: donor's name.
-#: includes/admin/class-memorial-quick-add.php:296
+#: includes/admin/class-memorial-quick-add.php:298
 #, php-format
 msgid "A donor named “%s” is already on file. Choose them in the search, or tick “This is a different person”."
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:303
+#: includes/admin/class-memorial-quick-add.php:305
 msgid "Enter the name of the person or pet the gift remembers."
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:306
+#: includes/admin/class-memorial-quick-add.php:308
 msgid "Choose person or pet."
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:309
+#: includes/admin/class-memorial-quick-add.php:311
 msgid "Choose a species from the list."
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:314
+#: includes/admin/class-memorial-quick-add.php:316
 msgid "Enter an amount greater than zero."
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:319
+#: includes/admin/class-memorial-quick-add.php:321
 msgid "Enter the date the gift was received."
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:321
+#: includes/admin/class-memorial-quick-add.php:323
 msgid "The date can't be in the future."
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:325
+#: includes/admin/class-memorial-quick-add.php:327
 msgid "That campaign no longer exists."
 msgstr ""
 
 #: includes/admin/class-memorial-quick-add.php:333
+msgid "Enter the family's email address to email them, or untick “Email the family now”."
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:337
 msgid "This donor has no email address. Add one, or untick “Email the donor a confirmation”."
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:435
+#: includes/admin/class-memorial-quick-add.php:443
 msgid "The memorial ability could not be loaded."
 msgstr ""
 
 #. translators: 1: donor's name; 2: donor's email address.
 #. translators: 1: membership start date, 2: membership end date
-#: includes/admin/class-memorial-quick-add.php:535
+#: includes/admin/class-memorial-quick-add.php:543
 #: templates/myaccount/my-memberships.php:108
 #, php-format
 msgid "%1$s — %2$s"
 msgstr ""
 
 #. translators: %s: donor's name.
-#: includes/admin/class-memorial-quick-add.php:537
+#: includes/admin/class-memorial-quick-add.php:545
 #, php-format
 msgid "%s (no email)"
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:555
+#: includes/admin/class-memorial-quick-add.php:563
 msgid "All Memorials"
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:565
+#: includes/admin/class-memorial-quick-add.php:573
 msgid "For memorial gifts received by mail or in person. Each one counts toward the donor's lifetime giving and appears on the memorial wall, as a gift made online does. No one is emailed unless you tick it."
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:578
+#: includes/admin/class-memorial-quick-add.php:586
 msgid "+ Add another memorial"
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:579
+#: includes/admin/class-memorial-quick-add.php:587
 msgid "Add memorials"
 msgstr ""
 
 #. translators: %s: the memorial's number on this screen.
-#: includes/admin/class-memorial-quick-add.php:645
+#: includes/admin/class-memorial-quick-add.php:654
 #, php-format
 msgid "Memorial %s"
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:648
+#: includes/admin/class-memorial-quick-add.php:657
 #: includes/admin/class-meta-boxes.php:237
 #: assets/js/admin-import-export.js:142
 msgid "Remove"
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:653
+#: includes/admin/class-memorial-quick-add.php:662
 msgid "Donor on file"
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:654
+#: includes/admin/class-memorial-quick-add.php:663
 msgid "Search by name or email"
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:662
+#: includes/admin/class-memorial-quick-add.php:671
 msgid "Or a new donor: name"
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:667
+#: includes/admin/class-memorial-quick-add.php:676
 msgid "Email (optional)"
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:673
+#: includes/admin/class-memorial-quick-add.php:682
 msgid "This is a different person: add a new donor"
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:675
+#: includes/admin/class-memorial-quick-add.php:684
 msgid "Keep the donor's name off the memorial"
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:683
-#: includes/admin/class-memorial-quick-add.php:832
+#: includes/admin/class-memorial-quick-add.php:692
+#: includes/admin/class-memorial-quick-add.php:842
 #: includes/admin/class-privacy.php:159
 msgid "In memory of"
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:684
-#: includes/admin/class-memorial-quick-add.php:832
+#: includes/admin/class-memorial-quick-add.php:693
+#: includes/admin/class-memorial-quick-add.php:842
 msgid "In honor of"
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:687
+#: includes/admin/class-memorial-quick-add.php:696
 #: includes/admin/class-privacy.php:125
 msgid "Name"
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:692
+#: includes/admin/class-memorial-quick-add.php:701
 msgid "Who"
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:698
-#: templates/emails/memorial-confirmation.php:62
+#: includes/admin/class-memorial-quick-add.php:707
+#: templates/emails/memorial-confirmation.php:66
 msgid "Species"
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:700
+#: includes/admin/class-memorial-quick-add.php:709
 msgid "—"
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:708
+#: includes/admin/class-memorial-quick-add.php:717
 msgid "Tribute message (optional)"
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:714
+#: includes/admin/class-memorial-quick-add.php:723
 msgid "Gift received"
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:720
+#: includes/admin/class-memorial-quick-add.php:729
 msgid "Date received"
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:725
+#: includes/admin/class-memorial-quick-add.php:734
 msgid "Campaign (optional)"
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:739
+#: includes/admin/class-memorial-quick-add.php:748
 msgid "The donor asked for the family to be told"
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:742
+#: includes/admin/class-memorial-quick-add.php:751
 msgid "Family member's name"
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:745
+#: includes/admin/class-memorial-quick-add.php:754
 msgid "Their email"
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:749
+#: includes/admin/class-memorial-quick-add.php:758
 msgid "Their mailing address"
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:753
+#: includes/admin/class-memorial-quick-add.php:762
 msgid "Mail them a card"
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:758
+#: includes/admin/class-memorial-quick-add.php:763
+msgid "Email the family now"
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:768
 msgid "Email the donor a confirmation"
 msgstr ""
 
 #. translators: %d: number of memorials added.
-#: includes/admin/class-memorial-quick-add.php:789
+#: includes/admin/class-memorial-quick-add.php:799
 #, php-format
 msgid "Added %d memorial."
 msgid_plural "Added %d memorials."
@@ -2886,32 +2898,42 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: 1: honoree's name; 2: why it failed.
-#: includes/admin/class-memorial-quick-add.php:807
+#: includes/admin/class-memorial-quick-add.php:817
 #, php-format
 msgid "The memorial for %1$s wasn't added: %2$s"
 msgstr ""
 
 #. translators: 1: "In memory of" or "In honor of"; 2: honoree's name; 3: amount; 4: donor's name.
-#: includes/admin/class-memorial-quick-add.php:831
+#: includes/admin/class-memorial-quick-add.php:841
 #, php-format
 msgid "%1$s %2$s, %3$s, from %4$s"
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:836
+#: includes/admin/class-memorial-quick-add.php:846
 msgid "(new donor)"
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:840
+#: includes/admin/class-memorial-quick-add.php:850
 msgid "Confirmation emailed."
 msgstr ""
 
 #. translators: %s: why it wasn't sent.
-#: includes/admin/class-memorial-quick-add.php:842
+#: includes/admin/class-memorial-quick-add.php:852
 #, php-format
 msgid "Confirmation not sent: %s"
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:847
+#: includes/admin/class-memorial-quick-add.php:856
+msgid "Family emailed."
+msgstr ""
+
+#. translators: %s: why it wasn't sent.
+#: includes/admin/class-memorial-quick-add.php:858
+#, php-format
+msgid "Family not emailed: %s"
+msgstr ""
+
+#: includes/admin/class-memorial-quick-add.php:863
 #: includes/admin/class-settings.php:996
 msgid "Edit"
 msgstr ""
@@ -3096,35 +3118,31 @@ msgstr ""
 msgid "View details"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:67
-#: includes/admin/class-quick-actions.php:105
-#: includes/admin/class-quick-actions.php:152
-#: includes/admin/class-quick-actions.php:193
-#: includes/admin/class-quick-actions.php:238
-#: includes/admin/class-quick-actions.php:274
+#: includes/admin/class-quick-actions.php:68
+#: includes/admin/class-quick-actions.php:106
+#: includes/admin/class-quick-actions.php:158
+#: includes/admin/class-quick-actions.php:202
+#: includes/admin/class-quick-actions.php:247
+#: includes/admin/class-quick-actions.php:283
 msgid "Invalid request."
 msgstr ""
 
 #. translators: 1: new end date, 2: admin user
-#: includes/admin/class-quick-actions.php:125
+#: includes/admin/class-quick-actions.php:126
 #, php-format
 msgid "Membership extended to %1$s by %2$s"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:163
-msgid "Family notification not configured for this memorial."
-msgstr ""
-
-#: includes/admin/class-quick-actions.php:289
-#: includes/admin/class-quick-actions.php:305
+#: includes/admin/class-quick-actions.php:298
+#: includes/admin/class-quick-actions.php:314
 msgid "Donation Receipt"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:314
+#: includes/admin/class-quick-actions.php:323
 msgid "Receipt #"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:339
+#: includes/admin/class-quick-actions.php:348
 #: includes/woocommerce/class-cart-handler.php:524
 #: templates/emails/donation-receipt.php:58
 #: assets/js/memorial-panel.js:128
@@ -3132,38 +3150,59 @@ msgid "Dedication"
 msgstr ""
 
 #. translators: %s: EIN number
-#: includes/admin/class-quick-actions.php:351
+#: includes/admin/class-quick-actions.php:360
 #, php-format
 msgid "Tax ID (EIN): %s"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:357
+#: includes/admin/class-quick-actions.php:366
 msgid "Thank you for your generous support!"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:360
+#: includes/admin/class-quick-actions.php:369
 msgid "Print Receipt"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:386
+#: includes/admin/class-quick-actions.php:395
 msgid "Export Selected"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:413
+#: includes/admin/class-quick-actions.php:422
 msgid "Send Renewal Reminders"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:465
+#: includes/admin/class-quick-actions.php:474
 msgid "Send Family Notifications"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:502
+#: includes/admin/class-quick-actions.php:498
 msgid "Resend Receipts"
 msgstr ""
 
-#. translators: %d: number of renewal reminders sent.
-#: includes/admin/class-quick-actions.php:547
+#: includes/admin/class-quick-actions.php:541
+#: includes/core/class-family-notification.php:63
+msgid "The memorial has no family email address."
+msgstr ""
+
+#: includes/admin/class-quick-actions.php:542
+msgid "The Memorial Family Notification email is turned off under WooCommerce → Settings → Emails."
+msgstr ""
+
+#: includes/admin/class-quick-actions.php:544
+msgid "Check that the Memorial Family Notification email is turned on under WooCommerce → Settings → Emails, and that the site can send email."
+msgstr ""
+
+#. translators: %d: number of families.
 #: includes/admin/class-quick-actions.php:549
+#, php-format
+msgid "The family email couldn't be sent for %d memorial."
+msgid_plural "The family email couldn't be sent for %d memorials."
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d: number of renewal reminders sent.
+#: includes/admin/class-quick-actions.php:565
+#: includes/admin/class-quick-actions.php:567
 #, php-format
 msgid "%d renewal reminder sent."
 msgid_plural "%d renewal reminders sent."
@@ -3171,7 +3210,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of memberships extended.
-#: includes/admin/class-quick-actions.php:551
+#: includes/admin/class-quick-actions.php:569
 #, php-format
 msgid "%d membership extended by 30 days."
 msgid_plural "%d memberships extended by 30 days."
@@ -3179,70 +3218,70 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of memberships extended.
-#: includes/admin/class-quick-actions.php:553
+#: includes/admin/class-quick-actions.php:571
 #, php-format
 msgid "%d membership extended."
 msgid_plural "%d memberships extended."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/admin/class-quick-actions.php:554
+#: includes/admin/class-quick-actions.php:572
 msgid "Family notification sent."
 msgstr ""
 
 #. translators: %d: number of family notifications sent.
-#: includes/admin/class-quick-actions.php:556
+#: includes/admin/class-quick-actions.php:574
 #, php-format
 msgid "%d family notification sent."
 msgid_plural "%d family notifications sent."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/admin/class-quick-actions.php:557
+#: includes/admin/class-quick-actions.php:575
 msgid "Annual statement sent."
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:558
+#: includes/admin/class-quick-actions.php:576
 msgid "Donation receipt sent."
 msgstr ""
 
 #. translators: %d: number of receipts sent.
-#: includes/admin/class-quick-actions.php:560
+#: includes/admin/class-quick-actions.php:578
 #, php-format
 msgid "%d receipt sent."
 msgid_plural "%d receipts sent."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/admin/class-quick-actions.php:602
+#: includes/admin/class-quick-actions.php:620
 msgid "All Statuses"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:604
+#: includes/admin/class-quick-actions.php:622
 msgid "Expiring Soon (30 days)"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:633
+#: includes/admin/class-quick-actions.php:651
 msgid "All Notifications"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:651
+#: includes/admin/class-quick-actions.php:669
 msgid "All Allocations"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:670
+#: includes/admin/class-quick-actions.php:688
 msgid "All Levels"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:679
+#: includes/admin/class-quick-actions.php:697
 msgid "All Donors"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:680
+#: includes/admin/class-quick-actions.php:698
 msgid "With Membership"
 msgstr ""
 
-#: includes/admin/class-quick-actions.php:681
+#: includes/admin/class-quick-actions.php:699
 msgid "Without Membership"
 msgstr ""
 
@@ -3927,7 +3966,8 @@ msgid "Memorial donations for people or pets."
 msgstr ""
 
 #: includes/admin/class-settings.php:1192
-#: shelterkit-donations.php:479
+#: includes/core/class-family-notification.php:142
+#: shelterkit-donations.php:484
 msgid "ShelterKit Donations:"
 msgstr ""
 
@@ -3950,10 +3990,12 @@ msgid "Settings → General"
 msgstr ""
 
 #: includes/admin/class-settings.php:1214
+#: includes/core/class-family-notification.php:158
 msgid "Dismiss"
 msgstr ""
 
 #: includes/admin/class-settings.php:1226
+#: includes/core/class-family-notification.php:170
 msgid "You do not have permission to do this."
 msgstr ""
 
@@ -4306,6 +4348,18 @@ msgstr ""
 
 #: includes/blocks/register-stores.php:118
 msgid "Business Membership"
+msgstr ""
+
+#. translators: %d: number of memorials.
+#: includes/core/class-family-notification.php:146
+#, php-format
+msgid "%d memorial was marked “family notified”, but until this update Notify Family never actually emailed the family. It is back among the memorials waiting to notify the family."
+msgid_plural "%d memorials were marked “family notified”, but until this update Notify Family never actually emailed the family. They are back among the memorials waiting to notify the family."
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/core/class-family-notification.php:157
+msgid "See memorials waiting to notify the family"
 msgstr ""
 
 #: includes/core/class-prefix-migration.php:405
@@ -4874,11 +4928,11 @@ msgstr ""
 msgid "Abilities for generating shelter reports."
 msgstr ""
 
-#: shelterkit-donations.php:480
+#: shelterkit-donations.php:485
 msgid "Some donation products need to be created."
 msgstr ""
 
-#: shelterkit-donations.php:481
+#: shelterkit-donations.php:486
 msgid "Set up products"
 msgstr ""
 
@@ -4895,10 +4949,10 @@ msgstr ""
 #: templates/emails/membership-renewal.php:32
 #: templates/emails/membership-welcome-plain.php:21
 #: templates/emails/membership-welcome.php:32
-#: templates/emails/memorial-confirmation-plain.php:21
-#: templates/emails/memorial-confirmation.php:32
-#: templates/emails/memorial-family-notification-plain.php:27
-#: templates/emails/memorial-family-notification.php:39
+#: templates/emails/memorial-confirmation-plain.php:22
+#: templates/emails/memorial-confirmation.php:33
+#: templates/emails/memorial-family-notification-plain.php:28
+#: templates/emails/memorial-family-notification.php:44
 #, php-format
 msgid "Dear %s,"
 msgstr ""
@@ -4913,7 +4967,7 @@ msgid "Amount:"
 msgstr ""
 
 #: templates/emails/donation-receipt-plain.php:30
-#: templates/emails/memorial-confirmation-plain.php:43
+#: templates/emails/memorial-confirmation-plain.php:47
 msgid "Date:"
 msgstr ""
 
@@ -5335,138 +5389,179 @@ msgid "Thank you for supporting our mission to help animals in need!"
 msgstr ""
 
 #. translators: %s: honoree name
-#: templates/emails/memorial-confirmation-plain.php:28
+#: templates/emails/memorial-confirmation-plain.php:30
+#, php-format
+msgid "Thank you for your thoughtful tribute in honor of %s."
+msgstr ""
+
+#. translators: %s: honoree name
+#: templates/emails/memorial-confirmation-plain.php:32
 #, php-format
 msgid "Thank you for your heartfelt memorial tribute in honor of %s."
 msgstr ""
 
-#: templates/emails/memorial-confirmation-plain.php:33
-#: templates/emails/memorial-confirmation.php:48
+#: templates/emails/memorial-confirmation-plain.php:37
+#: templates/emails/memorial-confirmation.php:52
 #: assets/js/memorial-panel.js:115
 msgid "Memorial Details"
 msgstr ""
 
-#: templates/emails/memorial-confirmation-plain.php:35
-msgid "In Memory Of:"
-msgstr ""
-
-#: templates/emails/memorial-confirmation-plain.php:36
-msgid "Memorial Type:"
+#: templates/emails/memorial-confirmation-plain.php:39
+msgid "In Honor Of:"
 msgstr ""
 
 #: templates/emails/memorial-confirmation-plain.php:39
+msgid "In Memory Of:"
+msgstr ""
+
+#: templates/emails/memorial-confirmation-plain.php:40
+msgid "Memorial Type:"
+msgstr ""
+
+#: templates/emails/memorial-confirmation-plain.php:43
 msgid "Species:"
 msgstr ""
 
-#: templates/emails/memorial-confirmation-plain.php:42
+#: templates/emails/memorial-confirmation-plain.php:46
 msgid "Donation Amount:"
 msgstr ""
 
-#: templates/emails/memorial-confirmation-plain.php:46
-#: templates/emails/memorial-confirmation.php:78
+#: templates/emails/memorial-confirmation-plain.php:50
+#: templates/emails/memorial-confirmation.php:82
 msgid "Your Tribute Message"
 msgstr ""
 
-#: templates/emails/memorial-confirmation-plain.php:51
+#: templates/emails/memorial-confirmation-plain.php:55
 msgid "View your memorial page:"
 msgstr ""
 
-#: templates/emails/memorial-confirmation-plain.php:59
-#: templates/emails/memorial-confirmation.php:99
+#: templates/emails/memorial-confirmation-plain.php:63
+#: templates/emails/memorial-confirmation.php:103
 msgid "We will notify the family of your thoughtful tribute as you requested."
 msgstr ""
 
-#: templates/emails/memorial-confirmation-plain.php:62
+#: templates/emails/memorial-confirmation-plain.php:66
 msgid "This donation is tax-deductible. Please keep this email for your records."
 msgstr ""
 
-#: templates/emails/memorial-confirmation-plain.php:65
-#: templates/emails/memorial-confirmation.php:108
+#: templates/emails/memorial-confirmation-plain.php:69
+#: templates/emails/memorial-confirmation.php:112
 msgid "With deepest gratitude,"
 msgstr ""
 
 #. translators: %s: honoree name
-#: templates/emails/memorial-confirmation.php:42
+#: templates/emails/memorial-confirmation.php:44
+#, php-format
+msgid "Thank you for your thoughtful tribute in honor of %s. Your gift helps us continue our mission."
+msgstr ""
+
+#. translators: %s: honoree name
+#: templates/emails/memorial-confirmation.php:46
 #, php-format
 msgid "Thank you for your heartfelt memorial tribute in honor of %s. Your donation helps us continue our mission while honoring the memory of your loved one."
 msgstr ""
 
-#: templates/emails/memorial-confirmation.php:57
+#: templates/emails/memorial-confirmation.php:61
 msgid "Memorial Type"
 msgstr ""
 
-#: templates/emails/memorial-confirmation.php:67
+#: templates/emails/memorial-confirmation.php:71
 msgid "Donation Amount"
 msgstr ""
 
-#: templates/emails/memorial-confirmation.php:87
+#: templates/emails/memorial-confirmation.php:91
 msgid "View and share your memorial page:"
 msgstr ""
 
-#: templates/emails/memorial-confirmation.php:104
+#: templates/emails/memorial-confirmation.php:108
 msgid "This donation is tax-deductible. Please keep this email as your receipt for tax purposes."
 msgstr ""
 
-#: templates/emails/memorial-family-notification-plain.php:20
-#: templates/emails/memorial-family-notification.php:29
-msgid "Dear Friend"
+#. translators: 1: honoree name, 2: site name
+#: templates/emails/memorial-family-notification-plain.php:37
+#, php-format
+msgid "A generous donor has made a gift to %2$s in honor of %1$s."
 msgstr ""
 
 #. translators: 1: honoree name, 2: site name
-#: templates/emails/memorial-family-notification-plain.php:35
+#: templates/emails/memorial-family-notification-plain.php:39
 #, php-format
 msgid "A generous donor has made a memorial donation to %2$s in loving memory of %1$s."
 msgstr ""
 
 #. translators: 1: donor name, 2: site name, 3: honoree name
-#: templates/emails/memorial-family-notification-plain.php:42
-#: templates/emails/memorial-family-notification.php:57
+#: templates/emails/memorial-family-notification-plain.php:47
+#: templates/emails/memorial-family-notification.php:66
+#, php-format
+msgid "%1$s has made a gift to %2$s in honor of %3$s."
+msgstr ""
+
+#. translators: 1: donor name, 2: site name, 3: honoree name
+#: templates/emails/memorial-family-notification-plain.php:49
+#: templates/emails/memorial-family-notification.php:68
 #, php-format
 msgid "%1$s has made a memorial donation to %2$s in loving memory of %3$s."
 msgstr ""
 
-#: templates/emails/memorial-family-notification-plain.php:51
-#: templates/emails/memorial-family-notification.php:68
+#: templates/emails/memorial-family-notification-plain.php:58
+#: templates/emails/memorial-family-notification.php:79
 msgid "In Loving Memory Of"
 msgstr ""
 
-#: templates/emails/memorial-family-notification-plain.php:59
-#: templates/emails/memorial-family-notification.php:81
+#: templates/emails/memorial-family-notification-plain.php:66
+#: templates/emails/memorial-family-notification.php:92
 msgid "A Message from the Donor"
 msgstr ""
 
-#: templates/emails/memorial-family-notification-plain.php:63
+#: templates/emails/memorial-family-notification-plain.php:70
+#: templates/emails/memorial-family-notification.php:102
 msgid "This thoughtful gift will help us provide care and comfort to animals in need."
 msgstr ""
 
-#: templates/emails/memorial-family-notification-plain.php:67
+#: templates/emails/memorial-family-notification-plain.php:74
 msgid "View the memorial tribute page:"
 msgstr ""
 
-#: templates/emails/memorial-family-notification-plain.php:71
+#: templates/emails/memorial-family-notification-plain.php:79
+#: templates/emails/memorial-family-notification.php:117
+msgid "We are delighted to be part of this tribute."
+msgstr ""
+
+#: templates/emails/memorial-family-notification-plain.php:80
 msgid "We send our sincere condolences to you and your family."
 msgstr ""
 
-#: templates/emails/memorial-family-notification-plain.php:74
-#: templates/emails/memorial-family-notification.php:104
+#: templates/emails/memorial-family-notification-plain.php:83
+#: templates/emails/memorial-family-notification.php:123
+msgid "With warm regards,"
+msgstr ""
+
+#: templates/emails/memorial-family-notification-plain.php:83
+#: templates/emails/memorial-family-notification.php:123
 msgid "With heartfelt sympathy,"
 msgstr ""
 
 #. translators: 1: honoree name, 2: site name
-#: templates/emails/memorial-family-notification.php:50
+#: templates/emails/memorial-family-notification.php:56
+#, php-format
+msgid "We wanted to let you know that a generous donor has made a gift to %2$s in honor of %1$s."
+msgstr ""
+
+#. translators: 1: honoree name, 2: site name
+#: templates/emails/memorial-family-notification.php:58
 #, php-format
 msgid "We wanted to let you know that a generous donor has made a memorial donation to %2$s in loving memory of %1$s."
 msgstr ""
 
-#: templates/emails/memorial-family-notification.php:89
+#: templates/emails/memorial-family-notification.php:103
 msgid "This thoughtful gift will help us provide care and comfort to animals in need, creating a meaningful tribute to your loved one's memory."
 msgstr ""
 
-#: templates/emails/memorial-family-notification.php:94
+#: templates/emails/memorial-family-notification.php:109
 msgid "You can view the memorial tribute page here:"
 msgstr ""
 
-#: templates/emails/memorial-family-notification.php:100
+#: templates/emails/memorial-family-notification.php:118
 msgid "We are deeply honored to be part of this tribute and send our sincere condolences to you and your family."
 msgstr ""
 

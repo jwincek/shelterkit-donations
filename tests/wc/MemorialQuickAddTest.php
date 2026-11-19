@@ -133,6 +133,29 @@ final class MemorialQuickAddTest extends WP_UnitTestCase {
 		$this->assertSame( '', (string) get_post_meta( $biscuit, '_skdon_family_notified_date', true ) );
 	}
 
+	public function test_the_family_is_emailed_when_ticked(): void {
+		$outcome = Memorial_Quick_Add::submit( [
+			$this->row( [
+				'donor_id'      => (string) $this->pat,
+				'honoree_name'  => 'Biscuit',
+				'amount'        => '30',
+				'notify_family' => '1',
+				'family_name'   => 'The Smiths',
+				'family_email'  => 'smiths@example.test',
+				'email_family'  => '1',
+			] ),
+		] );
+		$biscuit = $this->memorial_ids()[0];
+
+		$this->assertTrue( $outcome['results'][0]['family_email'] );
+		$this->assertSame( [ 'smiths@example.test: A gift in tribute to Biscuit' ], $this->sent, 'The family, and not the donor: their box wasn\'t ticked.' );
+		$this->assertNotEmpty( get_post_meta( $biscuit, '_skdon_family_notified_date', true ), 'Recorded as notified (#58).' );
+		$this->assertSame( 1, $this->logged( 'family_notified' ) );
+
+		$missing = Memorial_Quick_Add::submit( [ $this->row( [ 'donor_id' => (string) $this->pat, 'honoree_name' => 'Rex', 'amount' => '5', 'email_family' => '1' ] ) ] );
+		$this->assertArrayHasKey( 'family_email', $missing['errors'][0], 'Emailing the family needs their address.' );
+	}
+
 	public function test_the_name_can_be_kept_off_the_memorial(): void {
 		Memorial_Quick_Add::submit( [ $this->row( [ 'donor_id' => (string) $this->pat, 'honoree_name' => 'Rex', 'amount' => '25', 'is_anonymous' => '1' ] ) ] );
 		$id = $this->memorial_ids()[0];

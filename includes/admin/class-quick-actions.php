@@ -13,6 +13,7 @@ namespace Starter_Shelter\Admin;
 
 use Starter_Shelter\Admin\Import_Export\CSV_Exporter;
 use Starter_Shelter\Core\Entity_Hydrator;
+use Starter_Shelter\Core\Family_Notification;
 use Starter_Shelter\Emails\Email_Factory;
 use Starter_Shelter\Helpers;
 
@@ -141,44 +142,52 @@ class Quick_Actions {
     }
 
     /**
-     * Handle sending family notification for memorial.
+     * Notify Family, on one memorial: email the family now.
+     *
+     * Until #58 this fired a hook no email listened to and recorded the
+     * family as notified anyway. It now sends the email, and the memorial
+     * counts as notified only once the email has gone.
      */
     public static function handle_notify_family(): void {
-        $memorial_id = absint( $_GET['id'] ?? 0 );
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- the ID names the nonce checked next.
+        $memorial_id = isset( $_GET['id'] ) ? max( 0, (int) $_GET['id'] ) : 0;
 
         check_admin_referer( 'sd_notify_family_' . $memorial_id );
 
-        if ( ! current_user_can( 'manage_options' ) || ! $memorial_id ) {
+        if ( ! current_user_can( 'manage_options' ) || ! $memorial_id || 'skdon_memorial' !== get_post_type( $memorial_id ) ) {
             wp_die( esc_html__( 'Invalid request.', 'shelterkit-donations' ) );
         }
 
-        $memorial = Entity_Hydrator::get( 'skdon_memorial', $memorial_id );
-        if ( ! $memorial ) {
-            wp_die( esc_html__( 'Memorial not found.', 'shelterkit-donations' ) );
-        }
+        $sent = Family_Notification::send( $memorial_id );
 
-        // Check if notification is enabled.
-        $notify_family = Helpers\get_memorial_notify_family( $memorial_id );
-        if ( ! $notify_family['enabled'] || '' === $notify_family['email'] ) {
-            wp_die( esc_html__( 'Family notification not configured for this memorial.', 'shelterkit-donations' ) );
-        }
-
-        $donor_id = $memorial['donor_id'] ?? 0;
-
-        // Trigger the family notification email.
-        do_action( 'starter_shelter_memorial_family_notification', $memorial_id, $donor_id, $memorial );
-
-        // Track that notification was sent.
-        update_post_meta( $memorial_id, '_skdon_family_notified_date', current_time( 'mysql' ) );
-
-        do_action( 'starter_shelter_family_notified', $memorial_id, (string) $notify_family['email'] );
-
-        wp_safe_redirect( add_query_arg( [
-            'post_type' => 'skdon_memorial',
-            'sd_action' => 'family_notified',
-            'sd_count'  => 1,
-        ], admin_url( 'edit.php' ) ) );
+        wp_safe_redirect( add_query_arg(
+            is_wp_error( $sent )
+                ? [ 'post_type' => 'skdon_memorial', 'sd_action' => 'family_not_notified', 'sd_count' => 1, 'skdon_reason' => $sent->get_error_code() ]
+                : [ 'post_type' => 'skdon_memorial', 'sd_action' => 'family_notified', 'sd_count' => 1 ],
+            admin_url( 'edit.php' )
+        ) );
         exit;
+    }
+
+    /**
+     * Email the families of the memorials given that asked to be told and
+     * haven't been yet.
+     *
+     * @param int[] $memorial_ids Memorial post IDs.
+     * @return array{sent: int, failed: int} How many were emailed, and how many couldn't be.
+     */
+    public static function notify_families( array $memorial_ids ): array {
+        $sent   = 0;
+        $failed = 0;
+        foreach ( $memorial_ids as $memorial_id ) {
+            $memorial_id = (int) $memorial_id;
+            $notify      = Helpers\get_memorial_notify_family( $memorial_id );
+            if ( ! $notify['enabled'] || '' === $notify['email'] || get_post_meta( $memorial_id, '_skdon_family_notified_date', true ) ) {
+                continue;
+            }
+            true === Family_Notification::send( $memorial_id ) ? ++$sent : ++$failed;
+        }
+        return [ 'sent' => $sent, 'failed' => $failed ];
     }
 
     /**
@@ -477,22 +486,9 @@ class Quick_Actions {
             return $redirect_url;
         }
 
-        $count = 0;
+        $result = self::notify_families( $post_ids );
 
-        foreach ( $post_ids as $memorial_id ) {
-            $memorial      = Entity_Hydrator::get( 'skdon_memorial', $memorial_id );
-            $notify_family = Helpers\get_memorial_notify_family( $memorial_id );
-            $already_sent  = get_post_meta( $memorial_id, '_skdon_family_notified_date', true );
-
-            if ( $notify_family['enabled'] && '' !== $notify_family['email'] && ! $already_sent ) {
-                do_action( 'starter_shelter_memorial_family_notification', $memorial_id, $memorial['donor_id'] ?? 0, $memorial );
-                update_post_meta( $memorial_id, '_skdon_family_notified_date', current_time( 'mysql' ) );
-                do_action( 'starter_shelter_family_notified', $memorial_id, (string) $notify_family['email'] );
-                ++$count;
-            }
-        }
-
-        return add_query_arg( [ 'sd_action' => 'families_notified', 'sd_count' => $count ], $redirect_url );
+        return add_query_arg( [ 'sd_action' => 'families_notified', 'sd_count' => $result['sent'], 'skdon_failed' => $result['failed'] ], $redirect_url );
     }
 
     /**
@@ -537,6 +533,28 @@ class Quick_Actions {
     public static function display_action_notices(): void {
         $action = sanitize_key( $_GET['sd_action'] ?? '' );
         $count = absint( $_GET['sd_count'] ?? 0 );
+
+        // Notify Family, when the email couldn't be sent (#58).
+        $failed = 'family_not_notified' === $action ? 1 : absint( $_GET['skdon_failed'] ?? 0 ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a count shown in a notice, after a redirect from a checked action.
+        if ( $failed && in_array( $action, [ 'family_not_notified', 'families_notified' ], true ) ) {
+            $reasons = [
+                'no_family_email' => __( 'The memorial has no family email address.', 'shelterkit-donations' ),
+                'email_disabled'  => __( 'The Memorial Family Notification email is turned off under WooCommerce → Settings → Emails.', 'shelterkit-donations' ),
+            ];
+            $reason  = $reasons[ sanitize_key( $_GET['skdon_reason'] ?? '' ) ] ?? __( 'Check that the Memorial Family Notification email is turned on under WooCommerce → Settings → Emails, and that the site can send email.', 'shelterkit-donations' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- picks a message to show, after a redirect from a checked action.
+            printf(
+                '<div class="notice notice-error is-dismissible"><p>%s %s</p></div>',
+                esc_html( sprintf(
+                    /* translators: %d: number of families. */
+                    _n( 'The family email couldn\'t be sent for %d memorial.', 'The family email couldn\'t be sent for %d memorials.', $failed, 'shelterkit-donations' ),
+                    $failed
+                ) ),
+                esc_html( $reason )
+            );
+            if ( 'family_not_notified' === $action ) {
+                return;
+            }
+        }
 
         if ( ! $action || ! $count ) {
             return;

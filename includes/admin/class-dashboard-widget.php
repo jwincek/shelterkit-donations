@@ -44,7 +44,7 @@ class Dashboard_Widget {
         }
         add_action( 'starter_shelter_logo_approved', [ self::class, 'invalidate_cache' ] );
         add_action( 'starter_shelter_logo_rejected', [ self::class, 'invalidate_cache' ] );
-        add_action( 'starter_shelter_memorial_family_notification', [ self::class, 'invalidate_cache' ] );
+        add_action( 'starter_shelter_family_notified', [ self::class, 'invalidate_cache' ] );
         // Refunds change a record's status without a save_post (#34).
         add_action( 'starter_shelter_refunds_changed', [ self::class, 'invalidate_cache' ] );
     }

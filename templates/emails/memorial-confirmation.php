@@ -21,6 +21,7 @@ use Starter_Shelter\Helpers;
 
 $memorial = $data['memorial'] ?? [];
 $donor = $data['donor'] ?? [];
+$in_honor = 'honor' === ( $memorial['dedication_type'] ?? 'memory' );
 
 do_action( 'woocommerce_email_header', $heading, $email );
 ?>
@@ -38,8 +39,11 @@ do_action( 'woocommerce_email_header', $heading, $email );
 <p>
     <?php
     printf(
-        /* translators: %s: honoree name */
-        esc_html__( 'Thank you for your heartfelt memorial tribute in honor of %s. Your donation helps us continue our mission while honoring the memory of your loved one.', 'shelterkit-donations' ),
+        $in_honor
+            /* translators: %s: honoree name */
+            ? esc_html__( 'Thank you for your thoughtful tribute in honor of %s. Your gift helps us continue our mission.', 'shelterkit-donations' )
+            /* translators: %s: honoree name */
+            : esc_html__( 'Thank you for your heartfelt memorial tribute in honor of %s. Your donation helps us continue our mission while honoring the memory of your loved one.', 'shelterkit-donations' ),
         '<strong>' . esc_html( $memorial['honoree_name'] ?? '' ) . '</strong>'
     );
     ?>
@@ -50,7 +54,7 @@ do_action( 'woocommerce_email_header', $heading, $email );
 <table class="td" cellspacing="0" cellpadding="6" border="1" style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
     <tbody>
         <tr>
-            <th scope="row" style="text-align: left; padding: 12px; background-color: #f8f8f8;"><?php esc_html_e( 'In Memory Of', 'shelterkit-donations' ); ?></th>
+            <th scope="row" style="text-align: left; padding: 12px; background-color: #f8f8f8;"><?php echo $in_honor ? esc_html__( 'In Honor Of', 'shelterkit-donations' ) : esc_html__( 'In Memory Of', 'shelterkit-donations' ); ?></th>
             <td style="padding: 12px;"><strong><?php echo esc_html( $memorial['honoree_name'] ?? '' ); ?></strong></td>
         </tr>
         <tr>

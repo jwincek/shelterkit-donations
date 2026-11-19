@@ -278,6 +278,15 @@ return [
 		],
 	],
 	'computed' => [
+		// The family notification as one object, built from its five flat
+		// keys. The family email's condition and recipient read
+		// memorial.notify_family.enabled / .email. The `notify_family` field
+		// declares the shape, but nothing stores it as one value, so it
+		// hydrated to [] and the family email never went out (#58).
+		'notify_family' => [
+			'function' => 'get_memorial_notify_family',
+			'args'     => [ '_self' ],
+		],
 		'amount_formatted' => [
 			'function' => 'format_currency',
 			'args'     => [ 'amount' ],
@@ -717,7 +726,8 @@ return [
 			'condition'       => 'memorial.notify_family.enabled',
 			'recipient_type'  => 'custom',
 			'recipient_field' => 'memorial.notify_family.email',
-			'subject'         => 'A donation has been made in memory of {honoree_name}',
+			// Neutral: a gift may honor someone living (#58).
+			'subject'         => 'A gift in tribute to {honoree_name}',
 			'heading'         => 'A Special Tribute',
 			'template'        => 'emails/memorial-family-notification.php',
 			'placeholders'    => [

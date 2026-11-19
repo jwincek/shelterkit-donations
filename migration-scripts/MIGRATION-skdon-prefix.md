@@ -150,6 +150,11 @@ The first admin page after the move shows a notice with what moved. Then:
   nothing until #49, so the update turns them back on, which is what the
   forms have been doing all along, and a notice names them. Turn off any
   you don't want, then save.
+- **Memorials → family notifications "Pending".** Until #58, Notify Family
+  never sent the family an email, but recorded them as notified. Updating
+  clears those dates, and a notice says how many memorials are waiting.
+  Before you notify them, check whether anyone told those families another
+  way.
 - **ShelterKit Donations → Data Tools → Order Records.** Both steps are safe
   to run more than once, and neither emails a donor.
   - If this site ever ran Legacy Order Sync, check the list of records it
