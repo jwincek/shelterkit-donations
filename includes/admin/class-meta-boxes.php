@@ -48,7 +48,9 @@ class Meta_Boxes {
             add_action( "save_post_{$post_type}", [ self::class, 'save_meta_boxes' ], 10, 2 );
         }
 
-        add_action( 'admin_enqueue_scripts', [ self::class, 'enqueue_assets' ] );
+        // After WooCommerce (priority 10) has registered its admin styles,
+        // which hold select2's: before it, the donor search was unstyled (#64).
+        add_action( 'admin_enqueue_scripts', [ self::class, 'enqueue_assets' ], 20 );
     }
 
     /**
@@ -506,6 +508,8 @@ class Meta_Boxes {
             wp_enqueue_script( $select2_handle );
             if ( wp_style_is( 'select2', 'registered' ) ) {
                 wp_enqueue_style( 'select2' );
+            } elseif ( wp_style_is( 'woocommerce_admin_styles', 'registered' ) ) {
+                wp_enqueue_style( 'woocommerce_admin_styles' );
             }
         }
 

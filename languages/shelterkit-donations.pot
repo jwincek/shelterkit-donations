@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-19T04:32:36+00:00\n"
+"POT-Creation-Date: 2026-11-19T17:05:29+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: shelterkit-donations\n"
@@ -95,22 +95,22 @@ msgstr ""
 msgid "No active campaign found."
 msgstr ""
 
-#: blocks/campaign-card/render.php:185
+#: blocks/campaign-card/render.php:190
 #: includes/admin/class-reports.php:833
 msgid "Ended"
 msgstr ""
 
-#: blocks/campaign-card/render.php:223
+#: blocks/campaign-card/render.php:228
 #: includes/admin/class-reports.php:1334
 msgid "Joined"
 msgstr ""
 
-#: blocks/campaign-card/render.php:228
+#: blocks/campaign-card/render.php:233
 #: includes/admin/class-reports.php:1332
 msgid "Raised"
 msgstr ""
 
-#: blocks/campaign-card/render.php:238
+#: blocks/campaign-card/render.php:243
 #: includes/admin/class-campaign-admin.php:176
 #: includes/admin/class-campaign-admin.php:218
 #: includes/admin/class-reports.php:768
@@ -118,22 +118,22 @@ msgstr ""
 msgid "Goal"
 msgstr ""
 
-#: blocks/campaign-card/render.php:247
+#: blocks/campaign-card/render.php:252
 #: includes/admin/class-dashboard-widget.php:439
 #: assets/js/admin-import-export.js:937
 msgid "Donors"
 msgstr ""
 
-#: blocks/campaign-card/render.php:256
+#: blocks/campaign-card/render.php:261
 msgid "Deadline"
 msgstr ""
 
-#: blocks/campaign-card/render.php:271
+#: blocks/campaign-card/render.php:276
 #: blocks/membership-form/render.php:27
 msgid "Join Now"
 msgstr ""
 
-#: blocks/campaign-card/render.php:272
+#: blocks/campaign-card/render.php:277
 #: includes/woocommerce/class-my-account.php:1082
 msgid "Donate Now"
 msgstr ""
@@ -391,32 +391,32 @@ msgstr ""
 msgid "Recent Gifts"
 msgstr ""
 
-#: blocks/donor-dashboard/render.php:271
+#: blocks/donor-dashboard/render.php:273
 msgid "View All Gifts →"
 msgstr ""
 
-#: blocks/donor-dashboard/render.php:281
+#: blocks/donor-dashboard/render.php:285
 msgid "Make a Gift"
 msgstr ""
 
-#: blocks/donor-dashboard/render.php:285
+#: blocks/donor-dashboard/render.php:289
 msgid "Update Profile"
 msgstr ""
 
-#: blocks/donor-stats/render.php:117
+#: blocks/donor-stats/render.php:106
 #: includes/admin/class-reports.php:316
 msgid "Total Donations"
 msgstr ""
 
-#: blocks/donor-stats/render.php:138
+#: blocks/donor-stats/render.php:127
 msgid "Donations Made"
 msgstr ""
 
-#: blocks/donor-stats/render.php:159
+#: blocks/donor-stats/render.php:148
 msgid "Generous Donors"
 msgstr ""
 
-#: blocks/donor-stats/render.php:180
+#: blocks/donor-stats/render.php:169
 #: includes/admin/class-menu.php:119
 msgid "Active Members"
 msgstr ""
@@ -2509,7 +2509,7 @@ msgid "View Receipt"
 msgstr ""
 
 #: includes/admin/class-list-columns.php:691
-#: includes/admin/class-meta-boxes.php:255
+#: includes/admin/class-meta-boxes.php:257
 msgid "View Order"
 msgstr ""
 
@@ -2814,7 +2814,7 @@ msgid "Memorial %s"
 msgstr ""
 
 #: includes/admin/class-memorial-quick-add.php:657
-#: includes/admin/class-meta-boxes.php:237
+#: includes/admin/class-meta-boxes.php:239
 #: assets/js/admin-import-export.js:142
 msgid "Remove"
 msgstr ""
@@ -3006,29 +3006,29 @@ msgstr ""
 msgid "View Memorials"
 msgstr ""
 
-#: includes/admin/class-meta-boxes.php:190
+#: includes/admin/class-meta-boxes.php:192
 #: assets/js/memorial-panel.js:151
 msgid "— Select —"
 msgstr ""
 
-#: includes/admin/class-meta-boxes.php:202
+#: includes/admin/class-meta-boxes.php:204
 msgid "— Select Tier —"
 msgstr ""
 
-#: includes/admin/class-meta-boxes.php:236
-#: includes/admin/class-meta-boxes.php:514
+#: includes/admin/class-meta-boxes.php:238
+#: includes/admin/class-meta-boxes.php:518
 msgid "Select Image"
 msgstr ""
 
-#: includes/admin/class-meta-boxes.php:250
+#: includes/admin/class-meta-boxes.php:252
 msgid "— No User —"
 msgstr ""
 
-#: includes/admin/class-meta-boxes.php:257
+#: includes/admin/class-meta-boxes.php:259
 msgid "Not linked to an order"
 msgstr ""
 
-#: includes/admin/class-meta-boxes.php:514
+#: includes/admin/class-meta-boxes.php:518
 msgid "Use this image"
 msgstr ""
 

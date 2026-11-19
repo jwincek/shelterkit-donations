@@ -267,21 +267,25 @@ $wrapper_attributes = get_block_wrapper_attributes( [
                 <?php endforeach; ?>
             </ul>
             
-            <a href="<?php echo esc_url( wc_get_account_endpoint_url( 'donations' ) ); ?>" class="sd-view-all-link">
-                <?php esc_html_e( 'View All Gifts →', 'shelterkit-donations' ); ?>
-            </a>
+            <?php // My Account's gift history. "donations" isn't an endpoint, so this link was a 404 (#64). ?>
+            <p class="sd-view-all">
+                <a href="<?php echo esc_url( wc_get_account_endpoint_url( 'giving-history' ) ); ?>">
+                    <?php esc_html_e( 'View All Gifts →', 'shelterkit-donations' ); ?>
+                </a>
+            </p>
         </section>
         <?php endif; ?>
 
         <!-- Quick Actions -->
-        <section class="sd-dashboard-actions">
+        <?php // Class names as the stylesheet has them; the old ones matched no rule (#64). ?>
+        <section class="sd-quick-actions">
             <?php $donation_url = Helpers\get_donation_page_url(); ?>
             <?php if ( $donation_url ) : ?>
-            <a href="<?php echo esc_url( $donation_url ); ?>" class="sd-action-button wp-element-button">
+            <a href="<?php echo esc_url( $donation_url ); ?>" class="sd-action-button sd-primary wp-element-button">
                 <?php esc_html_e( 'Make a Gift', 'shelterkit-donations' ); ?>
             </a>
             <?php endif; ?>
-            <a href="<?php echo esc_url( wc_get_account_endpoint_url( 'edit-account' ) ); ?>" class="sd-action-button sd-action-secondary">
+            <a href="<?php echo esc_url( wc_get_account_endpoint_url( 'edit-account' ) ); ?>" class="sd-action-button sd-secondary">
                 <?php esc_html_e( 'Update Profile', 'shelterkit-donations' ); ?>
             </a>
         </section>

@@ -143,18 +143,23 @@ $progress_color   = $attributes['progressBarColor'] ?? '#059669';
 // Generate unique ID for animations.
 $block_id = 'campaign-card-' . wp_unique_id();
 
-// Initialize interactivity state.
-wp_interactivity_state(
-    'shelter-donations/campaign-card',
-    [
-        'campaign' => $campaign_data,
-        'isAnimated' => false,
-    ]
-);
-
-// Context for this instance.
-$context = [
-    'campaignId' => $campaign_id,
+// This card's figures, in its own context. They used to be one shared
+// `state.campaign`, so with several cards on a page every card showed the
+// last one's progress, total and donors once the page loaded (#64).
+$progress_text = $campaign_data['progress'] . '%';
+$context       = [
+    'campaignId'    => $campaign_id,
+    'campaign'      => [
+        'id'               => $campaign_id,
+        'name'             => $campaign_data['name'],
+        'progress'         => $campaign_data['progress'],
+        'raised_formatted' => $campaign_data['raised_formatted'],
+        'donor_count'      => $campaign_data['donor_count'],
+        'member_count'     => $campaign_data['member_count'],
+    ],
+    'progressWidth' => $progress_text,
+    'progressText'  => $progress_text,
+    'isAnimated'    => false,
 ];
 
 // Build wrapper attributes.
@@ -199,7 +204,7 @@ $interactive_attrs = sprintf(
             <div 
                 class="sd-progress-fill" 
                 style="width: <?php echo esc_attr( $campaign_data['progress'] ); ?>%;"
-                data-wp-style--width="state.progressWidth"
+                data-wp-style--width="context.progressWidth"
                 role="progressbar"
                 aria-valuenow="<?php echo esc_attr( $campaign_data['progress'] ); ?>"
                 aria-valuemin="0"
@@ -207,7 +212,7 @@ $interactive_attrs = sprintf(
             >
             </div>
         </div>
-        <span class="sd-progress-text" data-wp-text="state.progressText">
+        <span class="sd-progress-text" data-wp-text="context.progressText">
             <?php echo esc_html( $campaign_data['progress'] . '%' ); ?>
         </span>
     </div>
@@ -217,12 +222,12 @@ $interactive_attrs = sprintf(
         <?php if ( $show_raised ) : ?>
         <div class="sd-campaign-stat sd-stat-raised">
             <?php if ( $is_member_drive ) : ?>
-            <span class="sd-stat-value" data-wp-text="state.campaign.member_count">
+            <span class="sd-stat-value" data-wp-text="context.campaign.member_count">
                 <?php echo esc_html( (string) $campaign_data['member_count'] ); ?>
             </span>
             <span class="sd-stat-label"><?php esc_html_e( 'Joined', 'shelterkit-donations' ); ?></span>
             <?php else : ?>
-            <span class="sd-stat-value" data-wp-text="state.campaign.raised_formatted">
+            <span class="sd-stat-value" data-wp-text="context.campaign.raised_formatted">
                 <?php echo esc_html( $campaign_data['raised_formatted'] ); ?>
             </span>
             <span class="sd-stat-label"><?php esc_html_e( 'Raised', 'shelterkit-donations' ); ?></span>
@@ -241,7 +246,7 @@ $interactive_attrs = sprintf(
 
         <?php if ( $show_donors && ! $is_member_drive ) : ?>
         <div class="sd-campaign-stat sd-stat-donors">
-            <span class="sd-stat-value" data-wp-text="state.campaign.donor_count">
+            <span class="sd-stat-value" data-wp-text="context.campaign.donor_count">
                 <?php echo esc_html( (string) $campaign_data['donor_count'] ); ?>
             </span>
             <span class="sd-stat-label"><?php esc_html_e( 'Donors', 'shelterkit-donations' ); ?></span>

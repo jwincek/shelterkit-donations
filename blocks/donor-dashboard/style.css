@@ -215,11 +215,24 @@
     border: 1px solid var(--wp--preset--color--contrast-3, #e0e0e0);
     border-radius: 8px;
     overflow: hidden;
+    /* A theme's list indent offset every row but the first's border. */
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    /* One set of columns for every row: amount, type, date. */
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    column-gap: 1rem;
 }
 
+/* Each row takes the list's columns (subgrid), so the rows line up and a
+   date stays on one line. Without subgrid, equal thirds still line up. */
 .sd-gift-item {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: subgrid;
+    gap: 1rem;
     align-items: center;
     padding: 1rem;
     border-bottom: 1px solid var(--wp--preset--color--contrast-3, #e9ecef);
@@ -243,6 +256,15 @@
 .sd-gift-allocation {
     font-size: 0.85rem;
     color: var(--wp--preset--color--contrast-2, #666);
+}
+
+.sd-gift-type {
+    text-align: center;
+}
+
+.sd-gift-item .sd-gift-date {
+    text-align: right;
+    white-space: nowrap;
 }
 
 .sd-gift-amount {
