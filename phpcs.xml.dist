@@ -11,6 +11,8 @@
 	<exclude-pattern>tests/*</exclude-pattern>
 	<!-- One-shot upgrade scripts, not shipped (see .distignore). -->
 	<exclude-pattern>migration-scripts/*</exclude-pattern>
+	<!-- Developer tools run with WP-CLI's eval-file (the demo-data seeder), not shipped: .distignore leaves bin/ out. -->
+	<exclude-pattern>bin/*</exclude-pattern>
 
 	<arg name="extensions" value="php"/>
 	<arg name="basepath" value="."/>
