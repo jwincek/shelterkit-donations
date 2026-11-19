@@ -30,11 +30,28 @@ captions attach to the wrong image, or vanish.
 
 ## Generating screenshots
 
-`bin/capture-screenshots.js` drives a real browser against a local install:
+Take them only on a demo site filled with made-up data, **never on a site
+with real donors**. The August 2026 set was taken on a shelter's development
+copy and published its real memorials and members.
 
-```sh
-WP_PASS='<admin password>' node bin/capture-screenshots.js screenshots-draft
-```
+1. Install WordPress, WooCommerce and this plugin on a throwaway site.
+2. Fill it: `wp eval-file bin/seed-demo-data.php --user=admin`. It refuses a
+   site that already has donors or orders, makes up every person, business
+   and pet, uses example addresses, and sets the time zone to Los Angeles.
+   Set `SKDON_DEMO_FONT` to a TrueType font for nicer business logos.
+3. Optionally, put a real gift through: a memorial with the family told,
+   bought at checkout and completed by an admin, then edited. Screenshot 8,
+   a record's history, shows that sequence.
+4. Capture:
 
-Review what lands in `screenshots-draft/`, then copy the keepers into this
-directory with their final numbers.
+   ```sh
+   PLAYWRIGHT_PATH=<a node_modules/playwright> WP_URL=<demo site> \
+   WP_PASS='<admin password>' node bin/capture-screenshots.js screenshots-draft
+   ```
+
+   It has no default site, and refuses unless every donor has an example
+   address. It writes `screenshot-1.png` to `screenshot-10.png` in caption
+   order.
+
+Review `screenshots-draft/`, copy the keepers into this directory, and run
+`bin/check-screenshots.sh`.
