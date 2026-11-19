@@ -15,6 +15,7 @@ namespace Starter_Shelter\WooCommerce;
 
 use Starter_Shelter\Admin\Settings;
 use Starter_Shelter\Core\Allocations;
+use Starter_Shelter\Core\Config;
 use WP_Error;
 
 /**
@@ -231,6 +232,15 @@ class Cart_Handler {
             $data['skdon_donor_name'] = sanitize_text_field( $post_data['donor_name'] );
         }
 
+        // A donation's dedication line, from the donation form (#57). It used
+        // to be a checkout field, which the block checkout never shows.
+        if ( 'donation' === $product_type && Settings::is_feature_enabled( 'dedications' ) ) {
+            $dedication = is_scalar( $post_data['dedication'] ?? null ) ? sanitize_text_field( wp_unslash( (string) $post_data['dedication'] ) ) : '';
+            if ( '' !== $dedication ) {
+                $data['skdon_dedication'] = mb_substr( $dedication, 0, 200 );
+            }
+        }
+
         // Dedication fields.
         if ( ! empty( $post_data['dedication_enabled'] ) ) {
             $data['skdon_dedication_enabled'] = true;
@@ -245,6 +255,14 @@ class Cart_Handler {
 
             if ( ! empty( $post_data['honoree_type'] ) ) {
                 $data['skdon_honoree_type'] = sanitize_key( $post_data['honoree_type'] );
+            }
+
+            // The species, for a pet, from the memorial form (#57). It used to
+            // come only from a checkout field the block checkout never shows.
+            $species = is_scalar( $post_data['pet_species'] ?? null ) ? sanitize_key( (string) $post_data['pet_species'] ) : '';
+            if ( 'pet' === ( $data['skdon_honoree_type'] ?? '' ) && '' !== $species
+                && array_key_exists( $species, (array) Config::get_item( 'settings', 'pet_species', [] ) ) ) {
+                $data['skdon_pet_species'] = $species;
             }
 
             if ( ! empty( $post_data['tribute_message'] ) ) {
@@ -537,12 +555,27 @@ class Cart_Handler {
                 ];
             }
 
+            if ( ! empty( $cart_item['skdon_pet_species'] ) ) {
+                $item_data[] = [
+                    'key'   => __( 'Species', 'shelterkit-donations' ),
+                    'value' => \Starter_Shelter\Helpers\get_species_label( (string) $cart_item['skdon_pet_species'] ),
+                ];
+            }
+
             if ( ! empty( $cart_item['skdon_tribute_message'] ) ) {
                 $item_data[] = [
                     'key'   => __( 'Tribute Message', 'shelterkit-donations' ),
                     'value' => wp_trim_words( $cart_item['skdon_tribute_message'], 20 ),
                 ];
             }
+        }
+
+        // A donation's dedication.
+        if ( ! empty( $cart_item['skdon_dedication'] ) ) {
+            $item_data[] = [
+                'key'   => __( 'Dedication', 'shelterkit-donations' ),
+                'value' => $cart_item['skdon_dedication'],
+            ];
         }
 
         // Donor name.
@@ -610,6 +643,8 @@ class Cart_Handler {
             'skdon_allocation',
             'skdon_campaign_id',
             'skdon_is_anonymous',
+            'skdon_dedication',
+            'skdon_pet_species',
             'skdon_dedication_enabled',
             'skdon_dedication_type',
             'skdon_honoree_name',

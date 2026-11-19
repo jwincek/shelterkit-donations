@@ -140,7 +140,7 @@ class Field_Manifest {
 			}
 			if ( 'fields' === $key ) {
 				// Strip UI-only `form` sub-blocks — those are surface
-				// metadata for meta-boxes / checkout-fields projectors,
+				// metadata for meta-box projectors,
 				// not entity-schema attributes.
 				$section['fields'] = array_map( [ self::class, 'strip_internal_keys' ], $manifest['fields'] );
 			} else {
@@ -155,7 +155,7 @@ class Field_Manifest {
 	 * Strip manifest-internal keys from an entity-field definition
 	 * before it appears in the merged entities.json:
 	 *
-	 *  - `form`: UI metadata for meta-boxes / checkout-fields projectors.
+	 *  - `form`: UI metadata for meta-box projectors.
 	 *  - `properties`: nested-object shape used by the validator's
 	 *    placeholder-path walker; not consumed by Entity_Hydrator.
 	 *
@@ -370,99 +370,6 @@ class Field_Manifest {
 				$out[ $sku_prefix ] = $cfg;
 			}
 		}
-
-		return $out;
-	}
-
-	/**
-	 * Collect checkout-field declarations across all manifests,
-	 * projected into the flat shape `Checkout_Fields::load_field_definitions()`
-	 * produces. Each entry's UI shape combines:
-	 *
-	 *  - `fields.<name>.form` (intrinsic: label, input_type → type)
-	 *  - `checkout_fields.<name>` overlay (placeholder, required,
-	 *    priority, class, product_types, conditional, options)
-	 *  - `meta_key` derived from `meta_prefix + field_name`
-	 *
-	 * Labels and placeholders are i18n'd at projection time when
-	 * WordPress is loaded; CLI-time validation works with plain strings.
-	 *
-	 * @since 1.1.2
-	 *
-	 * @return array<string, array<string, mixed>>
-	 */
-	public static function get_checkout_fields(): array {
-		$out = [];
-
-		// Iterates all manifests (entities + shared) so the `_shared`
-		// manifest's checkout fields are projected alongside entity-owned
-		// ones.
-		foreach ( self::list_all_manifests() as $name ) {
-			$manifest = self::get( $name );
-			if ( null === $manifest ) {
-				continue;
-			}
-
-			$checkout_fields = $manifest['checkout_fields'] ?? null;
-			if ( ! is_array( $checkout_fields ) ) {
-				continue;
-			}
-
-			$fields      = $manifest['fields'] ?? [];
-			$meta_prefix = $manifest['meta_prefix'] ?? '_';
-
-			foreach ( $checkout_fields as $field_name => $overlay ) {
-				$out[ $field_name ] = self::project_checkout_field(
-					$field_name,
-					$fields[ $field_name ]['form'] ?? [],
-					is_array( $overlay ) ? $overlay : [],
-					$meta_prefix
-				);
-			}
-		}
-
-		return $out;
-	}
-
-	/**
-	 * Project one checkout field into the legacy config shape.
-	 *
-	 * Overlay attrs override the field's intrinsic `form` shape — the
-	 * same field can render differently per surface (e.g., skdon_donation
-	 * dedication is a textarea in meta-boxes but a text input at
-	 * checkout). Entries without a matching entity field are allowed
-	 * if the overlay supplies its own input_type and label (e.g.,
-	 * campaign_id, which lives as a taxonomy relation rather than a
-	 * meta field).
-	 *
-	 * @since 1.1.2
-	 *
-	 * @param string               $field_name  Field name (entity field or self-contained).
-	 * @param array<string, mixed> $form        The field's intrinsic form shape (may be empty).
-	 * @param array<string, mixed> $overlay     The checkout_fields overlay.
-	 * @param string               $meta_prefix Entity meta prefix (for meta_key derivation).
-	 * @return array<string, mixed>
-	 */
-	private static function project_checkout_field( string $field_name, array $form, array $overlay, string $meta_prefix ): array {
-		$merged = array_merge( $form, $overlay );
-
-		$out = [];
-		if ( isset( $merged['input_type'] ) ) {
-			$out['type'] = $merged['input_type'];
-		}
-		foreach ( [ 'label', 'placeholder', 'description' ] as $key ) {
-			if ( isset( $merged[ $key ] ) ) {
-				$out[ $key ] = self::translate( $merged[ $key ] );
-			}
-		}
-		foreach ( [ 'required', 'priority', 'class', 'options', 'product_types', 'conditional' ] as $key ) {
-			if ( isset( $merged[ $key ] ) ) {
-				$out[ $key ] = $merged[ $key ];
-			}
-		}
-
-		// meta_key is derived; Cart_Handler and friends store under this key.
-		$out['meta_key'] = $meta_prefix . $field_name;
 
 		return $out;
 	}

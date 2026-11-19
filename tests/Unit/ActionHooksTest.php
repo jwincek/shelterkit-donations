@@ -8,9 +8,9 @@
  * manifest, so those count as listeners here. Hooks kept for other plugins
  * are listed with the reason.
  *
- * This is the config validator's check 4, run in CI. The validator reads
- * the email triggers from config/emails.json, which has been empty since
- * the emails moved into the manifests.
+ * The config validator's check 4 does the same, and ConfigContractsTest
+ * runs the validator in CI (#57). This one needs no WordPress, so it fails
+ * first.
  *
  * @package Starter_Shelter
  */

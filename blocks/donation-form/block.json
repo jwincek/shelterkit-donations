@@ -64,6 +64,10 @@
             "type": "boolean",
             "default": true
         },
+        "showDedication": {
+            "type": "boolean",
+            "default": true
+        },
         "campaignId": {
             "type": "number"
         },

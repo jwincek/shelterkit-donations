@@ -54,9 +54,20 @@ class Validate_Command {
 	 * @param array<string, string> $assoc_args Flag args.
 	 */
 	public function __invoke( array $args, array $assoc_args ): void {
-		$only   = $assoc_args['check'] ?? null;
-		$format = $assoc_args['format'] ?? 'human';
+		$this->emit( $this->findings( $assoc_args['check'] ?? null ), $assoc_args['format'] ?? 'human' );
+	}
 
+	/**
+	 * Every contract violation the checks find.
+	 *
+	 * Public so the test suite runs the same checks, and CI catches what
+	 * only this command used to: #58's computed `notify_family` hid the
+	 * field's declared shape from check 10, and nothing ran it (#57).
+	 *
+	 * @param string|null $only One named check, or all.
+	 * @return array<int, array{file: string, line: int, message: string}>
+	 */
+	public function findings( ?string $only = null ): array {
 		$abilities_config = $this->load_json( 'config/abilities.json' );
 		$products_config  = $this->load_json( 'config/products.json' );
 		$emails_config    = $this->load_json( 'config/emails.json' );
@@ -108,7 +119,6 @@ class Validate_Command {
 				$this->check_manifest_abilities(),
 				$this->check_manifest_products(),
 				$this->check_manifest_meta_boxes(),
-				$this->check_manifest_checkout_fields(),
 				$this->check_manifest_emails(),
 				$this->check_producer_arg_counts(),
 				$this->check_ability_return_shapes( $abilities_config ),
@@ -116,7 +126,7 @@ class Validate_Command {
 			);
 		}
 
-		$this->emit( $findings, $format );
+		return $findings;
 	}
 
 	/**
@@ -1303,9 +1313,12 @@ class Validate_Command {
 		// Implicit `id` and declared `relations` are always populated by
 		// Entity_Hydrator at hydration time, so they're valid first-level
 		// access keys even though they aren't in `fields`/`computed`.
+		// A field's declared shape wins over a computed entry of the same
+		// name: the field says what it holds, the computed entry only how
+		// it's built (memorial notify_family, #58).
 		$node = array_merge(
-			$entity_manifest['fields'] ?? [],
 			$entity_manifest['computed'] ?? [],
+			$entity_manifest['fields'] ?? [],
 			$entity_manifest['relations'] ?? [],
 			[ 'id' => [ 'type' => 'integer', 'description' => 'WordPress post ID (always present)' ] ]
 		);
@@ -1347,65 +1360,13 @@ class Validate_Command {
 	}
 
 	/**
-	 * Check 9: per-manifest sanity for the checkout_fields they declare.
-	 *
-	 * Self-contained entries (no matching entity field) are allowed —
-	 * the overlay can fully describe the field. But any entry's
-	 * projected output must resolve at least an `input_type` (so the
-	 * checkout renderer knows what widget to render). A typo that
-	 * matches neither a fields entry nor supplies its own input_type
-	 * is flagged.
-	 *
-	 * @return array<int, array{file: string, line: int, message: string}>
-	 */
-	private function check_manifest_checkout_fields(): array {
-		$findings = [];
-
-		// Iterates all manifests (entities + shared) since the _shared
-		// manifest contributes checkout entries too.
-		foreach ( Field_Manifest::list_all_manifests() as $name ) {
-			$manifest = Field_Manifest::get( $name );
-			if ( null === $manifest ) {
-				continue;
-			}
-
-			$checkout_fields = $manifest['checkout_fields'] ?? null;
-			if ( ! is_array( $checkout_fields ) ) {
-				continue;
-			}
-
-			$fields        = $manifest['fields'] ?? [];
-			$manifest_file = sprintf( 'config/manifests/%s.php', $name );
-
-			foreach ( $checkout_fields as $field_name => $overlay ) {
-				$form          = $fields[ $field_name ]['form'] ?? [];
-				$has_input     = isset( $form['input_type'] )
-					|| ( is_array( $overlay ) && isset( $overlay['input_type'] ) );
-				if ( ! $has_input ) {
-					$findings[] = [
-						'file'    => $manifest_file,
-						'line'    => 0,
-						'message' => sprintf(
-							'checkout_fields "%s" can\'t resolve an input_type — not a field in %s.fields and overlay doesn\'t supply one.',
-							$field_name,
-							$name
-						),
-					];
-				}
-			}
-		}
-
-		return $findings;
-	}
-
-	/**
 	 * Check 8: per-manifest sanity for the meta_boxes they declare.
 	 *
 	 * Each entry in a box's `fields` list resolves either to a manifest
 	 * `fields` entry (bare string or `name => overrides` map) or is
 	 * self-contained — the overlay supplies its own `input_type` (e.g.,
 	 * display-only fields like `donor_level` that aren't editable
-	 * entity fields). Same relaxation as check_manifest_checkout_fields.
+	 * entity fields).
 	 *
 	 * @return array<int, array{file: string, line: int, message: string}>
 	 */

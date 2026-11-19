@@ -16,28 +16,5 @@
     "shelter-memberships-business": "membership-level",
     "shelter-donations-in-memoriam": "in-memoriam-type",
     "memberships": "membership-level"
-  },
-
-  "checkout_field_sets": {
-    "donation": {
-      "fields": ["dedication", "is_anonymous", "campaign_id"]
-    },
-    "membership": {
-      "fields": ["is_anonymous"],
-      "business_fields": ["business_name"]
-    },
-    "memorial": {
-      "fields": [
-        "honoree_name",
-        "tribute_message",
-        "pet_species",
-        "is_anonymous",
-        "notify_family",
-        "family_name",
-        "family_email",
-        "family_address",
-        "send_card"
-      ]
-    }
   }
 }

@@ -70,6 +70,7 @@ const { state, actions } = store( NAMESPACE, {
 					isAnonymous: false,
 					dedicationType: 'memory',
 					honoreeType: 'person',
+					petSpecies: '',
 					honoreeName: '',
 					tributeMessage: '',
 					notifyFamily: false,
@@ -98,6 +99,12 @@ const { state, actions } = store( NAMESPACE, {
 			const ctx = getContext();
 			const form = state.forms[ ctx.formId ];
 			if ( form ) form.honoreeType = event.target.value;
+		},
+
+		setPetSpecies( event ) {
+			const ctx = getContext();
+			const form = state.forms[ ctx.formId ];
+			if ( form ) form.petSpecies = String( event.target.value || '' );
 		},
 
 		setHonoreeName( event ) {
@@ -191,6 +198,9 @@ const { state, actions } = store( NAMESPACE, {
 					formData.append( 'dedication_type', form.dedicationType );
 					formData.append( 'honoree_name', form.honoreeName );
 					formData.append( 'honoree_type', form.honoreeType );
+					// The species for a pet (#57). It used to be a checkout field,
+					// which the block checkout never shows.
+					if ( 'pet' === form.honoreeType && form.petSpecies ) formData.append( 'pet_species', form.petSpecies );
 
 					if ( form.tributeMessage ) formData.append( 'tribute_message', form.tributeMessage );
 
@@ -213,6 +223,7 @@ const { state, actions } = store( NAMESPACE, {
 						isAnonymous: false,
 						dedicationType: 'memory',
 						honoreeType: 'person',
+						petSpecies: '',
 						honoreeName: '',
 						tributeMessage: '',
 						notifyFamily: false,
@@ -235,6 +246,7 @@ const { state, actions } = store( NAMESPACE, {
 					isAnonymous: false,
 					dedicationType: 'memory',
 					honoreeType: 'person',
+					petSpecies: '',
 					honoreeName: '',
 					tributeMessage: '',
 					notifyFamily: false,

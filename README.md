@@ -41,7 +41,7 @@ CI runs the syntax check on PHP 8.1/8.2/8.3 plus the PHPCS lint on every push to
 The plugin follows a **config-driven, layered architecture**:
 
 - **Manifest Layer** — Per-entity PHP-array files in `config/manifests/` (`skdon_donation.php`, `skdon_membership.php`, `skdon_memorial.php`, `skdon_donor.php`, plus `_shared.php`) are the single source of truth for each entity's field declarations, abilities, products, meta-boxes, checkout-fields, and emails. `Field_Manifest` merges them into the runtime config before consumers see it.
-- **Legacy JSON Layer** — A few cross-cutting files remain in `config/` for things that aren't entity-owned by design: `products.json` (cross-product blocks like `legacy_products`, `sku_attribute_mapping`, `checkout_field_sets`), `abilities.json` (cross-entity `shelter-reports/*` aggregations), `post-types.json`, `taxonomies.json`, and shared `schemas/`.
+- **Legacy JSON Layer** — A few cross-cutting files remain in `config/` for things that aren't entity-owned by design: `products.json` (cross-product blocks like `legacy_products` and `sku_attribute_mapping`), `abilities.json` (cross-entity `shelter-reports/*` aggregations), `post-types.json`, `taxonomies.json`, and shared `schemas/`.
 - **Infrastructure Layer** — Reusable PHP classes (`Config`, `Field_Manifest`, `Entity_Hydrator`, `Query`, `CPT_Registry`) read config and do the heavy lifting.
 - **Abilities Layer** — Discrete operations registered via the WordPress 6.9+ Abilities API with JSON Schema validation.
 - **Consumer Layer** — Thin integrations (WooCommerce, blocks, admin pages) that delegate to abilities.
@@ -70,7 +70,6 @@ return [
         ],
     ],
     'meta_boxes'      => [ /* admin meta-box layout */ ],
-    'checkout_fields' => [ /* WC checkout-field declarations */ ],
     'products'        => [ /* product → ability input mapping */ ],
     'emails'          => [ /* email triggers + trigger_args schema */ ],
 ];
@@ -93,7 +92,7 @@ includes/blocks/     → Block bindings, interactivity stores, editor registrati
 includes/cli/        → wp-cli commands (validator)
 includes/core/       → Config loader, Field_Manifest, entity hydrator, query builder, CPT registry
 includes/emails/     → Config-driven WooCommerce email integration
-includes/woocommerce/→ Order handler, product mapper, checkout fields, cart, My Account
+includes/woocommerce/→ Order handler, product mapper, cart, My Account
 blocks/              → Block definitions (block.json, render.php, edit.js, style.css)
 templates/           → Email templates (HTML and plain text)
 ```
@@ -121,7 +120,7 @@ The plugin creates four variable products on activation, mapped from `config/pro
 ### Adding a new entity
 
 1. Add a post type to `config/post-types.json` (and any taxonomies to `config/taxonomies.json`).
-2. Create `config/manifests/<post_type>.php` returning an array with `entity`, `abilities`, `products`, `meta_boxes`, `checkout_fields`, and `emails` sections as needed. Use `$entity` refs in ability/product schemas to reuse field declarations.
+2. Create `config/manifests/<post_type>.php` returning an array with `entity`, `abilities`, `products`, `meta_boxes` and `emails` sections as needed. A gift's details are collected by its form block onto the cart item, which works with the classic and the block checkout alike; there are no checkout fields (#57). Use `$entity` refs in ability/product schemas to reuse field declarations.
 3. Write the ability callbacks (typically ~50 lines per entity) in `includes/abilities/<entity>.php`.
 4. Run `wp shelterkit-donations validate` — fix any findings before considering the entity done.
 

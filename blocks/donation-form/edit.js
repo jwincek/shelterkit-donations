@@ -78,6 +78,11 @@
                         onChange: function( value ) { setAttributes( { showAnonymous: value } ); },
                     } ),
                     el( ToggleControl, {
+                        label: __( 'Show Dedication Line', 'shelterkit-donations' ),
+                        checked: attributes.showDedication,
+                        onChange: function( value ) { setAttributes( { showDedication: value } ); },
+                    } ),
+                    el( ToggleControl, {
                         label: __( 'Show Secure Badge', 'shelterkit-donations' ),
                         checked: attributes.showSecureBadge,
                         onChange: function( value ) { setAttributes( { showSecureBadge: value } ); },

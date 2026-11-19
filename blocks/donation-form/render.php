@@ -24,6 +24,9 @@ $default_amount   = $attributes['defaultAmount'] ?? 50;
 $show_allocation  = $attributes['showAllocation'] ?? true;
 // The site-wide switch beats each form's own (#49).
 $show_anonymous   = ( $attributes['showAnonymous'] ?? true ) && \Starter_Shelter\Admin\Settings::is_feature_enabled( 'anonymous_donations' );
+// The dedication line used to be a checkout field, which the block checkout
+// never shows (#57). On the form it reaches the cart item, with either checkout.
+$show_dedication  = ( $attributes['showDedication'] ?? true ) && \Starter_Shelter\Admin\Settings::is_feature_enabled( 'dedications' );
 // Campaign source of truth: explicit block attribute wins; otherwise
 // auto-tag from `?campaign={id}` so a click through campaign-card
 // (or any campaign-aware deep link) lands here and the resulting
@@ -134,6 +137,18 @@ $partials = dirname( __DIR__ ) . '/shared/partials';
                     <?php endforeach; ?>
                 </select>
             </div>
+        </div>
+        <?php endif; ?>
+
+        <?php if ( $show_dedication ) : ?>
+        <div class="sd-form-section sd-dedication-section">
+            <label class="sd-section-label" for="<?php echo esc_attr( $form_id ); ?>-dedication">
+                <?php esc_html_e( 'Dedication', 'shelterkit-donations' ); ?>
+                <span class="sd-optional">(<?php esc_html_e( 'Optional', 'shelterkit-donations' ); ?>)</span>
+            </label>
+            <input type="text" id="<?php echo esc_attr( $form_id ); ?>-dedication" class="sd-text-input" maxlength="200"
+                placeholder="<?php esc_attr_e( 'In honor of…', 'shelterkit-donations' ); ?>"
+                data-wp-on--input="actions.setDedication" data-wp-bind--value="state.form.dedication">
         </div>
         <?php endif; ?>
 

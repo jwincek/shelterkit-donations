@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-19T01:32:28+00:00\n"
+"POT-Creation-Date: 2026-11-19T03:44:21+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: shelterkit-donations\n"
@@ -23,7 +23,7 @@ msgstr ""
 #: includes/woocommerce/class-order-handler.php:498
 #: includes/woocommerce/class-order-handler.php:509
 #: shelterkit-donations.php:128
-#: shelterkit-donations.php:368
+#: shelterkit-donations.php:365
 msgid "ShelterKit Donations"
 msgstr ""
 
@@ -174,27 +174,27 @@ msgstr ""
 msgid "Contribution type"
 msgstr ""
 
-#: blocks/donation-form/render.php:33
+#: blocks/donation-form/render.php:36
 #: templates/myaccount/giving-history.php:50
 msgid "Make a Donation"
 msgstr ""
 
-#: blocks/donation-form/render.php:34
+#: blocks/donation-form/render.php:37
 msgid "Your gift helps animals in need."
 msgstr ""
 
-#: blocks/donation-form/render.php:35
+#: blocks/donation-form/render.php:38
 msgid "Add to Cart"
 msgstr ""
 
-#: blocks/donation-form/render.php:47
+#: blocks/donation-form/render.php:50
 #: includes/blocks/register-editor.php:106
 #: includes/core/helpers.php:1112
 #: includes/rest/class-rest-controller.php:575
 msgid "General Fund"
 msgstr ""
 
-#: blocks/donation-form/render.php:48
+#: blocks/donation-form/render.php:51
 #: includes/blocks/register-editor.php:107
 #: includes/core/helpers.php:1113
 #: includes/rest/class-rest-controller.php:576
@@ -202,40 +202,60 @@ msgid "Medical Care"
 msgstr ""
 
 #. translators: %s: campaign name.
-#: blocks/donation-form/render.php:111
+#: blocks/donation-form/render.php:114
 #: blocks/membership-form/render.php:107
 #, php-format
 msgid "Supporting: %s"
 msgstr ""
 
-#: blocks/donation-form/render.php:114
+#: blocks/donation-form/render.php:117
 msgid "Donation form not configured."
 msgstr ""
 
-#: blocks/donation-form/render.php:121
+#: blocks/donation-form/render.php:124
 #: blocks/shared/partials/amount-selector.php:21
 msgid "Select Amount"
 msgstr ""
 
-#: blocks/donation-form/render.php:128
+#: blocks/donation-form/render.php:131
 msgid "Direct Your Gift"
 msgstr ""
 
-#: blocks/donation-form/render.php:143
+#: blocks/donation-form/render.php:146
+#: includes/admin/class-quick-actions.php:348
+#: includes/woocommerce/class-cart-handler.php:542
+#: includes/woocommerce/class-cart-handler.php:576
+#: templates/emails/donation-receipt.php:58
+#: assets/js/memorial-panel.js:128
+msgid "Dedication"
+msgstr ""
+
+#: blocks/donation-form/render.php:147
+#: blocks/membership-form/render.php:251
+#: blocks/memorial-form/render.php:145
+#: blocks/memorial-form/render.php:167
+msgid "Optional"
+msgstr ""
+
+#: blocks/donation-form/render.php:150
+msgid "In honor of…"
+msgstr ""
+
+#: blocks/donation-form/render.php:158
 #: blocks/shared/partials/anonymous-toggle.php:15
 msgid "Make my donation anonymous"
 msgstr ""
 
-#: blocks/donation-form/render.php:151
+#: blocks/donation-form/render.php:166
 msgid "Your Gift:"
 msgstr ""
 
-#: blocks/donation-form/render.php:165
-#: blocks/memorial-form/render.php:218
+#: blocks/donation-form/render.php:180
+#: blocks/memorial-form/render.php:240
 msgid "Adding..."
 msgstr ""
 
-#: blocks/donation-form/render.php:175
+#: blocks/donation-form/render.php:190
 msgid "Secure donation powered by WooCommerce"
 msgstr ""
 
@@ -447,7 +467,7 @@ msgid "year"
 msgstr ""
 
 #: blocks/membership-form/render.php:232
-#: blocks/memorial-form/render.php:194
+#: blocks/memorial-form/render.php:216
 #: blocks/shared/partials/donor-name.php:19
 msgid "Your Name"
 msgstr ""
@@ -466,13 +486,8 @@ msgid "Please list all family members to be included in your membership (e.g. \"
 msgstr ""
 
 #: blocks/membership-form/render.php:251
-#: includes/woocommerce/class-cart-handler.php:585
+#: includes/woocommerce/class-cart-handler.php:618
 msgid "Business Logo"
-msgstr ""
-
-#: blocks/membership-form/render.php:251
-#: blocks/memorial-form/render.php:145
-msgid "Optional"
 msgstr ""
 
 #: blocks/membership-form/render.php:260
@@ -522,19 +537,19 @@ msgstr ""
 msgid "Add Memorial Gift to Cart"
 msgstr ""
 
-#: blocks/memorial-form/render.php:74
+#: blocks/memorial-form/render.php:77
 msgid "Memorial form not configured."
 msgstr ""
 
-#: blocks/memorial-form/render.php:81
+#: blocks/memorial-form/render.php:84
 msgid "This gift is:"
 msgstr ""
 
-#: blocks/memorial-form/render.php:88
+#: blocks/memorial-form/render.php:91
 #: blocks/memorial-wall/render.php:300
 #: includes/blocks/register-stores.php:110
 #: includes/core/helpers.php:513
-#: includes/woocommerce/class-cart-handler.php:519
+#: includes/woocommerce/class-cart-handler.php:537
 #: templates/emails/memorial-confirmation.php:57
 #: assets/js/admin-import-export.js:765
 #: assets/js/memorial-panel.js:131
@@ -542,12 +557,12 @@ msgstr ""
 msgid "In Memory Of"
 msgstr ""
 
-#: blocks/memorial-form/render.php:96
+#: blocks/memorial-form/render.php:99
 #: blocks/memorial-wall/render.php:301
 #: includes/admin/class-quick-actions.php:647
 #: includes/blocks/register-stores.php:109
 #: includes/core/helpers.php:512
-#: includes/woocommerce/class-cart-handler.php:518
+#: includes/woocommerce/class-cart-handler.php:536
 #: templates/emails/memorial-confirmation.php:57
 #: templates/emails/memorial-family-notification-plain.php:58
 #: templates/emails/memorial-family-notification.php:79
@@ -556,11 +571,11 @@ msgstr ""
 msgid "In Honor Of"
 msgstr ""
 
-#: blocks/memorial-form/render.php:104
+#: blocks/memorial-form/render.php:107
 msgid "Honoring a:"
 msgstr ""
 
-#: blocks/memorial-form/render.php:111
+#: blocks/memorial-form/render.php:114
 #: blocks/memorial-wall/render.php:483
 #: blocks/memorial-wall/render.php:497
 #: includes/admin/class-list-columns.php:420
@@ -568,13 +583,13 @@ msgstr ""
 #: includes/admin/class-quick-actions.php:645
 #: includes/blocks/register-stores.php:114
 #: includes/core/helpers.php:457
-#: includes/woocommerce/class-cart-handler.php:531
+#: includes/woocommerce/class-cart-handler.php:549
 #: assets/js/memorial-panel.js:141
 #: blocks/memorial-form/edit.js:71
 msgid "Person"
 msgstr ""
 
-#: blocks/memorial-form/render.php:119
+#: blocks/memorial-form/render.php:122
 #: blocks/memorial-wall/render.php:483
 #: blocks/memorial-wall/render.php:497
 #: includes/admin/class-list-columns.php:421
@@ -583,69 +598,81 @@ msgstr ""
 #: includes/blocks/register-stores.php:113
 #: includes/blocks/register-stores.php:115
 #: includes/core/helpers.php:456
-#: includes/woocommerce/class-cart-handler.php:532
+#: includes/woocommerce/class-cart-handler.php:550
 #: assets/js/memorial-panel.js:142
 #: blocks/memorial-form/edit.js:72
 msgid "Pet"
 msgstr ""
 
-#: blocks/memorial-form/render.php:128
+#: blocks/memorial-form/render.php:131
 #: includes/blocks/register-stores.php:111
 msgid "Person's Name"
 msgstr ""
 
-#: blocks/memorial-form/render.php:132
+#: blocks/memorial-form/render.php:135
 msgid "Enter their name..."
 msgstr ""
 
-#: blocks/memorial-form/render.php:139
+#: blocks/memorial-form/render.php:144
+#: includes/admin/class-memorial-quick-add.php:707
+#: includes/woocommerce/class-cart-handler.php:560
+#: templates/emails/memorial-confirmation.php:66
+msgid "Species"
+msgstr ""
+
+#: blocks/memorial-form/render.php:149
+#: includes/admin/class-memorial-quick-add.php:709
+msgid "—"
+msgstr ""
+
+#: blocks/memorial-form/render.php:161
 msgid "Gift Amount"
 msgstr ""
 
-#: blocks/memorial-form/render.php:145
-#: includes/woocommerce/class-cart-handler.php:542
+#: blocks/memorial-form/render.php:167
+#: includes/woocommerce/class-cart-handler.php:567
 #: assets/js/memorial-panel.js:163
 msgid "Tribute Message"
 msgstr ""
 
-#: blocks/memorial-form/render.php:147
+#: blocks/memorial-form/render.php:169
 msgid "Share a memory or message about your loved one..."
 msgstr ""
 
-#: blocks/memorial-form/render.php:160
+#: blocks/memorial-form/render.php:182
 msgid "Notify the family of this tribute gift"
 msgstr ""
 
-#: blocks/memorial-form/render.php:168
+#: blocks/memorial-form/render.php:190
 msgid "Family Contact Name"
 msgstr ""
 
-#: blocks/memorial-form/render.php:172
+#: blocks/memorial-form/render.php:194
 #: assets/js/memorial-panel.js:427
 msgid "Family Email"
 msgstr ""
 
-#: blocks/memorial-form/render.php:177
+#: blocks/memorial-form/render.php:199
 msgid "Family Mailing Address"
 msgstr ""
 
-#: blocks/memorial-form/render.php:184
+#: blocks/memorial-form/render.php:206
 msgid "Send a physical sympathy/tribute card"
 msgstr ""
 
-#: blocks/memorial-form/render.php:195
+#: blocks/memorial-form/render.php:217
 msgid "How your name will appear on the memorial wall."
 msgstr ""
 
-#: blocks/memorial-form/render.php:200
+#: blocks/memorial-form/render.php:222
 msgid "Make my tribute gift anonymous"
 msgstr ""
 
-#: blocks/memorial-form/render.php:210
+#: blocks/memorial-form/render.php:232
 msgid "Gift Amount:"
 msgstr ""
 
-#: blocks/memorial-form/render.php:229
+#: blocks/memorial-form/render.php:251
 msgid "Secure tribute gift powered by WooCommerce"
 msgstr ""
 
@@ -1852,7 +1879,7 @@ msgstr ""
 #: includes/admin/class-reports.php:413
 #: includes/admin/class-reports.php:697
 #: includes/admin/class-reports.php:1104
-#: includes/woocommerce/class-cart-handler.php:559
+#: includes/woocommerce/class-cart-handler.php:592
 #: assets/js/memorial-panel.js:395
 msgid "Anonymous"
 msgstr ""
@@ -2293,7 +2320,7 @@ msgstr ""
 #: includes/admin/class-reports.php:402
 #: includes/admin/class-reports.php:1102
 #: includes/admin/class-reports.php:1348
-#: includes/woocommerce/class-cart-handler.php:498
+#: includes/woocommerce/class-cart-handler.php:516
 #: templates/emails/donation-receipt.php:53
 #: templates/myaccount/giving-history.php:54
 msgid "Allocation"
@@ -2303,10 +2330,10 @@ msgstr ""
 #: includes/admin/class-reports.php:403
 #: includes/admin/class-reports.php:766
 #: includes/admin/class-reports.php:1103
-#: includes/woocommerce/class-cart-handler.php:508
+#: includes/woocommerce/class-cart-handler.php:526
 #: blocks/campaign-card/edit.js:24
 #: blocks/campaign-progress/edit.js:16
-#: blocks/donation-form/edit.js:86
+#: blocks/donation-form/edit.js:91
 #: blocks/membership-form/edit.js:84
 msgid "Campaign"
 msgstr ""
@@ -2836,15 +2863,6 @@ msgstr ""
 msgid "Who"
 msgstr ""
 
-#: includes/admin/class-memorial-quick-add.php:707
-#: templates/emails/memorial-confirmation.php:66
-msgid "Species"
-msgstr ""
-
-#: includes/admin/class-memorial-quick-add.php:709
-msgid "—"
-msgstr ""
-
 #: includes/admin/class-memorial-quick-add.php:717
 msgid "Tribute message (optional)"
 msgstr ""
@@ -3140,13 +3158,6 @@ msgstr ""
 
 #: includes/admin/class-quick-actions.php:323
 msgid "Receipt #"
-msgstr ""
-
-#: includes/admin/class-quick-actions.php:348
-#: includes/woocommerce/class-cart-handler.php:524
-#: templates/emails/donation-receipt.php:58
-#: assets/js/memorial-panel.js:128
-msgid "Dedication"
 msgstr ""
 
 #. translators: %s: EIN number
@@ -3506,14 +3517,12 @@ msgstr ""
 
 #: includes/admin/class-reports.php:1171
 #: includes/emails/class-config-email.php:346
-#: includes/woocommerce/class-cart-handler.php:560
-#: includes/woocommerce/class-checkout-fields.php:585
+#: includes/woocommerce/class-cart-handler.php:593
 msgid "Yes"
 msgstr ""
 
 #: includes/admin/class-reports.php:1171
 #: includes/emails/class-config-email.php:346
-#: includes/woocommerce/class-checkout-fields.php:585
 msgid "No"
 msgstr ""
 
@@ -3564,7 +3573,7 @@ msgid "Features"
 msgstr ""
 
 #: includes/admin/class-settings.php:179
-msgid "What the donation, membership and memorial forms and the checkout offer. A feature turned off here is off on every form, whatever that form's own settings say."
+msgid "What the donation, membership and memorial forms offer. A feature turned off here is off on every form, whatever that form's own settings say."
 msgstr ""
 
 #: includes/admin/class-settings.php:182
@@ -3609,7 +3618,7 @@ msgid "Allow Anonymous Donations"
 msgstr ""
 
 #: includes/admin/class-settings.php:218
-msgid "Offer donors the choice to keep their name off public lists, on the forms and at checkout. Gifts already marked anonymous stay anonymous, and staff can still mark one by hand."
+msgid "Offer donors the choice to keep their name off public lists, on the donation, membership and memorial forms. Gifts already marked anonymous stay anonymous, and staff can still mark one by hand."
 msgstr ""
 
 #: includes/admin/class-settings.php:220
@@ -3618,7 +3627,7 @@ msgid "Enable Donation Dedications"
 msgstr ""
 
 #: includes/admin/class-settings.php:222
-msgid "The optional \"Dedication\" line at checkout for general donations. Tribute gifts made with the memorial form are not affected."
+msgid "The optional \"Dedication\" line on the donation form. Tribute gifts made with the memorial form are not affected."
 msgstr ""
 
 #: includes/admin/class-settings.php:224
@@ -3627,7 +3636,7 @@ msgid "Enable Memorial Family Notifications"
 msgstr ""
 
 #: includes/admin/class-settings.php:226
-msgid "Let donors ask for the honoree's family to be told about a tribute gift, on the memorial form and at checkout. Staff can still notify a family from the memorial's screen."
+msgid "Let donors ask for the honoree's family to be told about a tribute gift, on the memorial form. Staff can still notify a family from the memorial's screen."
 msgstr ""
 
 #: includes/admin/class-settings.php:228
@@ -3967,7 +3976,7 @@ msgstr ""
 
 #: includes/admin/class-settings.php:1192
 #: includes/core/class-family-notification.php:142
-#: shelterkit-donations.php:484
+#: shelterkit-donations.php:481
 msgid "ShelterKit Donations:"
 msgstr ""
 
@@ -4301,7 +4310,7 @@ msgid "Added to cart successfully!"
 msgstr ""
 
 #: includes/blocks/register-stores.php:100
-#: includes/woocommerce/class-cart-handler.php:757
+#: includes/woocommerce/class-cart-handler.php:792
 msgid "Please enter a valid donation amount."
 msgstr ""
 
@@ -4330,7 +4339,7 @@ msgid "Please enter your business name."
 msgstr ""
 
 #: includes/blocks/register-stores.php:107
-#: includes/woocommerce/class-cart-handler.php:165
+#: includes/woocommerce/class-cart-handler.php:166
 msgid "Could not add to cart. Please try again."
 msgstr ""
 
@@ -4506,123 +4515,83 @@ msgstr ""
 msgid "Displays an individual memorial tribute with honoree name, message, and donor attribution."
 msgstr ""
 
-#: includes/woocommerce/class-cart-handler.php:67
+#: includes/woocommerce/class-cart-handler.php:68
 msgid "Please wait a moment before adding another item."
 msgstr ""
 
-#: includes/woocommerce/class-cart-handler.php:77
+#: includes/woocommerce/class-cart-handler.php:78
 msgid "Please enter a valid amount."
 msgstr ""
 
-#: includes/woocommerce/class-cart-handler.php:86
+#: includes/woocommerce/class-cart-handler.php:87
 msgid "Donation product not configured. Please contact the site administrator."
 msgstr ""
 
-#: includes/woocommerce/class-cart-handler.php:94
+#: includes/woocommerce/class-cart-handler.php:95
 msgid "Product not found."
 msgstr ""
 
-#: includes/woocommerce/class-cart-handler.php:122
+#: includes/woocommerce/class-cart-handler.php:123
 msgid "Please choose where your gift should go."
 msgstr ""
 
-#: includes/woocommerce/class-cart-handler.php:170
+#: includes/woocommerce/class-cart-handler.php:171
 msgid "Added to cart successfully."
 msgstr ""
 
-#: includes/woocommerce/class-cart-handler.php:339
+#: includes/woocommerce/class-cart-handler.php:357
 msgid "No variations available for this product."
 msgstr ""
 
-#: includes/woocommerce/class-cart-handler.php:397
+#: includes/woocommerce/class-cart-handler.php:415
 msgid "Could not find a matching product variation."
 msgstr ""
 
-#: includes/woocommerce/class-cart-handler.php:535
+#: includes/woocommerce/class-cart-handler.php:553
 #: assets/js/memorial-panel.js:138
 msgid "Honoree Type"
 msgstr ""
 
-#: includes/woocommerce/class-cart-handler.php:551
+#: includes/woocommerce/class-cart-handler.php:584
 #: assets/js/memorial-panel.js:338
 msgid "Donor Name"
 msgstr ""
 
-#: includes/woocommerce/class-cart-handler.php:567
+#: includes/woocommerce/class-cart-handler.php:600
 #: templates/emails/membership-renewal.php:77
 #: templates/emails/membership-welcome.php:54
 msgid "Membership Level"
 msgstr ""
 
-#: includes/woocommerce/class-cart-handler.php:575
+#: includes/woocommerce/class-cart-handler.php:608
 #: templates/emails/membership-welcome.php:63
 msgid "Business Name"
 msgstr ""
 
-#: includes/woocommerce/class-cart-handler.php:586
+#: includes/woocommerce/class-cart-handler.php:619
 msgid "Uploaded (pending review)"
 msgstr ""
 
-#: includes/woocommerce/class-cart-handler.php:588
+#: includes/woocommerce/class-cart-handler.php:621
 msgid "Pending review"
 msgstr ""
 
-#: includes/woocommerce/class-cart-handler.php:696
+#: includes/woocommerce/class-cart-handler.php:731
 msgid "Logo must be a PNG or JPG file."
 msgstr ""
 
-#: includes/woocommerce/class-cart-handler.php:705
+#: includes/woocommerce/class-cart-handler.php:740
 msgid "Logo must be under 2MB."
 msgstr ""
 
-#: includes/woocommerce/class-cart-handler.php:715
+#: includes/woocommerce/class-cart-handler.php:750
 msgid "Logo upload failed. Please try again."
 msgstr ""
 
 #. translators: %s: maximum amount
-#: includes/woocommerce/class-cart-handler.php:767
+#: includes/woocommerce/class-cart-handler.php:802
 #, php-format
 msgid "The maximum donation amount is %s."
-msgstr ""
-
-#: includes/woocommerce/class-checkout-fields.php:288
-msgid "Memorial Tribute Information"
-msgstr ""
-
-#: includes/woocommerce/class-checkout-fields.php:289
-msgid "Please provide details about the person or pet you are honoring."
-msgstr ""
-
-#: includes/woocommerce/class-checkout-fields.php:297
-msgid "Business Information"
-msgstr ""
-
-#: includes/woocommerce/class-checkout-fields.php:298
-msgid "Your business will be recognized as a supporting partner."
-msgstr ""
-
-#: includes/woocommerce/class-checkout-fields.php:305
-msgid "Donation Options"
-msgstr ""
-
-#: includes/woocommerce/class-checkout-fields.php:396
-msgid "— Select a campaign (optional) —"
-msgstr ""
-
-#. translators: %s: field label
-#: includes/woocommerce/class-checkout-fields.php:502
-#, php-format
-msgid "%s is a required field."
-msgstr ""
-
-#: includes/woocommerce/class-checkout-fields.php:520
-msgid "Shelter Donation Details"
-msgstr ""
-
-#: includes/woocommerce/class-checkout-fields.php:567
-#: templates/emails/donation-receipt-plain.php:27
-#: templates/emails/donation-receipt.php:40
-msgid "Donation Details"
 msgstr ""
 
 #: includes/woocommerce/class-my-account.php:156
@@ -4928,11 +4897,11 @@ msgstr ""
 msgid "Abilities for generating shelter reports."
 msgstr ""
 
-#: shelterkit-donations.php:485
+#: shelterkit-donations.php:482
 msgid "Some donation products need to be created."
 msgstr ""
 
-#: shelterkit-donations.php:486
+#: shelterkit-donations.php:483
 msgid "Set up products"
 msgstr ""
 
@@ -4960,6 +4929,11 @@ msgstr ""
 #: templates/emails/donation-receipt-plain.php:24
 #: templates/emails/donation-receipt.php:37
 msgid "Thank you for your generous donation to support our animal shelter. Your contribution makes a real difference in the lives of the animals in our care."
+msgstr ""
+
+#: templates/emails/donation-receipt-plain.php:27
+#: templates/emails/donation-receipt.php:40
+msgid "Donation Details"
 msgstr ""
 
 #: templates/emails/donation-receipt-plain.php:29
@@ -6538,10 +6512,14 @@ msgid "Show Anonymous Option"
 msgstr ""
 
 #: blocks/donation-form/edit.js:81
+msgid "Show Dedication Line"
+msgstr ""
+
+#: blocks/donation-form/edit.js:86
 msgid "Show Secure Badge"
 msgstr ""
 
-#: blocks/donation-form/edit.js:88
+#: blocks/donation-form/edit.js:93
 #: blocks/membership-form/edit.js:86
 msgid "Link to Campaign"
 msgstr ""
