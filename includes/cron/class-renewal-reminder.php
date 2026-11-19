@@ -60,12 +60,13 @@ class Renewal_Reminder {
      */
     public static function schedule_cron(): void {
         if ( ! wp_next_scheduled( self::CRON_HOOK ) ) {
-            // Schedule for 9 AM local time.
-            $timestamp = strtotime( 'today 9:00 AM', current_time( 'timestamp' ) );
+            // Schedule for 9 AM in the site's time zone. current_time( 'timestamp' )
+            // is shifted by the zone's offset, so this used to land at 9 AM UTC (#62).
+            $timestamp = (int) \Starter_Shelter\Helpers\local_timestamp( 'today 9:00' );
 
             // If 9 AM has already passed today, schedule for tomorrow.
-            if ( $timestamp < current_time( 'timestamp' ) ) {
-                $timestamp = strtotime( 'tomorrow 9:00 AM', current_time( 'timestamp' ) );
+            if ( $timestamp < time() ) {
+                $timestamp = (int) \Starter_Shelter\Helpers\local_timestamp( 'tomorrow 9:00' );
             }
 
             wp_schedule_event( $timestamp, 'daily', self::CRON_HOOK );

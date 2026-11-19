@@ -147,6 +147,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     could start, and renewals end, a day early. Data Integrity could file a
     memorial under the wrong year. Reports labelled each month's bar with
     the month before.
+  - **Times shown:** the Activity Log and each record's History panel
+    showed every entry hours off, eight in Los Angeles: the offset was
+    applied twice. Logo Moderation's "Uploaded … ago" was off by the same.
+    Renewal reminders were scheduled for 9 AM UTC, not 9 AM at the shelter.
 
   Dates are now read in the site's time zone everywhere. The editor
   changes a date only when you do. Dates earlier saves left in the wrong

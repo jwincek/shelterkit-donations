@@ -149,6 +149,20 @@ final class LocalDatesTest extends WP_UnitTestCase {
 		$this->assertSame( '2025-12-31T11:00', get_post_meta( $id, '_skdon_donation_date', true ), 'Once only.' );
 	}
 
+	public function test_the_activity_log_shows_the_time_it_was_written(): void {
+		update_option( 'time_format', 'g:i a' );
+		$id = $this->record( 'skdon_memorial', '2026-11-18 20:15:00' );
+		\Starter_Shelter\Admin\Activity_Log::record( 'memorial_created', 'memorial', [ 'honoree_name' => 'Bella' ], 'skdon_memorial', $id );
+		global $wpdb;
+		$wpdb->update( $wpdb->prefix . 'skdon_activity_log', [ 'created_at' => '2026-11-18 20:15:00' ], [ 'object_id' => $id ] );
+
+		ob_start();
+		\Starter_Shelter\Admin\Activity_Log::render_history_box( get_post( $id ) );
+		$html = (string) ob_get_clean();
+
+		$this->assertStringContainsString( 'November 18, 2026 8:15 pm', $html, 'mysql2date( \'U\' ) and wp_date() applied the offset twice: 3:15 pm.' );
+	}
+
 	// ─── Dates the plugin writes ───────────────────────────────────
 
 	public function test_a_membership_starts_and_ends_on_the_days_given(): void {
