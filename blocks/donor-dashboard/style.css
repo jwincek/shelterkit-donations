@@ -219,13 +219,19 @@
     list-style: none;
     margin: 0;
     padding: 0;
+    /* One set of columns for every row: amount, type, date. */
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    column-gap: 1rem;
 }
 
-/* Equal columns, so each row lines up with the others: every row is its
-   own grid, and an auto column sized to each row's date. */
+/* Each row takes the list's columns (subgrid), so the rows line up and a
+   date stays on one line. Without subgrid, equal thirds still line up. */
 .sd-gift-item {
     display: grid;
+    grid-column: 1 / -1;
     grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: subgrid;
     gap: 1rem;
     align-items: center;
     padding: 1rem;
@@ -258,6 +264,7 @@
 
 .sd-gift-item .sd-gift-date {
     text-align: right;
+    white-space: nowrap;
 }
 
 .sd-gift-amount {
