@@ -309,6 +309,9 @@ function starter_shelter_admin_init(): void {
     // Initialize quick actions and bulk operations.
     Starter_Shelter\Admin\Quick_Actions::init();
 
+    // Memorial Quick Add: memorials received by mail or in person.
+    Starter_Shelter\Admin\Memorial_Quick_Add::init();
+
     // Initialize import/export tools.
     Starter_Shelter\Admin\Import_Export_Page::init();
 

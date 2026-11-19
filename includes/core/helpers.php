@@ -547,6 +547,45 @@ function get_memorial_notify_family( int $memorial_id ): array {
 }
 
 /**
+ * Email the donor the confirmation for a memorial, now.
+ *
+ * The confirmation goes out by itself when a memorial is bought at checkout.
+ * This sends it on request, for a memorial staff entered (Quick Add).
+ *
+ * @param int $memorial_id Memorial post ID.
+ * @return bool|\WP_Error True when sent, or why it wasn't.
+ */
+function send_memorial_confirmation( int $memorial_id ): bool|\WP_Error {
+    $donor_id = (int) get_post_meta( $memorial_id, '_skdon_donor_id', true );
+    if ( ! is_email( (string) get_post_meta( $donor_id, '_skdon_email', true ) ) ) {
+        return new \WP_Error( 'no_donor_email', __( 'The donor has no email address.', 'shelterkit-donations' ) );
+    }
+    return send_memorial_email( 'memorial-confirmation', $memorial_id, $donor_id );
+}
+
+/**
+ * Send one of the memorial emails through its WooCommerce email.
+ *
+ * @param string $email_id    The email's id, e.g. memorial-confirmation.
+ * @param int    $memorial_id Memorial post ID.
+ * @param int    $donor_id    Donor post ID.
+ * @return bool|\WP_Error
+ */
+function send_memorial_email( string $email_id, int $memorial_id, int $donor_id ): bool|\WP_Error {
+    if ( ! class_exists( \Starter_Shelter\Emails\Email_Factory::class ) || ! function_exists( 'WC' ) ) {
+        return new \WP_Error( 'no_mailer', __( 'WooCommerce\'s emails aren\'t available.', 'shelterkit-donations' ) );
+    }
+    if ( ! \Starter_Shelter\Emails\Email_Factory::is_email_enabled( $email_id ) ) {
+        return new \WP_Error( 'email_disabled', __( 'This email is turned off under WooCommerce → Settings → Emails.', 'shelterkit-donations' ) );
+    }
+    $sent = \Starter_Shelter\Emails\Email_Factory::trigger_email( $email_id, [
+        'memorial_id' => $memorial_id,
+        'donor_id'    => $donor_id,
+    ] );
+    return $sent ? true : new \WP_Error( 'not_sent', __( 'The email could not be sent.', 'shelterkit-donations' ) );
+}
+
+/**
  * Get date range for a reporting period.
  *
  * For `'custom'` periods, callers must pass `$date_from` / `$date_to` as

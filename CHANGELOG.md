@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Quick Add for memorials.** A Quick Add button beside Add New on the
+  Memorials list opens a screen for memorial gifts received by mail or in
+  person.
+  - **One or several at once.** Each memorial is created the way checkout
+    creates one, so it counts toward the donor's lifetime giving, is filed
+    under its year and appears on the memorial wall. No WooCommerce order is
+    created.
+  - **The donor:** someone on file, found by name or email, or a new donor
+    by name, with an email if there is one. A new name with no email that
+    matches a donor on file is asked about, rather than recorded twice.
+  - **Per memorial:** in memory or in honor; person or pet; amount; the date
+    received; a tribute; a campaign; whether to keep the donor's name off
+    the memorial; and the family the donor asked to be told.
+  - **No emails by default.** The donor's confirmation goes only when "Email
+    the donor a confirmation" is ticked.
+  - **All or nothing.** One mistake adds nothing, and the screen comes back
+    with what was typed and what to fix.
+
 ### Changed
 - **The activity log shows an import as one entry.** A CSV import, a
   legacy memorial import or a Legacy Order Sync used to add one entry per
