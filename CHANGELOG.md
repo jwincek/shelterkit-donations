@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.2.0] - 2026-11-19
+
 ### Added
 - **Quick Add for memorials.** A Quick Add button beside Add New on the
   Memorials list opens a screen for memorial gifts received by mail or in
@@ -113,6 +115,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Also gone is the classic checkout's "Support a Campaign (optional)"
   choice. A gift is attached to a campaign by the campaign's card or link,
   or by the donation form's own campaign setting.
+- **The `starter_shelter_memorial_family_notification` action.** Notify
+  Family fired it, and nothing listened to it. Code that wants to know when
+  a family has been told should use `starter_shelter_family_notified`
+  (memorial ID, recipient), which fires once the email has gone, from
+  checkout or Notify Family. (#58)
 - **Settings that did nothing.** (#49)
   - Email From Name and Email From Address. See the Emails tab.
   - Logo Moderation Notifications. No such email existed. Pending logos

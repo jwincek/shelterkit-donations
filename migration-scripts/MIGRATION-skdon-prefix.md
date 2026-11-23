@@ -81,10 +81,15 @@ Also look for a theme file named `single-sd_memorial.php`, `.html` or
 From 3.1.0 the activity log deletes entries once they pass a retention
 period, and the first cleanup removes everything older than that.
 
-**After 3.1.0:** the periods are under **Settings → General → Data
+2.x scheduled a 90-day cleanup too, but attached it only on admin screens,
+and WP-Cron runs outside them, so it almost never ran. A 2.x log usually
+still holds every entry since the plugin was installed.
+
+**3.2.0 and later:** the periods are under **Settings → General → Data
 Management**. Routine entries are kept 90 days and admin actions 2 years
-by default, or choose Forever (#38). The first cleanup runs a day after the
-update, so set them right after upgrading.
+by default, or choose Forever (#38). The move clears 2.x's cleanup event,
+and the first cleanup runs a day after the update, so set them right after
+upgrading.
 
 **On 3.1.0 itself:** the cleanup runs as soon as the site is updated, and
 the period can only be changed in code. Export the table first, or extend
@@ -155,6 +160,17 @@ The first admin page after the move shows a notice with what moved. Then:
   clears those dates, and a notice says how many memorials are waiting.
   Before you notify them, check whether anyone told those families another
   way.
+- **Dates, on a site not set to UTC.** Until #62, pressing Update on a
+  donation in the editor moved its date back by the site's offset from UTC,
+  every time, and CSV imports stored every date shifted. The update repairs
+  the format those saves left, but it can't tell a moved time from a real
+  one. If gifts were edited or imported, check any whose date matters, such
+  as a gift near the end of a year, against its order.
+- **Placed forms.** The checkout no longer asks for a dedication, the
+  family's details or a pet's species (#57). The donation form has an
+  optional Dedication line, which follows Settings → General → Enable
+  Donation Dedications and can be hidden per form. The memorial form asks
+  for the species. Look over the pages that hold the forms.
 - **ShelterKit Donations → Data Tools → Order Records.** Both steps are safe
   to run more than once, and neither emails a donor.
   - If this site ever ran Legacy Order Sync, check the list of records it
